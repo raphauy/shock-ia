@@ -21,7 +21,15 @@ export const metadata: Metadata = {
     description: "Potenciá tu negocio con chatbots con IA",
     type: "website",
     url: "https://shock.uy",
-  },
+    images: [
+      {
+        url: "https://ia.shock.uy/logo.png",
+        width: 611,
+        height: 134,
+        alt: "ShockIA",
+      },
+    ],
+},
   metadataBase: new URL("https://shock.uy"),
 }
 
