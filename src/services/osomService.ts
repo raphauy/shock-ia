@@ -6,7 +6,7 @@ export async function sendWapMessage(phone: string, body: string, notificarAgent
   const agente= notificarAgente ? 1 : 0
 
   if (notificarAgente)
-    console.log("Notificando agente a Osom")
+    console.log("Notificando agente a Shock")
 
   const client= await getClient(clientId)
   if (!client) throw new Error("Client not found")

@@ -342,7 +342,7 @@ export default function Chat() {
               rel="noopener noreferrer"
               className="transition-colors hover:text-black"
             >            
-              Osom Digital
+              ShockIA
             </a>
           </p>
           <p></p>

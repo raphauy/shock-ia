@@ -64,7 +64,7 @@ export default async function AdminPage() {
                       admin ({users.filter(user => user.role === "admin").length})
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      osom ({users.filter(user => user.role === "osom").length})
+                      shock ({users.filter(user => user.role === "osom").length})
                     </p>
                     <p className="text-xs text-muted-foreground">
                       cliente ({users.filter(user => user.role === "cliente").length})

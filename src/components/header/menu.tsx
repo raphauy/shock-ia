@@ -1,11 +1,9 @@
 
 import { getCurrentUser } from "@/lib/auth";
-import MenuAdmin from "./menu-admin";
-import MenuOsom from "./menu-osom";
-import { ClientSelector, SelectorData } from "./client-selector";
-import { getDataClients } from "@/app/admin/clients/(crud)/actions";
 import getClients from "@/services/clientService";
 import { getUser } from "@/services/userService";
+import { ClientSelector, SelectorData } from "./client-selector";
+import MenuAdmin from "./menu-admin";
 
 export default async function Menu() {
     

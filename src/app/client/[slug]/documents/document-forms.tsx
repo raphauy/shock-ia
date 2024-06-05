@@ -98,7 +98,7 @@ export function DocumentForm({ id, clientId, closeDialog }: Props) {
                 <FormItem>
                   <FormLabel>URL</FormLabel>
                   <FormControl>
-                    <Input placeholder="ej: https://www.osom.com" {...field} />
+                    <Input placeholder="ej: https://shock.uy" {...field} />
                   </FormControl>
                   <FormDescription>Cuanto más descriptivo el nombre mejor para la IA</FormDescription>
                   <FormMessage />

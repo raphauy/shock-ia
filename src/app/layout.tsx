@@ -14,11 +14,15 @@ import SessionProvider from '@/components/SessionProvider'
 
 
 export const metadata: Metadata = {
-  title: "OsomGPT",
-  description: "Osom Digital AI",
-  icons: {
-    icon: "/favicon.ico",
-  },  
+  title: "ShockIA",
+  description: "Potenciá tu negocio con chatbots con IA",
+  openGraph: {
+    title: "ShockIA",
+    description: "Potenciá tu negocio con chatbots con IA",
+    type: "website",
+    url: "https://shock.uy",
+  },
+  metadataBase: new URL("https://shock.uy"),
 }
 
 export const viewport: Viewport = {
