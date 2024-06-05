@@ -1,0 +1,51 @@
+# agregado por RC
+docker-compose.yml
+production.Dockerfile
+production.Dockerfile.bak
+bun.lockb
+pnpm-lock.yaml
+/sql/delete_tables.sh
+borrar*.json
+borrar*.txt
+
+/prisma/seed-models.ts
+/prisma/seed-tokens-price.ts
+
+/prisma/seed-models.ts
+/prisma/seed-tokens-price.ts
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files
+.env*.local
+.env
+.env.postgres.docker
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
