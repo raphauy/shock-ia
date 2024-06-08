@@ -112,27 +112,31 @@ async function updateTextMessage(message: Message, text: string) {
 // si no, devuelve true
 export async function isMessageReadyToProcess(messageId: string) {
     console.log(`isMessageReadyToProcess: ${messageId}`)
-    return true
-    // const MESSAGE_ARRIVED_DELAY= await getValue("MESSAGE_ARRIVED_DELAY")
-    // let messageArrivedDelay= 5
-    // if(MESSAGE_ARRIVED_DELAY) {
-    //     messageArrivedDelay= parseInt(MESSAGE_ARRIVED_DELAY)
-    // } else console.log("MESSAGE_ARRIVED_DELAY not found")    
+    const MESSAGE_ARRIVED_DELAY= await getValue("MESSAGE_ARRIVED_DELAY")
+    let messageArrivedDelay= 5
+    if(MESSAGE_ARRIVED_DELAY) {
+        messageArrivedDelay= parseInt(MESSAGE_ARRIVED_DELAY)
+    } else console.log("MESSAGE_ARRIVED_DELAY not found")    
 
-    // const message = await prisma.message.findFirst({
-    //     where: {
-    //         id: messageId,
-    //         updatedAt: {
-    //             gte: new Date(Date.now() - messageArrivedDelay * 1000)
-    //         }
-    //     }
-    // });
+    const currentTime = new Date()
+    const cutoffTime = addMilliseconds(currentTime, -messageArrivedDelay * 1000)
+    console.log("cutoffTime: ", cutoffTime)
 
-    // if (message) {
-    //     return false
-    // } else {
-    //     return true
-    // }
+    const message = await prisma.message.findFirst({
+        where: {
+            id: messageId,
+            updatedAt: {
+                // gte: new Date(Date.now() - messageArrivedDelay * 1000)
+                gte: cutoffTime
+            }
+        }
+    });
+
+    if (message) {
+        return false
+    } else {
+        return true
+    }
 }
 
 export async function processDelayedMessage(id: string, phone: string) {
