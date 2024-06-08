@@ -61,6 +61,7 @@ export async function getMessage(phone: string, clientId: string) {
     const currentTime = new Date()
     const cutoffTime = addMilliseconds(currentTime, -messageArrivedDelay * 1000)
     const zonedCutoffTime = toZonedTime(cutoffTime, timeZone)    
+    console.log("cutoffTime: ", cutoffTime, " zonedCutoffTime: ", zonedCutoffTime)
     
 
     const conversation = await prisma.conversation.findFirst({
@@ -70,12 +71,12 @@ export async function getMessage(phone: string, clientId: string) {
         },
         include: {
             messages: {
-                where: {
-                    role: "user",
-                    updatedAt: {
-                        gte: cutoffTime
-                    }
-                },
+                // where: {
+                //     role: "user",
+                //     updatedAt: {
+                //         gte: cutoffTime
+                //     }
+                // },
                 orderBy: {
                     createdAt: "desc"
                 },
