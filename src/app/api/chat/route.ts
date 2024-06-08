@@ -1,15 +1,18 @@
-import { getCurrentUser } from "@/lib/auth";
-import { removeSectionTexts } from "@/lib/utils";
-import { getClient } from "@/services/clientService";
-import { getSystemMessage, messageArrived } from "@/services/conversationService";
-import { getFunctionsDefinitions } from "@/services/function-services";
-import { getFullModelDAO, getFullModelDAOByName } from "@/services/model-services";
-import { getContext, setSectionsToMessage } from "@/services/section-services";
-import { GoogleGenerativeAIStream, OpenAIStream, StreamingTextResponse } from "ai";
-import { OpenAI } from "openai";
-import openaiTokenCounter from 'openai-gpt-token-counter';
-import { NextResponse } from "next/server";
-import { processFunctionCall } from "@/services/functions";
+import { getCurrentUser } from "@/lib/auth"
+import { removeSectionTexts } from "@/lib/utils"
+import { getClient } from "@/services/clientService"
+import { getSystemMessage, messageArrived } from "@/services/conversationService"
+import { getFunctionsDefinitions } from "@/services/function-services"
+import { processFunctionCall } from "@/services/functions"
+import { getFullModelDAO, getFullModelDAOByName } from "@/services/model-services"
+import { getContext, setSectionsToMessage } from "@/services/section-services"
+import { OpenAIStream, StreamingTextResponse } from "ai"
+import { NextResponse } from "next/server"
+import { OpenAI } from "openai"
+import openaiTokenCounter from 'openai-gpt-token-counter'
+
+export const maxDuration = 59
+export const dynamic = 'force-dynamic'
 
 
 export async function POST(req: Request) {

@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx"
 import { format } from "date-fns"
+import { toZonedTime, format as formatTZ } from "date-fns-tz"
 import { twMerge } from "tailwind-merge"
 import he from 'he';
  
@@ -38,12 +39,21 @@ export function removeSectionTexts(inputText: string): string {
   
 
 export function getFormat(date: Date): string {
-  // if date is today return only the time
-  const today= new Date()
-  if (date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear()) {
-      return format(date, "HH:mm")
+  const timeZone = "America/Montevideo";
+  
+  // Convert the date to the desired time zone
+  const zonedDate = toZonedTime(date, timeZone);
+  
+  const today = toZonedTime(new Date(), timeZone);
+
+  if (
+    zonedDate.getDate() === today.getDate() &&
+    zonedDate.getMonth() === today.getMonth() &&
+    zonedDate.getFullYear() === today.getFullYear()
+  ) {
+    return formatTZ(zonedDate, "HH:mm", { timeZone, locale: es });
   } else {
-      return format(date, "yyyy/MM/dd")
+    return formatTZ(zonedDate, "yyyy/MM/dd", { timeZone, locale: es });
   }
 }
 
