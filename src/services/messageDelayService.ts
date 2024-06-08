@@ -71,12 +71,12 @@ export async function getMessage(phone: string, clientId: string) {
         },
         include: {
             messages: {
-                // where: {
-                //     role: "user",
-                //     updatedAt: {
-                //         gte: cutoffTime
-                //     }
-                // },
+                where: {
+                    role: "user",
+                    updatedAt: {
+                        gte: cutoffTime
+                    }
+                },
                 orderBy: {
                     createdAt: "desc"
                 },
