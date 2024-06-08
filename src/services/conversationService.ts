@@ -180,6 +180,8 @@ export async function messageArrived(phone: string, text: string, clientId: stri
 
 
 export async function processMessage(id: string, modelName?: string) {
+  console.log("***** processMessage *****")
+  
   const message= await prisma.message.findUnique({
     where: {
       id
