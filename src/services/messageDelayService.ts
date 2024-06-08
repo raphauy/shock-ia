@@ -142,7 +142,7 @@ export async function processDelayedMessage(id: string, phone: string) {
         await new Promise(r => setTimeout(r, 1000))
         isReady= await isMessageReadyToProcess(id)
     }
-    // console.log(`message from ${phone} ready to process`)
+    console.log(`message from ${phone} ready to process`)
 
     await processMessage(id)
 
