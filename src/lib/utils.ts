@@ -3,6 +3,7 @@ import { format } from "date-fns"
 import { toZonedTime, format as formatTZ } from "date-fns-tz"
 import { twMerge } from "tailwind-merge"
 import he from 'he';
+import { es } from "date-fns/locale";
  
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
