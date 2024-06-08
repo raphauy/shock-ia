@@ -3,6 +3,7 @@ import { messageArrived, processMessage } from "./conversationService";
 import { Message } from "@prisma/client";
 import { getValue } from "./config-services";
 import { addMilliseconds } from "date-fns";
+import { toZonedTime } from "date-fns-tz";
 
 export type MessageDelayResponse = {
     wasCreated: boolean,
@@ -53,6 +54,14 @@ export async function getMessage(phone: string, clientId: string) {
         console.log("MESSAGE_ARRIVED_DELAY: ", messageArrivedDelay, " seconds")
     } else console.log("MESSAGE_ARRIVED_DELAY not found")    
 
+    // Define the timezone of Uruguay (UTC-3)
+    const timeZone = 'America/Montevideo'
+
+    // Calculate the cutoff time in the specified timezone
+    const currentTime = new Date()
+    const cutoffTime = addMilliseconds(currentTime, -messageArrivedDelay * 1000)
+    const zonedCutoffTime = toZonedTime(cutoffTime, timeZone)    
+
     const conversation = await prisma.conversation.findFirst({
         where: {
             phone: phone,
@@ -63,7 +72,7 @@ export async function getMessage(phone: string, clientId: string) {
                 where: {
                     role: "user",
                     updatedAt: {
-                        gte: addMilliseconds(new Date(), -messageArrivedDelay * 1000)
+                        gte: zonedCutoffTime
                     }
                 },
                 orderBy: {

@@ -1,6 +1,8 @@
 import { getDocumentsByClient } from "@/services/document-services";
 import { NextResponse } from "next/server";
 
+export const maxDuration = 59
+export const dynamic = 'force-dynamic'
 
 export async function POST(request: Request, { params }: { params: { clientId: string } }) {
 

@@ -1,6 +1,9 @@
 import { OpenAIApi, Configuration } from "openai-edge";
 import { OpenAIStream, StreamingTextResponse } from "ai";
 
+export const maxDuration = 59
+export const dynamic = 'force-dynamic'
+
 const config = new Configuration({
   apiKey: process.env.OPENAI_API_KEY_FOR_EMBEDDINGS,
 });
