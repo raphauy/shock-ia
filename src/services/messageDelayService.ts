@@ -111,6 +111,7 @@ async function updateTextMessage(message: Message, text: string) {
 // si fue actualizado hace menos de 5 segundos, devuelve false
 // si no, devuelve true
 export async function isMessageReadyToProcess(messageId: string) {
+    console.log(`isMessageReadyToProcess: ${messageId}`)
     const MESSAGE_ARRIVED_DELAY= await getValue("MESSAGE_ARRIVED_DELAY")
     let messageArrivedDelay= 5
     if(MESSAGE_ARRIVED_DELAY) {
@@ -137,6 +138,7 @@ export async function processDelayedMessage(id: string, phone: string) {
     console.log(`message from ${phone} created with id ${id}`)
     // check every second if the message is ready to process
     let isReady= await isMessageReadyToProcess(id)
+    console.log(`isReady: ${isReady}`)
     while (!isReady) {
         console.log(`sleeping 1 second for phone ${phone}`)
         await new Promise(r => setTimeout(r, 1000))
