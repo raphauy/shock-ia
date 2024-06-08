@@ -37,11 +37,15 @@ export async function getConfigDAO(id: string) {
 }
 
 export async function getValue(name: string) {
+  console.log(`getValue: ${name}`)
+  
   const found = await prisma.config.findUnique({
     where: {
       name
     },
   })
+  console.log(`getValue found: ${found}`)
+  
   return found?.value
 }
 
