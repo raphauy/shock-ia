@@ -112,11 +112,11 @@ async function updateTextMessage(message: Message, text: string) {
 // si no, devuelve true
 export async function isMessageReadyToProcess(messageId: string) {
     console.log(`isMessageReadyToProcess: ${messageId}`)
-    const MESSAGE_ARRIVED_DELAY= await getValue("MESSAGE_ARRIVED_DELAY")
     let messageArrivedDelay= 5
-    if(MESSAGE_ARRIVED_DELAY) {
-        messageArrivedDelay= parseInt(MESSAGE_ARRIVED_DELAY)
-    } else console.log("MESSAGE_ARRIVED_DELAY not found")    
+    // const MESSAGE_ARRIVED_DELAY= await getValue("MESSAGE_ARRIVED_DELAY")
+    // if(MESSAGE_ARRIVED_DELAY) {
+    //     messageArrivedDelay= parseInt(MESSAGE_ARRIVED_DELAY)
+    // } else console.log("MESSAGE_ARRIVED_DELAY not found")    
 
     const currentTime = new Date()
     const cutoffTime = addMilliseconds(currentTime, -messageArrivedDelay * 1000)
