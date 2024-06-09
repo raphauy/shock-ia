@@ -1,5 +1,6 @@
 import { MessageDelayResponse, onMessageReceived, processDelayedMessage } from "@/services/messageDelayService";
 import { NextResponse } from "next/server";
+import { waitUntil } from '@vercel/functions';
 
 export const maxDuration = 59
 // export const dynamic = 'force-dynamic'
@@ -41,7 +42,7 @@ export async function POST(request: Request, { params }: { params: { clientId: s
 
         if (delayResponse.wasCreated ) {
             if (delayResponse.message) {
-                await processDelayedMessage(delayResponse.message.id, phone)
+                waitUntil(processDelayedMessage(delayResponse.message.id, phone))
                 
             } else {
                 console.log("delayResponse.message wasCreated but is null")
