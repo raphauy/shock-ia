@@ -159,9 +159,6 @@ export async function messageArrived(phone: string, text: string, clientId: stri
 
   if (!clientId) throw new Error("clientId is required")
 
-  console.log("phone: ", phone)
-  console.log("clientId: ", clientId)  
-
   const activeConversation= await getActiveConversation(phone, clientId)
   if (activeConversation) {
     const message= await createMessage(activeConversation.id, role, text, gptData, promptTokens, completionTokens)

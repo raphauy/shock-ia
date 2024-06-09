@@ -37,23 +37,14 @@ export async function getConfigDAO(id: string) {
 }
 
 export async function getValue(name: string) {
-  console.log(`getValue: ${name}`);
 
-  try {
-    console.log(`Antes de la consulta Prisma`);
-    const found = await prisma.config.findUnique({
-      where: {
-        name
-      },
-    });
-    console.log(`Después de la consulta Prisma`);
-    console.log(`getValue found: ${found}`);
-    return found?.value;
-  } catch (error: any) {
-    console.error(`Error en la consulta Prisma: ${error.message}`);
-    return null;
-  }
+  const found = await prisma.config.findUnique({
+    where: {
+      name
+    },
+  })
   
+  return found?.value
 }
 
 export async function setValue(name: string, value: string) {

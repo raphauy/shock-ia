@@ -38,7 +38,6 @@ export async function POST(request: Request, { params }: { params: { clientId: s
 
         const delayResponse: MessageDelayResponse= await onMessageReceived(phone, text, clientId, "user", "")
         console.log(`delayResponse wasCreated: ${delayResponse.wasCreated}`)
-        console.log(`delayResponse message: ${delayResponse.message ? delayResponse.message.id : "null"}`)
 
         if (delayResponse.wasCreated ) {
             if (delayResponse.message) {
