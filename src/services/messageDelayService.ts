@@ -111,11 +111,9 @@ async function updateTextMessage(message: Message, text: string) {
 // si fue actualizado hace menos de 5 segundos, devuelve false
 // si no, devuelve true
 export async function isMessageReadyToProcess(messageId: string, messageArrivedDelay: number) {
-    console.log(`isMessageReadyToProcess: ${messageId}`)
 
     const currentTime = new Date()
     const cutoffTime = addMilliseconds(currentTime, -messageArrivedDelay * 1000)
-    console.log("cutoffTime: ", cutoffTime)
 
     const message = await prisma.message.findFirst({
         where: {
@@ -145,7 +143,6 @@ export async function processDelayedMessage(id: string, phone: string) {
 
     // check every second if the message is ready to process
     let isReady= await isMessageReadyToProcess(id, messageArrivedDelay)
-    console.log(`isReady: ${isReady}`)
     while (!isReady) {
         console.log(`sleeping 1 second for phone ${phone}`)
         await new Promise(r => setTimeout(r, 1000))

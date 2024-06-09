@@ -270,7 +270,7 @@ export async function processMessage(id: string, modelName?: string) {
     await messageArrived(conversation.phone, assistantResponse, conversation.clientId, "assistant", gptDataString, promptTokens, completionTokens)
 
     console.log("notificarAgente: " + notificarAgente)    
-    sendWapMessage(conversation.phone, assistantResponse, notificarAgente, conversation.clientId)
+    await sendWapMessage(conversation.phone, assistantResponse, notificarAgente, conversation.clientId)
   }
 
   // if (assistantResponse) {
