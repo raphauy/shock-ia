@@ -3,7 +3,6 @@ import { NextResponse } from "next/server";
 import { waitUntil } from '@vercel/functions';
 
 export const maxDuration = 59
-// export const dynamic = 'force-dynamic'
 
 
 export async function POST(request: Request, { params }: { params: { clientId: string } }) {
