@@ -41,7 +41,7 @@ export async function getValue(name: string) {
 
   try {
     console.log(`Antes de la consulta Prisma`);
-    const found = await prisma.config.findFirst({
+    const found = await prisma.config.findUnique({
       where: {
         name
       },
