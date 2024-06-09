@@ -110,13 +110,8 @@ async function updateTextMessage(message: Message, text: string) {
 // función que recibe un messageId, lo busca, chequea si fue actualizado hace menos de 5 segundos
 // si fue actualizado hace menos de 5 segundos, devuelve false
 // si no, devuelve true
-export async function isMessageReadyToProcess(messageId: string) {
+export async function isMessageReadyToProcess(messageId: string, messageArrivedDelay: number) {
     console.log(`isMessageReadyToProcess: ${messageId}`)
-    let messageArrivedDelay= 5
-    const MESSAGE_ARRIVED_DELAY= await getValue("MESSAGE_ARRIVED_DELAY")
-    if(MESSAGE_ARRIVED_DELAY) {
-        messageArrivedDelay= parseInt(MESSAGE_ARRIVED_DELAY)
-    } else console.log("MESSAGE_ARRIVED_DELAY not found")    
 
     const currentTime = new Date()
     const cutoffTime = addMilliseconds(currentTime, -messageArrivedDelay * 1000)
@@ -141,13 +136,20 @@ export async function isMessageReadyToProcess(messageId: string) {
 
 export async function processDelayedMessage(id: string, phone: string) {
     console.log(`message from ${phone} created with id ${id}`)
+
+    let messageArrivedDelay= 5
+    const MESSAGE_ARRIVED_DELAY= await getValue("MESSAGE_ARRIVED_DELAY")
+    if(MESSAGE_ARRIVED_DELAY) {
+        messageArrivedDelay= parseInt(MESSAGE_ARRIVED_DELAY)
+    } else console.log("MESSAGE_ARRIVED_DELAY not found")    
+
     // check every second if the message is ready to process
-    let isReady= await isMessageReadyToProcess(id)
+    let isReady= await isMessageReadyToProcess(id, messageArrivedDelay)
     console.log(`isReady: ${isReady}`)
     while (!isReady) {
         console.log(`sleeping 1 second for phone ${phone}`)
         await new Promise(r => setTimeout(r, 1000))
-        isReady= await isMessageReadyToProcess(id)
+        isReady= await isMessageReadyToProcess(id, messageArrivedDelay)
     }
     console.log(`message from ${phone} ready to process`)
 
