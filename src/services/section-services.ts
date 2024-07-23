@@ -225,7 +225,11 @@ export async function getContext(clientId: string, phone: string, userInput: str
 
   if (functionsNames.includes("getDateOfNow")) {
     contextString+= "\n**** Fecha y hora ****\n"
-    const hoy= format(new Date(), "EEEE, dd/MM/yyyy HH:mm:ss", {locale: es})
+    const timezone= "America/Montevideo"
+    const hoy= format(new Date(), "EEEE, dd/MM/yyyy HH:mm:ss", {
+      locale: es,
+      timeZone: timezone
+    })
     contextString+= `Hoy es ${hoy}.\n`
   }
 
