@@ -7,6 +7,7 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { getFunctionsOfClient } from "./clientService";
 import { getActiveConversation } from "./conversationService";
+import { toZonedTime } from "date-fns-tz";
 
 export type SectionDAO = {
 	id: string
@@ -225,11 +226,12 @@ export async function getContext(clientId: string, phone: string, userInput: str
 
   if (functionsNames.includes("getDateOfNow")) {
     contextString+= "\n**** Fecha y hora ****\n"
-    const timezone= "America/Montevideo"
-    const hoy= format(new Date(), "EEEE, dd/MM/yyyy HH:mm:ss", {
+    const timezone = "America/Montevideo";
+    const now = new Date();
+    const zonedDate = toZonedTime(now, timezone);
+    const hoy = format(zonedDate, "EEEE, dd/MM/yyyy HH:mm:ss", {
       locale: es,
-      timeZone: timezone
-    })
+    });
     contextString+= `Hoy es ${hoy}.\n`
   }
 
