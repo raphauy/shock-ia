@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getClient } from "@/services/clientService";
+import { sendWapMessage } from "@/services/osomService";
 
 export const maxDuration = 59
 export const dynamic = 'force-dynamic'
@@ -27,8 +28,19 @@ export async function POST(request: Request) {
         if (!clientId) return NextResponse.json({ error: "clientId not found" }, { status: 502 })
         const client= await getClient(clientId)
         if (!client) return NextResponse.json({ error: "client not found" }, { status: 502 })
+
         const whatsappNumbers= client.whatsappNumbers
+        if (!whatsappNumbers) return NextResponse.json({ error: "whatsappNumbers not found" }, { status: 502 })
         console.log("whatsappNumbers: ", whatsappNumbers)
+
+        const data= json.data        
+        if (!data) return NextResponse.json({ error: "data not found" }, { status: 502 })
+        console.log("data: ", data)
+    
+        const numbers= whatsappNumbers.split(",")
+        for (const number of numbers) {
+            await sendWapMessage(number, data, false, client.id)
+        }
     
 
         return NextResponse.json( { result: "success", received: json }, { status: 200 })
