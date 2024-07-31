@@ -2,13 +2,14 @@ import { prisma } from "@/lib/db"
 import { JsonValue } from "@prisma/client/runtime/library"
 import * as z from "zod"
 import { getClient, getClientBySlug } from "./clientService"
+import { getFieldsDAOByRepositoryId } from "./field-services"
 
 export type RepoDataDAO = {
 	id: string
 	repoName: string
   phone: string
 	functionName: string
-	data: JsonValue
+	data: String
 	repositoryId: string | null
 	clientId: string
   conversationId: string
@@ -48,6 +49,8 @@ export async function getRepoDataDAO(id: string) {
 }
     
 export async function createRepoData(data: repoDataFormValues) {
+  const sortedData= await sortData(data.repositoryId, data.data)
+  
   const repoData = {
     repoName: data.repoName,
     phone: data.phone,
@@ -55,7 +58,7 @@ export async function createRepoData(data: repoDataFormValues) {
     repositoryId: data.repositoryId,
     clientId: data.clientId,
     conversationId: data.conversationId,
-    data: data.data ?? {}  
+    data: JSON.stringify(sortedData)
   };
 
   const created = await prisma.repoData.create({
@@ -70,6 +73,18 @@ export async function createRepoData(data: repoDataFormValues) {
     }
   })
   return created;
+}
+
+export async function sortData(repositoryId: string, data: JsonValue): Promise<JsonValue> {
+  if (!data) return {}
+  const mappedDAta= JSON.parse(JSON.stringify(data))
+  const sortedFields= await getFieldsDAOByRepositoryId(repositoryId)
+  let res: JsonValue= {}
+  for (const field of sortedFields) {
+    const key= field.name
+    res[field.name]= mappedDAta[key]
+  }
+  return res
 }
 
 export async function updateRepoData(id: string, data: repoDataFormValues) {

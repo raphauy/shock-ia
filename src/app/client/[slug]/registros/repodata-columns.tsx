@@ -63,7 +63,7 @@ export const columns: ColumnDef<RepoDataDAO>[] = [
     cell: ({ row }) => {
       const data= row.original
       // replace all false with NO and all true with SI
-      const jsonReplaced = JSON.stringify(data.data, null, 2)
+      const jsonReplaced = data.data
       .replace(/false/g, "NO")
       .replace(/true/g, "SI");
 

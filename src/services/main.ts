@@ -1,25 +1,17 @@
 import { prisma } from "@/lib/db"
 import { getFunctionsDefinitions } from "./function-services"
 import openaiTokenCounter from 'openai-gpt-token-counter'
+import { sortData } from "./repodata-services"
 
 async function main() {
 
-    const text = "Hola, buenos días!"
-    const model = "gpt-4"
+    const repositoryId= "clz8hklnw000g5t3q3wc6e4bj"
+    const data= {"correo":"pepe@gomez.com","operacion":"COMPRA","dormitorios":"2","nombreCompleto":"Pepe Gómez","preferenciaContacto":"llamada"}
 
-    let tokenCount = openaiTokenCounter.text(text, model)
-    console.log(`Token count: ${tokenCount}`)
-
-    const messages = [
-        { role: "system", content: "Usted es un asistente virtual muy entusiasta" },
-        { role: "user", content: "Hola, buenos días!" },
-        { role: "assistant", content: "¡Buenos días! ¿En qué puedo asistirte hoy con mi entusiasmo y energía? 😄" },
-    ]
-
-    tokenCount = openaiTokenCounter.chat(messages, model)
-    console.log(`Message token count: ${tokenCount}`)
-
+    const sortedData= await sortData(repositoryId, data)
+    console.log(sortedData)
+    
 }
   
-main()
+//main()
   

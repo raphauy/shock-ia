@@ -345,7 +345,7 @@ export async function defaultFunction(clientId: string, name: string, args: any)
     if (!created || !created.repositoryId)
       return "Hubo un error al procesar esta solicitud"
   
-    revalidatePath(`/client/${conversation.client.slug}/repo-data`)
+    revalidatePath(`/client/${conversation.client.slug}/registros`)
 
     const functionClient= await getFunctionClientDAO(repo.functionId, conversation.client.id)
     if (functionClient && functionClient.webHookUrl) {

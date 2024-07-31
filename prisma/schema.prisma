@@ -340,7 +340,7 @@ model RepoData {
   phone               String                              // gennext: show.column
   functionName        String                              // gennext: show.column
 
-  data                Json                                // gennext: show.column
+  data                String                                // gennext: show.column
 
   repository          Repository? @relation(fields: [repositoryId], references: [id], onDelete: SetNull)
   repositoryId        String?

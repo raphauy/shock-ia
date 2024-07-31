@@ -125,3 +125,15 @@ export async function updateOrder(fields: FieldDAO[]): Promise<string> {
 
   return fields[0].repositoryId
 }
+
+export async function getFieldsDAOByRepositoryId(repositoryId: string) {
+  const found = await prisma.field.findMany({
+    where: {
+      repositoryId
+    },
+    orderBy: {
+      order: "asc"
+    },
+  })
+  return found as FieldDAO[]
+}
