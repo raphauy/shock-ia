@@ -49,7 +49,7 @@ export default function RegistrosHook({ basePath }: Props) {
                 <SimpleCopyHook 
                     key={simpleFunction.repoId}
                     name={simpleFunction.functionName} 
-                    path={`${basePath}/api/${clientId}/${simpleFunction.repoId}`} 
+                    path={`${basePath}/api/registros/${simpleFunction.repoId}`} 
                 />
             ))}
 

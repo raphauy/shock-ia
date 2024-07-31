@@ -19,7 +19,6 @@ export type RegistroEntryResponse = {
 
 type Props= {
     params: {
-        clientId: string
         repoId: string
     }
 }
@@ -33,9 +32,6 @@ export async function POST(request: Request, { params }: Props) {
         if (!apiToken) return NextResponse.json({ error: "apiToken is required" }, { status: 400 })
         if (apiToken !== process.env.API_TOKEN) return NextResponse.json({ error: "Bad apiToken" }, { status: 400 })
         
-        const clientId = params.clientId
-        if (!clientId) return NextResponse.json({ error: "clientId not found" }, { status: 400 })
-
         const repoId = params.repoId
         if (!repoId) return NextResponse.json({ error: "registro id not found" }, { status: 400 })
 
@@ -49,7 +45,6 @@ export async function POST(request: Request, { params }: Props) {
             return NextResponse.json({ error: "phone is required" }, { status: 400 })
         }
 
-        console.log("clientId: ", clientId)
         console.log("Id: ", repoId)        
         console.log("[Registros Data API] phone: ", phone)
 
