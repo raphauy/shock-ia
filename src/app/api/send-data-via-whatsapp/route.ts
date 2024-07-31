@@ -6,19 +6,6 @@ import { camelCaseToNormal, putTildes } from "@/lib/utils";
 export const maxDuration = 59
 export const dynamic = 'force-dynamic'
 
-
-// json in is like:
-// type RepoDataEntryResponse = {
-//     id: string,
-//     phone: string,
-//     repoName: string,
-//     functionName: string,
-//     clientId: string,
-//     clientName: string,
-//     date: string,
-//     data: String,
-// }
-
 export async function POST(request: Request) {
 
     try {        
@@ -38,14 +25,19 @@ export async function POST(request: Request) {
         if (!data) return NextResponse.json({ error: "data not found" }, { status: 502 })
         console.log("data: ", data)
 
+        const phone= json.phone
+        const repoName= json.repoName
+
+        let text= `Usuario: ${phone}\n`
+        text+= "------------------------------------\n"
+
         const parsedData= JSON.parse(data)
         const keys= Object.keys(JSON.parse(data))
-        let text= ""
         for (const key of keys) {
             const value = parsedData[key]
             const normalKey = camelCaseToNormal(key)
             const keyWithTildes = putTildes(normalKey)
-            text += `${keyWithTildes}: ${value}\n`
+            text += `**${keyWithTildes}**: ${value}\n`
         }
         console.log("text: ", text)
         

@@ -11,6 +11,7 @@ import CopyHook from "./copy-hook"
 import { getClientBySlug, getFunctionsOfClient } from "@/services/clientService"
 import DocumentsHook from "./documents-hook"
 import { WhatsappNumbersForm } from "./whatsapp-numbers-form"
+import RegistrosHook from "./registros-hook"
 
 type Props = {
     searchParams: {
@@ -63,6 +64,7 @@ export default async function ConfigPage({ searchParams }: Props) {
                     { haveCarServiceFunction && 
                         <CopyHook name="Car Service Entry" path={`${BASE_PATH}/api/${client.id}/car-service`} clientId={client.id} />
                     }
+                    <RegistrosHook basePath={BASE_PATH} />
                 </TabsContent>
                 <TabsContent value="whatsapp-numbers">
                     <WhatsappNumbersForm id={client.id} update={updateWhatsAppNumbersAction} whatsappNumbers={client.whatsappNumbers} />
