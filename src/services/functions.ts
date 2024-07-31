@@ -8,6 +8,10 @@ import { SummitFormValues, createSummit } from "./summit-services";
 import { getConversation, messageArrived } from "./conversationService";
 import { CarServiceFormValues, createCarService } from "./carservice-services";
 import { revalidatePath } from "next/cache";
+import { getRepositoryDAOByFunctionName } from "./repository-services";
+import { createRepoData, repoDataFormValues } from "./repodata-services";
+import { getFunctionClientDAO } from "./function-services";
+import { sendWebhookNotification } from "./webhook-notifications-service";
 
 export type CompletionInitResponse = {
   assistantResponse: string | null
@@ -305,57 +309,61 @@ export async function reservarServicio(clientId: string, conversationId: string,
 }
 
 
+export async function defaultFunction(clientId: string, name: string, args: any) {
+  console.log("defaultFunction")
+  console.log("clientId: ", clientId)
+  console.log("name: ", name)
+  console.log("args: ", args)
 
-// export async function runFunction(name: string, args: any, clientId: string){
-//   console.log("raw args.texto: ", args.texto)
+  try {
+    const repo= await getRepositoryDAOByFunctionName(name)
+    if (!repo)
+      return "Hubo un error al procesar esta solicitud"
   
-//   switch (name) {
-//     case "getSection":
-//       return getSection(args.docId, args.secuence)
-//     case "getDocument":
-//       return getDocument(args.docId)
-//     case "notifyHuman":
-//       return notifyHuman(clientId)
-//     case "getDateOfNow":
-//       return getDateOfNow()
-//     case "registrarPedido":
-//       return registrarPedido(clientId, 
-//         args.conversationId, 
-//         args.clasificacion, 
-//         decodeAndCorrectText(args.consulta),
-//         decodeAndCorrectText(args.nombre),
-//         args.email, 
-//         decodeAndCorrectText(args.horarioContacto),
-//         args.idTrackeo, 
-//         args.urlPropiedad, 
-//         decodeAndCorrectText(args.consultaAdicional),
-//         decodeAndCorrectText(args.resumenConversacion),
-//       )
-//     case "reservarSummit":
-//       return reservarSummit(clientId, 
-//         args.conversationId, 
-//         decodeAndCorrectText(args.nombreReserva),
-//         decodeAndCorrectText(args.nombreCumpleanero),
-//         parseInt(args.cantidadInvitados),
-//         decodeAndCorrectText(args.fechaReserva),
-//         args.email,
-//         decodeAndCorrectText(args.resumenConversacion),
-//       )
-//     case "echoRegister":
-//       return echoRegister(clientId, 
-//         args.conversationId, 
-//         decodeAndCorrectText(args.texto)
-//       )
-//     case "completarFrase":
-//       return completarFrase(clientId, 
-//         args.conversationId, 
-//         decodeAndCorrectText(args.texto)
-//       )
-//     default:
-//       return null
-//   }
-// }
+    const { conversationId, ...data } = args
 
+    if (!conversationId)
+      return "conversationId es obligatorio"
+
+    const conversation= await getConversation(conversationId)
+    if (!conversation)
+      return `No se encontró la conversación con id ${conversationId}`
+  
+    const phone= conversation.phone
+  
+    const repoData: repoDataFormValues= {
+      clientId,
+      phone,
+      functionName: repo.functionName,
+      repoName: repo.name,
+      repositoryId: repo.id,
+      data,
+      conversationId
+    }
+  
+    const created= await createRepoData(repoData)
+    if (!created || !created.repositoryId)
+      return "Hubo un error al procesar esta solicitud"
+  
+    revalidatePath(`/client/${conversation.client.slug}/repo-data`)
+
+    const functionClient= await getFunctionClientDAO(repo.functionId, conversation.client.id)
+    if (functionClient && functionClient.webHookUrl) {
+      await sendWebhookNotification(functionClient.webHookUrl, created)
+    }
+    if (repo.conversationLLMOff) {
+      console.log(`simulating setting conversationLLMOff to true for phone ${conversation.phone}`)
+      // TODO: set LLMOff
+      // await setLLMOff(conversation.id, true)
+    }
+  
+    return repo.finalMessage    
+  } catch (error) {
+    console.log(error)
+    return "Hubo un error al procesar esta solicitud"        
+  }
+
+}
 
 export async function processFunctionCall(clientId: string, name: string, args: any) {
   console.log("function_call: ", name, args)
@@ -430,7 +438,9 @@ export async function processFunctionCall(clientId: string, name: string, args: 
       break
   
     default:
+      content= await defaultFunction(clientId, name, args)
       break
+        
   }
 
   if (content !== null) {      

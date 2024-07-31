@@ -51,10 +51,10 @@ export function DeleteConversationForm({ id, redirectUri, closeDialog }: DeleteP
   
   return (
     <div>
-      <Button onClick={() => closeDialog && closeDialog()} type="button" variant={"secondary"} className="w-32">Cancel</Button>
+      <Button onClick={() => closeDialog && closeDialog()} type="button" variant={"secondary"} className="w-32">Cancelar</Button>
       <Button onClick={handleDelete} variant="destructive" className="w-32 gap-1 ml-2">
         { loading && <Loader className="w-4 h-4 animate-spin" /> }
-        Delete  
+        Eliminar  
       </Button>
     </div>
   )

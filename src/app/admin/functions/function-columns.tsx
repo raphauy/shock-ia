@@ -46,6 +46,10 @@ export const columns: ColumnDef<FunctionDAO>[] = [
 
       const deleteDescription= `Do you want to delete Function ${data.id}?`
  
+      if (data.repositories?.length && data.repositories?.length > 0) {
+        return null
+      }
+
       return (
         <div className="flex items-center justify-end gap-2">
 

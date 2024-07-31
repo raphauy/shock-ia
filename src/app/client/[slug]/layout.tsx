@@ -2,7 +2,7 @@ import { getDataClientBySlug, getDataClientOfUser } from "@/app/admin/clients/(c
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import SideBar from "./side-bar";
-import { getClientsOfFunctionByName } from "@/services/function-services";
+import { getClientsOfFunctionByName, getClientsWithSomeFunctionWithRepository } from "@/services/function-services";
 import { getFullModelDAO, getFullModelsDAO } from "@/services/model-services";
 import { ModelSelector, SelectorData } from "@/components/header/model-selector";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -43,10 +43,13 @@ export default async function SlugLayout({ children, params }: Props) {
   const clientsOfCarServices= await getClientsOfFunctionByName("reservarServicio") 
   const showCarServices= clientsOfCarServices.map(c => c.slug).includes(slug)
 
+  const clientsWithRepo= await getClientsWithSomeFunctionWithRepository()
+  const showRepoData= clientsWithRepo.map(c => c.slug).includes(slug)
+
   return (
     <>
       <div className="flex flex-grow w-full">
-        <SideBar slug={slug} showRegistro={showRegistro} showCarServices={showCarServices} />
+        <SideBar slug={slug} showRegistro={showRegistro} showCarServices={showCarServices} showRepoData={showRepoData} repoLabel="Registros" />
         <div className="flex flex-col items-center flex-grow p-1">
           <TooltipProvider>
             {children}

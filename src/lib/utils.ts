@@ -145,3 +145,16 @@ export function decodeAndCorrectText(str: string): string {
 
   return decodedStr;
 }
+
+export const colorPalette = [
+  'rgb(53, 145, 118)',
+  'rgb(48, 130, 106)',
+  'rgb(58, 160, 130)',
+  'rgb(43, 115, 94)',
+  'rgb(63, 175, 142)',
+  'rgb(38, 100, 82)',
+  'rgb(68, 190, 154)',
+  'rgb(33, 85, 70)',
+  'rgb(73, 205, 166)',
+  'rgb(23, 55, 46)',
+];

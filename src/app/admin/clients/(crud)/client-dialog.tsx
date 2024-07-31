@@ -85,6 +85,7 @@ export function ClientFunctionsBox({ clientId, closeDialog }: ClientFunctionBoxP
     getFunctionsOfClientAction(clientId)
     .then((data) => {
         if(!data) return null
+        // @ts-ignore
         setFunctions(data)
     })
     .catch((error) => {
@@ -94,6 +95,7 @@ export function ClientFunctionsBox({ clientId, closeDialog }: ClientFunctionBoxP
     getComplementaryFunctionsOfClientAction(clientId)
     .then((data) => {
         if(!data) return null
+        // @ts-ignore
         setComplementary(data)
     })
     .catch((error) => {

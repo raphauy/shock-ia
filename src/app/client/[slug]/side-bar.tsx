@@ -1,7 +1,7 @@
 "use client"
 
 import { cn } from "@/lib/utils";
-import { BookOpen, Bot, Car, ChevronRightSquare, LayoutDashboard, MessageCircle, Receipt, Ticket, User, Warehouse } from "lucide-react";
+import { BookOpen, Bot, Car, ChevronRightSquare, DatabaseZap, LayoutDashboard, MessageCircle, Receipt, Ticket, User, Warehouse } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -9,8 +9,10 @@ interface Props {
   slug: string
   showRegistro?: boolean
   showCarServices?: boolean
+  showRepoData?: boolean
+  repoLabel: string
 }
-export default function SideBar({ slug, showRegistro, showCarServices }: Props) {
+export default function SideBar({ slug, showRegistro, showCarServices, showRepoData, repoLabel }: Props) {
 
   const data= [
     {
@@ -102,6 +104,13 @@ export default function SideBar({ slug, showRegistro, showCarServices }: Props) 
           <Car size={23} />
           </div>
           <p className={cn("hidden", !isChatPage && "md:block md:w-36")}>Servicios</p>                  
+        </Link>
+
+        <Link href={`/client/${slug}/registros`} className={cn(commonClasses, path.endsWith("registros") && selectedClasses, !showRepoData && "hidden")}>
+          <div className="pb-1">
+            <DatabaseZap size={23} />
+          </div>
+          <p className={cn("hidden", !isChatPage && "md:block md:w-36")}>{repoLabel}</p>                  
         </Link>
 
         {divider()}

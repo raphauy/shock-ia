@@ -2,7 +2,28 @@ import * as z from "zod"
 import { prisma } from "@/lib/db"
 import { ChatCompletionCreateParams } from "openai/resources/index.mjs"
 import { Client } from "@prisma/client"
+import { RepositoryDAO } from "./repository-services"
+import { getClient } from "./clientService"
 
+// export type FunctionDAO = {
+// 	id: string
+// 	name: string
+// 	description: string | null
+// 	definition: string | null
+// 	createdAt: Date
+// 	updatedAt: Date
+// }
+export type FunctionClientDAO= {
+  functionId: string
+  clientId: string
+  client: ClientDAO
+  webHookUrl: string | null
+  uiLabel: string
+}
+type ClientDAO= {
+  id: string
+  name: string
+}
 export type FunctionDAO = {
 	id: string
 	name: string
@@ -10,7 +31,10 @@ export type FunctionDAO = {
 	definition: string | null
 	createdAt: Date
 	updatedAt: Date
+  clients: FunctionClientDAO[]
+  repositories?: RepositoryDAO[]
 }
+
 
 export const functionSchema = z.object({
 	name: z.string({required_error: "name is required."}),
@@ -26,6 +50,10 @@ export async function getFunctionsDAO() {
     orderBy: {
       id: 'asc'
     },
+    include: {
+      clients: true,
+      repositories: true
+    }
   })
   return found as FunctionDAO[]
 }
@@ -105,4 +133,102 @@ export async function getClientsOfFunctionByName(name: string): Promise<Client[]
   })
 
   return found.map((f) => f.client)
+}
+
+export async function nameIsAvailable(name: string) {
+  const found = await prisma.function.findMany({
+    where: {
+      name
+    },
+    include: {
+      clients: true
+    }
+  })
+
+  return found.length === 0
+}
+
+export async function addFunctionToClient(clientId: string, functionId: string): Promise<boolean> {
+  const client= await getClient(clientId)
+  if (!client) throw new Error("Client not found")
+
+  const clientFunction= await prisma.clientFunction.findUnique({
+    where: {
+      clientId_functionId: {
+        clientId,
+        functionId
+      }
+    }
+  })
+  if (clientFunction) throw new Error("La función ya está asociada a este cliente")
+
+  const updated= await prisma.clientFunction.create({
+    data: {
+      clientId,
+      functionId
+    }
+  })
+
+  if (!updated) throw new Error("Error al asociar la función al cliente")
+
+  return true
+}
+
+export async function removeFunctionFromClient(clientId: string, functionId: string): Promise<boolean> {
+  const client= await getClient(clientId)
+  if (!client) throw new Error("Client not found")
+
+  const clientFunction= await prisma.clientFunction.findUnique({
+    where: {
+      clientId_functionId: {
+        clientId,
+        functionId
+      }
+    }
+  })
+  if (!clientFunction) throw new Error("La función no está asociada a este cliente")
+
+  const deleted= await prisma.clientFunction.delete({
+    where: {
+      clientId_functionId: {
+        clientId,
+        functionId
+      }
+    }
+  })
+
+  if (!deleted) throw new Error("Error al eliminar la función del cliente")
+
+  return true  
+}
+
+export async function getClientsWithSomeFunctionWithRepository(): Promise<Client[]> {
+  const clients = await prisma.client.findMany({
+    where: {
+      functions: {
+        some: {
+          function: {
+            repositories: {
+              some: {},
+            },
+          },
+        },
+      },
+    },
+  });
+
+  return clients;
+}
+
+export async function getFunctionClientDAO(functionId: string, clientId: string) {
+  const found = await prisma.clientFunction.findUnique({
+    where: {
+      clientId_functionId: {
+        clientId,
+        functionId
+      }
+    }
+  })
+
+  return found  
 }

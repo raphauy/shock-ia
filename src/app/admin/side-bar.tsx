@@ -1,11 +1,12 @@
 "use client"
 
 import { cn } from "@/lib/utils";
-import { Bot, Briefcase, ChevronRightSquare, FunctionSquare, LayoutDashboard, MessageCircle, Receipt, ScreenShare, Settings, User, Warehouse } from "lucide-react";
+import { Bot, Briefcase, ChevronRightSquare, Database, FunctionSquare, LayoutDashboard, MessageCircle, Receipt, ScreenShare, Settings, User, Warehouse } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getLastClientIdAction } from "./clients/(crud)/actions";
+import { useSession } from "next-auth/react";
 
 export default function SideBar() {
 
@@ -63,6 +64,11 @@ export default function SideBar() {
       text: "Modelos"
     },
     {
+      href: `/admin/repositories`,
+      icon: Database, 
+      text: "Repositorios"
+    },
+    {
       href: "divider", icon: User
     },  
   ]
@@ -72,6 +78,7 @@ export default function SideBar() {
     getLastClientIdAction().then((id) => setFirstClientId(id || ""))
   }, [])
   
+  const user= useSession().data?.user
 
   const path= usePathname()
 
@@ -83,6 +90,8 @@ export default function SideBar() {
       <section className="flex flex-col gap-3 py-4 mt-3 ">
         {data.map(({ href, icon: Icon, text }, index) => {
           if (href === "divider") return divider(index)
+
+          if (href === "/admin/repositories" && user?.email !== "rapha.uy@rapha.uy") return null
           
           const selected= path.endsWith(href)
           const classes= cn(commonClasses, selected && selectedClasses)
