@@ -8,15 +8,6 @@ import { toZonedTime } from "date-fns-tz";
 import { es } from "date-fns/locale";
 import { NextResponse } from "next/server";
 
-export type RegistroEntryResponse = {
-    id: string,
-    phone: string,
-    functionName: string,
-    clientName: string,
-    date: string,
-    data: JsonValue,
-}
-
 type Props= {
     params: {
         repoId: string
@@ -57,14 +48,17 @@ export async function POST(request: Request, { params }: Props) {
         const timeZone = "America/Montevideo"
         const date = format(toZonedTime(repoDataEntry.createdAt, timeZone), "yyyy-MM-dd HH:mm", { locale: es })
 
-        const data: RegistroEntryResponse= {
-            id: repoDataEntry.id,
+        let data: any= {
             phone,
             functionName: repoDataEntry.functionName,
             clientName: repoDataEntry.client.name,
             date,
-            data: JSON.parse(repoDataEntry.data),
         }
+        const dataMapped= JSON.parse(repoDataEntry.data)
+        for (const key in dataMapped) {
+            data[key]= dataMapped[key]
+        }
+
 
         return NextResponse.json( { data }, { status: 200 })
 
