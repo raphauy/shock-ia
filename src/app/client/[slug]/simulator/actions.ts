@@ -59,6 +59,7 @@ export async function getDataClientWithModel(slug: string, modelName?: string): 
       nombre: client.name,
       slug: client.slug,
       descripcion: client.description || '',
+      whatsappNumbers: client.whatsappNumbers || '',
       url: client.url || '',
       modelId: client.modelId,
       cantPropiedades: propertiesCount,
