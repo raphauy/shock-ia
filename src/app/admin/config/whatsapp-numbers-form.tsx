@@ -85,7 +85,7 @@ export function WhatsappNumbersForm({ id, update, whatsappNumbers }: Props) {
                     setCharCount(text.length); // Actualizar el contador de caracteres
                     field.onChange(e); // Asegúrate de llamar también al onChange de field
                   }}
-                  rows={25}
+                  rows={5}
                 />
               </FormControl>
               <FormMessage />
