@@ -1,6 +1,6 @@
 "use server"
   
-import { FunctionDAO, FunctionFormValues, SimpleFunction, createFunction, deleteFunction, getFunctionDAO, getFunctionsIdsWithRepo, updateFunction } from "@/services/function-services"
+import { FunctionDAO, FunctionFormValues, SimpleFunction, createFunction, deleteFunction, getFunctionDAO, getFunctionsWithRepo, updateFunction } from "@/services/function-services"
 import { revalidatePath } from "next/cache"
 
 
@@ -34,6 +34,6 @@ export async function deleteFunctionAction(id: string): Promise<FunctionDAO | nu
     return deleted as FunctionDAO
 }
 
-export async function getFunctionsIdsWithRepoAction(clientId: string): Promise<SimpleFunction[]> {
-    return getFunctionsIdsWithRepo(clientId)
+export async function getFunctionsWithRepoAction(clientId: string): Promise<SimpleFunction[]> {
+    return getFunctionsWithRepo(clientId)
 }

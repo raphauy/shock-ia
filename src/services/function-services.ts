@@ -234,11 +234,11 @@ export async function getFunctionClientDAO(functionId: string, clientId: string)
 }
 
 export type SimpleFunction= {
-  functionId: string
+  repoId: string
   functionName: string
 }
 
-export async function getFunctionsIdsWithRepo(clientId: string): Promise<SimpleFunction[]> {
+export async function getFunctionsWithRepo(clientId: string): Promise<SimpleFunction[]> {
   const found = await prisma.clientFunction.findMany({
     where: {
       clientId,
@@ -252,14 +252,15 @@ export async function getFunctionsIdsWithRepo(clientId: string): Promise<SimpleF
       functionId: true,
       function: {
         select: {
-          name: true
+          name: true,
+          repositories: true
         }
       }
     }
   })
 
   const res= found.map((f) => ({
-    functionId: f.functionId,
+    repoId: f.function.repositories[0].id,
     functionName: f.function.name
   }))
 

@@ -4,7 +4,7 @@ import { FunctionClientDAO, SimpleFunction } from "@/services/function-services"
 import { Loader } from "lucide-react"
 import { useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
-import { getFunctionsIdsWithRepoAction } from "../functions/function-actions"
+import { getFunctionsWithRepoAction } from "../functions/function-actions"
 import SimpleCopyHook from "./simple-copy-hook"
 
 interface Props {
@@ -22,7 +22,7 @@ export default function RegistrosHook({ basePath }: Props) {
         setLoading(true)
         const clientId= searchParams.get("clientId") || ""
         setClientId(clientId)
-        getFunctionsIdsWithRepoAction(clientId)
+        getFunctionsWithRepoAction(clientId)
         .then((data) => {
             if (!data) return
             setSimpleFunctions(data)
@@ -47,21 +47,12 @@ export default function RegistrosHook({ basePath }: Props) {
             <p className="text-2xl font-bold">Funciones con registros</p>
             {simpleFunctions.map((simpleFunction) => (
                 <SimpleCopyHook 
-                    key={simpleFunction.functionId}
+                    key={simpleFunction.repoId}
                     name={simpleFunction.functionName} 
-                    path={`${basePath}/api/${clientId}/registros/${simpleFunction.functionId}`} 
+                    path={`${basePath}/api/${clientId}/${simpleFunction.repoId}`} 
                 />
             ))}
 
         </div>
     )
-    // return (
-    //     <div className="w-full p-4 mt-2 border rounded-lg">
-    //         <p className="text-2xl font-bold">Documents</p>
-    //         <SimpleCopyHook name="getDocuments" path={`${basePath}/api/${clientId}/documents`} />
-    //         <SimpleCopyHook name="createDocuments" path={`${basePath}/api/${clientId}/documents/create`} />
-    //         <SimpleCopyHook name="updateDocument" path={`${basePath}/api/${clientId}/documents/update`} />
-    //         <SimpleCopyHook name="deleteDocument" path={`${basePath}/api/${clientId}/documents/delete`} />            
-    //     </div>
-    // )
 }
