@@ -176,8 +176,8 @@ export function putTildes(str: string): string {
   switch (str) {
       case "Operacion":
           return "Operación"
-      case "Conversacion":
-          return "Conversación"
+      case "Resumen Conversacion":
+          return "Resumen Conversación"
       default:
           return str
   }
