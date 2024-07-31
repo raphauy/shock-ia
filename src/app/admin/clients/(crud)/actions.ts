@@ -1,6 +1,6 @@
 "use server"
 
-import getClients, { createClient, deleteClient, editClient, getClient, getClientBySlug, getComplementaryFunctionsOfClient, getFunctionsOfClient, getLastClient, setFunctions, setPrompt, setWhatsAppEndpoing } from "@/services/clientService";
+import getClients, { createClient, deleteClient, editClient, getClient, getClientBySlug, getComplementaryFunctionsOfClient, getFunctionsOfClient, getLastClient, setFunctions, setPrompt, setWhatsAppEndpoing, setWhatsAppNumbers } from "@/services/clientService";
 import { getUser } from "@/services/userService";
 import { Client } from "@prisma/client";
 import { revalidatePath } from "next/cache";
@@ -8,12 +8,14 @@ import { EndpointFormValues } from "../../config/(crud)/endpoint-form";
 import { PromptFormValues } from "../../prompts/prompt-form";
 import { ClientFormValues } from "./clientForm";
 import { getFullModelDAO } from "@/services/model-services";
+import { WhatsappNumbersFormValues } from "../../config/whatsapp-numbers-form";
 
 export type DataClient = {
     id: string
     nombre: string
     slug: string
     descripcion: string
+    whatsappNumbers: string
     url: string
     modelId: string | null
     cantPropiedades: number
@@ -44,6 +46,7 @@ export async function getDataClient(clientId: string): Promise<DataClient | null
         nombre: client.name,
         slug: client.slug,
         descripcion: client.description || '',
+        whatsappNumbers: client.whatsappNumbers || '',
         url: client.url || '',
         modelId: client.modelId,
         cantPropiedades: propertiesCount,
@@ -77,6 +80,7 @@ export async function getDataClientOfUser(userId: string): Promise<DataClient | 
         nombre: client.name,
         slug: client.slug,
         descripcion: client.description || '',
+        whatsappNumbers: client.whatsappNumbers || '',
         url: client.url || '',
         modelId: client.modelId,
         cantPropiedades: propertiesCount,
@@ -107,6 +111,7 @@ export async function getDataClientBySlug(slug: string): Promise<DataClient | nu
         nombre: client.name,
         slug: client.slug,
         descripcion: client.description || '',
+        whatsappNumbers: client.whatsappNumbers || '',
         url: client.url || '',
         modelId: client.modelId,
         cantPropiedades: propertiesCount,
@@ -136,6 +141,7 @@ export async function getLastClientAction(): Promise<DataClient | null>{
         nombre: client.name,
         slug: client.slug,
         descripcion: client.description || '',
+        whatsappNumbers: client.whatsappNumbers || '',
         url: client.url || '',
         modelId: client.modelId,
         cantPropiedades: propertiesCount,
@@ -170,6 +176,7 @@ export async function getDataClients() {
                 nombre: client.name,
                 slug: client.slug,
                 descripcion: client.description || "",
+                whatsappNumbers: client.whatsappNumbers || "",
                 url: client.url || "",
                 modelId: client.modelId,
                 cantPropiedades: propertiesCount,
@@ -236,9 +243,17 @@ export async function updatePrompt(json: PromptFormValues) {
 
     setPrompt(json.prompt, json.clienteId)
 
-    revalidatePath(`/admin/prompts`)
+    revalidatePath(`/admin/config`)
 }
 
+export async function updateWhatsAppNumbersAction(json: WhatsappNumbersFormValues) {
+    if (!json.whatsappNumbers || !json.clienteId)
+        return
+
+    await setWhatsAppNumbers(json.whatsappNumbers, json.clienteId)
+
+    revalidatePath(`/admin/config`)
+}
 export async function getFunctionsOfClientAction(clientId: string) {
     return getFunctionsOfClient(clientId)
 }
@@ -255,3 +270,4 @@ export async function getLastClientIdAction() {
     const client= await getLastClient()
     return client?.id
 }
+

@@ -144,6 +144,18 @@ export async function setPrompt(prompt: string, clientId: string) {
   return client   
 }
 
+export async function setWhatsAppNumbers(whatsappNumbers: string, clientId: string) {
+  const client= await prisma.client.update({
+    where: {
+      id: clientId
+    },
+    data: {
+      whatsappNumbers
+    }
+  })
+  return client
+}
+
 
 export async function setTokensPrice(clientId: string, promptTokensPrice: number, completionTokensPrice: number) {
   console.log(clientId, promptTokensPrice, completionTokensPrice)

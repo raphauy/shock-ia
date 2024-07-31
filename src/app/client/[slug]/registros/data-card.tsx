@@ -23,7 +23,7 @@ export default function DataCard({ repoName, jsonData }: Props) {
                             return (
                                 <div key={i} className="grid grid-cols-2">
                                     <p className="whitespace-nowrap font-bold">{keyWithTildes}:</p>
-                                    <p className="whitespace-nowrap">{value}</p>
+                                    <p className="">{value}</p>
                                 </div>
                             );
                         })

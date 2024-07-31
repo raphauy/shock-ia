@@ -4,11 +4,12 @@ import { RepoDataDAO } from "./repodata-services";
 import { es } from "date-fns/locale";
 import axios from "axios";
 
-export type RepoDataEntryResponse = {
+type RepoDataEntryResponse = {
     id: string,
     phone: string,
     repoName: string,
     functionName: string,
+    clientId: string,
     clientName: string,
     date: string,
     data: String,
@@ -27,6 +28,7 @@ export async function sendWebhookNotification(webhookUrl: string, repoData: Repo
         phone: repoData.phone,
         repoName: repoData.repoName,
         functionName: repoData.functionName,
+        clientId: repoData.clientId,
         clientName: repoData.client.name,
         date: format(repoData.createdAt, "yyyy-MM-dd HH:mm", { locale: es }),
         data: repoData.data,

@@ -1,7 +1,7 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ClientSelector, SelectorData } from "../client-selector"
-import { getDataClients, updatePrompt } from "../clients/(crud)/actions"
+import { getDataClients, updatePrompt, updateWhatsAppNumbersAction } from "../clients/(crud)/actions"
 import { ClientFunctionsBox } from "../clients/(crud)/client-dialog"
 import ConfigsPage from "../configs/page"
 import { PromptForm } from "../prompts/prompt-form"
@@ -10,6 +10,7 @@ import TokensPrice from "./tokens-price"
 import CopyHook from "./copy-hook"
 import { getClientBySlug, getFunctionsOfClient } from "@/services/clientService"
 import DocumentsHook from "./documents-hook"
+import { WhatsappNumbersForm } from "./whatsapp-numbers-form"
 
 type Props = {
     searchParams: {
@@ -41,6 +42,7 @@ export default async function ConfigPage({ searchParams }: Props) {
                         <TabsTrigger value="functions">Funciones</TabsTrigger>
                         <TabsTrigger value="token-price">Tokens $</TabsTrigger>
                         <TabsTrigger value="hooks">Hooks</TabsTrigger>                        
+                        <TabsTrigger value="whatsapp-numbers">Destinatarios</TabsTrigger>                        
                         <TabsTrigger value="general">General</TabsTrigger>
                     </div>
                 </TabsList>
@@ -61,6 +63,9 @@ export default async function ConfigPage({ searchParams }: Props) {
                     { haveCarServiceFunction && 
                         <CopyHook name="Car Service Entry" path={`${BASE_PATH}/api/${client.id}/car-service`} clientId={client.id} />
                     }
+                </TabsContent>
+                <TabsContent value="whatsapp-numbers">
+                    <WhatsappNumbersForm id={client.id} update={updateWhatsAppNumbersAction} whatsappNumbers={client.whatsappNumbers} />
                 </TabsContent>
                 <TabsContent value="general">
                     <ConfigsPage />
