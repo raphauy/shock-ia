@@ -49,6 +49,8 @@ function putTildes(str: string): string {
     switch (str) {
         case "Operacion":
             return "Operación"
+        case "Conversacion":
+            return "Conversación"
         default:
             return str
     }
