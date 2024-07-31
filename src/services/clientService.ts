@@ -265,7 +265,7 @@ export async function getFunctionsOfClient(clientId: string) {
       id: clientId
     },
     include: {
-      functions: true      
+      functions: true,      
     }
   })
 
@@ -278,7 +278,10 @@ export async function getFunctionsOfClient(clientId: string) {
       id: {
         in: functionsIds
       }
-    }
+    },
+    include: {
+      repositories: true
+    },
   })
 
   return functions

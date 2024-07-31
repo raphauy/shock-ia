@@ -167,7 +167,9 @@ export function ClientFunctionsBox({ clientId, closeDialog }: ClientFunctionBoxP
                   return (
                       <div key={item.id} className="flex items-center justify-between gap-2 mb-1 mr-5">
                           <p className="text-green-500 whitespace-nowrap">{item.name}</p>
-                          <Button variant="secondary" className="h-7" onClick={() => complementaryOut(item.id)}><ChevronsRight /></Button>
+                          <Button variant="secondary" className="h-7" onClick={() => complementaryOut(item.id)} disabled={item.repositories && item.repositories.length > 0}>
+                            <ChevronsRight />
+                          </Button>
                       </div>
                   )})
               }
