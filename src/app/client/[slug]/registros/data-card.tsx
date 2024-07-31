@@ -1,4 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { camelCaseToNormal, putTildes } from "@/lib/utils";
 
 type Props = {
     repoName: string
@@ -34,24 +35,3 @@ export default function DataCard({ repoName, jsonData }: Props) {
     );
 }
 
-// función que transforma camel case en texto normal con mayúsculas
-// ej nombreCompleto -> Nombre Completo 
-// función que transforma camel case en texto normal con mayúsculas
-// ej nombreCompleto -> Nombre Completo 
-function camelCaseToNormal(str: string): string {
-    return str
-        .replace(/([A-Z])/g, ' $1')  // Inserta un espacio antes de cada mayúscula
-        .replace(/^./, function(str){ return str.toUpperCase(); })  // Capitaliza la primera letra
-        .trim();  // Elimina cualquier espacio inicial innecesario
-}
-
-function putTildes(str: string): string {
-    switch (str) {
-        case "Operacion":
-            return "Operación"
-        case "Conversacion":
-            return "Conversación"
-        default:
-            return str
-    }
-}

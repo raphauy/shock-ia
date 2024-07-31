@@ -158,3 +158,27 @@ export const colorPalette = [
   'rgb(73, 205, 166)',
   'rgb(23, 55, 46)',
 ];
+
+// función que transforma camel case en texto normal con mayúsculas
+// ej nombreCompleto -> Nombre Completo 
+// función que transforma camel case en texto normal con mayúsculas
+// ej nombreCompleto -> Nombre Completo 
+export function camelCaseToNormal(str: string): string {
+  return str
+      .replace(/([A-Z])/g, ' $1')  // Inserta un espacio antes de cada mayúscula
+      .replace(/^./, function(str){ return str.toUpperCase(); })  // Capitaliza la primera letra
+      .trim();  // Elimina cualquier espacio inicial innecesario
+}
+
+
+
+export function putTildes(str: string): string {
+  switch (str) {
+      case "Operacion":
+          return "Operación"
+      case "Conversacion":
+          return "Conversación"
+      default:
+          return str
+  }
+}

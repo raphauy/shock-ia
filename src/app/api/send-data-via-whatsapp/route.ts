@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getClient } from "@/services/clientService";
 import { sendWapMessage } from "@/services/osomService";
+import { camelCaseToNormal, putTildes } from "@/lib/utils";
 
 export const maxDuration = 59
 export const dynamic = 'force-dynamic'
@@ -36,10 +37,22 @@ export async function POST(request: Request) {
         const data= json.data        
         if (!data) return NextResponse.json({ error: "data not found" }, { status: 502 })
         console.log("data: ", data)
-    
+
+        const parsedData= JSON.parse(data)
+        const keys= Object.keys(JSON.parse(data))
+        let text= ""
+        for (const key of keys) {
+            const value = parsedData[key]
+            const normalKey = camelCaseToNormal(key)
+            const keyWithTildes = putTildes(normalKey)
+            text += `${keyWithTildes}: ${value}\n`
+        }
+        console.log("text: ", text)
+        
+
         const numbers= whatsappNumbers.split(",")
         for (const number of numbers) {
-            await sendWapMessage(number, data, false, client.id)
+            await sendWapMessage(number, text, false, client.id)
         }
     
 
