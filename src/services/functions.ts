@@ -465,6 +465,9 @@ switch (name) {
   case "reservarServicio":
     res= true
     break
+  case "registrarLeadInmobiliario":
+    res= true
+    break
   default:
     break
 }
