@@ -28,7 +28,7 @@ export async function POST(request: Request) {
         const phone= json.phone
         const repoName= json.repoName
 
-        let text= `Usuario: ${phone}\n`
+        let text= `Usuario: +${phone}\n`
         text+= "------------------------------------\n"
 
         const parsedData= JSON.parse(data)
