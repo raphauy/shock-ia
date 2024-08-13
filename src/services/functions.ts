@@ -472,6 +472,9 @@ switch (name) {
   case "registrarLeadInmobiliario":
     res= true
     break
+  case "registrarLeadsDeRegalosEmpresariales":
+    res= true
+    break
   default:
     break
 }
