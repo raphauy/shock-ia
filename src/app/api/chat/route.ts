@@ -11,7 +11,7 @@ import { NextResponse } from "next/server"
 import { OpenAI } from "openai"
 import openaiTokenCounter from 'openai-gpt-token-counter'
 
-export const maxDuration = 59
+export const maxDuration = 299
 export const dynamic = 'force-dynamic'
 
 
