@@ -44,9 +44,9 @@ export async function sendWebhookNotification(webhookUrl: string, repoData: Repo
             timeout: 20000, // 20 segundos
         })
         const elapsedTime = new Date().getTime() - init
+        console.log(`Request took ${elapsedTime} milliseconds`)
 
         // if (response.status !== 200) {
-        //     console.log(`Request took ${elapsedTime} milliseconds`)
         //     console.error(`Failed to send webhook notification to ${webhookUrl} `, response.status, response.statusText)
         // }
     } catch (error) {
