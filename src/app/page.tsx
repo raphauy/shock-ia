@@ -7,6 +7,9 @@ import { getDataClientOfUser, getDataClients } from "./admin/clients/(crud)/acti
 import { getCountDataOfAllClients } from "@/services/clientService"
 import ClientData from "./client/[slug]/client-data"
 
+export const maxDuration = 99
+export const dynamic = 'force-dynamic'
+
 export default async function Home() {
   const session= await getSession()
 
