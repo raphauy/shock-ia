@@ -20,7 +20,7 @@ export function ModelDialog({ id }: Props) {
   const [open, setOpen] = useState(false);
   const currentUser= useSession().data?.user
 
-  if (currentUser?.email !== "rapha.uy@rapha.uy" && currentUser?.email !== "gilberto@osomdigital.com") return null
+  if (currentUser?.email !== "rapha.uy@rapha.uy" && currentUser?.email !== "gilberto@shock.uy") return null
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
