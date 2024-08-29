@@ -273,7 +273,7 @@ export default function SimulatorBox() {
         )}
       </div>
 
-      {error && <p className="mt-10 text-base text-center text-red-500">{JSON.parse(error.message).error}</p>}
+      {error && <p className="mt-10 text-base text-center text-red-500">{error.message}</p>}
 
       <div className="fixed bottom-0 flex flex-col items-center w-full p-5 pb-3 space-y-3 max-w-[350px] sm:max-w-[400px] md:max-w-[550px] lg:max-w-screen-md bg-gradient-to-b from-transparent via-gray-100 to-gray-100 sm:px-0">
         <form
