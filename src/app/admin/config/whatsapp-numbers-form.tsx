@@ -66,8 +66,9 @@ export function WhatsappNumbersForm({ id, update, whatsappNumbers }: Props) {
 
 
   return (
-    <div className="">
-    <Form {...form}>
+    <div className="w-full p-4 border rounded-lg">
+      <p className="text-lg font-bold mb-4">Destinatarios:</p>
+      <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}

@@ -392,3 +392,27 @@ export async function getComplementaryClients(clientsIds: string[]) {
   })
   return clients
 }
+
+export async function clientHaveEvents(slug: string) {
+  const client= await prisma.client.findUnique({
+    where: {
+      slug
+    },
+  })
+  if (!client) return false
+
+  return client.haveEvents
+}
+
+export async function setHaveEvents(clientId: string, haveEvents: boolean) {
+  const client= await prisma.client.update({
+    where: {
+      id: clientId
+    },
+    data: {
+      haveEvents
+    }
+  })
+
+  return client
+}

@@ -5,6 +5,7 @@ const nextConfig = {
           "/api/chat": ["./node_modules/tiktoken/tiktoken_bg.wasm"],
         },
     },
+    reactStrictMode: false,
 }
 
 module.exports = nextConfig

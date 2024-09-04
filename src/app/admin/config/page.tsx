@@ -12,6 +12,7 @@ import { getClientBySlug, getFunctionsOfClient } from "@/services/clientService"
 import DocumentsHook from "./documents-hook"
 import { WhatsappNumbersForm } from "./whatsapp-numbers-form"
 import RegistrosHook from "./registros-hook"
+import PropsEdit from "./props-edit-box"
 
 type Props = {
     searchParams: {
@@ -41,9 +42,8 @@ export default async function ConfigPage({ searchParams }: Props) {
                     <div>
                         <TabsTrigger value="prompt">Prompt</TabsTrigger>
                         <TabsTrigger value="functions">Funciones</TabsTrigger>
-                        <TabsTrigger value="token-price">Tokens $</TabsTrigger>
+                        <TabsTrigger value="props">Config</TabsTrigger>
                         <TabsTrigger value="hooks">Hooks</TabsTrigger>                        
-                        <TabsTrigger value="whatsapp-numbers">Destinatarios</TabsTrigger>                        
                         <TabsTrigger value="general">General</TabsTrigger>
                     </div>
                 </TabsList>
@@ -53,7 +53,9 @@ export default async function ConfigPage({ searchParams }: Props) {
                 <TabsContent value="functions">
                     <ClientFunctionsBox clientId={client.id} />
                 </TabsContent>
-                <TabsContent value="token-price">
+                <TabsContent value="props" className="space-y-6">
+                    <PropsEdit clientId={client.id} haveEvents={client.haveEvents} />
+                    <WhatsappNumbersForm id={client.id} update={updateWhatsAppNumbersAction} whatsappNumbers={client.whatsappNumbers} />
                     <TokensPrice clientId={client.id} promptTokensPrice={client.promptTokensPrice} completionTokensPrice={client.completionTokensPrice} />
                 </TabsContent>
                 <TabsContent value="hooks">
@@ -65,9 +67,6 @@ export default async function ConfigPage({ searchParams }: Props) {
                         <CopyHook name="Car Service Entry" path={`${BASE_PATH}/api/${client.id}/car-service`} clientId={client.id} />
                     }
                     <RegistrosHook basePath={BASE_PATH} />
-                </TabsContent>
-                <TabsContent value="whatsapp-numbers">
-                    <WhatsappNumbersForm id={client.id} update={updateWhatsAppNumbersAction} whatsappNumbers={client.whatsappNumbers} />
                 </TabsContent>
                 <TabsContent value="general">
                     <ConfigsPage />

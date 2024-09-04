@@ -3,6 +3,7 @@ import Logo from "./logo"
 import Logged from "./logged"
 import getSession from "@/lib/auth"
 import { ThemeToggle } from "../shadcn/theme-toggle"
+import { Badge } from "../ui/badge"
 
 interface Props {  
     children: ReactNode
@@ -10,6 +11,15 @@ interface Props {
   
 export default async function Header({ children }: Props) {
     const session= await getSession()
+    const environment = process.env.VERCEL_ENV || "development"
+
+    let env
+
+    if (environment === 'preview') {
+      env= "PREVIEW"
+    } else if (environment === 'development') {
+      env= "DEVELOPMENT"
+    }
 
     return (
         <div className="flex items-center gap-2 pb-1 border-b border-shock-color/50">
@@ -20,6 +30,7 @@ export default async function Header({ children }: Props) {
                 {session && children}
             </div>
             
+            { env && <Badge className="font-bold">{env}</Badge> }
             <div>
                 <ThemeToggle />
             </div>
