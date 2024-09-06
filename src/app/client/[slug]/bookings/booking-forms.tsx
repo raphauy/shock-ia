@@ -106,9 +106,9 @@ export function BookingForm({ id, eventId, clientId, date, availableSeats, close
             name="seats"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Seats</FormLabel>
+                <FormLabel>Cupos</FormLabel>
                 <FormControl>
-                  <Input placeholder="Booking's seats" {...field} />
+                  <Input placeholder="Booking's seats" {...field} disabled={true}/>
                 </FormControl>
                 <FormMessage />
               </FormItem>
