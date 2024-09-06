@@ -39,21 +39,22 @@ type Props = {
 
 export default function BigCalendar({ initialEvents, timezone }: Props) { 
 
+  console.log("initialEvents: ", initialEvents)
+  console.log("timezone: ", timezone)
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [view, setView] = useState<View>(Views.WEEK)
 
   useEffect(() => {
-    moment.tz.setDefault(timezone)
-
-    let adjustedEvents = initialEvents
-    if (view === 'month') {
-      adjustedEvents = initialEvents.filter(event => event.title !== "Libre")
-    }
-    adjustedEvents = adjustedEvents.map(event => ({
+    let adjustedEvents = initialEvents.map(event => ({
       ...event,
-      start: moment(event.start).tz(timezone, true).toDate(),
-      end: moment(event.end).tz(timezone, true).toDate(),
+      start: moment.utc(event.start).tz(timezone).toDate(),
+      end: moment.utc(event.end).tz(timezone).toDate(),
     }))
+
+    if (view === 'month') {
+      adjustedEvents = adjustedEvents.filter(event => event.title !== "Libre")
+    }
+
     setEvents(adjustedEvents)
   }, [initialEvents, view, timezone])
 
@@ -66,11 +67,11 @@ export default function BigCalendar({ initialEvents, timezone }: Props) {
     }
   }
 
-  const minTime = new Date(2000, 0, 1, 6, 0, 0)
+  const minTime = new Date(2000, 0, 1, 11, 0, 0)
   const maxTime = new Date(2000, 0, 1, 23, 0, 0)
 
   return (
-    <div className="h-full" style={{ height: "calc(100vh - 310px)" }}>
+    <div className="h-full">
       <Calendar
         className='h-fit'
         localizer={localizer}
@@ -90,7 +91,7 @@ export default function BigCalendar({ initialEvents, timezone }: Props) {
         }}
         messages={messages}
         min={minTime}
-        max={maxTime}
+        // max={maxTime}
         components={{
           event: (props) => <CustomEvent {...props} />,
         }}

@@ -4,6 +4,7 @@ import * as z from "zod"
 import { getClientBySlug } from "./clientService"
 import { EventDAO, getEventDAO } from "./event-services"
 import { addMinutes } from "date-fns"
+import { toZonedTime } from "date-fns-tz"
 
 export type BookingDAO = {
 	id: string
@@ -64,7 +65,8 @@ export async function createBooking(data: BookingFormValues) {
   if (event.type === "MULTIPLE_SLOTS") {
     throw new Error("Eventos de duración variable aún no soportados")
   }
-  const end = addMinutes(data.start, event.duration)
+  const start= toZonedTime(data.start, event.timezone)
+  const end = addMinutes(start, event.duration)
   const seats = data.seats ? Number(data.seats) : 0
   const created = await prisma.booking.create({
     data: {
@@ -72,6 +74,7 @@ export async function createBooking(data: BookingFormValues) {
       eventName: event.name,
       status: "RESERVADO",
       seats: seats,
+      start,
       end
     }
   })
