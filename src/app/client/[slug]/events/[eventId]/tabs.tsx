@@ -8,8 +8,9 @@ type Props = {
     slug: string
     eventId: string
     initialEvents: CalendarEvent[]
+    timezone: string
 }
-export default async function TabsPage({slug, eventId, initialEvents}: Props) {
+export default async function TabsPage({slug, eventId, initialEvents, timezone}: Props) {
 
     const bookings= await getFutureBookingsDAOByEventId(eventId)
 
@@ -23,13 +24,13 @@ export default async function TabsPage({slug, eventId, initialEvents}: Props) {
                 </div>
             </TabsList>
             <TabsContent value="calendario">
-                <BigCalendar initialEvents={initialEvents} />
+                <BigCalendar initialEvents={initialEvents} timezone={timezone} />
             </TabsContent>
             <TabsContent value="listado">
-                <EventList bookings={bookings.filter(booking => booking.status !== "CANCELADO")} />
+                <EventList bookings={bookings.filter(booking => booking.status !== "CANCELADO")} timezone={timezone} />
             </TabsContent>
             <TabsContent value="canceladas">
-                <EventList bookings={bookings.filter(booking => booking.status === "CANCELADO")} />
+                <EventList bookings={bookings.filter(booking => booking.status === "CANCELADO")} timezone={timezone} />
             </TabsContent>
         </Tabs>    
     )

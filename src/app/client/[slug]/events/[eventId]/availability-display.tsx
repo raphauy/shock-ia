@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Availability, Schedule } from "@/services/calcom-sdk-v2";
 import { EventDAO } from "@/services/event-services";
-import { Calendar, Eye } from "lucide-react";
+import { Calendar, Eye, Globe } from "lucide-react";
 import Link from "next/link";
 
 
@@ -41,6 +41,10 @@ export default function AvailabilityDisplay({ event }: Props) {
           <p>No hay disponibilidad configurada para este evento</p>
         )}
       </CardContent>
+      <CardFooter className="flex items-center justify-center gap-2">
+        <Globe className="w-5 h-5" />
+        <span>{event.timezone}</span>
+      </CardFooter>
     </Card>
 )
 }

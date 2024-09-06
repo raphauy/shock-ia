@@ -1,10 +1,12 @@
-import { getFullBookingsDAO } from "@/services/booking-services";
-import { getEventDAO } from "@/services/event-services";
-import { addMinutes, isBefore } from "date-fns";
+import { BookingDAO, getFullBookingsDAO, getFutureBookingsDAOByEventId } from "@/services/booking-services";
+import { EventDAO, getEventDAO } from "@/services/event-services";
+import { addMinutes, isBefore, parseISO, format, addDays } from "date-fns";
 import { CalendarEvent } from "../big-calendar";
 import AvailabilityDisplay from "./availability-display";
 import EventHeader from "./event-header";
 import TabsPage from "./tabs";
+import { toZonedTime, } from "date-fns-tz";
+import { getSlots } from "@/services/slots-service";
 
 type Props= {
     params: {
@@ -20,19 +22,8 @@ export default async function EventPage({ params }: Props) {
     const event= await getEventDAO(eventId)
     let availability1Month: CalendarEvent[] = []
     if (event) {
-      const bookingsDAO= await getFullBookingsDAO(event.id)
-      const bookings= bookingsDAO.map(b => ({
-        title: b.name,
-        start: b.start,
-        end: b.end,
-        color: event.color,
-        status: b.status,
-        clientId: b.clientId,
-        eventId: b.eventId,
-        availableSeats: b.seats,
-        type: "booking" as const
-      }))
-      availability1Month= get1MonthAvailability(event.availability, event.duration, bookings)
+      const bookingsDAO= await getFutureBookingsDAOByEventId(eventId)
+      availability1Month= get1MonthAvailability(event, bookingsDAO)
       availability1Month= availability1Month.map(a => ({
         ...a,
         clientId: event.clientId,
@@ -40,9 +31,10 @@ export default async function EventPage({ params }: Props) {
         availableSeats: event.seatsPerTimeSlot || 1
       }))
     }
-  
+
     return ( 
         <div className="w-full space-y-4 flex flex-col items-center">
+          hola
 
           <div className="flex gap-2 w-full">
             <EventHeader event={event} slug={slug} />
@@ -51,69 +43,42 @@ export default async function EventPage({ params }: Props) {
           </div>
 
           <div className="w-full">
-            <TabsPage slug={slug} eventId={eventId} initialEvents={availability1Month} />
+            <TabsPage slug={slug} eventId={eventId} initialEvents={availability1Month} timezone={event.timezone} />
           </div>
         </div>
       );
 }    
 
 
-function get1MonthAvailability(availability: string[], duration: number, bookings: CalendarEvent[]): CalendarEvent[] {
-  const result: CalendarEvent[] = []
-  const now = new Date()
-  for (let i = 0; i < 8; i++) {
-    const day = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i)
-    let dayOfWeek = day.getDay() - 1
-    if (dayOfWeek === -1) dayOfWeek = 6
-    
-    const dayAvailability = availability[dayOfWeek]
-    if (dayAvailability) {
-      const [startDayRange, endDayRange] = dayAvailability.split("-")
-      const [startHour, startMinute] = startDayRange.split(":").map(Number)
-      const [endHour, endMinute] = endDayRange.split(":").map(Number)
-      let startDayTime = new Date(day.getFullYear(), day.getMonth(), day.getDate(), startHour, startMinute)
-      const finishDayTime = new Date(day.getFullYear(), day.getMonth(), day.getDate(), endHour, endMinute)
+function get1MonthAvailability(event: EventDAO, bookings: BookingDAO[]): CalendarEvent[] {
+  const availability= event.availability
+  console.log("availability:", availability)
+  const duration= event.duration
+  const timezone= event.timezone
+  const result: CalendarEvent[] = [];
+  const now = new Date();
+  const zonedNow = toZonedTime(now, timezone);
 
-      while (true) {
-        const start = startDayTime
-        const end = addMinutes(start, duration)
-        if (end > finishDayTime) break
+  const DAYS_AHEAD= 2
+  for (let i = 0; i < DAYS_AHEAD; i++) {
+    const dateStr= format(addDays(zonedNow, i), "yyyy-MM-dd")
 
-        const booking = bookings.find(b => 
-          b.start.getTime() === start.getTime() && 
-          b.end.getTime() === end.getTime()
-        )
+    const slots= getSlots(dateStr, bookings, availability, duration, timezone)
+    console.log("slots:", slots)
 
-        if (booking) {
-          result.push({
-            title: booking.title,
-            start,
-            end,
-            color: booking.color,
-            status: booking.status,
-            clientId: booking.clientId,
-            eventId: booking.eventId,
-            availableSeats: booking.availableSeats,
-            type: "booking"
-          })
-        } else {
-          if (isBefore(start, now)) continue
-          
-          result.push({
-            title: "Libre",
-            start,
-            end,
-            color: "#fafffb",
-            status: "",
-            clientId: "",
-            eventId: "",
-            availableSeats: 0,
-            type: "free"
-          })
-        }
-        startDayTime = end
-      }
-    }
+    slots.forEach(slot => {
+      result.push({
+        title: slot.available ? "Libre" : slot.name || "",
+        start: slot.start,
+        end: slot.end,
+        color: slot.available ? "#fafffb" : event.color || "",
+        status: "available" as const,
+        clientId: event.clientId,
+        eventId: event.id,
+        availableSeats: event.seatsPerTimeSlot || 1,
+        type: slot.available ? "free" : "booking"
+      })
+    })
   }
-  return result
+  return result;
 }

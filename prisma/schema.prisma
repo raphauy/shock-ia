@@ -379,6 +379,7 @@ model Event {
   isArchived        Boolean   @default(false)                   // gennext: show.column
 
   availability      String[]  @default([])
+  timezone          String      @default("America/Montevideo")
   type              EventType   @default(SINGLE_SLOT)
 
   createdAt         DateTime    @default(now())                 // gennext: skip.zod

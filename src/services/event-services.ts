@@ -17,6 +17,7 @@ export type EventDAO = {
 	price: number | undefined
 	isArchived: boolean
   availability: string[]
+  timezone: string
   type: EventType
 	createdAt: Date
 	updatedAt: Date
@@ -226,3 +227,4 @@ export async function setAvailability(id: string, availability: string[]): Promi
   })
   return updated !== null  
 }
+

@@ -34,26 +34,28 @@ export type CalendarEvent = {
 
 type Props = {
   initialEvents: CalendarEvent[]
+  timezone: string
 }
 
-export default function BigCalendar({ initialEvents }: Props) { 
+export default function BigCalendar({ initialEvents, timezone }: Props) { 
+
   const [events, setEvents] = useState<CalendarEvent[]>([])
-  const [view, setView] = useState<View>(Views.WEEK) // Estado para la vista actual
+  const [view, setView] = useState<View>(Views.WEEK)
 
   useEffect(() => {
-    // Ajusta las fechas de los eventos a la zona horaria local
-    let adjustedEvents= initialEvents
+//    moment.tz.setDefault(timezone)
+
+    let adjustedEvents = initialEvents
     if (view === 'month') {
-      adjustedEvents= initialEvents.filter(event => event.title !== "Libre")
+      adjustedEvents = initialEvents.filter(event => event.title !== "Libre")
     }
-    adjustedEvents = adjustedEvents.map(event => {      
-      return ({
+    adjustedEvents = adjustedEvents.map(event => ({
       ...event,
-      start: moment(event.start).toDate(),
-      end: moment(event.end).toDate(),
-    })})
+      start: moment.tz(event.start, timezone).toDate(),
+      end: moment.tz(event.end, timezone).toDate(),
+    }))
     setEvents(adjustedEvents)
-  }, [initialEvents, view])
+  }, [initialEvents, view, timezone])
 
   const eventStyleGetter = (event: CalendarEvent) => {
     return {
@@ -63,6 +65,9 @@ export default function BigCalendar({ initialEvents }: Props) {
       }
     }
   }
+
+  const minTime = new Date(2000, 0, 1, 6, 0, 0)
+  const maxTime = new Date(2000, 0, 1, 23, 0, 0)
 
   return (
     <div className="h-full" style={{ height: "calc(100vh - 310px)" }}>
@@ -80,12 +85,12 @@ export default function BigCalendar({ initialEvents }: Props) {
         onView={(newView) => setView(newView)}
         formats={{
           eventTimeRangeFormat: () => '',
-          dayRangeHeaderFormat: ({ start, end }) => 
-            `${moment(start).format('D MMM')} - ${moment(end).format('D MMM')}`,
+          dayRangeHeaderFormat: ({ start, end }) => `${moment(start).format('D MMM')} - ${moment(end).format('D MMM')}`,
+          timeGutterFormat: (date, culture, localizer) => moment(date).format('HH:mm'),
         }}
         messages={messages}
-        min={new Date(0, 0, 0, 7, 0, 0)}        
-        max={new Date(0, 0, 0, 23, 0, 0)}
+        // min={minTime}
+        // max={maxTime}
         components={{
           event: (props) => <CustomEvent {...props} />,
         }}

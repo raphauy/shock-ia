@@ -14,11 +14,11 @@ type Props= {
   description?: string
   initialValue: string
   fieldName: string
-  options: string[]
   update: (id: string, fieldName: string, value: string) => Promise<boolean>
+  disabled?: boolean
 }
 
-export function SelectForm({ id, icon, label, description, initialValue, fieldName, options, update }: Props) {
+export function SelectTimezoneForm({ id, icon, label, description, initialValue, fieldName, update, disabled }: Props) {
 
   const [loading, setLoading] = useState(false)
   const [value, setValue] = useState(initialValue)
@@ -40,7 +40,7 @@ export function SelectForm({ id, icon, label, description, initialValue, fieldNa
   }
 
   return (
-    <div className="mt-6 border rounded-md p-4 w-full bg-muted">
+    <div className="mt-6 border rounded-md p-4 w-full">
       <div className="">
         <div className="flex items-center gap-2 mb-2 font-bold border-b">
           {icon && icon}
@@ -54,13 +54,13 @@ export function SelectForm({ id, icon, label, description, initialValue, fieldNa
               onChange(value)
             }}
           >
-            <SelectTrigger className="">
+            <SelectTrigger disabled={disabled}>
               <SelectValue placeholder={value} />
             </SelectTrigger>
             <SelectContent side="top">
-              {options.map((option) => (
+              {getTimezones().map((option) => (
                 <SelectItem key={option} value={option}>
-                  {getEventTypeLabel(option as EventType)}
+                  {option}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -72,3 +72,6 @@ export function SelectForm({ id, icon, label, description, initialValue, fieldNa
   )
 }
 
+function getTimezones() {
+  return Intl.supportedValuesOf("timeZone")
+}

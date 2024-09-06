@@ -11,8 +11,9 @@ import { cn } from "@/lib/utils"
 
 type Props = {
   bookings: BookingDAO[]
+  timezone: string
 }
-export default function EventList({bookings}: Props) {
+export default function EventList({bookings, timezone}: Props) {
 
     if (bookings.length === 0) {
         return <p className="text-center text-muted-foreground mt-4">No hay reservas</p>

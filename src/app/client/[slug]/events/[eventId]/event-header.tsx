@@ -22,7 +22,11 @@ type Props= {
         
         <div className="flex flex-col lg:flex-row gap-4 w-full">
           <div className="text-center md:text-left text-muted-foreground min-w-72 flex flex-col flex-1">
-            <h2 className="text-2xl font-bold mb-2">{name}</h2>
+            <h2 className="text-2xl font-bold mb-2">
+              <Link href={`/client/${slug}/events/${event.id}/edit`}>
+                {name}
+              </Link>
+            </h2>
             <p className="text-sm text-muted-foreground">
               {event.description}
             </p>
