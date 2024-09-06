@@ -14,18 +14,14 @@ const formatTime = (time: string) => {
 
 type Props= {
   event: EventDAO
-  config: boolean
-  slug: string
 }
-export default function AvailabilityDisplay({ event, config, slug }: Props) {
+export default function AvailabilityDisplay({ event }: Props) {
   const availability= event.availability
 
   return (
-    <Card key={event.id} className="min-w-64">
+    <Card key={event.id} className="min-w-64 text-muted-foreground" style={{borderColor: event.color}}>
       <CardHeader>
-        <CardTitle className="text-center">
-          Disponibilidad
-        </CardTitle>
+        <h2 className="text-2xl font-bold text-center">Disponibilidad</h2>            
       </CardHeader>
       <CardContent className="text-center">
         {Array.isArray(availability) && availability.length > 0 ? (
@@ -42,28 +38,9 @@ export default function AvailabilityDisplay({ event, config, slug }: Props) {
             })}
           </ul>
         ) : (
-          <p>No availability set for this event</p>
+          <p>No hay disponibilidad configurada para este evento</p>
         )}
       </CardContent>
-      <CardFooter className="pb-4">
-      {
-          config ?
-          <Link href={`/client/${slug}/events/${event.id}?config=true`} className="w-full">
-              <Button variant="outline" size="icon" className="w-full gap-2">
-                  <Calendar className="h-4 w-4" /> Configurar
-                  <span className="sr-only">Editar Schedule</span>
-              </Button>
-          </Link>
-          :
-          <Link href={`/client/${slug}/events/${event.id}`} className="w-full">
-            <Button variant="outline" size="icon" className="w-full gap-2">
-                  <Eye className="h-4 w-4" /> Previsualizar
-                  <span className="sr-only">Ver Schedule</span>
-              </Button>
-          </Link>
-        }
-
-      </CardFooter>
     </Card>
 )
 }

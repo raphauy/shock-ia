@@ -118,7 +118,6 @@ export const columns: ColumnDef<EventDAO>[] = [
       return (
         <div className="flex items-center justify-end gap-2">
 
-          <EventDialog id={data.id} />
           <DeleteEventDialog description={deleteDescription} id={data.id} />
         </div>
 

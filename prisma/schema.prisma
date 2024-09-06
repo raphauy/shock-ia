@@ -360,14 +360,17 @@ model RepoData {
   updatedAt           DateTime     @updatedAt            // gennext: skip.zod
 }
 
+enum EventType {
+  SINGLE_SLOT
+  MULTIPLE_SLOTS
+}
+
 model Event {
   id                String    @id @default(cuid())
   name              String                                      // gennext: show.column
   slug              String                                      // gennext: show.column
   duration          Int                                         // gennext: show.column
   color             String                                      // gennext: show.column
-  scheduleId        Int                                         // gennext: show.column
-  eventTypeId       Int                                         // gennext: show.column
 
   description       String?
   address           String?                                     // gennext: show.column
@@ -376,6 +379,7 @@ model Event {
   isArchived        Boolean   @default(false)                   // gennext: show.column
 
   availability      String[]  @default([])
+  type              EventType   @default(SINGLE_SLOT)
 
   createdAt         DateTime    @default(now())                 // gennext: skip.zod
   updatedAt         DateTime    @updatedAt                      // gennext: skip.zod
@@ -396,7 +400,9 @@ enum BookingStatus {
 
 model Booking {
   id                String    @id @default(cuid())
-  date              DateTime                                     // gennext: show.column
+  eventName         String                                      // gennext: show.column
+  start             DateTime                                     // gennext: show.column
+  end               DateTime                                     // gennext: show.column
   seats             Int                                         // gennext: show.column
   price             Float?                                      // gennext: show.column
   status            BookingStatus                               // gennext: show.column

@@ -1,11 +1,11 @@
 "use client"
 
 import { useEffect, useState } from "react";
-import { ArrowLeftRight, ChevronsLeft, ChevronsRight, Loader, Pencil, PlusCircle, Trash2 } from "lucide-react";
+import { ArrowLeftRight, ChevronsLeft, ChevronsRight, Loader, Pencil, PlusCircle, Trash2, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { toast } from "@/components/ui/use-toast";
-import { BookingForm, DeleteBookingForm } from "./booking-forms"
+import { BookingForm, CancelBookingForm, DeleteBookingForm } from "./booking-forms"
 import { getBookingDAOAction } from "./booking-actions"
 
 type Props= {
@@ -62,12 +62,29 @@ export function DeleteBookingDialog({ id, description }: DeleteProps) {
   )
 }
 
-interface CollectionProps{
+type CancelProps= {
   id: string
-  title: string
+  description: string
 }
 
+export function CancelBookingDialog({ id, description }: CancelProps) {
+  const [open, setOpen] = useState(false)
 
-
-
-  
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm">
+          <XIcon className="h-4 w-4 mr-2" />
+            Cancelar reserva
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Cancelar Reserva</DialogTitle>
+          <DialogDescription className="py-8">{description}</DialogDescription>
+        </DialogHeader>
+        <CancelBookingForm id={id} closeDialog={() => setOpen(false)} />
+      </DialogContent>
+    </Dialog>
+  )
+}

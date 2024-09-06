@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { getFullEventsDAO } from "@/services/event-services";
 import { EventCard } from "../event-card";
+import { EventDialog } from "../event-dialogs";
 
 type Props = {
   params: {
@@ -19,11 +20,7 @@ export default async function EventLayout({ params, children }: Props) {
   return (
     <div className="flex flex-grow p-1 w-full gap-2">
       <div className="mt-4 border-r pr-4 border-gray-300 mr-2">
-        <Link href={`/client/${slug}/events/edit`} >
-          <Button className="gap-2 w-full">
-            <PlusCircle className="h-5 w-5" /> Crear Evento
-          </Button>
-        </Link>
+        <EventDialog />
         <div className="mt-4 flex flex-col gap-4 min-w-[250px]">
           {data.map((event) => (
             <Link key={event.id} href={`/client/${slug}/events/${event.id}`}>

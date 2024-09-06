@@ -1,23 +1,18 @@
-import { getEventDAO } from "@/services/event-services";
-import EventHeader from "./event-header";
-import AvailabilityDisplay from "./availability-display";
-import AvailabilitySelector from "./availability-selector";
-import BigCalendar, { CalendarEvent } from "../big-calendar";
-import { addMinutes } from "date-fns";
-import { log } from "node:console";
-import { toZonedTime } from "date-fns-tz";
 import { getFullBookingsDAO } from "@/services/booking-services";
+import { getEventDAO } from "@/services/event-services";
+import { addMinutes, isBefore } from "date-fns";
+import { CalendarEvent } from "../big-calendar";
+import AvailabilityDisplay from "./availability-display";
+import EventHeader from "./event-header";
+import TabsPage from "./tabs";
 
 type Props= {
     params: {
       slug: string;
       eventId?: string;
     },
-    searchParams: {
-      config?: string
-    }
 }
-export default async function EventPage({ params, searchParams }: Props) {
+export default async function EventPage({ params }: Props) {
     const eventId = params.eventId
     const slug = params.slug
     if (!eventId) return <div>No se encontró el event ID</div>
@@ -28,8 +23,8 @@ export default async function EventPage({ params, searchParams }: Props) {
       const bookingsDAO= await getFullBookingsDAO(event.id)
       const bookings= bookingsDAO.map(b => ({
         title: b.name,
-        start: b.date,
-        end: addMinutes(b.date, event.duration),
+        start: b.start,
+        end: b.end,
         color: event.color,
         status: b.status,
         clientId: b.clientId,
@@ -46,24 +41,18 @@ export default async function EventPage({ params, searchParams }: Props) {
       }))
     }
   
-    const config= searchParams.config
-
     return ( 
         <div className="w-full space-y-4 flex flex-col items-center">
 
           <div className="flex gap-2 w-full">
             <EventHeader event={event} slug={slug} />
 
-            <AvailabilityDisplay event={event} config={config ? false : true} slug={slug} />
+            <AvailabilityDisplay event={event} />
           </div>
 
-          { config === "true" ?
-            <AvailabilitySelector eventId={eventId} initialAvailability={event.availability} />
-            :
-            <div className="w-full">
-              <BigCalendar initialEvents={availability1Month} />
-            </div>
-          } 
+          <div className="w-full">
+            <TabsPage slug={slug} eventId={eventId} initialEvents={availability1Month} />
+          </div>
         </div>
       );
 }    
@@ -71,9 +60,9 @@ export default async function EventPage({ params, searchParams }: Props) {
 
 function get1MonthAvailability(availability: string[], duration: number, bookings: CalendarEvent[]): CalendarEvent[] {
   const result: CalendarEvent[] = []
-  const today = new Date()
+  const now = new Date()
   for (let i = 0; i < 8; i++) {
-    const day = new Date(today.getFullYear(), today.getMonth(), today.getDate() + i)
+    const day = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i)
     let dayOfWeek = day.getDay() - 1
     if (dayOfWeek === -1) dayOfWeek = 6
     
@@ -108,11 +97,13 @@ function get1MonthAvailability(availability: string[], duration: number, booking
             type: "booking"
           })
         } else {
+          if (isBefore(start, now)) continue
+          
           result.push({
             title: "Libre",
             start,
             end,
-            color: "#e6ffe6",
+            color: "#fafffb",
             status: "",
             clientId: "",
             eventId: "",

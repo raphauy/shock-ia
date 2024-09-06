@@ -14,15 +14,19 @@ export default function MenuAdmin() {
 
     useEffect(() => {
         const newSlug= path.split('/')[2]
-        clientHaveEventsAction(newSlug)
-        .then((haveEvents) => {
-            if (haveEvents) {
-                setSlug(newSlug)
-            }
-        })
-        .catch((error) => {
-            console.log(error)
-        })
+        if (newSlug) {
+            clientHaveEventsAction(newSlug)
+            .then((haveEvents) => {
+                if (haveEvents) {
+                    setSlug(newSlug)
+                }
+            })
+            .catch((error) => {
+                console.log(error)
+            })
+        } else {
+            setSlug("")
+        }
     }, [path])
 
     return (

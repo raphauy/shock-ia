@@ -11,7 +11,7 @@ import { DeleteBookingDialog, BookingDialog } from "./booking-dialogs"
 export const columns: ColumnDef<BookingDAO>[] = [
   
   {
-    accessorKey: "date",
+    accessorKey: "start",
     header: ({ column }) => {
         return (
           <Button variant="ghost" className="pl-0 dark:text-white"
@@ -22,7 +22,7 @@ export const columns: ColumnDef<BookingDAO>[] = [
     )},
 		cell: ({ row }) => {
       const data= row.original
-      const date= data.date && format(new Date(data.date), "yyyy-MM-dd")
+      const date= data.start && format(new Date(data.start), "yyyy-MM-dd")
       return (<p>{date}</p>)
     }
   },

@@ -85,7 +85,7 @@ export default function BigCalendar({ initialEvents }: Props) {
         }}
         messages={messages}
         min={new Date(0, 0, 0, 7, 0, 0)}        
-        max={new Date(0, 0, 0, 20, 0, 0)}
+        max={new Date(0, 0, 0, 23, 0, 0)}
         components={{
           event: (props) => <CustomEvent {...props} />,
         }}

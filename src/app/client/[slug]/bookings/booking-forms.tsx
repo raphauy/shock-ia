@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { toast } from "@/components/ui/use-toast"
 import { useEffect, useState } from "react"
-import { deleteBookingAction, createOrUpdateBookingAction, getBookingDAOAction } from "./booking-actions"
+import { deleteBookingAction, createOrUpdateBookingAction, getBookingDAOAction, cancelBookingAction } from "./booking-actions"
 import { bookingSchema, BookingFormValues } from '@/services/booking-services'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -26,7 +26,7 @@ export function BookingForm({ id, eventId, clientId, date, availableSeats, close
     defaultValues: {
       eventId,
       clientId,
-      date,
+      start: date,
       seats: "1",
       name: "",
       contact: "",
@@ -52,7 +52,7 @@ export function BookingForm({ id, eventId, clientId, date, availableSeats, close
     if (id) {
       getBookingDAOAction(id).then((data) => {
         if (data) {
-          form.setValue("date", data.date)
+          form.setValue("start", data.start)
           form.setValue("seats", data.seats.toString())
           form.setValue("name", data.name)
           form.setValue("contact", data.contact)
@@ -141,7 +141,7 @@ export function DeleteBookingForm({ id, closeDialog }: DeleteProps) {
     setLoading(true)
     deleteBookingAction(id)
     .then(() => {
-      toast({title: "Booking deleted" })
+      toast({title: "Reserva eliminada" })
     })
     .catch((error) => {
       toast({title: "Error", description: error.message, variant: "destructive"})
@@ -163,3 +163,37 @@ export function DeleteBookingForm({ id, closeDialog }: DeleteProps) {
   )
 }
 
+type CancelProps= {
+  id: string
+  closeDialog: () => void
+}
+
+export function CancelBookingForm({ id, closeDialog }: CancelProps) {
+  const [loading, setLoading] = useState(false)
+
+  async function handleCancel() {
+    if (!id) return
+    setLoading(true)
+    cancelBookingAction(id)
+    .then(() => {
+      toast({title: "Reserva cancelada" })
+    })
+    .catch((error) => {
+      toast({title: "Error", description: error.message, variant: "destructive"})
+    })
+    .finally(() => {
+      setLoading(false)
+      closeDialog && closeDialog()
+    })
+  }
+
+  return (
+    <div>
+      <Button onClick={() => closeDialog && closeDialog()} type="button" variant={"secondary"} className="w-32">Cancelar</Button>
+      <Button onClick={handleCancel} variant="destructive" className="ml-2 gap-1">
+        { loading && <Loader className="h-4 w-4 animate-spin" /> }
+        Cancelar reserva  
+      </Button>
+    </div>
+  )
+}

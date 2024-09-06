@@ -5,7 +5,7 @@ import { EventDAO } from "@/services/event-services"
 import { Archive, Calendar, Clock, DollarSign, Edit, MapPin, PersonStanding, Star } from "lucide-react"
 import Link from "next/link"
 import { DeleteEventDialog } from "../event-dialogs"
-import { cn } from "@/lib/utils"
+import { cn, getEventTypeLabel } from "@/lib/utils"
 
 type Props= {
   event: EventDAO
@@ -51,21 +51,10 @@ type Props= {
                 <div className="flex items-center gap-1 text-sm text-muted-foreground">
                   <MapPin className="w-4 h-4" />
                   <span>{event.address}</span>
-                </div>                      
-
-                {isArchived && (
-                  <Badge className="bg-gray-200 text-gray-800">
-                    <Archive className="w-3 h-3 mr-1" />
-                    Archivada
-                  </Badge>
-                )}
+                </div>
               </div>
+              <Badge variant="secondary" className="whitespace-nowrap text-center border-gray-300">{getEventTypeLabel(event.type)}</Badge>
               <div className="flex gap-2 mt-2">
-                <Link href={`/client/${slug}/events/${event.id}?config=true`}>
-                    <Button variant="outline" size="icon">
-                        <Calendar className="h-4 w-4" /><span className="sr-only">Editar Schedule</span>
-                    </Button>
-                </Link>
                 <Link href={`/client/${slug}/events/${event.id}/edit`}>
                     <Button variant="outline" size="icon">
                         <Edit className="h-4 w-4" /><span className="sr-only">Editar</span>

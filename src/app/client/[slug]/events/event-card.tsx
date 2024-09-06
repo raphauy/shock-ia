@@ -1,6 +1,8 @@
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
+import { getEventTypeLabel } from "@/lib/utils"
 import { EventDAO } from "@/services/event-services"
+import { EventType } from "@prisma/client"
 import { Clock, DollarSign, MapPin, PersonStanding } from "lucide-react"
 
 type EventCardProps= {
@@ -21,8 +23,8 @@ export function EventCard({event}: EventCardProps) {
                     <span>{event.duration} minutos</span>
                 </div>
                 <div className="flex items-center gap-1 justify-end">
-                <PersonStanding className="w-4 h-4" />
-                <span>{event.seatsPerTimeSlot}</span>
+                    <PersonStanding className="w-4 h-4" />
+                    <span>{event.seatsPerTimeSlot}</span>
                 </div>
                 {typeof event.price === 'number' && event.price > 0 && (
                 <div className="flex items-center gap-1">
@@ -37,7 +39,7 @@ export function EventCard({event}: EventCardProps) {
                 <MapPin className="w-4 h-4" />
                 <span className="line-clamp-1">{event.address}</span>
             </div>
-            <Badge>{event.isArchived ? "Pausado" : "Activo"}</Badge>
+            <Badge variant="secondary" className="border-gray-300">{event.isArchived ? "Archivado" : "Activo"}</Badge>
         </CardFooter>    
     </Card>
   )

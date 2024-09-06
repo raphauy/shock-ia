@@ -1,6 +1,5 @@
-import { View } from "react-big-calendar";
-import { BookingDialog } from "../bookings/booking-dialogs"
-import { CalendarEvent } from "./big-calendar"
+import { BookingDialog } from "../bookings/booking-dialogs";
+import { CalendarEvent } from "./big-calendar";
 
 interface CustomEventProps {
   event: CalendarEvent,

@@ -46,18 +46,6 @@ export default async function EventPage({ params, searchParams }: Props) {
         <EventDialog />
       </div>
 
-      <div className="flex gap-4 mt-10">
-        <div className="container bg-white p-3 py-4 mx-auto border rounded-md text-muted-foreground dark:text-white dark:bg-black">
-          <DataTable columns={columns} data={bookings} subject="Booking"/>      
-        </div>
-
-        {/* <div className="mt-4 bg-white p-3 py-4 mx-auto border rounded-md text-muted-foreground dark:text-white dark:bg-black">
-          <DataTable columns={columns} data={data} subject="Event"/>      
-        </div> */}
-        
-      </div>
-
-
     </div>
   )
 }

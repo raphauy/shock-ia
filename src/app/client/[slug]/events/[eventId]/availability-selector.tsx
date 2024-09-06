@@ -26,10 +26,9 @@ type Props = {
 
 export default function AvailabilitySelector({ eventId, initialAvailability }: Props) {
 
-  const router= useRouter()
-  const params= useParams()
   const [loading, setLoading] = useState(false)
   const [availability, setAvailability] = useState<{ [key: string]: { start: string, end: string } }>(getInitialValues(initialAvailability))
+  const [needSave, setNeedSave] = useState(false)
 
   const timeSlots = useMemo(() => {
     const slots = [];
@@ -52,6 +51,7 @@ export default function AvailabilitySelector({ eventId, initialAvailability }: P
       }
       return newAvailability
     })
+    setNeedSave(true)
   }
 
   const handleTimeChange = (day: string, type: 'start' | 'end', value: string) => {
@@ -59,6 +59,7 @@ export default function AvailabilitySelector({ eventId, initialAvailability }: P
       ...prev,
       [day]: { ...prev[day], [type]: value }
     }))
+    setNeedSave(true)
   }
 
   const handleSave = () => {
@@ -77,10 +78,11 @@ export default function AvailabilitySelector({ eventId, initialAvailability }: P
     setAvailabilityAction(eventId, mappedAvailability)
     .then(() => {
       toast({ title: "Disponibilidad actualizada" })
-      router.push(`/client/${params.slug}/events/${eventId}`)
+      setNeedSave(false)
     })
     .catch((error) => {
       toast({ title: "Error", description: error.message })
+      setNeedSave(true)
     })
     .finally(() => {
       setLoading(false)
@@ -88,11 +90,8 @@ export default function AvailabilitySelector({ eventId, initialAvailability }: P
   }
 
   return (
-    <Card className="w-full max-w-2xl">
-      <CardHeader>
-        <CardTitle>Selecciona tu disponibilidad</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <Card className="w-full xl:max-w-2xl mt-6">
+      <CardContent className="mt-6">
         <div className="space-y-4">
           {daysOfWeek.map(day => (
             <div key={day} className="flex items-center justify-between">
@@ -140,9 +139,9 @@ export default function AvailabilitySelector({ eventId, initialAvailability }: P
         </div>
       </CardContent>
       <CardFooter>
-        <Button onClick={handleSave} className='w-32 gap-2'>
+        <Button onClick={handleSave} className='w-full gap-2' disabled={!needSave}>
           { loading && <Loader className="w-4 h-4 animate-spin" /> }
-          Guardar
+          Guardar disponibilidad
         </Button>
       </CardFooter>
     </Card>

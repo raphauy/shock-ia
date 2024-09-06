@@ -6,13 +6,15 @@ import { Loader, Pencil } from "lucide-react"
 import { useEffect, useState } from "react"
 
 type Props= {
-  clientId: string
-  label?: string
+  id: string
+  icon?: React.ReactNode
+  label: string
   initialValue: number
-  update: (clientId: string, value: number) => Promise<boolean>
+  fieldName: string
+  update: (id: string, fieldName: string, value: number) => Promise<boolean>
 }
 
-export function NumberForm({ clientId, label, initialValue, update }: Props) {
+export function NumberForm({ id, icon, label, initialValue, fieldName, update }: Props) {
 
   const [isEditing, setIsEditing] = useState(false)
   const toggleEdit = () => setIsEditing(!isEditing)
@@ -30,7 +32,7 @@ export function NumberForm({ clientId, label, initialValue, update }: Props) {
     
     setLoading(true)
     try {
-      const ok= await update(clientId, value)
+      const ok= await update(id, fieldName, value)
     
       if (ok) {
         toast({title: `${label} editado` })
@@ -55,42 +57,47 @@ export function NumberForm({ clientId, label, initialValue, update }: Props) {
 
   if (!initialValue) return <div>Valor inicial de {label} no encontrado</div>
 
+
+
   return (
     <div className="mt-6 border bg-slate-100 rounded-md p-4 dark:bg-black max-w-xs w-full">
       <div className="font-medium flex flex-col">
-        {label ? <p className="border-b mb-2">{label}:</p> : "Título:"}
-            {
-              isEditing ? (
+        <div className="flex items-center gap-2 border-b mb-2">
+          {icon && icon}
+          {label}
+        </div>
+          {
+            isEditing ? (
 
-                <div className="flex items-center justify-between gap-1 font-medium">
-                  <input
-                    name="value"
-                    type="number"
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    autoFocus
-                    disabled={!isEditing}
-                    value={value}
-                    onChange={(e) => setValue(parseInt(e.target.value))}
-                    onKeyDown={handleEnterKey}
-                    onBlur={onSubmit}
-                  />
-                </div>
+              <div className="flex items-center justify-between gap-1 font-medium">
+                <input
+                  name="value"
+                  type="number"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  autoFocus
+                  disabled={!isEditing}
+                  value={value}
+                  onChange={(e) => setValue(parseInt(e.target.value))}
+                  onKeyDown={handleEnterKey}
+                  onBlur={onSubmit}
+                />
+              </div>
 
-              ) : 
-              loading ? (
-                <div className="h-10 w-full flex items-center justify-center">
-                  <Loader className="animate-spin" />
-                </div>
-              ) : (
-                <Button 
-                  onClick={toggleEdit} 
-                  variant="ghost" 
-                  type="button" 
-                  className="text-xl p-0 font-bold flex justify-between gap-4">
-                  <><p>{initialValue}</p> <Pencil className="w-5 h-5 mb-1" /></>                      
-                </Button>
-              )
-            }
+            ) : 
+            loading ? (
+              <div className="h-10 w-full flex items-center justify-center">
+                <Loader className="animate-spin" />
+              </div>
+            ) : (
+              <Button 
+                onClick={toggleEdit} 
+                variant="ghost" 
+                type="button" 
+                className="text-xl p-0 font-bold flex justify-between gap-4">
+                <><p>{initialValue}</p> <Pencil className="w-5 h-5 mb-1" /></>                      
+              </Button>
+            )
+          }
     </div>
     </div>
   )

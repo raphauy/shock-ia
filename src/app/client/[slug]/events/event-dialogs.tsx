@@ -6,26 +6,19 @@ import { Pencil, PlusCircle, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { DeleteEventForm, EventForm } from "./event-forms";
 
-type Props= {
-  id?: string
-}
-
-const addTrigger= <Button><PlusCircle size={22} className="mr-2"/>Crear Evento</Button>
-const updateTrigger= <Pencil size={30} className="pr-2 hover:cursor-pointer"/>
-
-export function EventDialog({ id }: Props) {
+export function EventDialog() {
   const [open, setOpen] = useState(false);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        {id ? updateTrigger : addTrigger }
+        <Button className="w-full max-w-xs"><PlusCircle size={22} className="mr-2"/>Crear Evento</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{id ? 'Actualizar' : 'Crear'} Evento</DialogTitle>
+          <DialogTitle>Crear Evento</DialogTitle>
         </DialogHeader>
-        <EventForm closeDialog={() => setOpen(false)} id={id} />
+        <EventForm closeDialog={() => setOpen(false)} />
       </DialogContent>
     </Dialog>
   )

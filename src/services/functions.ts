@@ -478,6 +478,10 @@ switch (name) {
   case "registrarLeadsAcademia":
     res= true
     break
+  case "calificarLeadMiDerecho":
+    res= true
+    break
+        
   default:
     break
 }
