@@ -1,8 +1,6 @@
-import { toZonedTime } from "date-fns-tz"
-import { BookingDAO, getFutureBookingsDAOByEventId } from "./booking-services"
-import { EventDAO } from "./event-services"
 import { addHours, addMinutes, endOfDay, isAfter, isBefore, isPast, parse, startOfDay } from "date-fns"
-import { log } from "node:console"
+import { toZonedTime } from "date-fns-tz"
+import { BookingDAO } from "./booking-services"
 
 export type Slot = {
   start: Date
@@ -51,12 +49,14 @@ export function getSlots(dateStr: string, bookings: BookingDAO[], availability: 
     
     // iterar sobre las horas del día armando los slots con la duración del evento
     // si un slot coincide con una hora de booking, se marca como ocupado
-    let timeCursor= zonedDate
-    console.log("timeCursor: ", timeCursor)
-    const timeEnd= addHours(timeCursor, 24)
+    // Definir el inicio y fin del día en la zona horaria correcta
+    const timeStart = toZonedTime(startOfDay(date), timezone)
+    const timeEnd = toZonedTime(endOfDay(date), timezone)
+
+    console.log("timeStart: ", timeStart)
     console.log("timeEnd: ", timeEnd)
 
-    const zonedNow= toZonedTime(new Date(), timezone)
+    let timeCursor = timeStart
 
     while (isBefore(timeCursor, timeEnd)) {
         const slotStart= timeCursor
@@ -76,7 +76,7 @@ export function getSlots(dateStr: string, bookings: BookingDAO[], availability: 
             });
         } else {
             // chequear si el slot está dentro del rango de disponibilidad y si aún no pasó
-            if (isBefore(slotStart, rangeEndDate) && isAfter(slotEnd, rangeStartDate)) {
+            if (isBefore(toZonedTime(slotStart, timezone), rangeEndDate) && isAfter(toZonedTime(slotEnd, timezone), rangeStartDate)) {
                 slots.push({
                     start: slotStart,
                     end: slotEnd,

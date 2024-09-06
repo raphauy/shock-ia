@@ -43,7 +43,7 @@ export default function BigCalendar({ initialEvents, timezone }: Props) {
   const [view, setView] = useState<View>(Views.WEEK)
 
   useEffect(() => {
-//    moment.tz.setDefault(timezone)
+    moment.tz.setDefault(timezone)
 
     let adjustedEvents = initialEvents
     if (view === 'month') {
@@ -51,8 +51,8 @@ export default function BigCalendar({ initialEvents, timezone }: Props) {
     }
     adjustedEvents = adjustedEvents.map(event => ({
       ...event,
-      start: moment.tz(event.start, timezone).toDate(),
-      end: moment.tz(event.end, timezone).toDate(),
+      start: moment(event.start).tz(timezone, true).toDate(),
+      end: moment(event.end).tz(timezone, true).toDate(),
     }))
     setEvents(adjustedEvents)
   }, [initialEvents, view, timezone])
@@ -89,8 +89,8 @@ export default function BigCalendar({ initialEvents, timezone }: Props) {
           timeGutterFormat: (date, culture, localizer) => moment(date).format('HH:mm'),
         }}
         messages={messages}
-        // min={minTime}
-        // max={maxTime}
+        min={minTime}
+        max={maxTime}
         components={{
           event: (props) => <CustomEvent {...props} />,
         }}

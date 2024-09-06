@@ -59,7 +59,7 @@ function get1MonthAvailability(event: EventDAO, bookings: BookingDAO[]): Calenda
   const now = new Date();
   const zonedNow = toZonedTime(now, timezone);
 
-  const DAYS_AHEAD= 2
+  const DAYS_AHEAD= 1
   for (let i = 0; i < DAYS_AHEAD; i++) {
     const dateStr= format(addDays(zonedNow, i), "yyyy-MM-dd")
 
