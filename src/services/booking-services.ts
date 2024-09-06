@@ -144,7 +144,7 @@ export async function getFutureBookingsDAOByEventId(eventId: string) {
       }
     },
     orderBy: {
-      createdAt: 'asc'
+      start: 'asc'
     },
     include: {
       event: true,
