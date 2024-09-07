@@ -99,6 +99,7 @@ export async function getDataClientOfUser(userId: string): Promise<DataClient | 
 }
 
 export async function getDataClientBySlug(slug: string): Promise<DataClient | null>{
+    console.log("getDataClientBySlug: ", slug)
     
     const client= await getClientBySlug(slug)
     if (!client) return null
