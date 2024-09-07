@@ -1,9 +1,9 @@
-import { type ClassValue, clsx } from "clsx"
-import { format } from "date-fns"
-import { toZonedTime, format as formatTZ } from "date-fns-tz"
-import { twMerge } from "tailwind-merge"
-import he from 'he';
+import { EventType } from "@prisma/client";
+import { type ClassValue, clsx } from "clsx";
+import { format as formatTZ, toZonedTime } from "date-fns-tz";
 import { es } from "date-fns/locale";
+import he from 'he';
+import { twMerge } from "tailwind-merge";
  
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -30,6 +30,7 @@ export function formatPresupuesto(presupuestoStr: string | undefined) {
 export function removeSectionTexts(inputText: string): string {
   // Expresión regular que identifica el patrón, incluyendo saltos de línea
   // Uso de [\s\S]*? para coincidir con cualquier carácter incluyendo saltos de línea de forma no ávida
+  // @ts-ignore
   const regex = /Text: ".*?",\n/gs;
 
   // Reemplazar las coincidencias encontradas por la cadena vacía
@@ -181,4 +182,38 @@ export function putTildes(str: string): string {
       default:
           return str
   }
+}
+
+export function generateSlug(name: string): string {
+  return name
+    .toLowerCase() // Convertir a minúsculas
+    .normalize('NFD') // Descomponer los acentos y diacríticos
+    .replace(/[\u0300-\u036f]/g, '') // Eliminar los diacríticos
+    .replace(/\s+/g, '-') // Reemplazar espacios con guiones
+    .replace(/[^\w\-]+/g, '') // Eliminar todos los caracteres que no sean palabras o guiones
+    .replace(/\-\-+/g, '-') // Reemplazar múltiples guiones con uno solo
+    .trim(); // Eliminar espacios al inicio y al final
+}
+
+export function getEventTypeLabel(option: EventType) {
+  switch (option) {
+    case EventType.SINGLE_SLOT:
+      return "Duración fija"
+    case EventType.MULTIPLE_SLOTS:
+      return "Duración variable"
+    default:
+      return "Evento"
+  }
+}
+
+export function checkDateFormatForSlot(dateStr: string) {
+  // formato YYYY-MM-DD
+  const regex = /^\d{4}-\d{2}-\d{2}$/;
+  return regex.test(dateStr);
+}
+
+export function checkDateTimeFormatForSlot(dateStr: string) {
+  // formato YYYY-MM-DD HH:mm
+  const regex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/;
+  return regex.test(dateStr);
 }

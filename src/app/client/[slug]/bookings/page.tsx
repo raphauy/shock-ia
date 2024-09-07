@@ -1,0 +1,25 @@
+import { getFullBookingsDAO } from "@/services/booking-services"
+import { BookingDialog } from "./booking-dialogs"
+import { DataTable } from "./booking-table"
+import { columns } from "./booking-columns"
+
+type Props = {  
+  params: {
+    slug: string
+  }
+}
+
+export default async function BookingPage({ params }: Props) {
+  
+  const data= await getFullBookingsDAO(params.slug)
+
+  return (
+    <div className="w-full">      
+
+      <div className="container bg-white p-3 py-4 mx-auto border rounded-md text-muted-foreground dark:text-white dark:bg-black">
+        <DataTable columns={columns} data={data} subject="Booking"/>      
+      </div>
+    </div>
+  )
+}
+  

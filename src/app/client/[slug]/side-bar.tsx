@@ -67,6 +67,9 @@ export default function SideBar({ slug, showRegistro, showCarServices, showRepoD
   const selectedClasses= "font-bold text-shock-color dark:border-r-white"
 
   const isChatPage= path.startsWith(`/client/${slug}/chats`)
+  const isEventsPage= path.startsWith(`/client/${slug}/events`)
+
+  if (isEventsPage) return null
 
   return (
     <div className={cn("flex flex-col justify-between border-r border-r-shock-color/50", !isChatPage && "lg:pl-8")}>

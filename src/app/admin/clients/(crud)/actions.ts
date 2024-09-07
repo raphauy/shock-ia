@@ -1,6 +1,6 @@
 "use server"
 
-import getClients, { createClient, deleteClient, editClient, getClient, getClientBySlug, getComplementaryFunctionsOfClient, getFunctionsOfClient, getLastClient, setFunctions, setPrompt, setWhatsAppEndpoing, setWhatsAppNumbers } from "@/services/clientService";
+import getClients, { clientHaveEvents, createClient, deleteClient, editClient, getClient, getClientBySlug, getComplementaryFunctionsOfClient, getFunctionsOfClient, getLastClient, setFunctions, setPrompt, setWhatsAppEndpoing, setWhatsAppNumbers } from "@/services/clientService";
 import { getUser } from "@/services/userService";
 import { Client } from "@prisma/client";
 import { revalidatePath } from "next/cache";
@@ -28,6 +28,7 @@ export type DataClient = {
     promptCostTokenPrice: number
     completionCostTokenPrice: number
     modelName: string
+    haveEvents: boolean
   }
     
 
@@ -56,7 +57,8 @@ export async function getDataClient(clientId: string): Promise<DataClient | null
         completionTokensPrice: client.completionTokensPrice,
         promptCostTokenPrice: promptCostTokenPrice,
         completionCostTokenPrice: completionCostTokenPrice,
-        modelName: model?.name || ''
+        modelName: model?.name || '',
+        haveEvents: client.haveEvents
     }
     return data
 }
@@ -90,7 +92,8 @@ export async function getDataClientOfUser(userId: string): Promise<DataClient | 
         completionTokensPrice: client.completionTokensPrice,
         promptCostTokenPrice,
         completionCostTokenPrice,
-        modelName: model?.name || ''
+        modelName: model?.name || '',
+        haveEvents: client.haveEvents
     }
     return data
 }
@@ -121,7 +124,8 @@ export async function getDataClientBySlug(slug: string): Promise<DataClient | nu
         completionTokensPrice: client.completionTokensPrice,
         promptCostTokenPrice,
         completionCostTokenPrice,
-        modelName: model?.name || ''
+        modelName: model?.name || '',
+        haveEvents: client.haveEvents
     }
     return data
 }
@@ -151,7 +155,8 @@ export async function getLastClientAction(): Promise<DataClient | null>{
         completionTokensPrice: client.completionTokensPrice,
         promptCostTokenPrice,
         completionCostTokenPrice,
-        modelName: model?.name || ''
+        modelName: model?.name || '',
+        haveEvents: client.haveEvents
     }
     return data
 }
@@ -188,7 +193,8 @@ export async function getDataClients() {
                 completionTokensPrice: client.completionTokensPrice,
                 promptCostTokenPrice,
                 completionCostTokenPrice,
-                modelName: model?.name || ''
+                modelName: model?.name || '',
+                haveEvents: client.haveEvents
             };
         })
     );
@@ -271,3 +277,7 @@ export async function getLastClientIdAction() {
     return client?.id
 }
 
+export async function clientHaveEventsAction(slug: string): Promise<boolean> {
+    const haveEvents= await clientHaveEvents(slug)
+    return haveEvents
+}

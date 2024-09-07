@@ -20,12 +20,13 @@ export default async function ArticlePreview({ params }: Props) {
     }
 
     return (
-        <div className="flex flex-col items-center p-1 md:p-4 xl:p-8">
-
-            <p className="mb-4 text-3xl font-bold">{doc.name}</p>
-
-            <ContentViewer content={content} />
-
+        <div className="flex flex-col w-full">
+            <div className="flex flex-col items-center p-1 md:p-4 xl:p-8">
+                <p className="mb-4 text-3xl font-bold">{doc.name}</p>
+            </div>
+            <div className="w-full">
+                <ContentViewer content={content} />
+            </div>
         </div>
   )
 }

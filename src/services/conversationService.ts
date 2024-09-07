@@ -130,6 +130,19 @@ export async function getConversation(id: string) {
   return found
 }
 
+export async function getConversationPhone(id: string) {
+  const found= await prisma.conversation.findUnique({
+    where: {
+      id
+    },
+    select: {
+      phone: true
+    }
+  })
+
+  return found?.phone
+}
+
 export async function getLastConversation(slug: string) {
     
     const found = await prisma.conversation.findFirst({

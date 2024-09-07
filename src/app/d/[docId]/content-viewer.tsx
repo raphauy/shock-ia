@@ -34,12 +34,12 @@ export default function ContentViewer({ content }: Props) {
     }
 
     return (
-        <div ref={editorContainerRef} className="flex justify-center h-full border rounded-b-lg">
+        <div ref={editorContainerRef} className="w-full border rounded-b-lg">
 
             <div className="invisible-anchor" style={{ position: 'absolute', top: '0', left: '0', opacity: 0 }}/>
 
             <NovelEditor
-                className="w-full h-full bg-white rounded-t-none rounded-b-md"
+                className="w-full bg-white rounded-t-none rounded-b-md"
                 defaultValue={content ? JSON.parse(content) : {}}
                 disableLocalStorage
                 editorProps={editorProps}

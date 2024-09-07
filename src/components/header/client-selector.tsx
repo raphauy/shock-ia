@@ -8,6 +8,7 @@ import { Check, ChevronsRight, ChevronsUpDown, LayoutDashboard, PlusCircle, Sear
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { Separator } from "../ui/separator"
 import { useEffect, useMemo, useState } from "react"
+import { log } from "node:console"
 
 export type SelectorData={
     slug: string,
@@ -90,7 +91,8 @@ export function ClientSelector({ selectors }: Props) {
                           setValue("")
                         } else {
                           setValue(currentValue)
-                          let restOfPath = path.split('/').slice(3).join('/') 
+                          const isEventsPage= path.split('/')[3] === "events"
+                          const restOfPath = isEventsPage ? "" : path.split('/').slice(3).join('/') 
                           router.push(`/client/${client.slug}/${restOfPath}`)
                         }
                         setSearchValue("")
