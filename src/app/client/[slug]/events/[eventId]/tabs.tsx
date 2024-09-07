@@ -11,7 +11,7 @@ type Props = {
 }
 export default async function TabsPage({eventId, initialEvents, timezone}: Props) {
 
-    const bookings= await getFutureBookingsDAOByEventId(eventId)
+    const bookings= await getFutureBookingsDAOByEventId(eventId, timezone)
     const canceledBookings= await getBookingsByState(eventId, "CANCELADO")
 
     return (

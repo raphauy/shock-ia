@@ -1,12 +1,10 @@
 "use client"
 
-import { useEffect, useState } from "react";
-import { ArrowLeftRight, ChevronsLeft, ChevronsRight, Loader, Pencil, PlusCircle, Trash2, XIcon } from "lucide-react";
-import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { toast } from "@/components/ui/use-toast";
-import { BookingForm, CancelBookingForm, DeleteBookingForm } from "./booking-forms"
-import { getBookingDAOAction } from "./booking-actions"
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { CircleX, Pencil, PlusCircle, Trash2, XIcon } from "lucide-react";
+import { useState } from "react";
+import { BookingForm, CancelBookingForm, DeleteBookingForm } from "./booking-forms";
 
 type Props= {
   id?: string
@@ -65,18 +63,28 @@ export function DeleteBookingDialog({ id, description }: DeleteProps) {
 type CancelProps= {
   id: string
   description: string
+  size?: "sm" | "lg"
 }
 
-export function CancelBookingDialog({ id, description }: CancelProps) {
+export function CancelBookingDialog({ id, description, size }: CancelProps) {
   const [open, setOpen] = useState(false)
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          <XIcon className="h-4 w-4 mr-2" />
-            Cancelar reserva
-        </Button>
+        {
+          size === "sm" ? (
+            <Button variant="ghost" size="icon" className="h-8 w-8 hover:border">
+              <CircleX className="h-4 w-4"/>
+            </Button>
+          ) : (
+            <Button variant="outline" size="sm">
+              <XIcon className="h-4 w-4 mr-2" />
+                Cancelar reserva
+            </Button>
+          )
+        }
+        
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

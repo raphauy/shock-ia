@@ -14,6 +14,7 @@ export async function createOrUpdateBookingAction(id: string | null, data: Booki
         updated= await updateBooking(id, data)
     } else {
         updated= await createBooking(data)
+        console.log("booking created: ", updated)
     }     
 
     revalidatePath("/[slug]/bookings", "page")

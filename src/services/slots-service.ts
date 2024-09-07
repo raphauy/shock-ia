@@ -8,6 +8,7 @@ export type Slot = {
   end: Date
   available: boolean
   name?: string
+  bookingId?: string
 }
 
 // devuelve todos los slots del día, estén ocupados o no
@@ -76,7 +77,8 @@ export function getSlots(dateStr: string, bookings: BookingDAO[], availability: 
                 start: transformTimezoneToUTC(slotStart, timezone),
                 end: transformTimezoneToUTC(slotEnd, timezone),
                 available: false,
-                name: booking.name
+                name: booking.name,
+                bookingId: booking.id
             });
         } else {
             // chequear si el slot está dentro del rango de disponibilidad y si aún no pasó

@@ -22,7 +22,7 @@ export default async function EventPage({ params }: Props) {
     const event= await getEventDAO(eventId)
     let availability1Month: CalendarEvent[] = []
     if (event) {
-      const bookingsDAO= await getFutureBookingsDAOByEventId(eventId)
+      const bookingsDAO= await getFutureBookingsDAOByEventId(eventId, event.timezone)
       availability1Month= get1MonthAvailability(event, bookingsDAO)
       availability1Month= availability1Month.map(a => ({
         ...a,
@@ -67,6 +67,7 @@ function get1MonthAvailability(event: EventDAO, bookings: BookingDAO[]): Calenda
 
     slots.forEach(slot => {
       result.push({
+        bookingId: slot.bookingId,
         title: slot.available ? "Libre" : slot.name || "",
         start: slot.start,
         end: slot.end,

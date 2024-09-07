@@ -21,6 +21,7 @@ moment.updateLocale('es', {
 const localizer = momentLocalizer(moment)
 
 export type CalendarEvent = {
+  bookingId?: string
   title: string
   start: Date
   end: Date

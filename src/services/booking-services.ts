@@ -126,16 +126,12 @@ export async function getFullBookingsDAOBySlug(slug: string) {
     orderBy: {
       createdAt: 'asc'
     },
-    include: {
-			event: true,
-			client: true,
-		}
   })
   return found as BookingDAO[]
 }
 
-export async function getFutureBookingsDAOByEventId(eventId: string) {
-  const now= new Date()
+export async function getFutureBookingsDAOByEventId(eventId: string, timezone: string) {
+  const now= toZonedTime(new Date(), timezone)
   const found = await prisma.booking.findMany({
     where: {
       eventId,
@@ -149,9 +145,6 @@ export async function getFutureBookingsDAOByEventId(eventId: string) {
     orderBy: {
       start: 'asc'
     },
-    include: {
-      event: true,
-    }
   })
   return found as BookingDAO[]
 }

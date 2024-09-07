@@ -41,7 +41,7 @@ export default function EventList({bookings, timezone}: Props) {
                             </div>
                             <div className="flex space-x-2">
                                 { reservation.status !== "CANCELADO" && (
-                                    <CancelBookingDialog id={reservation.id} description={`Cancelar reserva de ${reservation.name}`} />
+                                    <CancelBookingDialog id={reservation.id} description={`Seguro que desea cancelar la reserva de ${reservation.name}?`} />
                                 )}
                             </div>
                             </div>
