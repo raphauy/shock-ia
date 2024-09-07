@@ -44,10 +44,14 @@ export const eventSchema = z.object({
 export type EventFormValues = z.infer<typeof eventSchema>
 
 
-export async function getEventsDAO() {
+export async function getActiveEventsDAOByClientId(clientId: string) {
   const found = await prisma.event.findMany({
+    where: {
+      clientId,
+      isArchived: false
+    },
     orderBy: {
-      id: 'asc'
+      createdAt: 'asc'
     },
   })
   return found as EventDAO[]

@@ -65,7 +65,7 @@ export function getSlots(dateStr: string, bookings: BookingDAO[], availability: 
         const slotStart= timeCursor
         const slotEnd= addMinutes(timeCursor, duration)
 
-        console.log("slot: ", slotStart, " - ", slotEnd)
+        //console.log("slot: ", slotStart, " - ", slotEnd)
 
         const booking = bookings.find(b => 
             b.start.getTime() === slotStart.getTime() && 
@@ -82,14 +82,14 @@ export function getSlots(dateStr: string, bookings: BookingDAO[], availability: 
             });
         } else {
             // chequear si el slot está dentro del rango de disponibilidad y si aún no pasó
-            if (isBefore(slotStart, rangeEndDate) && isAfter(slotEnd, rangeStartDate) && isAfter(slotEnd, nowZoned)) {
+            if (isBefore(slotStart, rangeEndDate) && isAfter(slotEnd, rangeStartDate) && isAfter(slotStart, nowZoned)) {
                 slots.push({
                     start: transformTimezoneToUTC(slotStart, timezone),
                     end: transformTimezoneToUTC(slotEnd, timezone),
                     available: true
                 });
             } else {
-                console.log("slot is out of range")
+                //console.log("slot is out of range")
             }
         }
 

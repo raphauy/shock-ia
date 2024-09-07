@@ -12,6 +12,11 @@ import { getRepositoryDAOByFunctionName } from "./repository-services";
 import { createRepoData, repoDataFormValues } from "./repodata-services";
 import { getFunctionClientDAO } from "./function-services";
 import { sendWebhookNotification } from "./webhook-notifications-service";
+import { getEventDAO } from "./event-services";
+import { format } from "date-fns";
+import { getFutureBookingsDAOByEventId } from "./booking-services";
+import { getSlots } from "./slots-service";
+import { toZonedTime } from "date-fns-tz";
 
 export type CompletionInitResponse = {
   assistantResponse: string | null
@@ -308,6 +313,41 @@ export async function reservarServicio(clientId: string, conversationId: string,
   return "Reserva registrada. Dile exactamente esto al usuario: Gracias por agendar tu service, a la brevedad un asesor te confirmará la fecha del service."
 }
 
+type SlotsResult = {
+  eventId: string
+  start: string
+  end: string
+  available: boolean
+}
+
+export async function obtenerDisponibilidad(clientId: string, conversationId: string, eventId: string, date: string){
+  console.log("obtenerDisponibilidad")
+  console.log(`\tconversationId: ${conversationId}`)
+  console.log(`\teventId: ${eventId}`)
+  console.log(`\tdate: ${date}`)
+
+  const event= await getEventDAO(eventId)
+  if (!event) return "Evento no encontrado"
+
+  const dateStr= format(date, "yyyy-MM-dd")
+
+  const bookings= await getFutureBookingsDAOByEventId(eventId, event.timezone)
+  console.log("bookings: ", bookings)
+
+  const slots= getSlots(dateStr, bookings, event.availability, event.duration, event.timezone)
+  console.log("slots: ", slots)
+
+  const result: SlotsResult[]= slots.map((slot) => ({
+    eventId,
+    start: format(toZonedTime(slot.start, event.timezone), "yyyy-MM-dd HH:mm"),
+    end: format(toZonedTime(slot.end, event.timezone), "yyyy-MM-dd HH:mm"),
+    available: slot.available,
+  }))
+  console.log("result: ", result)
+
+  return JSON.stringify(result)
+}
+
 
 export async function defaultFunction(clientId: string, name: string, args: any) {
   console.log("defaultFunction")
@@ -438,6 +478,14 @@ export async function processFunctionCall(clientId: string, name: string, args: 
         args.modeloAuto,
         args.matriculaAuto,
         args.kilometraje
+      )
+      break
+
+    case "obtenerDisponibilidad":
+      content= await obtenerDisponibilidad(clientId,
+        args.conversationId,
+        args.eventId,
+        args.date
       )
       break
   
