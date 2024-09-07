@@ -47,7 +47,10 @@ export function DeleteBookingDialog({ id, description }: DeleteProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Trash2 className="hover:cursor-pointer"/>
+        <Button variant="outline" size="sm">
+          <Trash2 className="h-4 w-4 mr-2 mb-0.5" />
+          <p>Eliminar reserva</p>
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
