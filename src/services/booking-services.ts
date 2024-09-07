@@ -26,6 +26,7 @@ export type BookingDAO = {
 
 export const bookingSchema = z.object({
 	start: z.date({required_error: "start is required."}),
+	end: z.date().optional(),
   seats: z.string()
     .refine((val) => !isNaN(Number(val)), { message: "debe ser un número" })
     .refine((val) => Number(val) > 0, { message: "debe haber al menos 1 cupo por experiencia" }),
@@ -66,7 +67,7 @@ export async function createBooking(data: BookingFormValues) {
     throw new Error("Eventos de duración variable aún no soportados")
   }
   const start= toZonedTime(data.start, event.timezone)
-  const end = addMinutes(start, event.duration)
+  const end = data.end ? toZonedTime(data.end, event.timezone) : addMinutes(start, event.duration)
   const seats = data.seats ? Number(data.seats) : 0
   const created = await prisma.booking.create({
     data: {

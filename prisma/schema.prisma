@@ -421,6 +421,6 @@ model Booking {
   client            Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
   clientId          String
 
-  conversation        Conversation? @relation(fields: [conversationId], references: [id], onDelete: NoAction)
+  conversation        Conversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
   conversationId      String?
 }

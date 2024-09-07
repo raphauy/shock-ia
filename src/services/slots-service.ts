@@ -2,6 +2,7 @@ import { addHours, addMinutes, endOfDay, isAfter, isBefore, isPast, parse, start
 import { toZonedTime } from "date-fns-tz"
 import { BookingDAO } from "./booking-services"
 import moment from 'moment-timezone'
+import { checkDateFormatForSlot } from "@/lib/utils"
 
 export type Slot = {
   start: Date
@@ -13,7 +14,7 @@ export type Slot = {
 
 // devuelve todos los slots del día, estén ocupados o no
 export function getSlots(dateStr: string, bookings: BookingDAO[], availability: string[], duration: number, timezone: string) {
-    const formatIsCorrect= checkDateFormat(dateStr)
+    const formatIsCorrect= checkDateFormatForSlot(dateStr)
     if (!formatIsCorrect) {
         throw new Error("Formato de fecha incorrecto")
     }
@@ -99,11 +100,6 @@ export function getSlots(dateStr: string, bookings: BookingDAO[], availability: 
     return slots
 }
 
-// chequear el formato YYYY-MM-DD
-function checkDateFormat(dateStr: string) {
-    const regex = /^\d{4}-\d{2}-\d{2}$/;
-    return regex.test(dateStr);
-}
 
 
 function transformTimezoneToUTC(date: Date, timezone: string): Date {

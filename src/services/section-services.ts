@@ -290,7 +290,8 @@ export async function getContext(clientId: string, phone: string, userInput: str
     eventDescription: "${event.description}",
     eventAddress: "${event.address}",
     timezone: "${event.timezone}",
-},`
+},
+`
     const hoy = format(toZonedTime(new Date(), event.timezone), "EEEE, dd/MM/yyyy HH:mm:ss", {
       locale: es,
     });

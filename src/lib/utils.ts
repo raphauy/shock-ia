@@ -205,3 +205,15 @@ export function getEventTypeLabel(option: EventType) {
       return "Evento"
   }
 }
+
+export function checkDateFormatForSlot(dateStr: string) {
+  // formato YYYY-MM-DD
+  const regex = /^\d{4}-\d{2}-\d{2}$/;
+  return regex.test(dateStr);
+}
+
+export function checkDateTimeFormatForSlot(dateStr: string) {
+  // formato YYYY-MM-DD HH:mm
+  const regex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/;
+  return regex.test(dateStr);
+}

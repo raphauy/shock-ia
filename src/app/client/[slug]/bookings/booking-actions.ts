@@ -22,6 +22,12 @@ export async function createOrUpdateBookingAction(id: string | null, data: Booki
     return updated as BookingDAO
 }
 
+export async function createBookingAction(data: BookingFormValues): Promise<BookingDAO | null> {
+    const created= await createBooking(data)
+    revalidatePath("/[slug]/bookings", "page")
+    return created as BookingDAO
+}
+
 export async function deleteBookingAction(id: string): Promise<BookingDAO | null> {    
     const deleted= await deleteBooking(id)
 

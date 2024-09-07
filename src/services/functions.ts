@@ -1,22 +1,23 @@
-import { decodeAndCorrectText } from "@/lib/utils";
+import { checkDateTimeFormatForSlot, decodeAndCorrectText } from "@/lib/utils";
+import { addMinutes, format, parse } from "date-fns";
+import { toZonedTime } from "date-fns-tz";
+import { revalidatePath } from "next/cache";
+import { BookingFormValues, createBooking, getFutureBookingsDAOByEventId } from "./booking-services";
+import { CarServiceFormValues, createCarService } from "./carservice-services";
 import { getValue, setValue } from "./config-services";
+import { getConversation, getConversationPhone, messageArrived } from "./conversationService";
 import { getDocumentDAO } from "./document-services";
+import { getEventDAO } from "./event-services";
+import { getFunctionClientDAO } from "./function-services";
 import { NarvaezFormValues, createOrUpdateNarvaez } from "./narvaez-services";
 import { sendWapMessage } from "./osomService";
-import { getSectionOfDocument } from "./section-services";
-import { SummitFormValues, createSummit } from "./summit-services";
-import { getConversation, messageArrived } from "./conversationService";
-import { CarServiceFormValues, createCarService } from "./carservice-services";
-import { revalidatePath } from "next/cache";
-import { getRepositoryDAOByFunctionName } from "./repository-services";
 import { createRepoData, repoDataFormValues } from "./repodata-services";
-import { getFunctionClientDAO } from "./function-services";
-import { sendWebhookNotification } from "./webhook-notifications-service";
-import { getEventDAO } from "./event-services";
-import { format } from "date-fns";
-import { getFutureBookingsDAOByEventId } from "./booking-services";
+import { getRepositoryDAOByFunctionName } from "./repository-services";
+import { getSectionOfDocument } from "./section-services";
 import { getSlots } from "./slots-service";
-import { toZonedTime } from "date-fns-tz";
+import { SummitFormValues, createSummit } from "./summit-services";
+import { sendWebhookNotification } from "./webhook-notifications-service";
+import moment from 'moment-timezone'
 
 export type CompletionInitResponse = {
   assistantResponse: string | null
@@ -348,6 +349,49 @@ export async function obtenerDisponibilidad(clientId: string, conversationId: st
   return JSON.stringify(result)
 }
 
+export async function reservarEventoDuracionFija(clientId: string, conversationId: string, eventId: string, start: string, end: string, name: string){
+  console.log("reservarEventoDuracionFija")
+  console.log(`\tconversationId: ${conversationId}`)
+  console.log(`\teventId: ${eventId}`)
+  console.log(`\tstart: ${start}`)
+  console.log(`\tend: ${end}`)
+
+  const startFormatIsCorrect= checkDateTimeFormatForSlot(start)
+  const endFormatIsCorrect= checkDateTimeFormatForSlot(end)
+  if (!startFormatIsCorrect || !endFormatIsCorrect) {
+    return "Formato de fecha incorrecto, debe ser YYYY-MM-DD HH:mm"
+  }
+
+  let startDate= parse(start, "yyyy-MM-dd HH:mm", new Date())
+  let endDate= parse(end, "yyyy-MM-dd HH:mm", new Date())
+
+  const event= await getEventDAO(eventId)
+  if (!event) return "Evento no encontrado"
+
+  const offsetInMinutes = moment.tz(startDate, event.timezone).utcOffset()
+  startDate= addMinutes(startDate, -offsetInMinutes)
+  endDate= addMinutes(endDate, -offsetInMinutes)
+
+  let contact= await getConversationPhone(conversationId)
+  if (!contact) contact= "Ocurrió un error al obtener la conversación"
+
+  const data: BookingFormValues = {
+    eventId,
+    start: startDate,
+    end: endDate,
+    contact,
+    seats: "1",
+    name,
+    clientId,
+    conversationId,
+  }
+
+  const created= await createBooking(data)
+  if (!created) return "Error al reservar, pregunta al usuario si quiere que tu reintentes"
+
+  return "Reserva registrada."
+}
+
 
 export async function defaultFunction(clientId: string, name: string, args: any) {
   console.log("defaultFunction")
@@ -486,6 +530,16 @@ export async function processFunctionCall(clientId: string, name: string, args: 
         args.conversationId,
         args.eventId,
         args.date
+      )
+      break
+
+    case "reservarEventoDuracionFija":
+      content= await reservarEventoDuracionFija(clientId,
+        args.conversationId,
+        args.eventId,
+        args.start,
+        args.end,
+        args.name
       )
       break
   
