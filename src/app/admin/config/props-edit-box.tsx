@@ -18,7 +18,7 @@ export default function PropsEdit({ clientId, haveEvents }: Props) {
         <div className="w-full p-4 border rounded-lg">
             <p className="text-lg font-bold mb-4">Configuración del cliente:</p>
             <div className="flex items-center gap-4">                
-                <Switch checked={haveEvents} onCheckedChange={handleHaveEventsChange} />
+                <Switch checked={haveEvents} onCheckedChange={handleHaveEventsChange} disabled={true}/>
                 <p className="">Funcionalidad Eventos</p>
             </div>
         </div>
