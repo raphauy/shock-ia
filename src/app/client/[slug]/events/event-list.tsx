@@ -6,7 +6,7 @@ import { BookingDAO } from "@/services/booking-services"
 import { addMinutes, format, isSameDay } from "date-fns"
 import { es } from "date-fns/locale"
 import { XIcon, Edit2Icon, FilterIcon, PersonStanding } from "lucide-react"
-import { CancelBookingDialog } from "../bookings/booking-dialogs"
+import { CancelBookingDialog, DeleteBookingDialog } from "../bookings/booking-dialogs"
 import { cn } from "@/lib/utils"
 
 type Props = {
@@ -40,9 +40,11 @@ export default function EventList({bookings, timezone}: Props) {
                                 <p className="mt-2">{reservation.contact}</p>
                             </div>
                             <div className="flex space-x-2">
-                                { reservation.status !== "CANCELADO" && (
+                                { reservation.status === "CANCELADO" ? 
+                                    <DeleteBookingDialog id={reservation.id} description={`Seguro que desea eliminar la reserva de ${reservation.name}?`} />
+                                    :
                                     <CancelBookingDialog id={reservation.id} description={`Seguro que desea cancelar la reserva de ${reservation.name}?`} />
-                                )}
+                                }
                             </div>
                             </div>
                             <div className="mt-2 flex justify-between">
