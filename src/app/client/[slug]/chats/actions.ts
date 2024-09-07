@@ -1,11 +1,9 @@
 "use server"
 
-import { revalidatePath } from "next/cache"
-import { Client, Conversation, Message } from "@prisma/client"
-import { deleteConversation, getConversation, getConversationsOfClient, getLastConversation } from "@/services/conversationService"
-import { format } from "date-fns"
 import { getFormat } from "@/lib/utils"
-import { getSummitIdByConversationId } from "@/services/summit-services"
+import { deleteConversation, getConversation, getConversationsOfClient, getLastConversation } from "@/services/conversationService"
+import { Client, Conversation, Message } from "@prisma/client"
+import { revalidatePath } from "next/cache"
 
 
 export type DataMessage = {
@@ -45,6 +43,7 @@ export async function getDataConversationAction(conversationId: string): Promise
 }
 
 export async function getLastDataConversationAction(slug: string): Promise<DataConversation | null>{
+    console.log("slug: ", slug)
     const conversation= await getLastConversation(slug)
     if (!conversation) return null
 
