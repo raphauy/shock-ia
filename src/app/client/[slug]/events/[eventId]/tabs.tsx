@@ -1,18 +1,18 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { getFutureBookingsDAOByEventId } from "@/services/booking-services"
+import { getFutureBookingsDAOByEventId, getBookingsByState } from "@/services/booking-services"
 import BigCalendar, { CalendarEvent } from "../big-calendar"
 import EventList from "../event-list"
 
 
 type Props = {
-    slug: string
     eventId: string
     initialEvents: CalendarEvent[]
     timezone: string
 }
-export default async function TabsPage({slug, eventId, initialEvents, timezone}: Props) {
+export default async function TabsPage({eventId, initialEvents, timezone}: Props) {
 
     const bookings= await getFutureBookingsDAOByEventId(eventId)
+    const canceledBookings= await getBookingsByState(eventId, "CANCELADO")
 
     return (
         <Tabs defaultValue="calendario" className="min-w-[700px]">
@@ -27,10 +27,10 @@ export default async function TabsPage({slug, eventId, initialEvents, timezone}:
                 <BigCalendar initialEvents={initialEvents} timezone={timezone} />
             </TabsContent>
             <TabsContent value="listado">
-                <EventList bookings={bookings.filter(booking => booking.status !== "CANCELADO")} timezone={timezone} />
+                <EventList bookings={bookings} timezone={timezone} />
             </TabsContent>
             <TabsContent value="canceladas">
-                <EventList bookings={bookings.filter(booking => booking.status === "CANCELADO")} timezone={timezone} />
+                <EventList bookings={canceledBookings} timezone={timezone} />
             </TabsContent>
         </Tabs>    
     )

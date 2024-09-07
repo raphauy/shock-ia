@@ -139,6 +139,9 @@ export async function getFutureBookingsDAOByEventId(eventId: string) {
   const found = await prisma.booking.findMany({
     where: {
       eventId,
+      status: {
+        not: "CANCELADO"
+      },
       start: {
         gt: now
       }
@@ -148,7 +151,21 @@ export async function getFutureBookingsDAOByEventId(eventId: string) {
     },
     include: {
       event: true,
-      client: true,
+    }
+  })
+  return found as BookingDAO[]
+}
+export async function getBookingsByState(eventId: string, state: BookingStatus) {
+  const found = await prisma.booking.findMany({
+    where: {
+      eventId,
+      status: state,
+    },
+    orderBy: {
+      start: 'asc'
+    },
+    include: {
+      event: true,
     }
   })
   return found as BookingDAO[]

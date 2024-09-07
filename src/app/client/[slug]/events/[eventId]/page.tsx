@@ -43,7 +43,7 @@ export default async function EventPage({ params }: Props) {
           </div>
 
           <div className="w-full">
-            <TabsPage slug={slug} eventId={eventId} initialEvents={availability1Month} timezone={event.timezone} />
+            <TabsPage eventId={eventId} initialEvents={availability1Month} timezone={event.timezone} />
           </div>
         </div>
       );
@@ -64,7 +64,6 @@ function get1MonthAvailability(event: EventDAO, bookings: BookingDAO[]): Calenda
     const dateStr= format(addDays(zonedNow, i), "yyyy-MM-dd")
 
     const slots= getSlots(dateStr, bookings, availability, duration, timezone)
-    console.log("slots:", slots)
 
     slots.forEach(slot => {
       result.push({
