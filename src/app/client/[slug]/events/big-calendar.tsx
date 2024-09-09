@@ -68,7 +68,7 @@ export default function BigCalendar({ initialEvents, timezone }: Props) {
     }
   }
 
-  const minTime = new Date(2000, 0, 1, 11, 0, 0)
+  const minTime = new Date(2000, 0, 1, 8, 0, 0)
   const maxTime = new Date(2000, 0, 1, 23, 0, 0)
 
   return (
