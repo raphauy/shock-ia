@@ -66,7 +66,7 @@ export async function getConversationsOfClient(clientId: string) {
 export async function getActiveConversation(phone: string, clientId: string) {
 
   // 4 hours
-  let sessionTimeInMinutes= 240
+  let sessionTimeInMinutes= 2
     
   const found = await prisma.conversation.findFirst({
     where: {
