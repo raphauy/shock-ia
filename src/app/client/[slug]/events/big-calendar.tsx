@@ -43,7 +43,7 @@ export default function BigCalendar({ initialEvents, timezone }: Props) {
   console.log("timezone: ", timezone)
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [view, setView] = useState<View>(Views.WEEK)
-
+  
   useEffect(() => {
     let adjustedEvents = initialEvents.map(event => ({
       ...event,
@@ -92,7 +92,7 @@ export default function BigCalendar({ initialEvents, timezone }: Props) {
         }}
         messages={messages}
         min={minTime}
-        // max={maxTime}
+        //max={maxTime}
         components={{
           event: (props) => <CustomEvent {...props} />,
         }}
