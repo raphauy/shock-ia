@@ -12,9 +12,10 @@ type Props= {
   initialValue: number
   fieldName: string
   update: (id: string, fieldName: string, value: number) => Promise<boolean>
+  disabled?: boolean
 }
 
-export function NumberForm({ id, icon, label, initialValue, fieldName, update }: Props) {
+export function NumberForm({ id, icon, label, initialValue, fieldName, update, disabled }: Props) {
 
   const [isEditing, setIsEditing] = useState(false)
   const toggleEdit = () => setIsEditing(!isEditing)
@@ -60,7 +61,7 @@ export function NumberForm({ id, icon, label, initialValue, fieldName, update }:
 
 
   return (
-    <div className="mt-6 border bg-slate-100 rounded-md p-4 dark:bg-black max-w-xs w-full">
+    <div className="mt-6 border bg-slate-100 rounded-md p-4 dark:bg-black w-full">
       <div className="font-medium flex flex-col">
         <div className="flex items-center gap-2 border-b mb-2">
           {icon && icon}
@@ -75,7 +76,7 @@ export function NumberForm({ id, icon, label, initialValue, fieldName, update }:
                   type="number"
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   autoFocus
-                  disabled={!isEditing}
+                  disabled={!isEditing || disabled}
                   value={value}
                   onChange={(e) => setValue(parseInt(e.target.value))}
                   onKeyDown={handleEnterKey}
@@ -91,10 +92,11 @@ export function NumberForm({ id, icon, label, initialValue, fieldName, update }:
             ) : (
               <Button 
                 onClick={toggleEdit} 
+                disabled={disabled}
                 variant="ghost" 
                 type="button" 
                 className="text-xl p-0 font-bold flex justify-between gap-4">
-                <><p>{initialValue}</p> <Pencil className="w-5 h-5 mb-1" /></>                      
+                <><p>{initialValue}</p> {!disabled && <Pencil className="w-5 h-5 mb-1" />}</>                      
               </Button>
             )
           }

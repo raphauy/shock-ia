@@ -290,12 +290,15 @@ export async function getContext(clientId: string, phone: string, userInput: str
     eventDescription: "${event.description}",
     eventAddress: "${event.address}",
     timezone: "${event.timezone}",
-},
+    minDuration: ${event.minDuration},
+    maxDuration: ${event.maxDuration},
+}
 `
     const hoy = format(toZonedTime(new Date(), event.timezone), "EEEE, dd/MM/yyyy HH:mm:ss", {
       locale: es,
     });
-    contextString+= `Hoy es ${hoy} en el timezone del evento ${event.timezone}`
+    contextString+= `Ahora es ${hoy} en el timezone del evento (${event.timezone})\n`
+    contextString+= `---------------\n\n`
 
 // eventSeatsPerTimeSlot: ${event.seatsPerTimeSlot}
     })

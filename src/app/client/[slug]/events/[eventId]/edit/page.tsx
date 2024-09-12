@@ -1,19 +1,18 @@
+import { BooleanForm } from "@/components/boolean-form";
+import { ColorForm } from "@/components/color-form";
 import { IconBadge } from "@/components/icon-badge";
 import { LongTextForm } from "@/components/long-text-form";
-import { ShortTextForm } from "@/components/short-text-form";
-import { SlugForm } from "@/components/slug-form";
-import { getEventDAO } from "@/services/event-services";
-import { Archive, Calendar, Clock, Globe, LayoutDashboard, Palette, PersonStanding, Settings } from "lucide-react";
-import { seEventNumberFieldAction, setEventBooleanFieldAction, setEventFieldAction } from "../../event-actions";
-import AvailabilitySelector from "../availability-selector";
 import { NumberForm } from "@/components/number-form";
-import { BooleanForm } from "@/components/boolean-form";
-import { SelectTextForm } from "@/components/select-text-form";
-import { EventType } from "@prisma/client";
-import { ColorForm } from "@/components/color-form";
 import { SelectTypeForm } from "@/components/select-form-type";
 import { SelectNumberForm } from "@/components/select-number-form";
 import { SelectTimezoneForm } from "@/components/select-timezone";
+import { ShortTextForm } from "@/components/short-text-form";
+import { getEventDAO } from "@/services/event-services";
+import { EventType } from "@prisma/client";
+import { Archive, Calendar, Globe, LayoutDashboard, Palette, PersonStanding, Settings } from "lucide-react";
+import { seEventNumberFieldAction, setEventBooleanFieldAction, setEventFieldAction } from "../../event-actions";
+import AvailabilitySelector from "../availability-selector";
+import { cn } from "@/lib/utils";
 
 type Props= {
     params: {
@@ -26,8 +25,8 @@ export default async function EditEventPage({ params }: Props) {
   if (!event) return <div>Event not found</div>
 
   const selectDescription= `
-Duración fija: todas las reservas tienen la misma duración, ej: 1 hora \n
-Duración variable: el usuario puede reservar tiempo variable, la duración marca el mínimo reservable, ej: media hora pero puede reservar 1 hora y media por ejemplo`
+Duración fija: todas las reservas tienen la misma duración, ej: 60 minutos \n
+Duración variable: el usuario puede reservar tiempo variable, abajo puedes configurar el mínimo y máximo de tiempo reservable, ej: mínimo de 30 minutos y máximo de 60 minutos`
   return (
     <div className="bg-white dark:bg-black mt-4 border rounded-lg w-full">
       <div style={{backgroundColor: event.color}} className="h-4 rounded-t-lg" />
@@ -54,6 +53,13 @@ Duración variable: el usuario puede reservar tiempo variable, la duración marc
                       fieldName="description"
                       update={setEventFieldAction}
                   />
+                  <ShortTextForm
+                    label="Dirección"
+                    initialValue={event.address || ""}
+                    id={event.id}
+                    fieldName="address"
+                    update={setEventFieldAction}
+                  />
                   <SelectTypeForm
                       label="Tipo de evento"
                       description={selectDescription}
@@ -64,30 +70,46 @@ Duración variable: el usuario puede reservar tiempo variable, la duración marc
                       update={setEventFieldAction}
                       disabled={true}
                   />
-                  <ShortTextForm
-                    label="Dirección"
-                    initialValue={event.address || ""}
-                    id={event.id}
-                    fieldName="address"
-                    update={setEventFieldAction}
-                  />
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className={cn("grid grid-cols-2 gap-2", event.type !== EventType.MULTIPLE_SLOTS && "hidden")}>
                     <SelectNumberForm
-                        label="Duración"
-                        initialValue={event.duration}
+                        label="Duración mínima"
+                        initialValue={event.minDuration}
                         id={event.id}
-                        fieldName="duration"
+                        fieldName="minDuration"
                         options={[30, 60, 120, 180, 240, 300]}
                         update={seEventNumberFieldAction}
                     />
-                    <NumberForm
-                      id={event.id}
-                      icon={<PersonStanding className="w-6 h-6" />}
-                      label="Cupos"
-                      initialValue={event.seatsPerTimeSlot || 1}
-                      fieldName="seatsPerTimeSlot"
-                      update={seEventNumberFieldAction}
+                    <SelectNumberForm
+                        label="Duración máxima"
+                        initialValue={event.maxDuration}
+                        id={event.id}
+                        fieldName="maxDuration"
+                        options={[30, 60, 120, 180, 240, 300]}
+                        update={seEventNumberFieldAction}
                     />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className={cn(event.type !== EventType.SINGLE_SLOT && "hidden")}>
+                      <SelectNumberForm
+                          label="Duración"
+                          initialValue={event.maxDuration}
+                          id={event.id}
+                          fieldName="duration"
+                          options={[30, 60, 120, 180, 240, 300]}
+                          update={seEventNumberFieldAction}
+                      />
+                    </div>
+                    <div className={cn(event.type !== EventType.SINGLE_SLOT && "col-span-2")}>
+                      <NumberForm
+                        disabled={true}
+                        id={event.id}
+                        icon={<PersonStanding className="w-6 h-6" />}
+                        label="Cupos"
+                        initialValue={event.seatsPerTimeSlot || 1}
+                        fieldName="seatsPerTimeSlot"
+                        update={seEventNumberFieldAction}
+                      />
+                    </div>
                   </div>
               </div>
               <div className="min-w-96">

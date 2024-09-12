@@ -18,13 +18,6 @@ async function main() {
     // console.log("slots:")
     // console.log(slots)
 
-    const eventCancha3= await getEventDAO(cancha3Id)
-    console.log("timezone:", eventCancha3.timezone)
-    const bookings2= await getFutureBookingsDAOByEventId(eventCancha3.id, eventCancha3.timezone)
-    const slots2= getSlots(dateStr, bookings2, eventCancha3.availability, eventCancha3.duration, eventCancha3.timezone)
-
-    console.log("slots2:")
-    console.log(slots2)
 }
   
-main()
+//main()

@@ -66,12 +66,13 @@ export async function getConversationsOfClient(clientId: string) {
 export async function getActiveConversation(phone: string, clientId: string) {
 
   // 4 hours
-  let sessionTimeInMinutes= 2
+  let sessionTimeInMinutes= 240
     
   const found = await prisma.conversation.findFirst({
     where: {
       phone,
       clientId,        
+      closed: false,
       messages: {
         some: {
           createdAt: {
@@ -488,3 +489,18 @@ export async function getMessagesCountOfActiveConversation(phone: string, client
   return messages
 }
 
+export async function closeConversation(conversationId: string) {
+  const updated= await prisma.conversation.update({
+    where: {
+      id: conversationId
+    },
+    data: {
+      closed: true
+    },
+    include: {
+      client: true
+    }
+  })
+
+  return updated
+}

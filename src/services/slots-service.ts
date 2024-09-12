@@ -1,8 +1,9 @@
-import { addHours, addMinutes, endOfDay, isAfter, isBefore, isPast, parse, startOfDay } from "date-fns"
+import { addHours, addMinutes, areIntervalsOverlapping, endOfDay, isAfter, isBefore, isPast, parse, startOfDay } from "date-fns"
 import { toZonedTime } from "date-fns-tz"
-import { BookingDAO } from "./booking-services"
+import { BookingDAO, getFutureBookingsDAOByEventId } from "./booking-services"
 import moment from 'moment-timezone'
 import { checkDateFormatForSlot } from "@/lib/utils"
+import { EventDAO, getEventDAO } from "./event-services"
 
 export type Slot = {
   start: Date
@@ -100,9 +101,55 @@ export function getSlots(dateStr: string, bookings: BookingDAO[], availability: 
     return slots
 }
 
+export async function checkBookingAvailability(start: Date, end: Date, event: EventDAO){
+
+    const bookings= await getFutureBookingsDAOByEventId(event.id, event.timezone)
+
+    const zonedStart= toZonedTime(start, event.timezone)
+    const zonedEnd= toZonedTime(end, event.timezone)
+
+    console.log("Checking booking availability for: ", zonedStart, " - ", zonedEnd)    
+
+    // iterar sobre los bookings y chequear si el nuevo booking se solapa con alguno de los existentes
+    for (const booking of bookings) {
+        if (areIntervalsOverlapping({start: zonedStart, end: zonedEnd}, {start: booking.start, end: booking.end})) {
+            return false
+        }
+    }
+
+    // chequear si el slot está dentro del rango de disponibilidad y si aún no pasó
+    let dayOfWeek= zonedStart.getDay() - 1
+    if (dayOfWeek < 0) dayOfWeek = 6
+
+    console.log("dayOfWeek: ", dayOfWeek)
+    const availability= event.availability[dayOfWeek]
+    // availability exampe: ["","","","","14:00-20:00","09:00-18:00",""]
+    if (!availability) return false
+
+    const rangeStart= availability.split("-")[0]
+    const rangeEnd= availability.split("-")[1]
+
+    const rangeStartDate= parse(rangeStart, "HH:mm", zonedStart)
+    const rangeEndDate= parse(rangeEnd, "HH:mm", zonedStart)
+    console.log("range: ", rangeStartDate, " - ", rangeEndDate)
+
+    const nowZoned= toZonedTime(new Date(), event.timezone)
+    if (
+        zonedStart.getTime() >= rangeStartDate.getTime() &&
+        zonedEnd.getTime() >= rangeStartDate.getTime() &&
+        zonedStart.getTime() <= rangeEndDate.getTime() &&
+        zonedEnd.getTime() <= rangeEndDate.getTime() &&
+        zonedStart.getTime() >= nowZoned.getTime()
+    ) {
+        return true
+    }
+
+    return false
+}
 
 
-function transformTimezoneToUTC(date: Date, timezone: string): Date {
+
+export function transformTimezoneToUTC(date: Date, timezone: string): Date {
     // Obtener el offset en minutos para la fecha y el huso horario proporcionado
     const offsetInMinutes = moment.tz(date, timezone).utcOffset()
     

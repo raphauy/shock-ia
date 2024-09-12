@@ -14,7 +14,7 @@ import { sendWapMessage } from "./osomService";
 import { createRepoData, repoDataFormValues } from "./repodata-services";
 import { getRepositoryDAOByFunctionName } from "./repository-services";
 import { getSectionOfDocument } from "./section-services";
-import { getSlots } from "./slots-service";
+import { checkBookingAvailability, getSlots } from "./slots-service";
 import { SummitFormValues, createSummit } from "./summit-services";
 import { sendWebhookNotification } from "./webhook-notifications-service";
 import moment from 'moment-timezone'
@@ -335,7 +335,7 @@ export async function obtenerDisponibilidad(clientId: string, conversationId: st
   const bookings= await getFutureBookingsDAOByEventId(eventId, event.timezone)
   console.log("bookings: ", bookings)
 
-  const slots= getSlots(dateStr, bookings, event.availability, event.duration, event.timezone)
+  const slots= getSlots(dateStr, bookings, event.availability, event.minDuration, event.timezone)
   console.log("slots: ", slots)
 
   const result: SlotsResult[]= slots.map((slot) => ({
@@ -349,21 +349,21 @@ export async function obtenerDisponibilidad(clientId: string, conversationId: st
   return JSON.stringify(result)
 }
 
-export async function reservarEventoDuracionFija(clientId: string, conversationId: string, eventId: string, start: string, end: string, name: string){
-  console.log("reservarEventoDuracionFija")
+export async function reservarParaEvento(clientId: string, conversationId: string, eventId: string, start: string, duration: string, name: string){
+  console.log("reservarParaEvento")
   console.log(`\tconversationId: ${conversationId}`)
   console.log(`\teventId: ${eventId}`)
   console.log(`\tstart: ${start}`)
-  console.log(`\tend: ${end}`)
+  console.log(`\tduration: ${duration}`)
 
   const startFormatIsCorrect= checkDateTimeFormatForSlot(start)
-  const endFormatIsCorrect= checkDateTimeFormatForSlot(end)
-  if (!startFormatIsCorrect || !endFormatIsCorrect) {
+  if (!startFormatIsCorrect) {
     return "Formato de fecha incorrecto, debe ser YYYY-MM-DD HH:mm"
   }
 
-  let startDate= parse(start, "yyyy-MM-dd HH:mm", new Date())
-  let endDate= parse(end, "yyyy-MM-dd HH:mm", new Date())
+  const dateTimeFormat= "yyyy-MM-dd HH:mm"
+  let startDate= parse(start, dateTimeFormat, new Date())
+  let endDate= addMinutes(startDate, parseInt(duration))
 
   const event= await getEventDAO(eventId)
   if (!event) return "Evento no encontrado"
@@ -371,6 +371,11 @@ export async function reservarEventoDuracionFija(clientId: string, conversationI
   const offsetInMinutes = moment.tz(startDate, event.timezone).utcOffset()
   startDate= addMinutes(startDate, -offsetInMinutes)
   endDate= addMinutes(endDate, -offsetInMinutes)
+
+  const isAvailable= await checkBookingAvailability(startDate, endDate, event)
+  console.log("isAvailable: ", isAvailable)
+  if (!isAvailable) 
+    return `El slot ${format(startDate, dateTimeFormat)} - ${format(endDate, dateTimeFormat)} no está disponible`
 
   let contact= await getConversationPhone(conversationId)
   if (!contact) contact= "Ocurrió un error al obtener la conversación"
@@ -533,12 +538,12 @@ export async function processFunctionCall(clientId: string, name: string, args: 
       )
       break
 
-    case "reservarEventoDuracionFija":
-      content= await reservarEventoDuracionFija(clientId,
+    case "reservarParaEvento":
+      content= await reservarParaEvento(clientId,
         args.conversationId,
         args.eventId,
         args.start,
-        args.end,
+        args.duration,
         args.name
       )
       break

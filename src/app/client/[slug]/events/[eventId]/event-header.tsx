@@ -13,7 +13,8 @@ type Props= {
 }
   
   export default function EventHeader({ event, slug }: Props) {
-    const { name, price, duration, isArchived, seatsPerTimeSlot } = event
+
+    const duration= event.minDuration === event.maxDuration ? event.minDuration : `${event.minDuration}-${event.maxDuration}`
 
     return (
     <Card className={cn("w-full overflow-hidden pb-4")} style={{borderColor: event.color}}>
@@ -24,7 +25,7 @@ type Props= {
           <div className="text-center md:text-left text-muted-foreground min-w-72 flex flex-col flex-1">
             <h2 className="text-2xl font-bold mb-2">
               <Link href={`/client/${slug}/events/${event.id}/edit`}>
-                {name}
+                {event.name}
               </Link>
             </h2>
             <p className="text-sm text-muted-foreground">
@@ -40,7 +41,7 @@ type Props= {
                 </div>
                 <div className="flex items-center gap-1">
                   <PersonStanding className="w-4 h-4" />
-                  <span>{seatsPerTimeSlot}</span>
+                  <span>{event.seatsPerTimeSlot}</span>
                 </div>
             </div>
           </div>

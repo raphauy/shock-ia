@@ -51,8 +51,15 @@ export async function setEventFieldAction(id: string, name: string, value: strin
     return ok
 }
 
-export async function seEventNumberFieldAction(id: string, name: string, value: number): Promise<boolean> {    
-    const ok= await updateEventNumberField(id, name, value)
+export async function seEventNumberFieldAction(id: string, name: string, value: number): Promise<boolean> {
+    let ok= false
+    if (name === "duration") {
+        ok= await updateEventNumberField(id, "minDuration", value)
+        if (!ok) return false
+        ok= await updateEventNumberField(id, "maxDuration", value)
+    } else {
+        ok= await updateEventNumberField(id, name, value)
+    }
 
     revalidatePath("/client/[slug]/events", 'page')
 

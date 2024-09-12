@@ -1,10 +1,11 @@
 import { prisma } from "@/lib/db"
 import { BookingStatus } from "@prisma/client"
-import * as z from "zod"
-import { getClientBySlug } from "./clientService"
-import { EventDAO, getEventDAO } from "./event-services"
 import { addMinutes } from "date-fns"
 import { toZonedTime } from "date-fns-tz"
+import * as z from "zod"
+import { getClientBySlug } from "./clientService"
+import { getEventDAO } from "./event-services"
+import { checkBookingAvailability } from "./slots-service"
 
 export type BookingDAO = {
 	id: string
@@ -67,7 +68,7 @@ export async function createBooking(data: BookingFormValues) {
     throw new Error("Eventos de duración variable aún no soportados")
   }
   const start= toZonedTime(data.start, event.timezone)
-  const end = data.end ? toZonedTime(data.end, event.timezone) : addMinutes(start, event.duration)
+  const end = data.end ? toZonedTime(data.end, event.timezone) : addMinutes(start, event.minDuration)
   const seats = data.seats ? Number(data.seats) : 0
   const created = await prisma.booking.create({
     data: {
@@ -196,3 +197,28 @@ export async function getFullBookingDAO(id: string) {
   return found as BookingDAO
 }
     
+export async function blockSlot(eventId: string, start: Date, end: Date) {
+  const event= await getEventDAO(eventId)
+  if (!event) throw new Error("Event not found")
+  const isAvailable= checkBookingAvailability(start, end, event)
+  if (!isAvailable) throw new Error("Slot not available")
+
+  start= toZonedTime(start, event.timezone)
+  end= toZonedTime(end, event.timezone)
+  
+  const blocked= await prisma.booking.create({
+    data: {
+      clientId: event.clientId,
+      eventId,
+      name: "Bloqueado",
+      start,
+      end,
+      contact: "BLOQUEADO",
+      eventName: event.name,
+      seats: 0,      
+      status: "BLOQUEADO"
+    }
+  })
+
+  return blocked
+}

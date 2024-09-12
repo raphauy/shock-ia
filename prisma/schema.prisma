@@ -141,6 +141,8 @@ model Conversation {
   zona        String?
   presupuesto String?
 
+  closed      Boolean  @default(false)
+
   narvaez     Narvaez?
   summit      Summit?
   carService  CarService?
@@ -369,7 +371,8 @@ model Event {
   id                String    @id @default(cuid())
   name              String                                      // gennext: show.column
   slug              String                                      // gennext: show.column
-  duration          Int                                         // gennext: show.column
+  minDuration       Int       @default(60)                      // gennext: show.column
+  maxDuration       Int       @default(60)                      // gennext: show.column
   color             String                                      // gennext: show.column
 
   description       String?
@@ -379,8 +382,8 @@ model Event {
   isArchived        Boolean   @default(false)                   // gennext: show.column
 
   availability      String[]  @default([])
-  timezone          String      @default("America/Montevideo")
-  type              EventType   @default(SINGLE_SLOT)
+  timezone          String    @default("America/Montevideo")
+  type              EventType @default(SINGLE_SLOT)
 
   createdAt         DateTime    @default(now())                 // gennext: skip.zod
   updatedAt         DateTime    @updatedAt                      // gennext: skip.zod
@@ -397,6 +400,7 @@ enum BookingStatus {
   PAGADO
   CONFIRMADO
   CANCELADO
+  BLOQUEADO
 }
 
 model Booking {

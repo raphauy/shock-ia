@@ -1,7 +1,7 @@
 "use server"
   
 import { revalidatePath } from "next/cache"
-import { BookingDAO, BookingFormValues, createBooking, updateBooking, getFullBookingDAO, deleteBooking, cancelBooking } from "@/services/booking-services"
+import { BookingDAO, BookingFormValues, createBooking, updateBooking, getFullBookingDAO, deleteBooking, cancelBooking, blockSlot } from "@/services/booking-services"
 
 
 export async function getBookingDAOAction(id: string): Promise<BookingDAO | null> {
@@ -44,3 +44,11 @@ export async function cancelBookingAction(id: string): Promise<BookingDAO | null
     return canceled as BookingDAO
 }
 
+export async function blockSlotAction(eventId: string, start: Date, end: Date): Promise<boolean> {    
+    const blocked= await blockSlot(eventId, start, end)
+    if (!blocked) return false
+
+    revalidatePath("/[slug]/bookings", "page")
+
+    return true
+}

@@ -40,7 +40,6 @@ type Props = {
 
 export default function BigCalendar({ initialEvents, timezone }: Props) { 
 
-  console.log("initialEvents: ", initialEvents)
   console.log("timezone: ", timezone)
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [view, setView] = useState<View>(Views.WEEK)
@@ -60,9 +59,10 @@ export default function BigCalendar({ initialEvents, timezone }: Props) {
   }, [initialEvents, view, timezone])
 
   const eventStyleGetter = (event: CalendarEvent) => {
+    const backgroundColor = event.title === "Bloqueado" ? "#ffcccb" : event.color
     return {
       style: {
-        backgroundColor: event.color,
+        backgroundColor,
         border: event.title ? '1px solid black' : 'none',
       }
     }
@@ -74,7 +74,7 @@ export default function BigCalendar({ initialEvents, timezone }: Props) {
   return (
     <div className="h-full">
       <Calendar
-        className='h-fit'
+        className='h-fit min-h-[calc(100vh-300px)]'
         localizer={localizer}
         culture='es'
         events={events}
