@@ -279,11 +279,12 @@ export async function getContext(clientId: string, phone: string, userInput: str
 
   if (functionsNames.includes("obtenerDisponibilidad")) {
     const events= await getActiveEventsDAOByClientId(clientId)
-    console.log("events: ", events)
+    const availableEvents= events.filter(event => event.availability.length > 0)
+    console.log("availableEvents: ", availableEvents)
 
     contextString+= "\n**** Eventos disponibles ****\n"
     contextString+= "Eventos que pueden ser relevantes para elaborar una respuesta:\n"
-    events.map((event) => {
+    availableEvents.map((event) => {
     contextString += `{
     eventId: "${event.id}",
     eventName: "${event.name}",
