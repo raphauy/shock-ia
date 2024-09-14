@@ -398,7 +398,7 @@ export async function reservarParaEvento(clientId: string, conversationId: strin
 }
 
 type ObtenerReservasResult = {
-  id: string
+  bookingId: string
   eventId: string
   eventName: string
   start: string
@@ -420,7 +420,7 @@ export async function obtenerReservas(clientId: string, conversationId: string){
   const bookings= await getFutureBookingsDAOByContact(phone)
 
   const result: ObtenerReservasResult[]= bookings.map((booking) => ({
-    id: booking.id,
+    bookingId: booking.id,
     eventId: booking.eventId,
     eventName: booking.eventName,
     start: format(booking.start, "yyyy-MM-dd HH:mm"),
