@@ -266,3 +266,13 @@ export async function getFunctionsWithRepo(clientId: string): Promise<SimpleFunc
 
   return res
 }
+
+export async function getFunctionIdByFunctionName(name: string) {
+  const found = await prisma.function.findUnique({
+    where: {
+      name
+    }
+  })
+
+  return found?.id
+}

@@ -1,6 +1,6 @@
 import { ClientFormValues } from "@/app/admin/clients/(crud)/clientForm";
 import { prisma } from "@/lib/db";
-import { FunctionDAO } from "./function-services";
+import { addFunctionToClient, FunctionDAO, getFunctionIdByFunctionName, removeFunctionFromClient } from "./function-services";
 
 
 export default async function getClients() {
@@ -414,5 +414,59 @@ export async function setHaveEvents(clientId: string, haveEvents: boolean) {
     }
   })
 
+  if (haveEvents) {
+    await addEventFunctionsToClient(clientId)
+  } else {
+    await removeEventFunctionsFromClient(clientId)
+  }
+
   return client
+}
+
+async function addEventFunctionsToClient(clientId: string) {
+  // Event functions:
+  // obtenerDisponibilidad
+  // reservarParaEvento
+  // obtenerReservas
+  // cancelarReserva
+
+  const obtenerDisponibilidadId= await getFunctionIdByFunctionName("obtenerDisponibilidad")
+  if (!obtenerDisponibilidadId) throw new Error("Function not found")
+  let res= await addFunctionToClient(clientId, obtenerDisponibilidadId)
+  if (!res) throw new Error("Error adding function to client")
+
+  const reservarParaEventoId= await getFunctionIdByFunctionName("reservarParaEvento")
+  if (!reservarParaEventoId) throw new Error("Function not found")
+  res= await addFunctionToClient(clientId, reservarParaEventoId)
+
+  const obtenerReservasId= await getFunctionIdByFunctionName("obtenerReservas")
+  if (!obtenerReservasId) throw new Error("Function not found")
+  res= await addFunctionToClient(clientId, obtenerReservasId)
+
+  const cancelarReservaId= await getFunctionIdByFunctionName("cancelarReserva")
+  if (!cancelarReservaId) throw new Error("Function not found")
+  res= await addFunctionToClient(clientId, cancelarReservaId)
+
+  return true
+}
+
+async function removeEventFunctionsFromClient(clientId: string) {
+
+  const obtenerDisponibilidadId= await getFunctionIdByFunctionName("obtenerDisponibilidad")
+  if (!obtenerDisponibilidadId) throw new Error("Function not found")
+  await removeFunctionFromClient(clientId, obtenerDisponibilidadId)
+
+  const reservarParaEventoId= await getFunctionIdByFunctionName("reservarParaEvento")
+  if (!reservarParaEventoId) throw new Error("Function not found")
+  await removeFunctionFromClient(clientId, reservarParaEventoId)
+
+  const obtenerReservasId= await getFunctionIdByFunctionName("obtenerReservas")
+  if (!obtenerReservasId) throw new Error("Function not found")
+  await removeFunctionFromClient(clientId, obtenerReservasId)
+
+  const cancelarReservaId= await getFunctionIdByFunctionName("cancelarReserva")
+  if (!cancelarReservaId) throw new Error("Function not found")
+  await removeFunctionFromClient(clientId, cancelarReservaId)
+
+  return true
 }
