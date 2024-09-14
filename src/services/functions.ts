@@ -363,10 +363,14 @@ export async function reservarParaEvento(clientId: string, conversationId: strin
 
   const dateTimeFormat= "yyyy-MM-dd HH:mm"
   let startDate= parse(start, dateTimeFormat, new Date())
-  let endDate= addMinutes(startDate, parseInt(duration))
+  const durationInt= parseInt(duration)
+  let endDate= addMinutes(startDate, durationInt)
 
   const event= await getEventDAO(eventId)
   if (!event) return "Evento no encontrado"
+
+  if (event.type === "SINGLE_SLOT" && event.minDuration !== durationInt)
+    return `El evento es de duración fija y debe ser de ${event.minDuration} minutos`
 
   const offsetInMinutes = moment.tz(startDate, event.timezone).utcOffset()
   startDate= addMinutes(startDate, -offsetInMinutes)

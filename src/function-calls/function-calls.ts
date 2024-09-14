@@ -79,7 +79,7 @@ const cancelarReserva=
       },
       "bookingId": {
         "type": "string",
-        "description": "Id de la reserva (bookingId) que se obtiene con la función obtenerReservas."
+        "description": "Id de la reserva (bookingId) que se obtiene con la función obtenerReservas. Ej de bookingId: cm12jj0xr001d23y2bvgbpiem"
       }
     }
   },
