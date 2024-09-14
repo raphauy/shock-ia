@@ -399,13 +399,12 @@ export async function reservarParaEvento(clientId: string, conversationId: strin
 
 type ObtenerReservasResult = {
   bookingId: string
-  eventId: string
-  eventName: string
   start: string
   end: string
   name: string
   contact: string
   status: string
+  eventName: string
 }
 
 export async function obtenerReservas(clientId: string, conversationId: string){
@@ -421,13 +420,12 @@ export async function obtenerReservas(clientId: string, conversationId: string){
 
   const result: ObtenerReservasResult[]= bookings.map((booking) => ({
     bookingId: booking.id,
-    eventId: booking.eventId,
-    eventName: booking.eventName,
     start: format(booking.start, "yyyy-MM-dd HH:mm"),
     end: format(booking.end, "yyyy-MM-dd HH:mm"),
     name: booking.name,
     contact: booking.contact,
     status: booking.status,
+    eventName: booking.eventName,
   }))
 
   console.log("result: ", result)  
