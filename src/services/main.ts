@@ -2,6 +2,7 @@ import { toZonedTime } from "date-fns-tz"
 import { getEventDAO } from "./event-services"
 import { getSlots } from "./slots-service"
 import { getFutureBookingsDAOByEventId } from "./booking-services"
+import { functionHaveRepository } from "./function-services"
 
 async function main() {
 
@@ -17,6 +18,10 @@ async function main() {
     // const slots= getSlots(dateStr, bookings, eventCancha2.availability, eventCancha2.duration, eventCancha2.timezone)
     // console.log("slots:")
     // console.log(slots)
+
+    const functionName= "registrarLeadInmobiliario"
+    const haveRepository= await functionHaveRepository(functionName)
+    console.log("haveRepository:", haveRepository)
 
 }
   

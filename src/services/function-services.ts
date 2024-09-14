@@ -276,3 +276,16 @@ export async function getFunctionIdByFunctionName(name: string) {
 
   return found?.id
 }
+
+export async function functionHaveRepository(functionName: string) {
+  const found = await prisma.function.findMany({
+    where: {
+      name: functionName,
+      repositories: {
+        some: {}
+      }
+    }
+  })
+
+  return found.length > 0
+}

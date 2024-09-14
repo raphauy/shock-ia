@@ -61,7 +61,7 @@ export async function completionInit(client: Client, functions: ChatCompletionCr
       name, 
       content,
     })
-    agentes= getAgentes(name)
+    agentes= await getAgentes(name)
 
     const stepResponse = await completionInit(client, functions, messages, modelName)
     if (!stepResponse) return null

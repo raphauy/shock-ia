@@ -8,7 +8,7 @@ import { getValue, setValue } from "./config-services";
 import { getConversation, getConversationPhone, messageArrived } from "./conversationService";
 import { getDocumentDAO } from "./document-services";
 import { getEventDAO } from "./event-services";
-import { getFunctionClientDAO } from "./function-services";
+import { functionHaveRepository, getFunctionClientDAO } from "./function-services";
 import { NarvaezFormValues, createOrUpdateNarvaez } from "./narvaez-services";
 import { sendWapMessage } from "./osomService";
 import { createRepoData, repoDataFormValues } from "./repodata-services";
@@ -629,8 +629,10 @@ export async function processFunctionCall(clientId: string, name: string, args: 
   }
 }
 
-export function getAgentes(name: string): boolean {
-let res= false
+export async function getAgentes(name: string): Promise<boolean> {
+let res= await functionHaveRepository(name)
+if (res) return true
+
 switch (name) {
   case "notifyHuman":
     res= true
@@ -644,21 +646,24 @@ switch (name) {
   case "reservarServicio":
     res= true
     break
-  case "registrarLeadInmobiliario":
-    res= true
-    break
-  case "registrarLeadsDeRegalosEmpresariales":
-    res= true
-    break
-  case "registrarLeadsAcademia":
-    res= true
-    break
-  case "registrarLeadsInteresadosAccessOne":
-    res= true
-    break
-  case "calificarLeadMiDerecho":
-    res= true
-    break
+  // case "registrarLeadInmobiliario":
+  //   res= true
+  //   break
+  // case "registrarLeadsDeRegalosEmpresariales":
+  //   res= true
+  //   break
+  // case "registrarLeadsAcademia":
+  //   res= true
+  //   break
+  // case "registrarLeadsInteresadosAccessOne":
+  //   res= true
+  //   break
+  // case "calificarLeadMiDerecho":
+  //   res= true
+  //   break
+  // case "registrarLeadAmbic":
+  //   res= true
+  //   break
     
   default:
     break

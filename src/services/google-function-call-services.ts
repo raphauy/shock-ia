@@ -106,7 +106,7 @@ export async function googleCompletionInit(client: Client, functions: ChatComple
         name,
         content,
       })
-      agentes = getAgentes(name)
+      agentes = await getAgentes(name)
 
       const functionResponse = {
         functionResponse: {
