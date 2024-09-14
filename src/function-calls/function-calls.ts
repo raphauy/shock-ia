@@ -49,3 +49,39 @@ const reservarParaEvento=
     "required": ["eventId", "start", "duration", "name"]
   }
 }
+
+const obtenerReservas=
+{
+  "name": "obtenerReservas",
+  "description": "Devuelve las reservas de del usuario de la conversación actual.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "conversationId": {
+        "type": "string",
+        "description": "Id de la conversación que se proporciona en el prompt."
+      }
+    }
+  },
+  "required": ["conversationId"]
+}
+
+const cancelarReserva=
+{
+  "name": "cancelarReserva",
+  "description": "Cancela una reserva de un evento. Para obtener el id de la reserva, se debe usar la función obtenerReservas.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "conversationId": {
+        "type": "string",
+        "description": "Id de la conversación que se proporciona en el prompt."
+      },
+      "bookingId": {
+        "type": "string",
+        "description": "Id de la reserva que se quiere cancelar."
+      }
+    }
+  },
+  "required": ["conversationId", "bookingId"]
+}

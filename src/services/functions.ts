@@ -2,7 +2,7 @@ import { checkDateTimeFormatForSlot, decodeAndCorrectText } from "@/lib/utils";
 import { addMinutes, format, parse } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import { revalidatePath } from "next/cache";
-import { BookingFormValues, createBooking, getFutureBookingsDAOByEventId } from "./booking-services";
+import { BookingFormValues, cancelBooking, createBooking, getBookingDAO, getFutureBookingsDAOByContact, getFutureBookingsDAOByEventId } from "./booking-services";
 import { CarServiceFormValues, createCarService } from "./carservice-services";
 import { getValue, setValue } from "./config-services";
 import { getConversation, getConversationPhone, messageArrived } from "./conversationService";
@@ -397,6 +397,66 @@ export async function reservarParaEvento(clientId: string, conversationId: strin
   return "Reserva registrada."
 }
 
+type ObtenerReservasResult = {
+  id: string
+  eventId: string
+  eventName: string
+  start: string
+  end: string
+  name: string
+  contact: string
+  status: string
+}
+
+export async function obtenerReservas(clientId: string, conversationId: string){
+  console.log("obtenerReservas")
+  console.log(`\tconversationId: ${conversationId}`)
+
+  const conversation= await getConversation(conversationId)
+  if (!conversation) return `No se encontró una conversación con id ${conversationId}`
+
+  const phone= conversation.phone
+
+  const bookings= await getFutureBookingsDAOByContact(phone)
+
+  const result: ObtenerReservasResult[]= bookings.map((booking) => ({
+    id: booking.id,
+    eventId: booking.eventId,
+    eventName: booking.eventName,
+    start: format(booking.start, "yyyy-MM-dd HH:mm"),
+    end: format(booking.end, "yyyy-MM-dd HH:mm"),
+    name: booking.name,
+    contact: booking.contact,
+    status: booking.status,
+  }))
+
+  console.log("result: ", result)  
+
+  return JSON.stringify(result)
+}
+
+export async function cancelarReserva(clientId: string, conversationId: string, bookingId: string){
+  console.log("cancelarReserva")
+  console.log(`\tconversationId: ${conversationId}`)
+  console.log(`\tbookingId: ${bookingId}`)
+
+  const conversation= await getConversation(conversationId)
+  if (!conversation) return `No se encontró una conversación con id ${conversationId}`
+
+  const phone= conversation.phone
+
+  const booking= await getBookingDAO(bookingId)
+  if (!booking) return `No se encontró una reserva con id ${bookingId}`
+
+  // check contact and phone match
+  if (booking.contact !== phone) return "La reserva no pertenece a esta conversación"
+
+  const canceled= await cancelBooking(bookingId)
+  if (!canceled) return "Error al cancelar la reserva"
+
+  return `La reserva de ${booking.contact} ha sido cancelada`
+}
+
 
 export async function defaultFunction(clientId: string, name: string, args: any) {
   console.log("defaultFunction")
@@ -547,7 +607,15 @@ export async function processFunctionCall(clientId: string, name: string, args: 
         args.name
       )
       break
-  
+
+    case "obtenerReservas":
+      content= await obtenerReservas(clientId, args.conversationId)
+      break
+
+    case "cancelarReserva":
+      content= await cancelarReserva(clientId, args.conversationId, args.bookingId)      
+      break
+
     default:
       content= await defaultFunction(clientId, name, args)
       break

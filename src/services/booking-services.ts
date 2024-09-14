@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db"
-import { BookingStatus } from "@prisma/client"
-import { addMinutes } from "date-fns"
+import { Booking, BookingStatus } from "@prisma/client"
+import { addMinutes, isAfter } from "date-fns"
 import { toZonedTime } from "date-fns-tz"
 import * as z from "zod"
 import { getClientBySlug } from "./clientService"
@@ -221,4 +221,32 @@ export async function blockSlot(eventId: string, start: Date, end: Date) {
   })
 
   return blocked
+}
+
+export async function getFutureBookingsDAOByContact(contact: string) {
+  const found = await prisma.booking.findMany({
+    where: {
+      contact,
+      status: {
+        not: "CANCELADO"
+      },
+    },
+    orderBy: {
+      start: 'asc'
+    },
+    include: {
+      event: true,
+    }
+  })
+  if (!found) return []
+
+  const result: Booking[] = []
+  // filter by future bookings, taking the timezone of the event for each booking
+  for (const booking of found) {
+    const now= toZonedTime(new Date(), booking.event.timezone)
+    if (isAfter(booking.start, now)) {
+      result.push(booking)
+    }
+  }
+  return result
 }
