@@ -586,7 +586,10 @@ switch (name) {
   case "calificarLeadMiDerecho":
     res= true
     break
-    
+  case "registrarLeadAmbit":
+    res= true
+    break
+      
   default:
     break
 }
