@@ -14,7 +14,7 @@ import clsx from "clsx";
 import { Bot, Car, CircleDollarSign, Loader, Podcast, SendIcon, Terminal, Ticket, User } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import Textarea from "react-textarea-autosize";
@@ -25,7 +25,10 @@ export default function SimulatorBox() {
   const slug= params.slug as string
   const searchParams= useSearchParams()
   const model= searchParams.get("model")
-  
+
+  const pathname= usePathname()
+  const redirectUri= pathname.includes("events") ? `/client/${slug}/events/id/simulator?r=${new Date().getMilliseconds()}` : `/client/${slug}/simulator?r=${new Date().getMilliseconds()}`
+
   const formRef = useRef<HTMLFormElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -154,6 +157,8 @@ export default function SimulatorBox() {
 
   const disabled = isLoading || input.length === 0;
 
+
+
   return (
     <main className="flex flex-col items-center justify-between w-full pb-40">
       {
@@ -168,12 +173,12 @@ export default function SimulatorBox() {
             </TooltipContent>
           </Tooltip>
           <div className="flex items-center gap-2">
-            <CloseConversationDialog id={conversationId} description={`Seguro que desea cerrar la conversación de ${userEmail}?`} redirectUri={`/client/${slug}/simulator?r=${new Date().getMilliseconds()}`} /> 
+            <CloseConversationDialog id={conversationId} description={`Seguro que desea cerrar la conversación de ${userEmail}?`} redirectUri={redirectUri} /> 
           </div>
         </div>
         :
         <div className="flex items-center gap-2">
-          <CloseConversationDialog id={conversationId} description={`Seguro que desea cerrar la conversación de ${userEmail}?`} redirectUri={`/client/${slug}/simulator?r=${new Date().getMilliseconds()}`} /> 
+          <CloseConversationDialog id={conversationId} description={`Seguro que desea cerrar la conversación de ${userEmail}?`} redirectUri={redirectUri} /> 
         </div>
       }
       
