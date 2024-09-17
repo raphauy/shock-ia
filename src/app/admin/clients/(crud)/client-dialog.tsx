@@ -164,14 +164,20 @@ export function ClientFunctionsBox({ clientId, closeDialog }: ClientFunctionBoxP
               <div className="flex flex-col border-r">
               {
                   functions.map((item) => {
-                  return (
-                      <div key={item.id} className="flex items-center justify-between gap-2 mb-1 mr-5">
-                          <p className="text-green-500 whitespace-nowrap">{item.name}</p>
-                          <Button variant="secondary" className="h-7" onClick={() => complementaryOut(item.id)} disabled={item.repositories && item.repositories.length > 0}>
-                            <ChevronsRight />
-                          </Button>
-                      </div>
-                  )})
+                    // eventos functions:
+                    // cancelarReserva
+                    // obtenerDisponibilidad
+                    // reservarParaEvento
+                    // obtenerReservas
+                    const isEventosFunction= item.name === "cancelarReserva" || item.name === "obtenerDisponibilidad" || item.name === "reservarParaEvento" || item.name === "obtenerReservas"
+                    return (
+                        <div key={item.id} className="flex items-center justify-between gap-2 mb-1 mr-5">
+                            <p className="text-green-500 whitespace-nowrap">{item.name}</p>
+                            <Button variant="secondary" className="h-7" onClick={() => complementaryOut(item.id)} disabled={item.repositories && item.repositories.length > 0 || isEventosFunction}>
+                              <ChevronsRight />
+                            </Button>
+                        </div>
+                    )})
               }
                       <div className="flex items-end justify-between flex-1 gap-2 mb-1 mr-5">
                           <p>Todos</p>
@@ -181,14 +187,15 @@ export function ClientFunctionsBox({ clientId, closeDialog }: ClientFunctionBoxP
               <div className="flex flex-col">
               {
                   complementary.map((item) => {
-                  return (
-                      <div key={item.id} className="flex items-center gap-2 mb-1">
-                          <Button variant="secondary" className="h-7 x-7" onClick={() => complementaryIn(item.id)}>
-                              <ChevronsLeft />
-                          </Button>
-                          <p className="whitespace-nowrap">{item.name}</p>
-                      </div>
-                  )})
+                    const isEventosFunction= item.name === "cancelarReserva" || item.name === "obtenerDisponibilidad" || item.name === "reservarParaEvento" || item.name === "obtenerReservas"
+                    return (
+                        <div key={item.id} className="flex items-center gap-2 mb-1">
+                            <Button variant="secondary" className="h-7 x-7" onClick={() => complementaryIn(item.id)} disabled={isEventosFunction}>
+                                <ChevronsLeft />
+                            </Button>
+                            <p className="whitespace-nowrap">{item.name}</p>
+                        </div>
+                    )})
               }
                   <div className="flex items-end flex-1 gap-2 mb-1">
                       <Button variant="secondary" className="h-7" onClick={() => allIn()}><ChevronsLeft /></Button>
