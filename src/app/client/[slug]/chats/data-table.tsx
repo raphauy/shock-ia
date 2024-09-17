@@ -24,8 +24,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { DataTableToolbar } from "./data-table-toolbar"
+import { cn } from "@/lib/utils"
+import { useSearchParams } from "next/navigation"
+import { DataConversation } from "./actions"
 import { DataTablePagination } from "./data-table-pagination"
+import { DataTableToolbar } from "./data-table-toolbar"
 
 
 
@@ -47,6 +50,9 @@ export function DataTable<TData, TValue>({
     []
   )
   const [sorting, setSorting] = React.useState<SortingState>([])
+
+  const params= useSearchParams()
+  const id= params.get("id") as string
 
   const table = useReactTable({
     data,
@@ -101,10 +107,13 @@ export function DataTable<TData, TValue>({
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
+              table.getRowModel().rows.map((row) => {
+                const original= row.original as DataConversation
+                return (
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  className={cn(original.id === id ? "bg-blue-100 dark:bg-blue-900" : "")}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
@@ -115,7 +124,7 @@ export function DataTable<TData, TValue>({
                     </TableCell>
                   ))}
                 </TableRow>
-              ))
+              )})
             ) : (
               <TableRow>
                 <TableCell
