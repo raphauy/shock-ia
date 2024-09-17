@@ -18,34 +18,70 @@ const obtenerDisponibilidad=
     }
   }
 
-  const reservarEventoDuracionFija=
-  {
-    "name": "reservarEventoDuracionFija",
-    "description": "Reserva un un evento en una fecha específica.",
-    "parameters": {
-      "type": "object",
-      "properties": {
-        "conversationId": {
-          "type": "string",
-          "description": "Id de la conversación que se proporciona en el prompt."
-        },
-        "eventId": {
-          "type": "string",
-          "description": "Id del evento que se quiere reservar."
-        },
-        "start": {
-          "type": "string",
-          "description": "Fecha y hora de inicio de la reserva en formato YYYY-MM-DD HH:mm."
-        },
-        "end": {
-          "type": "string",
-          "description": "Fecha y hora de fin de la reserva en formato YYYY-MM-DD HH:mm."
-        },
-        "name": {
-          "type": "string",
-          "description": "Nombre del cliente."
-        }
+const reservarParaEvento=
+{
+  "name": "reservarParaEvento",
+  "description": "Reserva un un evento en una fecha específica.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "conversationId": {
+        "type": "string",
+        "description": "Id de la conversación que se proporciona en el prompt."
       },
-      "required": ["eventId", "start", "end", "name"]
-    }
+      "eventId": {
+        "type": "string",
+        "description": "Id del evento que se quiere reservar."
+      },
+      "start": {
+        "type": "string",
+        "description": "Fecha y hora de inicio de la reserva en formato YYYY-MM-DD HH:mm."
+      },
+      "duration": {
+        "type": "string",
+        "description": "Duración de la reserva en minutos."
+      },
+      "name": {
+        "type": "string",
+        "description": "Nombre del usuario. Hay que preguntarle al usuario por su nombre."
+      }
+    },
+    "required": ["eventId", "start", "duration", "name"]
   }
+}
+
+const obtenerReservas=
+{
+  "name": "obtenerReservas",
+  "description": "Devuelve las reservas de del usuario de la conversación actual.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "conversationId": {
+        "type": "string",
+        "description": "Id de la conversación que se proporciona en el prompt."
+      }
+    }
+  },
+  "required": ["conversationId"]
+}
+
+const cancelarReserva=
+{
+  "name": "cancelarReserva",
+  "description": "Cancela una reserva de un evento. Para obtener el id de la reserva, se debe usar la función obtenerReservas.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "conversationId": {
+        "type": "string",
+        "description": "Id de la conversación que se proporciona en el prompt."
+      },
+      "bookingId": {
+        "type": "string",
+        "description": "Id de la reserva (bookingId) que se obtiene con la función obtenerReservas. Ej de bookingId: cm12jj0xr001d23y2bvgbpiem"
+      }
+    }
+  },
+  "required": ["conversationId", "bookingId"]
+}

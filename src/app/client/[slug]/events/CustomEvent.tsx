@@ -1,4 +1,5 @@
-import { BookingDialog, CancelBookingDialog } from "../bookings/booking-dialogs";
+import { format } from "date-fns";
+import { BlockSlotDialog, BookingDialog, CancelBookingDialog } from "../bookings/booking-dialogs";
 import { CalendarEvent } from "./big-calendar";
 
 interface CustomEventProps {
@@ -7,9 +8,9 @@ interface CustomEventProps {
 
 const CustomEvent: React.FC<CustomEventProps> = ({ event }) => {
 
-
-  const statusColor= event.status === "APROBADO" ? "bg-green-500" : event.status === "REVISADO" ? "bg-orange-500" : event.status === "PROGRAMADO" ? "bg-sky-500" : event.status === "PUBLICADO" ? "bg-yellow-500" : "bg-gray-500"
-
+  const timeFormated= format(event.start, "HH:mm")
+  const isBlocked= event.title === "Bloqueado"
+  const description= isBlocked ? `Seguro que desea quitar de bloqueado el slot de las ${timeFormated}?` : `Seguro que desea cancelar la reserva de ${event.title}?`
   return (
     <>
       {
@@ -20,12 +21,15 @@ const CustomEvent: React.FC<CustomEventProps> = ({ event }) => {
             <div className="text-sm font-bold text-gray-700 line-clamp-2 whitespace-pre-wrap flex items-center justify-between w-full">
               {event.title} 
               {
-                event.bookingId && <CancelBookingDialog id={event.bookingId} description={`Seguro que desea cancelar la reserva de ${event.title}?`} size="sm"/>
+                event.bookingId && <CancelBookingDialog id={event.bookingId} description={description} size="sm"/>
               }
               
               {
                 event.type === "free" && (
-                  <BookingDialog clientId={event.clientId} eventId={event.eventId} date={event.start} availableSeats={event.availableSeats}/>
+                  <div className="flex flex-col gap-1">
+                    <BookingDialog clientId={event.clientId} eventId={event.eventId} date={event.start} availableSeats={event.availableSeats}/>
+                    <BlockSlotDialog eventId={event.eventId} start={event.start} end={event.end} description={`Seguro que desea bloquear el slot de las ${timeFormated}?`} size="sm"/>
+                  </div>
                 )
               }
             </div>

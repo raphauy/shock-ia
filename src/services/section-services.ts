@@ -279,23 +279,27 @@ export async function getContext(clientId: string, phone: string, userInput: str
 
   if (functionsNames.includes("obtenerDisponibilidad")) {
     const events= await getActiveEventsDAOByClientId(clientId)
-    console.log("events: ", events)
+    const availableEvents= events.filter(event => event.availability.length > 0)
+    console.log("availableEvents: ", availableEvents.map((event) => event.name))
 
-    contextString+= "\n**** Eventos disponibles ****\n"
+    contextString+= "\n**** Eventos disponibles, no son reservas, son eventos disponibles para reservar ****\n"
     contextString+= "Eventos que pueden ser relevantes para elaborar una respuesta:\n"
-    events.map((event) => {
+    availableEvents.map((event) => {
     contextString += `{
     eventId: "${event.id}",
     eventName: "${event.name}",
     eventDescription: "${event.description}",
     eventAddress: "${event.address}",
     timezone: "${event.timezone}",
-},
+    minDuration: ${event.minDuration},
+    maxDuration: ${event.maxDuration},
+}
 `
     const hoy = format(toZonedTime(new Date(), event.timezone), "EEEE, dd/MM/yyyy HH:mm:ss", {
       locale: es,
     });
-    contextString+= `Hoy es ${hoy} en el timezone del evento ${event.timezone}`
+    contextString+= `Ahora es ${hoy} en el timezone del evento (${event.timezone})\n`
+    contextString+= `---------------\n\n`
 
 // eventSeatsPerTimeSlot: ${event.seatsPerTimeSlot}
     })

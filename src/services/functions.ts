@@ -2,19 +2,19 @@ import { checkDateTimeFormatForSlot, decodeAndCorrectText } from "@/lib/utils";
 import { addMinutes, format, parse } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import { revalidatePath } from "next/cache";
-import { BookingFormValues, createBooking, getFutureBookingsDAOByEventId } from "./booking-services";
+import { BookingFormValues, cancelBooking, createBooking, getBookingDAO, getFutureBookingsDAOByContact, getFutureBookingsDAOByEventId } from "./booking-services";
 import { CarServiceFormValues, createCarService } from "./carservice-services";
 import { getValue, setValue } from "./config-services";
 import { getConversation, getConversationPhone, messageArrived } from "./conversationService";
 import { getDocumentDAO } from "./document-services";
 import { getEventDAO } from "./event-services";
-import { getFunctionClientDAO } from "./function-services";
+import { functionHaveRepository, getFunctionClientDAO } from "./function-services";
 import { NarvaezFormValues, createOrUpdateNarvaez } from "./narvaez-services";
 import { sendWapMessage } from "./osomService";
 import { createRepoData, repoDataFormValues } from "./repodata-services";
 import { getRepositoryDAOByFunctionName } from "./repository-services";
 import { getSectionOfDocument } from "./section-services";
-import { getSlots } from "./slots-service";
+import { checkBookingAvailability, getSlots } from "./slots-service";
 import { SummitFormValues, createSummit } from "./summit-services";
 import { sendWebhookNotification } from "./webhook-notifications-service";
 import moment from 'moment-timezone'
@@ -335,7 +335,7 @@ export async function obtenerDisponibilidad(clientId: string, conversationId: st
   const bookings= await getFutureBookingsDAOByEventId(eventId, event.timezone)
   console.log("bookings: ", bookings)
 
-  const slots= getSlots(dateStr, bookings, event.availability, event.duration, event.timezone)
+  const slots= getSlots(dateStr, bookings, event.availability, event.minDuration, event.timezone)
   console.log("slots: ", slots)
 
   const result: SlotsResult[]= slots.map((slot) => ({
@@ -349,28 +349,37 @@ export async function obtenerDisponibilidad(clientId: string, conversationId: st
   return JSON.stringify(result)
 }
 
-export async function reservarEventoDuracionFija(clientId: string, conversationId: string, eventId: string, start: string, end: string, name: string){
-  console.log("reservarEventoDuracionFija")
+export async function reservarParaEvento(clientId: string, conversationId: string, eventId: string, start: string, duration: string, name: string){
+  console.log("reservarParaEvento")
   console.log(`\tconversationId: ${conversationId}`)
   console.log(`\teventId: ${eventId}`)
   console.log(`\tstart: ${start}`)
-  console.log(`\tend: ${end}`)
+  console.log(`\tduration: ${duration}`)
 
   const startFormatIsCorrect= checkDateTimeFormatForSlot(start)
-  const endFormatIsCorrect= checkDateTimeFormatForSlot(end)
-  if (!startFormatIsCorrect || !endFormatIsCorrect) {
+  if (!startFormatIsCorrect) {
     return "Formato de fecha incorrecto, debe ser YYYY-MM-DD HH:mm"
   }
 
-  let startDate= parse(start, "yyyy-MM-dd HH:mm", new Date())
-  let endDate= parse(end, "yyyy-MM-dd HH:mm", new Date())
+  const dateTimeFormat= "yyyy-MM-dd HH:mm"
+  let startDate= parse(start, dateTimeFormat, new Date())
+  const durationInt= parseInt(duration)
+  let endDate= addMinutes(startDate, durationInt)
 
   const event= await getEventDAO(eventId)
   if (!event) return "Evento no encontrado"
 
+  if (event.type === "SINGLE_SLOT" && event.minDuration !== durationInt)
+    return `El evento es de duración fija y debe ser de ${event.minDuration} minutos`
+
   const offsetInMinutes = moment.tz(startDate, event.timezone).utcOffset()
   startDate= addMinutes(startDate, -offsetInMinutes)
   endDate= addMinutes(endDate, -offsetInMinutes)
+
+  const isAvailable= await checkBookingAvailability(startDate, endDate, event)
+  console.log("isAvailable: ", isAvailable)
+  if (!isAvailable) 
+    return `El slot ${format(startDate, dateTimeFormat)} - ${format(endDate, dateTimeFormat)} no está disponible`
 
   let contact= await getConversationPhone(conversationId)
   if (!contact) contact= "Ocurrió un error al obtener la conversación"
@@ -390,6 +399,64 @@ export async function reservarEventoDuracionFija(clientId: string, conversationI
   if (!created) return "Error al reservar, pregunta al usuario si quiere que tu reintentes"
 
   return "Reserva registrada."
+}
+
+type ObtenerReservasResult = {
+  bookingId: string
+  start: string
+  end: string
+  name: string
+  contact: string
+  status: string
+  eventName: string
+}
+
+export async function obtenerReservas(clientId: string, conversationId: string){
+  console.log("obtenerReservas")
+  console.log(`\tconversationId: ${conversationId}`)
+
+  const conversation= await getConversation(conversationId)
+  if (!conversation) return `No se encontró una conversación con id ${conversationId}`
+
+  const phone= conversation.phone
+
+  const bookings= await getFutureBookingsDAOByContact(phone)
+
+  const result: ObtenerReservasResult[]= bookings.map((booking) => ({
+    bookingId: booking.id,
+    start: format(booking.start, "yyyy-MM-dd HH:mm"),
+    end: format(booking.end, "yyyy-MM-dd HH:mm"),
+    name: booking.name,
+    contact: booking.contact,
+    status: booking.status,
+    eventName: booking.eventName,
+  }))
+
+  console.log("result: ", result)  
+
+  return JSON.stringify(result)
+}
+
+export async function cancelarReserva(clientId: string, conversationId: string, bookingId: string){
+  console.log("cancelarReserva")
+  console.log(`\tconversationId: ${conversationId}`)
+  console.log(`\tbookingId: ${bookingId}`)
+
+  const conversation= await getConversation(conversationId)
+  if (!conversation) return `No se encontró una conversación con id ${conversationId}`
+
+  const phone= conversation.phone
+
+  const booking= await getBookingDAO(bookingId)
+  if (!booking) return `No se encontró una reserva con id ${bookingId}`
+
+  // check contact and phone match
+  if (booking.contact !== phone) return "La reserva no pertenece a esta conversación"
+
+  const canceled= await cancelBooking(bookingId)
+  if (!canceled) return "Error al cancelar la reserva"
+
+  return `La reserva de ${booking.contact} ha sido cancelada`
 }
 
 
@@ -533,16 +600,24 @@ export async function processFunctionCall(clientId: string, name: string, args: 
       )
       break
 
-    case "reservarEventoDuracionFija":
-      content= await reservarEventoDuracionFija(clientId,
+    case "reservarParaEvento":
+      content= await reservarParaEvento(clientId,
         args.conversationId,
         args.eventId,
         args.start,
-        args.end,
+        args.duration,
         args.name
       )
       break
-  
+
+    case "obtenerReservas":
+      content= await obtenerReservas(clientId, args.conversationId)
+      break
+
+    case "cancelarReserva":
+      content= await cancelarReserva(clientId, args.conversationId, args.bookingId)      
+      break
+
     default:
       content= await defaultFunction(clientId, name, args)
       break
@@ -556,8 +631,10 @@ export async function processFunctionCall(clientId: string, name: string, args: 
   }
 }
 
-export function getAgentes(name: string): boolean {
-let res= false
+export async function getAgentes(name: string): Promise<boolean> {
+let res= await functionHaveRepository(name)
+if (res) return true
+
 switch (name) {
   case "notifyHuman":
     res= true
@@ -571,25 +648,25 @@ switch (name) {
   case "reservarServicio":
     res= true
     break
-  case "registrarLeadInmobiliario":
-    res= true
-    break
-  case "registrarLeadsDeRegalosEmpresariales":
-    res= true
-    break
-  case "registrarLeadsAcademia":
-    res= true
-    break
-  case "registrarLeadsInteresadosAccessOne":
-    res= true
-    break
-  case "calificarLeadMiDerecho":
-    res= true
-    break
-  case "registrarLeadAmbit":
-    res= true
-    break
-      
+  // case "registrarLeadInmobiliario":
+  //   res= true
+  //   break
+  // case "registrarLeadsDeRegalosEmpresariales":
+  //   res= true
+  //   break
+  // case "registrarLeadsAcademia":
+  //   res= true
+  //   break
+  // case "registrarLeadsInteresadosAccessOne":
+  //   res= true
+  //   break
+  // case "calificarLeadMiDerecho":
+  //   res= true
+  //   break
+  // case "registrarLeadAmbic":
+  //   res= true
+  //   break
+    
   default:
     break
 }

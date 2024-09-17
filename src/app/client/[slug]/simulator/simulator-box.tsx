@@ -3,7 +3,7 @@
 import { CustomInfo, getActiveMessagesAction, getCustomInfoAction } from "@/app/admin/chat/actions";
 import { DataClient, getDataClientBySlug } from "@/app/admin/clients/(crud)/actions";
 import { getModelDAOActionByName } from "@/app/admin/models/model-actions";
-import { DeleteConversationDialog } from "@/app/client/[slug]/chats/(delete-conversation)/delete-dialogs";
+import { CloseConversationDialog, DeleteConversationDialog } from "@/app/client/[slug]/chats/(delete-conversation)/delete-dialogs";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -168,11 +168,13 @@ export default function SimulatorBox() {
             </TooltipContent>
           </Tooltip>
           <div className="flex items-center gap-2">
-            <DeleteConversationDialog id={conversationId} description={`Seguro que desea eliminar la conversación de ${userEmail}?`} redirectUri={`/client/${slug}/simulator?r=${new Date().getMilliseconds()}`} />
+            <CloseConversationDialog id={conversationId} description={`Seguro que desea cerrar la conversación de ${userEmail}?`} redirectUri={`/client/${slug}/simulator?r=${new Date().getMilliseconds()}`} /> 
           </div>
         </div>
         :
-        <div className="mt-5"/>
+        <div className="flex items-center gap-2">
+          <CloseConversationDialog id={conversationId} description={`Seguro que desea cerrar la conversación de ${userEmail}?`} redirectUri={`/client/${slug}/simulator?r=${new Date().getMilliseconds()}`} /> 
+        </div>
       }
       
       <div>

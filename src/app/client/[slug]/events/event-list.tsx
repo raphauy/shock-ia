@@ -29,7 +29,7 @@ export default function EventList({bookings, timezone}: Props) {
                 <Card>
                     {bookings.map((reservation: BookingDAO, index: number) => {
                         const time= `${format(reservation.start, 'HH:mm')} - ${format(reservation.end, 'HH:mm')}`
-                        const statusColor= reservation.status === "CANCELADO" ? "bg-gray-200" : reservation.status === "CONFIRMADO" ? "bg-green-200" : reservation.status === "RESERVADO" ? "bg-sky-200" : reservation.status === "PAGADO" ? "bg-blue-200" : "bg-yellow-200"
+                        const statusColor= reservation.status === "CANCELADO" ? "bg-gray-200" : reservation.status === "CONFIRMADO" ? "bg-green-200" : reservation.status === "RESERVADO" ? "bg-sky-200" : reservation.status === "PAGADO" ? "bg-blue-200" : reservation.status === "BLOQUEADO" ? "bg-red-200" : "bg-yellow-200"
                         return (
                         <div key={index} className={`p-4 ${index !== 0 ? 'border-t' : ''}`}>
                             <div className="flex justify-between items-start">

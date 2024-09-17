@@ -83,7 +83,7 @@ export async function groqCompletionInit(client: Client, functions: ChatCompleti
         "content": content
       }
       messages.push(responseMessage)
-      agentes= getAgentes(name)
+      agentes= await getAgentes(name)
 
       const stepResponse = await groqCompletionInit(client, functions, messages, modelName)
       if (!stepResponse) return null

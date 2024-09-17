@@ -266,3 +266,26 @@ export async function getFunctionsWithRepo(clientId: string): Promise<SimpleFunc
 
   return res
 }
+
+export async function getFunctionIdByFunctionName(name: string) {
+  const found = await prisma.function.findUnique({
+    where: {
+      name
+    }
+  })
+
+  return found?.id
+}
+
+export async function functionHaveRepository(functionName: string) {
+  const found = await prisma.function.findMany({
+    where: {
+      name: functionName,
+      repositories: {
+        some: {}
+      }
+    }
+  })
+
+  return found.length > 0
+}

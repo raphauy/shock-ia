@@ -53,7 +53,7 @@ export default async function EventPage({ params }: Props) {
 function get1MonthAvailability(event: EventDAO, bookings: BookingDAO[]): CalendarEvent[] {
   const availability= event.availability
   console.log("availability:", availability)
-  const duration= event.duration
+  const duration= event.minDuration
   const timezone= event.timezone
   const result: CalendarEvent[] = [];
   const now = new Date();

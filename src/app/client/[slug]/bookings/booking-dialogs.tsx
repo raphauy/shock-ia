@@ -2,9 +2,9 @@
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { CircleX, Pencil, PlusCircle, Trash2, XIcon } from "lucide-react";
+import { Ban, CircleX, Pencil, PlusCircle, Trash2, XIcon } from "lucide-react";
 import { useState } from "react";
-import { BookingForm, CancelBookingForm, DeleteBookingForm } from "./booking-forms";
+import { BlockSlotForm, BookingForm, CancelBookingForm, DeleteBookingForm } from "./booking-forms";
 
 type Props= {
   id?: string
@@ -14,7 +14,7 @@ type Props= {
   availableSeats: number  
 }
 
-const addTrigger= <Button variant="ghost" size="icon" className="h-8 w-8 hover:border"><PlusCircle className="h-4 w-4"/></Button>
+const addTrigger= <PlusCircle className="h-4 w-4 text-green-500"/>
 const updateTrigger= <Pencil size={30} className="pr-2 hover:cursor-pointer"/>
 
 export function BookingDialog({ id, eventId, clientId, date, availableSeats }: Props) {
@@ -77,9 +77,7 @@ export function CancelBookingDialog({ id, description, size }: CancelProps) {
       <DialogTrigger asChild>
         {
           size === "sm" ? (
-            <Button variant="ghost" size="icon" className="h-8 w-8 hover:border">
-              <CircleX className="h-4 w-4"/>
-            </Button>
+            <CircleX className="h-4 w-4"/>
           ) : (
             <Button variant="outline" size="sm">
               <XIcon className="h-4 w-4 mr-2" />
@@ -95,6 +93,42 @@ export function CancelBookingDialog({ id, description, size }: CancelProps) {
           <DialogDescription className="py-8">{description}</DialogDescription>
         </DialogHeader>
         <CancelBookingForm id={id} closeDialog={() => setOpen(false)} />
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+type BlockProps= {
+  eventId: string
+  start: Date
+  end: Date
+  description: string
+  size?: "sm" | "lg"
+}
+
+export function BlockSlotDialog({ eventId, start, end, description, size }: BlockProps) {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        {
+          size === "sm" ? (
+            <Ban className="h-4 w-4 text-red-500"/>
+          ) : (
+            <Button variant="outline" size="sm">
+              <XIcon className="h-4 w-4 mr-2" />
+                Bloquear slot
+            </Button>
+          )
+        }
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Bloquear slot</DialogTitle>
+          <DialogDescription className="py-8">{description}</DialogDescription>
+        </DialogHeader>
+        <BlockSlotForm eventId={eventId} start={start} end={end} closeDialog={() => setOpen(false)} />
       </DialogContent>
     </Dialog>
   )

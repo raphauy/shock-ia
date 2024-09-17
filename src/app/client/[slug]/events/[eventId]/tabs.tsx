@@ -12,6 +12,7 @@ type Props = {
 export default async function TabsPage({eventId, initialEvents, timezone}: Props) {
 
     const bookings= await getFutureBookingsDAOByEventId(eventId, timezone)
+    const noBlockedBookings= bookings.filter(booking => booking.status !== "BLOQUEADO")
     const canceledBookings= await getBookingsByState(eventId, "CANCELADO")
 
     return (
@@ -27,7 +28,7 @@ export default async function TabsPage({eventId, initialEvents, timezone}: Props
                 <BigCalendar initialEvents={initialEvents} timezone={timezone} />
             </TabsContent>
             <TabsContent value="listado">
-                <EventList bookings={bookings} timezone={timezone} />
+                <EventList bookings={noBlockedBookings} timezone={timezone} />
             </TabsContent>
             <TabsContent value="canceladas">
                 <EventList bookings={canceledBookings} timezone={timezone} />

@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { toast } from "@/components/ui/use-toast"
 import { useEffect, useState } from "react"
-import { deleteBookingAction, createOrUpdateBookingAction, getBookingDAOAction, cancelBookingAction } from "./booking-actions"
+import { deleteBookingAction, createOrUpdateBookingAction, getBookingDAOAction, cancelBookingAction, blockSlotAction } from "./booking-actions"
 import { bookingSchema, BookingFormValues } from '@/services/booking-services'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -193,6 +193,47 @@ export function CancelBookingForm({ id, closeDialog }: CancelProps) {
       <Button onClick={handleCancel} variant="destructive" className="ml-2 gap-1">
         { loading && <Loader className="h-4 w-4 animate-spin" /> }
         Cancelar reserva  
+      </Button>
+    </div>
+  )
+}
+
+type BlockProps= {
+  eventId: string
+  start: Date
+  end: Date
+  closeDialog: () => void
+}
+
+export function BlockSlotForm({ eventId, start, end, closeDialog }: BlockProps) {
+  const [loading, setLoading] = useState(false)
+
+  async function handleBlock() {
+    if (!eventId) return
+    setLoading(true)
+    blockSlotAction(eventId, start, end)
+    .then((ok) => {
+      if (ok) {
+        toast({title: "Slot bloqueado" })
+      } else {
+        toast({title: "Error", description: "No se pudo bloquear el slot", variant: "destructive"})
+      } 
+    })
+    .catch((error) => {
+      toast({title: "Error", description: error.message, variant: "destructive"})
+    })
+    .finally(() => {
+      setLoading(false)
+      closeDialog && closeDialog()
+    })
+  }
+
+  return (
+    <div>
+      <Button onClick={() => closeDialog && closeDialog()} type="button" variant={"secondary"} className="w-32">Cancelar</Button>
+      <Button onClick={handleBlock} variant="destructive" className="ml-2 gap-1">
+        { loading && <Loader className="h-4 w-4 animate-spin" /> }
+        Bloquear slot  
       </Button>
     </div>
   )

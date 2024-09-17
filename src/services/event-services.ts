@@ -10,7 +10,8 @@ export type EventDAO = {
 	name: string
 	slug: string
   color: string
-	duration: number
+	minDuration: number
+	maxDuration: number
 	description: string | undefined
 	address: string | undefined
 	seatsPerTimeSlot: number | undefined
@@ -34,7 +35,8 @@ export const eventSchema = z.object({
 	name: z.string().min(1, "name is required."),
   slug: z.string().min(1, "slug is required."),
   color: z.string().min(1, "color is required."),
-  duration: z.number().min(1, "duration is required."),
+  minDuration: z.number().min(1, "minDuration is required."),
+  maxDuration: z.number().min(1, "maxDuration is required."),
   description: z.string().min(1, "description is required."),
   address: z.string().min(1, "address is required."),
   seatsPerTimeSlot: z.number().min(1, "seatsPerTimeSlot is required."),
@@ -80,7 +82,8 @@ export async function createEvent(clientId: string, name: string) {
       name,
       slug,
       color: "#bfe1ff",
-      duration: 60,
+      minDuration: 60,
+      maxDuration: 60,
       description: "Modifica esta descripción",
       address: "Modifica esta dirección",
       seatsPerTimeSlot: 1,
@@ -105,7 +108,8 @@ async function checkSlugAvailability(clientId: string, slug: string) {
 
 export async function updateEvent(id: string, data: EventFormValues) {
   const price= data.price ? Number(data.price) : 0
-  const duration= data.duration ? Number(data.duration) : 0
+  const minDuration= data.minDuration ? Number(data.minDuration) : 0
+  const maxDuration= data.maxDuration ? Number(data.maxDuration) : 0
   const seatsPerTimeSlot= data.seatsPerTimeSlot ? Number(data.seatsPerTimeSlot) : 0
 
   const updated = await prisma.event.update({
@@ -115,7 +119,8 @@ export async function updateEvent(id: string, data: EventFormValues) {
     data: {
       ...data,
       price,
-      duration,
+      minDuration,
+      maxDuration,
       seatsPerTimeSlot
     }
   })

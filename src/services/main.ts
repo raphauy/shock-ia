@@ -2,6 +2,7 @@ import { toZonedTime } from "date-fns-tz"
 import { getEventDAO } from "./event-services"
 import { getSlots } from "./slots-service"
 import { getFutureBookingsDAOByEventId } from "./booking-services"
+import { functionHaveRepository } from "./function-services"
 
 async function main() {
 
@@ -18,13 +19,10 @@ async function main() {
     // console.log("slots:")
     // console.log(slots)
 
-    const eventCancha3= await getEventDAO(cancha3Id)
-    console.log("timezone:", eventCancha3.timezone)
-    const bookings2= await getFutureBookingsDAOByEventId(eventCancha3.id, eventCancha3.timezone)
-    const slots2= getSlots(dateStr, bookings2, eventCancha3.availability, eventCancha3.duration, eventCancha3.timezone)
+    const functionName= "registrarLeadInmobiliario"
+    const haveRepository= await functionHaveRepository(functionName)
+    console.log("haveRepository:", haveRepository)
 
-    console.log("slots2:")
-    console.log(slots2)
 }
   
-main()
+//main()
