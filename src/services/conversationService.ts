@@ -42,7 +42,8 @@ export async function getConversationsOfClient(clientId: string) {
     include: {
       client: true,
       messages: true
-    }
+    },
+    take: 100
   })
 
   // const found = await prisma.conversation.findMany({
