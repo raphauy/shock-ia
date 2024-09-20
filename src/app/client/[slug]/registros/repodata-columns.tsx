@@ -10,6 +10,7 @@ import ConversationButton from "@/app/admin/carservices/conversation-button"
 import { format, formatDistanceToNow } from "date-fns"
 import { es } from "date-fns/locale"
 import DataCard from "./data-card"
+import { toZonedTime } from "date-fns-tz"
 
 
 export const columns: ColumnDef<RepoDataDAO>[] = [
@@ -41,10 +42,11 @@ export const columns: ColumnDef<RepoDataDAO>[] = [
     )},
     cell: ({ row }) => {
       const data= row.original
+      const zonedDate= toZonedTime(data.updatedAt, "America/Montevideo")
       return (
         <div>
             <ConversationButton name={data.phone} conversationId={data.conversationId} /> 
-            <p>{format(data.updatedAt, "yyyy-MM-dd HH:mm", { locale: es})}</p>
+            <p>{format(zonedDate, "yyyy-MM-dd HH:mm", { locale: es})}</p>
         </div>
       )
     },
