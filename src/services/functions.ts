@@ -459,6 +459,28 @@ export async function cancelarReserva(clientId: string, conversationId: string, 
   return `La reserva de ${booking.contact} ha sido cancelada`
 }
 
+export async function notificarAsesor(clientId: string, conversationId: string, sucursal: string){
+  console.log("notificarAsesor")
+  console.log(`\tconversationId: ${conversationId}`)
+  console.log(`\tsucursal: ${sucursal}`)
+  if (!sucursal) return "La sucursal es obligatoria"
+
+  const dateTime= toZonedTime(new Date(), "America/Montevideo")
+
+  const isWorkHours= isInWorkHours(dateTime, sucursal)
+  console.log("isWorkHours: ", isWorkHours)
+
+  let message= "Debes enviar exactamente este texto al usuario:"
+
+  if (!isWorkHours) {
+    message+= "Actualmente estamos fuera del horario laboral de la clínica. Un representante comercial se pondrá en contacto contigo al inicio de la próxima jornada."
+  } else {
+    message+= "Un representante comercial se pondrá en contacto contigo a la brevedad."
+  } 
+
+  return message
+}
+
 
 export async function defaultFunction(clientId: string, name: string, args: any) {
   console.log("defaultFunction")
@@ -618,6 +640,10 @@ export async function processFunctionCall(clientId: string, name: string, args: 
       content= await cancelarReserva(clientId, args.conversationId, args.bookingId)      
       break
 
+    case "notificarAsesor":
+      content= await notificarAsesor(clientId, args.conversationId, args.sucursal)
+      break
+
     default:
       content= await defaultFunction(clientId, name, args)
       break
@@ -666,6 +692,10 @@ switch (name) {
   // case "registrarLeadAmbic":
   //   res= true
   //   break
+
+  case "notificarAsesor":
+    res= true
+    break
     
   default:
     break
@@ -673,3 +703,33 @@ switch (name) {
 return res
 }
 
+// crea una estructuar de datos para representar un horario laboral
+// por ej: lunes a viernes de 9:00 a 17:00 hs y sábado de 9:00 a 12:00 hs
+const horarioLaboralCasaCentral= ["07:00-17:00", "07:00-17:00", "07:00-17:00", "07:00-17:00", "07:00-17:00", "08:00-12:00", ""]
+const horarioLaboralCostaUrbana= ["07:00-19:00", "07:00-19:00", "07:00-19:00", "07:00-19:00", "07:00-19:00", "08:00-12:00", ""]
+
+// return true if the dateTime is in the work hours
+export function isInWorkHours(dateTime: Date, sucursal: string) {
+  //dateTime= toUtc
+  console.log("dateTime: ", format(dateTime, "yyyy-MM-dd HH:mm"))
+  
+
+  const dayOfWeek= dateTime.getDay() -1
+  const time= dateTime.getTime()
+  let timeRange= horarioLaboralCasaCentral[dayOfWeek]
+  if (sucursal.toLocaleLowerCase().includes("urbana")) timeRange= horarioLaboralCostaUrbana[dayOfWeek]
+
+  if (!timeRange) return false
+
+  const [start, end]= timeRange.split("-")
+  const [startHour, startMinute]= start.split(":")
+  const [endHour, endMinute]= end.split(":")
+  const startTime= new Date(dateTime)
+  startTime.setHours(parseInt(startHour), parseInt(startMinute))
+  const endTime= new Date(dateTime)
+  endTime.setHours(parseInt(endHour), parseInt(endMinute))
+  console.log("startTime: ", format(startTime, "yyyy-MM-dd HH:mm"))
+  console.log("endTime: ", format(endTime, "yyyy-MM-dd HH:mm"))
+
+  return time >= startTime.getTime() && time <= endTime.getTime()
+}

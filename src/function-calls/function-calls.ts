@@ -85,3 +85,24 @@ const cancelarReserva=
   },
   "required": ["conversationId", "bookingId"]
 }
+
+
+const notificarAsesor=
+{
+  "name": "notificarAsesor",
+  "description": "Notifica a un asesor que es una persona que asistirá al usuario. Esta función se debe llamar cuando el usuario quiere hablar con una persona, con un humano o con un asesor.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "conversationId": {
+        "type": "string",
+        "description": "Id de la conversación que se proporciona en el prompt."
+      },
+      "sucursal": {
+        "type": "string",
+        "description": "Sucursal de la que se quiere notificar al asesor. Las sucursales son: Casa Central o Costa Urbana."
+      }
+    }
+  },
+  "required": ["conversationId", "sucursal"]
+}

@@ -3,6 +3,7 @@ import { getEventDAO } from "./event-services"
 import { getSlots } from "./slots-service"
 import { getFutureBookingsDAOByEventId } from "./booking-services"
 import { functionHaveRepository } from "./function-services"
+import { isInWorkHours } from "./functions"
 
 async function main() {
 
@@ -19,10 +20,10 @@ async function main() {
     // console.log("slots:")
     // console.log(slots)
 
-    const functionName= "registrarLeadInmobiliario"
-    const haveRepository= await functionHaveRepository(functionName)
-    console.log("haveRepository:", haveRepository)
 
+//    const dateTime= toZonedTime(new Date("2024-09-15T09:59:00"), "America/Montevideo")
+    const dateTime= toZonedTime(new Date(), "America/Montevideo")
+    console.log("isInWorkHours:", isInWorkHours(dateTime, "casa central"))
 }
   
 //main()
