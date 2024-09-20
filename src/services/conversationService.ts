@@ -402,9 +402,84 @@ export async function deleteConversation(id: string) {
   return deleted
 }
 
+// export async function getBillingData(from: Date, to: Date, clientId?: string): Promise<CompleteData> {  
+
+//   const messages= await prisma.message.findMany({
+//     where: {
+//       createdAt: {
+//         gte: from,
+//         lte: to
+//       },
+//       conversation: {
+//         clientId: clientId
+//       }
+//     },
+//     include: {
+//       conversation: {
+//         include: {
+//           client: {
+//             include: {
+//               model: true
+//             }
+//           }
+//         }
+//       }
+//     }
+//   })
+
+//   const billingData: BillingData[]= []
+
+//   const clientMap: {[key: string]: BillingData}= {}
+
+//   for (const message of messages) {    
+//     const clientName= message.conversation.client.name
+//     const model= message.conversation.client.model
+//     const modelName= model?.name || ""
+//     const promptTokensCost= model?.inputPrice || 0
+//     const completionTokensCost= model?.outputPrice || 0
+//     const promptTokens= message.promptTokens ? message.promptTokens : 0
+//     const completionTokens= message.completionTokens ? message.completionTokens : 0
+
+//     if (!clientMap[clientName]) {
+//       clientMap[clientName]= {
+//         clientName,
+//         modelName,
+//         promptTokensCost,
+//         completionTokensCost,
+//         promptTokens,
+//         completionTokens,
+//         clientPricePerPromptToken: message.conversation.client.promptTokensPrice,
+//         clientPricePerCompletionToken: message.conversation.client.completionTokensPrice,
+//       }
+//     } else {
+//       clientMap[clientName].promptTokens+= promptTokens
+//       clientMap[clientName].completionTokens+= completionTokens
+//     }
+//   }
+
+//   let totalCost= 0
+
+//   for (const key in clientMap) {
+//     billingData.push(clientMap[key])
+//     totalCost+= (clientMap[key].promptTokens / 1000000 * clientMap[key].promptTokensCost) + (clientMap[key].completionTokens / 1000000 * clientMap[key].completionTokensCost)
+//   }
+
+//   // sort billingData by promptTokens
+//   billingData.sort((a, b) => {
+//     return b.promptTokens - a.promptTokens
+//   })
+
+//   const res: CompleteData= {
+//     totalCost,
+//     billingData
+//   }
+  
+//   return res
+// }
+
 export async function getBillingData(from: Date, to: Date, clientId?: string): Promise<CompleteData> {  
 
-  const messages= await prisma.message.findMany({
+  const messages = await prisma.message.findMany({
     where: {
       createdAt: {
         gte: from,
@@ -414,18 +489,31 @@ export async function getBillingData(from: Date, to: Date, clientId?: string): P
         clientId: clientId
       }
     },
-    include: {
+    select: {
+      promptTokens: true,
+      completionTokens: true,
       conversation: {
-        include: {
+        select: {
           client: {
-            include: {
-              model: true
+            select: {
+              name: true,
+              model: {
+                select: {
+                  name: true,
+                  inputPrice: true,
+                  outputPrice: true
+                }
+              },
+              promptTokensPrice: true,
+              completionTokensPrice: true
             }
           }
         }
       }
     }
-  })
+  });
+  
+  console.log("messages count: ", messages.length)
 
   const billingData: BillingData[]= []
 
