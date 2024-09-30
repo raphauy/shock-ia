@@ -64,10 +64,12 @@ export const columns: ColumnDef<RepoDataDAO>[] = [
     )},
     cell: ({ row }) => {
       const data= row.original
-      // replace all false with NO and all true with SI
-      const jsonReplaced = data.data
-      .replace(/false/g, "NO")
-      .replace(/true/g, "SI");
+      const parsedData = JSON.parse(data.data as string);
+
+      const jsonReplaced = Object.keys(parsedData).reduce((acc, key) => {
+        acc[key] = parsedData[key] === true ? "SI" : parsedData[key] === false ? "NO" : parsedData[key];
+        return acc;
+      }, {} as Record<string, any>);
 
       return <DataCard repoName={data.repoName} jsonData={jsonReplaced} />
     },

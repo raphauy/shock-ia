@@ -1,13 +1,13 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { camelCaseToNormal, putTildes } from "@/lib/utils";
 
 type Props = {
     repoName: string
-    jsonData: string
+    jsonData: Record<string, any>
 }
 
 export default function DataCard({ repoName, jsonData }: Props) {
-    const keys= Object.keys(JSON.parse(jsonData))
+    const keys= Object.keys(jsonData)
     return (
         <Card>
             <CardHeader>
@@ -18,7 +18,7 @@ export default function DataCard({ repoName, jsonData }: Props) {
                 <div className="">
                     {
                         keys.map((key, i) => {
-                            const value = JSON.parse(jsonData)[key];
+                            const value = jsonData[key];
                             const normalKey = camelCaseToNormal(key);
                             const keyWithTildes = putTildes(normalKey);
                             return (
