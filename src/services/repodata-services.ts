@@ -68,8 +68,12 @@ export async function createRepoData(data: repoDataFormValues) {
         select: {
           name: true,
         }
+      },
+      repository: {
+        select: {
+          name: true,
+        }
       }
-      
     }
   })
   return created;

@@ -30,6 +30,7 @@ export async function POST(request: Request) {
 
         let text= `Usuario: +${phone}\n`
         text+= "------------------------------------\n"
+        text+= `Registro: ${repoName}\n`
 
         const parsedData= JSON.parse(data)
         const keys= Object.keys(JSON.parse(data))
