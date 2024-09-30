@@ -53,7 +53,13 @@ export async function sendWebhookNotification(webhookUrl: string, repoData: Repo
         if (axios.isAxiosError(error) && error.code === 'ECONNABORTED') {
             console.error('Request timed out');
         } else {
-            console.error('Failed to send webhook notification:', error)
+            const statusCode = (error as any).response?.status
+            // if error es 400 log only the message
+            if (statusCode === 400) {
+                console.error('Failed to send webhook notification:', (error as any).response?.data?.message)
+            } else {
+                console.error('Failed to send webhook notification:', error)
+            }
         }
     }
 }
