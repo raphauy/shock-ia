@@ -23,13 +23,13 @@ export function DataTableToolbar<TData>({ table, repoNames, repoLabel }: DataTab
   return (
     <div className="flex gap-1 dark:text-white items-center">
           
-      {/* {table.getColumn("repoName") && (
+      {table.getColumn("repoName") && repoNames.length > 1 && (
         <DataTableFacetedFilter
           column={table.getColumn("repoName")}
           title={repoLabel}
           options={repoNames}
         />
-      )} */}
+      )}
 
       <Input className="max-w-xs" placeholder="filtrar teléfono..."
           value={(table.getColumn("phone")?.getFilterValue() as string) ?? ""}
