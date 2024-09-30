@@ -4,9 +4,10 @@ import { CompletionInitResponse, getAgentes, getDateOfNow, getDocument, getSecti
 import { decodeAndCorrectText } from "@/lib/utils";
 import { Client } from "@prisma/client";
 import { getFullModelDAO } from "./model-services";
+import { saveFunction } from "./conversationService";
 
 
-export async function completionInit(client: Client, functions: ChatCompletionCreateParams.Function[], messages: ChatCompletionMessageParam[], modelName?: string): Promise<CompletionInitResponse | null> {
+export async function completionInit(phone: string, client: Client, functions: ChatCompletionCreateParams.Function[], messages: ChatCompletionMessageParam[], modelName?: string): Promise<CompletionInitResponse | null> {
 
   if (!client.modelId) throw new Error("Client modelId not found")
 
@@ -63,7 +64,10 @@ export async function completionInit(client: Client, functions: ChatCompletionCr
     })
     agentes= await getAgentes(name)
 
-    const stepResponse = await completionInit(client, functions, messages, modelName)
+    const completion= { function_call: { name, arguments: JSON.stringify(args) } }
+    await saveFunction(phone, JSON.stringify(completion), client.id)
+
+    const stepResponse = await completionInit(phone, client, functions, messages, modelName)
     if (!stepResponse) return null
 
     return {

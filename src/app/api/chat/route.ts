@@ -1,7 +1,7 @@
 import { getCurrentUser } from "@/lib/auth"
 import { removeSectionTexts } from "@/lib/utils"
 import { getClient } from "@/services/clientService"
-import { getSystemMessage, messageArrived } from "@/services/conversationService"
+import { getSystemMessage, messageArrived, saveFunction } from "@/services/conversationService"
 import { getFunctionsDefinitions } from "@/services/function-services"
 import { processFunctionCall } from "@/services/functions"
 import { getFullModelDAO, getFullModelDAOByName } from "@/services/model-services"
@@ -144,13 +144,11 @@ export async function POST(req: Request) {
         const messageStored= await messageArrived(phone, completion, client.id, "assistant", "", promptTokens, completionTokens)
         if (messageStored) console.log("assistant message stored")
       } else {
-        // console.log("function call")
-        // const completionObj= JSON.parse(completion)
-        // const { name, arguments: args }= completionObj.function_call
-//        const text= `Llamando a la función ${name} con los argumentos: ${args}`
-        // const text= `Función invocada.`
-        // const messageStored= await messageArrived(phone, text, client.id, "function", "", 0, 0)
-        // if (messageStored) console.log("function message stored")
+        console.log("completion")
+        console.log(completion)
+        console.log(JSON.stringify(completion))
+        
+        await saveFunction(phone, completion, client.id)
       }
     },
   });
