@@ -22,6 +22,13 @@ type RepoDataWithClientName = RepoDataDAO & {
 }
 
 export async function sendWebhookNotification(webhookUrl: string, repoData: RepoDataWithClientName) {
+    const parsedData = JSON.parse(repoData.data as string);
+
+    const jsonReplaced = Object.keys(parsedData).reduce((acc, key) => {
+      acc[key] = parsedData[key] === true ? "SI" : parsedData[key] === false ? "NO" : parsedData[key];
+      return acc;
+    }, {} as Record<string, any>);
+
 
     const data: RepoDataEntryResponse = {
         id: repoData.id,
@@ -31,7 +38,7 @@ export async function sendWebhookNotification(webhookUrl: string, repoData: Repo
         clientId: repoData.clientId,
         clientName: repoData.client.name,
         date: format(repoData.createdAt, "yyyy-MM-dd HH:mm", { locale: es }),
-        data: repoData.data,
+        data: JSON.stringify(jsonReplaced),
     }
 
     const init= new Date().getTime()
