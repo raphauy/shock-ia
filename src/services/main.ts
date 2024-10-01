@@ -23,7 +23,7 @@ async function main() {
 
 //    const dateTime= toZonedTime(new Date("2024-09-15T09:59:00"), "America/Montevideo")
     const dateTime= toZonedTime(new Date(), "America/Montevideo")
-    console.log("isInWorkHours:", isInWorkHours(dateTime, "casa central"))
+    console.log("isInWorkHours:", isInWorkHours(dateTime))
 }
   
 //main()
