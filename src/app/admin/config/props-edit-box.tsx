@@ -2,7 +2,7 @@
 
 import { Switch } from "@/components/ui/switch"
 import { setHaveEventsAction } from "./(crud)/actions"
-import { useState } from "react"
+import { use, useEffect, useState } from "react"
 import { Loader } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
 
@@ -15,6 +15,10 @@ export default function PropsEdit({ clientId, haveEvents: initialHaveEvents }: P
 
     const [loading, setLoading] = useState(false)
     const [haveEvents, setHaveEvents] = useState(initialHaveEvents)
+
+    useEffect(() => {
+        setHaveEvents(initialHaveEvents)
+    }, [initialHaveEvents])
 
     function handleHaveEventsChange(haveEvents: boolean) {
         setLoading(true)
