@@ -11,13 +11,16 @@ type RepoDataEntryResponse = {
     functionName: string,
     clientId: string,
     clientName: string,
+    clientSlug: string,
+    conversationId: string,
     date: string,
     data: String,
 }
 
 type RepoDataWithClientName = RepoDataDAO & {
     client: {
-        name: string
+        name: string,
+        slug: string
     }
 }
 
@@ -37,6 +40,8 @@ export async function sendWebhookNotification(webhookUrl: string, repoData: Repo
         functionName: repoData.functionName,
         clientId: repoData.clientId,
         clientName: repoData.client.name,
+        clientSlug: repoData.client.slug,
+        conversationId: repoData.conversationId,
         date: format(repoData.createdAt, "yyyy-MM-dd HH:mm", { locale: es }),
         data: JSON.stringify(jsonReplaced),
     }

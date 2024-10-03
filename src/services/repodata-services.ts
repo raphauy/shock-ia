@@ -67,11 +67,12 @@ export async function createRepoData(data: repoDataFormValues) {
       client: {
         select: {
           name: true,
+          slug: true,
         }
       },
       repository: {
         select: {
-          name: true,
+          name: true,          
         }
       }
     }

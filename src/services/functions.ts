@@ -677,24 +677,6 @@ switch (name) {
   case "reservarServicio":
     res= true
     break
-  // case "registrarLeadInmobiliario":
-  //   res= true
-  //   break
-  // case "registrarLeadsDeRegalosEmpresariales":
-  //   res= true
-  //   break
-  // case "registrarLeadsAcademia":
-  //   res= true
-  //   break
-  // case "registrarLeadsInteresadosAccessOne":
-  //   res= true
-  //   break
-  // case "calificarLeadMiDerecho":
-  //   res= true
-  //   break
-  // case "registrarLeadAmbic":
-  //   res= true
-  //   break
 
   case "notificarAsesor":
     res= true
@@ -705,37 +687,6 @@ switch (name) {
 }
 return res
 }
-
-// crea una estructuar de datos para representar un horario laboral
-// por ej: lunes a viernes de 9:00 a 17:00 hs y sábado de 9:00 a 12:00 hs
-// const horarioLaboralCasaCentral= ["07:00-17:00", "07:00-17:00", "07:00-17:00", "07:00-17:00", "07:00-17:00", "08:00-12:00", ""]
-// const horarioLaboralCostaUrbana= ["07:00-19:00", "07:00-19:00", "07:00-19:00", "07:00-19:00", "07:00-19:00", "08:00-12:00", ""]
-
-// return true if the dateTime is in the work hours
-// export function isInWorkHours(dateTime: Date, sucursal: string) {
-//   //dateTime= toUtc
-//   console.log("dateTime: ", format(dateTime, "yyyy-MM-dd HH:mm"))
-  
-
-//   const dayOfWeek= dateTime.getDay() -1
-//   const time= dateTime.getTime()
-//   let timeRange= horarioLaboralCasaCentral[dayOfWeek]
-//   if (sucursal.toLocaleLowerCase().includes("urbana")) timeRange= horarioLaboralCostaUrbana[dayOfWeek]
-
-//   if (!timeRange) return false
-
-//   const [start, end]= timeRange.split("-")
-//   const [startHour, startMinute]= start.split(":")
-//   const [endHour, endMinute]= end.split(":")
-//   const startTime= new Date(dateTime)
-//   startTime.setHours(parseInt(startHour), parseInt(startMinute))
-//   const endTime= new Date(dateTime)
-//   endTime.setHours(parseInt(endHour), parseInt(endMinute))
-//   console.log("startTime: ", format(startTime, "yyyy-MM-dd HH:mm"))
-//   console.log("endTime: ", format(endTime, "yyyy-MM-dd HH:mm"))
-
-//   return time >= startTime.getTime() && time <= endTime.getTime()
-// }
 
 const horarioLaboral= ["07:00-19:00", "07:00-19:00", "07:00-19:00", "07:00-19:00", "07:00-19:00", "08:00-12:00", ""]
 

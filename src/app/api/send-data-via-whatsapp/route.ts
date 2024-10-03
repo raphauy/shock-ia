@@ -27,6 +27,10 @@ export async function POST(request: Request) {
 
         const phone= json.phone
         const repoName= json.repoName
+        const clientSlug= json.clientSlug
+        const conversationId= json.conversationId
+        const baseUrl= process.env.NEXTAUTH_URL
+        const conversationUrl= `${baseUrl}/client/${clientSlug}/chats?id=${conversationId}`
 
         let text= `Usuario: +${phone}\n`
         text+= "------------------------------------\n"
@@ -40,6 +44,8 @@ export async function POST(request: Request) {
             const keyWithTildes = putTildes(normalKey)
             text += `**${keyWithTildes}**: ${value}\n`
         }
+        text+= "------------------------------------\n"
+        text+= `${conversationUrl}\n`
         console.log("text: ", text)
         
 
