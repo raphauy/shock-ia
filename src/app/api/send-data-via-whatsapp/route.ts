@@ -45,6 +45,7 @@ export async function POST(request: Request) {
             text += `**${keyWithTildes}**: ${value}\n`
         }
         text+= "------------------------------------\n"
+        text+= `**Ver conversación:**\n`
         text+= `${conversationUrl}\n`
         console.log("text: ", text)
         
