@@ -44,8 +44,8 @@ export async function POST(request: Request) {
             const keyWithTildes = putTildes(normalKey)
             text += `**${keyWithTildes}**: ${value}\n`
         }
-        text+= "------------------------------------\n"
-        text+= `${conversationUrl}\n`
+        // text+= "------------------------------------\n"
+        // text+= `${conversationUrl}\n`
         console.log("text: ", text)
         
 
