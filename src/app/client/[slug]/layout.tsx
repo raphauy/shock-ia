@@ -19,7 +19,7 @@ export default async function SlugLayout({ children, params }: Props) {
   const slug = params.slug
 
   if (!currentUser) {
-    return redirect("/unauthorized?message=Deberías estar logueado.")
+    return redirect("/unauthorized?message=" + encodeURIComponent("Deberías estar logueado."))
   }
 
   if (currentUser.role !== 'admin' && currentUser.role !== 'cliente' && currentUser.role !== 'osom')
