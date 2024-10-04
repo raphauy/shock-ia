@@ -34,8 +34,6 @@ export default async function EventPage({ params }: Props) {
 
     return ( 
         <div className="w-full space-y-4 flex flex-col items-center">
-          hola
-
           <div className="flex gap-2 w-full">
             <EventHeader event={event} slug={slug} />
 
