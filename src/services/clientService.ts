@@ -1,6 +1,8 @@
 import { ClientFormValues } from "@/app/admin/clients/(crud)/clientForm";
 import { prisma } from "@/lib/db";
 import { addFunctionToClient, FunctionDAO, getFunctionIdByFunctionName, removeFunctionFromClient } from "./function-services";
+import { InboxProvider } from "@prisma/client";
+import { WhatsappInstanceDAO } from "./wrc-sdk-types";
 
 
 export default async function getClients() {
@@ -11,7 +13,8 @@ export default async function getClients() {
     },
     include: {
       users: true,
-      model: true
+      model: true,
+      whatsappInstances: true
     }
   })
 
@@ -469,4 +472,101 @@ async function removeEventFunctionsFromClient(clientId: string) {
   await removeFunctionFromClient(clientId, cancelarReservaId)
 
   return true
+}
+
+
+export async function setWhatsappInstance(whatsappInstanceData: WhatsappInstanceDAO) {
+  const whatsappInstance = await prisma.whatsappInstance.findFirst({
+    where: {
+      clientId: whatsappInstanceData.clientId
+    }
+  })
+
+  if (!whatsappInstance) {
+    const newWhatsappInstance = await prisma.whatsappInstance.create({
+      data: {
+        ...whatsappInstanceData,
+        clientId: whatsappInstanceData.clientId
+      }
+    })
+    return newWhatsappInstance
+  } else {
+    const updatedWhatsappInstance = await prisma.whatsappInstance.update({
+      where: {
+        id: whatsappInstance.id
+      },
+      data: whatsappInstanceData
+    })
+    return updatedWhatsappInstance
+  }  
+
+}
+
+export async function deleteWhatsappInstance(instanceName: string) {
+  const instance = await prisma.whatsappInstance.findFirst({
+    where: {
+      name: instanceName
+    }
+  })
+  if (!instance) {
+    return null
+  }
+  const deletedInstance = await prisma.whatsappInstance.delete({
+    where: {
+      id: instance.id
+    }
+  })
+  return deletedInstance
+}
+
+export async function setInboxProvider(clientId: string, inboxProvider: InboxProvider) {
+  const client = await prisma.client.update({
+    where: {
+      id: clientId
+    },
+    data: {
+      inboxProvider
+    }
+  })
+  return client
+}
+
+export async function getWhatsappInstance(clientId: string) {
+  const client = await prisma.client.findUnique({
+    where: {
+      id: clientId
+    },
+    select: {
+      whatsappInstances: true
+    }
+  })
+  if (!client) return null
+  if (client.whatsappInstances.length === 0) return null
+
+  return client.whatsappInstances[0]
+}
+
+export async function setChatwootData(clientId: string, chatwootAccountId: string, chatwootAccessToken: string, chatwootUrl: string) {
+  const whatsappInstance = await prisma.whatsappInstance.findFirst({
+    where: {
+      clientId
+    }
+  })
+
+  if (!whatsappInstance) {
+    throw new Error('Whatsapp instance not found')
+  }
+
+  const updatedInstance = await prisma.whatsappInstance.update({
+    where: {
+      id: whatsappInstance.id
+    },
+    data: {
+      chatwootAccountId,
+      chatwootAccessToken,
+      chatwootUrl
+    }
+  })
+
+  return updatedInstance
 }

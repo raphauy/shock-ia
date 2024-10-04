@@ -71,6 +71,7 @@ export async function getDataClientWithModel(slug: string, modelName?: string): 
       completionCostTokenPrice,
       modelName: model && model.name ? model.name : '',
       haveEvents: client.haveEvents,
+      inboxProvider: client.inboxProvider
   }
   return data
 }

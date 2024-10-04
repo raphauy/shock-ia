@@ -13,6 +13,8 @@ import DocumentsHook from "./documents-hook"
 import { WhatsappNumbersForm } from "./whatsapp-numbers-form"
 import RegistrosHook from "./registros-hook"
 import PropsEdit from "./props-edit-box"
+import ProviderSelector from "./whatsapp/provider-selector"
+import WhatsappTab from "./whatsapp/whatsapp-tab"
 
 type Props = {
     searchParams: {
@@ -44,6 +46,7 @@ export default async function ConfigPage({ searchParams }: Props) {
                         <TabsTrigger value="functions">Funciones</TabsTrigger>
                         <TabsTrigger value="props">Config</TabsTrigger>
                         <TabsTrigger value="hooks">Hooks</TabsTrigger>                        
+                        <TabsTrigger value="whatsapp">Whatsapp</TabsTrigger>                        
                         <TabsTrigger value="general">General</TabsTrigger>
                     </div>
                 </TabsList>
@@ -67,6 +70,12 @@ export default async function ConfigPage({ searchParams }: Props) {
                         <CopyHook name="Car Service Entry" path={`${BASE_PATH}/api/${client.id}/car-service`} clientId={client.id} />
                     }
                     <RegistrosHook basePath={BASE_PATH} />
+                </TabsContent>
+                <TabsContent value="whatsapp">
+                    <div className="w-fit mx-auto mb-4">
+                        <ProviderSelector client={client}/>
+                    </div>
+                    <WhatsappTab client={client} basePath={BASE_PATH} />
                 </TabsContent>
                 <TabsContent value="general">
                     <ConfigsPage />

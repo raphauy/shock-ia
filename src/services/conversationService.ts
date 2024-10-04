@@ -13,6 +13,7 @@ import { completionInit } from "./function-call-services";
 import { groqCompletionInit } from "./groq-function-call-services";
 import { getClient } from "./clientService";
 import { getDocument } from "./functions";
+import { sendText } from "./wrc-sdk";
 
 
 export default async function getConversations() {
@@ -280,7 +281,22 @@ export async function processMessage(id: string, modelName?: string) {
     await messageArrived(conversation.phone, assistantResponse, conversation.clientId, "assistant", gptDataString, promptTokens, completionTokens)
 
     console.log("notificarAgente: " + notificarAgente)    
-    await sendWapMessage(conversation.phone, assistantResponse, notificarAgente, conversation.clientId)
+    // await sendWapMessage(conversation.phone, assistantResponse, notificarAgente, conversation.clientId)
+
+    const inboxProvider= client.inboxProvider
+    if (inboxProvider === "OSOM") {
+      await sendWapMessage(conversation.phone, assistantResponse, notificarAgente, conversation.clientId)
+      return
+    }
+
+    if (inboxProvider === "WRC") {
+      console.log("Sending text vía WRC")
+      await sendText(client.slug, conversation.phone, assistantResponse)
+      return
+    }
+
+    console.log("Inbox provider not found, message not sent")
+
   }
 
   // if (assistantResponse) {

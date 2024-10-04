@@ -217,3 +217,15 @@ export function checkDateTimeFormatForSlot(dateStr: string) {
   const regex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/;
   return regex.test(dateStr);
 }
+
+export function getStatusColorAndLabel(status: string) {
+  if (status === 'open') {
+    return "Conectado"
+  } else if (status === 'close') {
+    return "Desconectado"
+  } else if (status === 'connecting') {
+    return "Conectando"
+  } else {
+    return "Desconocido"
+  }
+}

@@ -2,13 +2,14 @@
 
 import getClients, { clientHaveEvents, createClient, deleteClient, editClient, getClient, getClientBySlug, getComplementaryFunctionsOfClient, getFunctionsOfClient, getLastClient, setFunctions, setPrompt, setWhatsAppEndpoing, setWhatsAppNumbers } from "@/services/clientService";
 import { getUser } from "@/services/userService";
-import { Client } from "@prisma/client";
+import { Client, InboxProvider } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { EndpointFormValues } from "../../config/(crud)/endpoint-form";
 import { PromptFormValues } from "../../prompts/prompt-form";
 import { ClientFormValues } from "./clientForm";
 import { getFullModelDAO } from "@/services/model-services";
 import { WhatsappNumbersFormValues } from "../../config/whatsapp-numbers-form";
+import { WhatsappInstanceDAO } from "@/services/wrc-sdk-types";
 
 export type DataClient = {
     id: string
@@ -29,6 +30,8 @@ export type DataClient = {
     completionCostTokenPrice: number
     modelName: string
     haveEvents: boolean
+    whatsappInstance?: WhatsappInstanceDAO
+    inboxProvider: InboxProvider
   }
     
 
@@ -58,7 +61,8 @@ export async function getDataClient(clientId: string): Promise<DataClient | null
         promptCostTokenPrice: promptCostTokenPrice,
         completionCostTokenPrice: completionCostTokenPrice,
         modelName: model?.name || '',
-        haveEvents: client.haveEvents
+        haveEvents: client.haveEvents,
+        inboxProvider: client.inboxProvider
     }
     return data
 }
@@ -93,7 +97,8 @@ export async function getDataClientOfUser(userId: string): Promise<DataClient | 
         promptCostTokenPrice,
         completionCostTokenPrice,
         modelName: model?.name || '',
-        haveEvents: client.haveEvents
+        haveEvents: client.haveEvents,
+        inboxProvider: client.inboxProvider
     }
     return data
 }
@@ -126,7 +131,8 @@ export async function getDataClientBySlug(slug: string): Promise<DataClient | nu
         promptCostTokenPrice,
         completionCostTokenPrice,
         modelName: model?.name || '',
-        haveEvents: client.haveEvents
+        haveEvents: client.haveEvents,
+        inboxProvider: client.inboxProvider
     }
     return data
 }
@@ -157,7 +163,8 @@ export async function getLastClientAction(): Promise<DataClient | null>{
         promptCostTokenPrice,
         completionCostTokenPrice,
         modelName: model?.name || '',
-        haveEvents: client.haveEvents
+        haveEvents: client.haveEvents,
+        inboxProvider: client.inboxProvider
     }
     return data
 }
@@ -195,7 +202,9 @@ export async function getDataClients() {
                 promptCostTokenPrice,
                 completionCostTokenPrice,
                 modelName: model?.name || '',
-                haveEvents: client.haveEvents
+                haveEvents: client.haveEvents,
+                whatsappInstance: client.whatsappInstances.length === 0 ? undefined : client.whatsappInstances[0],
+                inboxProvider: client.inboxProvider
             };
         })
     );

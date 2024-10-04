@@ -59,6 +59,11 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+enum InboxProvider {
+  OSOM
+  WRC
+}
+
 model Client {
   id                    String   @id @default(cuid())
   name                  String
@@ -86,6 +91,9 @@ model Client {
   repoData              RepoData[]                         // gennext: skip.list
   events                Event[]                            // gennext: skip.list
   bookings              Booking[]                          // gennext: skip.list
+
+  whatsappInstances     WhatsappInstance[]
+  inboxProvider         InboxProvider @default(OSOM)
 }
 
 model Document {
@@ -427,4 +435,21 @@ model Booking {
 
   conversation        Conversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
   conversationId      String?
+}
+
+model WhatsappInstance {
+  id                  String @id @default(cuid())
+  externalId          String
+  name                String
+  number              String?
+
+  chatwootAccountId   String?
+  chatwootUrl         String?
+  chatwootAccessToken String?
+
+  client              Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId            String
+
+  createdAt           DateTime     @default(now())       // gennext: skip.zod
+  updatedAt           DateTime     @updatedAt            // gennext: skip.zod
 }
