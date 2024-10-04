@@ -420,7 +420,7 @@ export async function obtenerReservas(clientId: string, conversationId: string){
 
   const phone= conversation.phone
 
-  const bookings= await getFutureBookingsDAOByContact(phone)
+  const bookings= await getFutureBookingsDAOByContact(phone, clientId)
 
   const result: ObtenerReservasResult[]= bookings.map((booking) => ({
     bookingId: booking.id,

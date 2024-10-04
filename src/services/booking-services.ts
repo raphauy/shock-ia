@@ -223,9 +223,10 @@ export async function blockSlot(eventId: string, start: Date, end: Date) {
   return blocked
 }
 
-export async function getFutureBookingsDAOByContact(contact: string) {
+export async function getFutureBookingsDAOByContact(contact: string, clientId: string) {
   const found = await prisma.booking.findMany({
     where: {
+      clientId,
       contact,
       status: {
         not: "CANCELADO"
