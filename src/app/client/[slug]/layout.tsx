@@ -1,3 +1,4 @@
+import React from "react";
 import { getDataClientBySlug, getDataClientOfUser } from "@/app/admin/clients/(crud)/actions";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";

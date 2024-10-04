@@ -91,9 +91,10 @@ export function ClientSelector({ selectors }: Props) {
                           setValue("")
                         } else {
                           setValue(currentValue)
-                          const isEventsPage= path.split('/')[3] === "events"
-                          const restOfPath = isEventsPage ? "" : path.split('/').slice(3).join('/') 
-                          router.push(`/client/${client.slug}/${restOfPath}`)
+                          // const isEventsPage= path.split('/')[3] === "events"
+                          // const restOfPath = isEventsPage ? "" : path.split('/').slice(3).join('/') 
+                          // router.push(`/client/${client.slug}/${restOfPath}`)
+                          router.push(`/client/${client.slug}`)
                         }
                         setSearchValue("")
                         setOpen(false)

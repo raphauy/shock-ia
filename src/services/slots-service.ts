@@ -20,7 +20,6 @@ export function getSlots(dateStr: string, bookings: BookingDAO[], availability: 
         throw new Error("Formato de fecha incorrecto")
     }
 
-    console.log("dateStr:", dateStr)
     const date= parse(dateStr, "yyyy-MM-dd", new Date())
 
     const slots: Slot[] = []
@@ -30,12 +29,11 @@ export function getSlots(dateStr: string, bookings: BookingDAO[], availability: 
     if (dayOfWeek < 0) {
         dayOfWeek = 6
     }
-    console.log("dayOfWeek: ", dayOfWeek);
     
 
     const dayAvailability = availability[dayOfWeek];
     if (!dayAvailability) {
-        console.log("No hay disponibilidad para el día")
+        //console.log("No hay disponibilidad para el día")
         return slots
     }
 
@@ -49,15 +47,10 @@ export function getSlots(dateStr: string, bookings: BookingDAO[], availability: 
     let rangeEnd= date.setHours(hourRangeEnd, minuteRangeEnd, 0, 0)
     const rangeEndDate= new Date(rangeEnd)
 
-    console.log("range: ", rangeStartDate, " - ", rangeEndDate)
-    
     const timeStart = toZonedTime(startOfDay(date), timezone)
     let timeEnd = addHours(timeStart, 24)
     const offsetInMinutes = moment.tz(date, timezone).utcOffset()
     timeEnd = moment(timeEnd).subtract(offsetInMinutes, 'minutes').toDate()
-
-    console.log("timeStart: ", timeStart)
-    console.log("timeEnd: ", timeEnd)
 
     const nowZoned = toZonedTime(new Date(), timezone)
 

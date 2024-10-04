@@ -19,6 +19,8 @@ export default function MenuAdmin() {
             .then((haveEvents) => {
                 if (haveEvents) {
                     setSlug(newSlug)
+                } else {
+                    setSlug("")
                 }
             })
             .catch((error) => {

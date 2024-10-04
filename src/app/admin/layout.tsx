@@ -1,3 +1,4 @@
+import React from "react";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import SideBar from "./side-bar";

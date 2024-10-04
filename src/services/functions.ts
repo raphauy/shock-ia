@@ -333,10 +333,10 @@ export async function obtenerDisponibilidad(clientId: string, conversationId: st
   const dateStr= format(date, "yyyy-MM-dd")
 
   const bookings= await getFutureBookingsDAOByEventId(eventId, event.timezone)
-  console.log("bookings: ", bookings)
+//  console.log("bookings: ", bookings)
 
   const slots= getSlots(dateStr, bookings, event.availability, event.minDuration, event.timezone)
-  console.log("slots: ", slots)
+//  console.log("slots: ", slots)
 
   const result: SlotsResult[]= slots.map((slot) => ({
     eventId,
