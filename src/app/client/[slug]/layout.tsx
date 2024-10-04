@@ -24,7 +24,7 @@ export default async function SlugLayout({ children, params }: Props) {
   }
 
   if (currentUser.role !== 'admin' && currentUser.role !== 'cliente' && currentUser.role !== 'osom')
-    return redirect("/unauthorized?message=No estas autorizado a acceder a esta página, contacta con los administradores de OsomGPT")
+    return redirect("/unauthorized?message=" + encodeURIComponent("No estas autorizado a acceder a esta página, contacta con los administradores de Shock IA"))
 
   let client= null
   if (currentUser.role === "admin" || currentUser.role === "osom") {
@@ -36,7 +36,7 @@ export default async function SlugLayout({ children, params }: Props) {
     return <div>Cliente no encontrado (l)</div>
   
   if (slug !== client.slug)
-    return redirect("/unauthorized?message=No tienes permisos para ver este cliente.")
+    return redirect("/unauthorized?message=" + encodeURIComponent("No tienes permisos para ver este cliente."))
 
   const clientsOfNarvaez= await getClientsOfFunctionByName("registrarPedido")
   const showRegistro= clientsOfNarvaez.map(c => c.slug).includes(slug)

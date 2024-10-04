@@ -1,3 +1,4 @@
+import React from "react"
 import CodeBlock from "@/components/code-block"
 import { DescriptionForm } from "@/components/description-form"
 import { IconBadge } from "@/components/icon-badge"
@@ -84,7 +85,7 @@ export default async function RepositoryPage({ params }: Props) {
                       checked={repository.conversationLLMOff} 
                       switchUpdate={setConversationLLMOffAction}
                       description="Deshabilitar LLM al ejecutar esta función"
-                      info= {`Si esta casilla está marcada, cuando se ejecute esta función, se deshabilitará el LLM para la conversaión en cuestión.  \n\nOsomGPT dejará de responer al usuario aunque se registrarán mensajes entrantes.`}
+                      info= {`Si esta casilla está marcada, cuando se ejecute esta función, se deshabilitará el LLM para la conversaión en cuestión.  \n\nShock IA dejará de responer al usuario aunque se registrarán mensajes entrantes.`}
                     />
                     {
                       repository.conversationLLMOff &&

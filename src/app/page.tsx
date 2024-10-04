@@ -20,7 +20,7 @@ export default async function Home() {
   console.log("user: ", user.email)  
 
   if (user.role !== 'admin' && user.role !== 'cliente')
-    return redirect("/unauthorized?message=No estas autorizado a acceder a esta página, contacta con los administradores de OsomGPT")
+    return redirect("/unauthorized?message=" + encodeURIComponent("No estas autorizado a acceder a esta página, contacta con los administradores de Shock IA"))
 
   if (user.role === "cliente") {
     const client= await getDataClientOfUser(user.id)
