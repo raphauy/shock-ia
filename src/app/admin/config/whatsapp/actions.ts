@@ -77,14 +77,14 @@ export async function enableChatwootAction(clientId: string, instanceName: strin
         url,
         signMsg: true,
         reopenConversation: false,
-        conversationPending: true,
+        conversationPending: false,
         nameInbox: instanceName,
         importContacts: false,        
         importMessages: false,
         daysLimitImportMessages: 7,
         signDelimiter: '\n',
         autoCreate: true,
-        organization: 'BOT',
+        organization: 'WRC',
         logo: '',
     }
 

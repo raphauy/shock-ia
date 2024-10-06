@@ -1,4 +1,5 @@
 import { MessageDelayResponse, onMessageReceived, processDelayedMessage } from "@/services/messageDelayService";
+import { log } from "console";
 import { NextResponse } from "next/server";
 
 
@@ -31,6 +32,10 @@ export async function POST(request: Request, { params }: Props) {
         const text= json.data.message.conversation
         const messageType= json.data.messageType
         console.log("messageType: ", messageType)
+        if (messageType !== "conversation") {
+            log("messageType is not conversation")
+            return NextResponse.json({ data: "ACK" }, { status: 200 })
+        }
         const dateTimestamp= new Date(json.data.messageTimestamp * 1000)
         const zonedDateTimestamp= dateTimestamp.toLocaleString('es-UY', { timeZone: 'America/Montevideo' })
         console.log("zonedDateTimestamp: ", zonedDateTimestamp)
@@ -48,6 +53,9 @@ export async function POST(request: Request, { params }: Props) {
     
         console.log("phone: ", phone)
         console.log("text: ", text)
+        // if (phone !== "59892265737") {
+        //     return NextResponse.json({ data: "ACK" }, { status: 200 })
+        // }
     
         const delayResponse: MessageDelayResponse= await onMessageReceived(phone, text, clientId, "user", "")
         console.log(`delayResponse wasCreated: ${delayResponse.wasCreated}`)
