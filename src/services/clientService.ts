@@ -570,3 +570,18 @@ export async function setChatwootData(clientId: string, chatwootAccountId: strin
 
   return updatedInstance
 }
+
+export async function getClientIdsWithChatwootData() {
+  const clients = await prisma.whatsappInstance.findMany({
+    where: {
+      chatwootAccountId: {
+        not: null
+      }
+    },
+    select: {
+      clientId: true
+    }
+  })
+
+  return clients.map((c) => c.clientId)
+}

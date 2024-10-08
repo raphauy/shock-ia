@@ -1,6 +1,6 @@
 "use server"
   
-import { FunctionDAO, FunctionFormValues, SimpleFunction, createFunction, deleteFunction, getFunctionDAO, getFunctionsWithRepo, updateFunction } from "@/services/function-services"
+import { FunctionDAO, FunctionFormValues, SimpleFunction, createFunction, deleteFunction, getFunctionDAO, getFunctionsWithRepo, getTagsOfFunction, setTagsOfFunction, updateFunction } from "@/services/function-services"
 import { revalidatePath } from "next/cache"
 
 
@@ -36,4 +36,16 @@ export async function deleteFunctionAction(id: string): Promise<FunctionDAO | nu
 
 export async function getFunctionsWithRepoAction(clientId: string): Promise<SimpleFunction[]> {
     return getFunctionsWithRepo(clientId)
+}
+
+export async function getTagsOfFunctionAction(functionId: string) {
+    return getTagsOfFunction(functionId)
+}
+
+export async function setTagsOfFunctionAction(functionId: string, tags: string[]) {
+    const res= await setTagsOfFunction(functionId, tags)
+
+    revalidatePath("/admin/tags")
+
+    return res
 }

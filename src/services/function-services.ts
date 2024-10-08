@@ -29,6 +29,7 @@ export type FunctionDAO = {
 	name: string
 	description: string | null
 	definition: string | null
+  tags: string[]
 	createdAt: Date
 	updatedAt: Date
   clients: FunctionClientDAO[]
@@ -267,6 +268,21 @@ export async function getFunctionsWithRepo(clientId: string): Promise<SimpleFunc
   return res
 }
 
+export async function getAllFunctionsWithRepo() {
+  const found = await prisma.function.findMany({
+    where: {
+      repositories: {
+        some: {}
+      }
+    },
+    include: {
+      clients: true
+    }
+  })
+
+  return found
+}
+
 export async function getFunctionIdByFunctionName(name: string) {
   const found = await prisma.function.findUnique({
     where: {
@@ -288,4 +304,25 @@ export async function functionHaveRepository(functionName: string) {
   })
 
   return found.length > 0
+}
+
+export async function getTagsOfFunction(functionId: string) {
+  const found = await prisma.function.findUnique({
+    where: {
+      id: functionId
+    }
+  })
+
+  return found?.tags
+}
+
+export async function setTagsOfFunction(functionId: string, tags: string[]) {
+  const updated = await prisma.function.update({
+    where: {
+      id: functionId
+    },
+    data: {
+      tags
+    }
+  })
 }

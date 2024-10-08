@@ -32,7 +32,7 @@ export async function POST(request: Request, { params }: Props) {
         const text= json.data.message.conversation
         const messageType= json.data.messageType
         console.log("messageType: ", messageType)
-        if (messageType !== "conversation") {
+        if (messageType !== "conversation" && messageType !== "extendedTextMessage") {
             log("messageType is not conversation")
             return NextResponse.json({ data: "ACK" }, { status: 200 })
         }
@@ -53,9 +53,10 @@ export async function POST(request: Request, { params }: Props) {
     
         console.log("phone: ", phone)
         console.log("text: ", text)
-        // if (phone !== "59892265737") {
-        //     return NextResponse.json({ data: "ACK" }, { status: 200 })
-        // }
+        if (instanceName === "cantinabarreiro" && phone !== "59892265737") {
+            console.log("phone is not allowed for this instance")
+            return NextResponse.json({ data: "ACK" }, { status: 200 })
+        }
     
         const delayResponse: MessageDelayResponse= await onMessageReceived(phone, text, clientId, "user", "")
         console.log(`delayResponse wasCreated: ${delayResponse.wasCreated}`)

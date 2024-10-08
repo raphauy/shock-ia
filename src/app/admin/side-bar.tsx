@@ -1,7 +1,7 @@
 "use client"
 
 import { cn } from "@/lib/utils";
-import { Bot, Briefcase, ChevronRightSquare, Database, FunctionSquare, LayoutDashboard, MessageCircle, Receipt, ScreenShare, Settings, User, Warehouse } from "lucide-react";
+import { Bot, Briefcase, ChevronRightSquare, Database, FunctionSquare, LayoutDashboard, MessageCircle, Receipt, ScreenShare, Settings, Tag, User, Warehouse } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -33,6 +33,11 @@ export default function SideBar() {
       href: `/admin/functions`,
       icon: FunctionSquare,
       text: "Funciones"
+    },
+    {
+      href: `/admin/tags`,
+      icon: Tag,
+      text: "Etiquetas"
     },
     {
       href: "divider", icon: User
@@ -92,6 +97,7 @@ export default function SideBar() {
           if (href === "divider") return divider(index)
 
           if (href === "/admin/repositories" && user?.email !== "rapha.uy@rapha.uy") return null
+          if (href === "/admin/tags" && user?.email !== "rapha.uy@rapha.uy") return null
           
           const selected= path.endsWith(href)
           const classes= cn(commonClasses, selected && selectedClasses)
