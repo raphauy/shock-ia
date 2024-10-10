@@ -432,6 +432,7 @@ async function addEventFunctionsToClient(clientId: string) {
   // reservarParaEvento
   // obtenerReservas
   // cancelarReserva
+  // reservarParaEventoDeUnicaVez
 
   const obtenerDisponibilidadId= await getFunctionIdByFunctionName("obtenerDisponibilidad")
   if (!obtenerDisponibilidadId) throw new Error("Function not found")
@@ -449,6 +450,10 @@ async function addEventFunctionsToClient(clientId: string) {
   const cancelarReservaId= await getFunctionIdByFunctionName("cancelarReserva")
   if (!cancelarReservaId) throw new Error("Function not found")
   res= await addFunctionToClient(clientId, cancelarReservaId)
+
+  const reservarParaEventoDeUnicaVezId= await getFunctionIdByFunctionName("reservarParaEventoDeUnicaVez")
+  if (!reservarParaEventoDeUnicaVezId) throw new Error("Function not found")
+  res= await addFunctionToClient(clientId, reservarParaEventoDeUnicaVezId)
 
   return true
 }
@@ -470,6 +475,10 @@ async function removeEventFunctionsFromClient(clientId: string) {
   const cancelarReservaId= await getFunctionIdByFunctionName("cancelarReserva")
   if (!cancelarReservaId) throw new Error("Function not found")
   await removeFunctionFromClient(clientId, cancelarReservaId)
+
+  const reservarParaEventoDeUnicaVezId= await getFunctionIdByFunctionName("reservarParaEventoDeUnicaVez")
+  if (!reservarParaEventoDeUnicaVezId) throw new Error("Function not found")
+  await removeFunctionFromClient(clientId, reservarParaEventoDeUnicaVezId)
 
   return true
 }
