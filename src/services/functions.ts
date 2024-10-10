@@ -7,7 +7,7 @@ import { CarServiceFormValues, createCarService } from "./carservice-services";
 import { getValue, setValue } from "./config-services";
 import { getConversation, getConversationPhone, messageArrived } from "./conversationService";
 import { getDocumentDAO } from "./document-services";
-import { getEventDAO } from "./event-services";
+import { getEventDAO, updateSeatsAvailable } from "./event-services";
 import { functionHaveRepository, getFunctionClientDAO } from "./function-services";
 import { NarvaezFormValues, createOrUpdateNarvaez } from "./narvaez-services";
 import { sendWapMessage } from "./osomService";
@@ -18,6 +18,7 @@ import { checkBookingAvailability, getSlots } from "./slots-service";
 import { SummitFormValues, createSummit } from "./summit-services";
 import { sendWebhookNotification } from "./webhook-notifications-service";
 import moment from 'moment-timezone'
+import { EventType } from "@prisma/client";
 
 export type CompletionInitResponse = {
   assistantResponse: string | null
@@ -330,12 +331,16 @@ export async function obtenerDisponibilidad(clientId: string, conversationId: st
   const event= await getEventDAO(eventId)
   if (!event) return "Evento no encontrado"
 
+  if (event.type === EventType.FIXED_DATE) {
+    return "Este evento no tiene disponibilidad, su fecha fija es: " + format(event.startDateTime!, 'dd/MM/yyyy HH:mm')
+  }
+
   const dateStr= format(date, "yyyy-MM-dd")
 
   const bookings= await getFutureBookingsDAOByEventId(eventId, event.timezone)
 //  console.log("bookings: ", bookings)
 
-  const slots= getSlots(dateStr, bookings, event.availability, event.minDuration, event.timezone)
+  const slots= getSlots(dateStr, bookings, event.availability, event.minDuration!, event.timezone)
 //  console.log("slots: ", slots)
 
   const result: SlotsResult[]= slots.map((slot) => ({
@@ -399,6 +404,43 @@ export async function reservarParaEvento(clientId: string, conversationId: strin
   if (!created) return "Error al reservar, pregunta al usuario si quiere que tu reintentes"
 
   return "Reserva registrada."
+}
+
+export async function reservarParaEventoDeUnicaVez(clientId: string, conversationId: string, eventId: string, name: string){
+  console.log("reservarParaEventoDeUnicaVez")
+  console.log(`\tconversationId: ${conversationId}`)
+  console.log(`\teventId: ${eventId}`)
+  console.log(`\tname: ${name}`)
+
+  const event= await getEventDAO(eventId)
+  if (!event) return "Evento no encontrado"
+
+  if (event.type !== EventType.FIXED_DATE)
+    return "Este evento no es de unica vez"
+
+  const setsLeft= event.seatsAvailable
+  if (setsLeft === undefined || setsLeft <= 0)
+    return "No hay cupos disponibles para este evento"
+
+  let contact= await getConversationPhone(conversationId)
+  if (!contact) contact= "Ocurrió un error al obtener la conversación"
+
+  const data: BookingFormValues = {
+    eventId,
+    start: event.startDateTime!,
+    end: event.endDateTime!,
+    contact,
+    seats: "1",
+    name,
+    clientId,
+    conversationId,
+  }
+
+  const created= await createBooking(data)
+  if (!created) return "Error al reservar, pregunta al usuario si quiere que tu reintentes"
+
+  return "Reserva registrada."
+
 }
 
 type ObtenerReservasResult = {
@@ -626,13 +668,11 @@ export async function processFunctionCall(clientId: string, name: string, args: 
       break
 
     case "reservarParaEvento":
-      content= await reservarParaEvento(clientId,
-        args.conversationId,
-        args.eventId,
-        args.start,
-        args.duration,
-        args.name
-      )
+      content= await reservarParaEvento(clientId, args.conversationId, args.eventId, args.start, args.duration, args.name)
+      break
+
+    case "reservarParaEventoDeUnicaVez":
+      content= await reservarParaEventoDeUnicaVez(clientId, args.conversationId, args.eventId, args.name)
       break
 
     case "obtenerReservas":

@@ -142,7 +142,6 @@ export function UserForm({ id, create, update, closeDialog }: Props) {
                 </SelectContent>
               </Select>
               <FormDescription>admin: puede hacer todo</FormDescription>
-              <FormDescription>osom: puede ver/editar todos los clientes</FormDescription>
               <FormDescription>client: puede ver/editar solo la info de un cliente</FormDescription>
               <FormMessage />
             </FormItem>

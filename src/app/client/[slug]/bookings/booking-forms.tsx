@@ -16,11 +16,10 @@ type Props= {
   eventId: string
   clientId: string
   date: Date
-  availableSeats: number
   closeDialog: () => void
 }
 
-export function BookingForm({ id, eventId, clientId, date, availableSeats, closeDialog }: Props) {
+export function BookingForm({ id, eventId, clientId, date, closeDialog }: Props) {
   const form = useForm<BookingFormValues>({
     resolver: zodResolver(bookingSchema),
     defaultValues: {
@@ -101,7 +100,7 @@ export function BookingForm({ id, eventId, clientId, date, availableSeats, close
             )}
           />
 
-          <FormField
+          {/* <FormField
             control={form.control}
             name="seats"
             render={({ field }) => (
@@ -113,7 +112,7 @@ export function BookingForm({ id, eventId, clientId, date, availableSeats, close
                 <FormMessage />
               </FormItem>
             )}
-          />
+          /> */}
           
       
         <div className="flex justify-end">

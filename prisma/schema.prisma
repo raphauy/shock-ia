@@ -375,25 +375,30 @@ model RepoData {
 enum EventType {
   SINGLE_SLOT
   MULTIPLE_SLOTS
+  FIXED_DATE
 }
 
 model Event {
   id                String    @id @default(cuid())
   name              String                                      // gennext: show.column
   slug              String                                      // gennext: show.column
-  minDuration       Int       @default(60)                      // gennext: show.column
-  maxDuration       Int       @default(60)                      // gennext: show.column
+  minDuration       Int?                                        // gennext: show.column
+  maxDuration       Int?                                        // gennext: show.column
   color             String                                      // gennext: show.column
 
   description       String?
   address           String?                                     // gennext: show.column
   seatsPerTimeSlot  Int?                                        // gennext: show.column
+  seatsAvailable    Int?                                        // gennext: show.column
   price             Float?                                      // gennext: show.column
   isArchived        Boolean   @default(false)                   // gennext: show.column
 
   availability      String[]  @default([])
   timezone          String    @default("America/Montevideo")
   type              EventType @default(SINGLE_SLOT)
+
+  startDateTime     DateTime? // For FIXED_DATE
+  endDateTime       DateTime? // For FIXED_DATE
 
   createdAt         DateTime    @default(now())                 // gennext: skip.zod
   updatedAt         DateTime    @updatedAt                      // gennext: skip.zod

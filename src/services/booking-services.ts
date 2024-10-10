@@ -4,7 +4,7 @@ import { addMinutes, isAfter } from "date-fns"
 import { toZonedTime } from "date-fns-tz"
 import * as z from "zod"
 import { getClientBySlug } from "./clientService"
-import { getEventDAO } from "./event-services"
+import { getEventDAO, updateSeatsAvailable } from "./event-services"
 import { checkBookingAvailability } from "./slots-service"
 
 export type BookingDAO = {
@@ -43,8 +43,11 @@ export const bookingSchema = z.object({
 export type BookingFormValues = z.infer<typeof bookingSchema>
 
 
-export async function getBookingsDAO() {
+export async function getBookingsDAO(eventId: string) {
   const found = await prisma.booking.findMany({
+    where: {
+      eventId
+    },
     orderBy: {
       id: 'asc'
     },
@@ -68,7 +71,7 @@ export async function createBooking(data: BookingFormValues) {
     throw new Error("Eventos de duración variable aún no soportados")
   }
   const start= toZonedTime(data.start, event.timezone)
-  const end = data.end ? toZonedTime(data.end, event.timezone) : addMinutes(start, event.minDuration)
+  const end = data.end ? toZonedTime(data.end, event.timezone) : addMinutes(start, event.minDuration || 0)
   const seats = data.seats ? Number(data.seats) : 0
   const created = await prisma.booking.create({
     data: {
@@ -80,6 +83,11 @@ export async function createBooking(data: BookingFormValues) {
       end
     }
   })
+
+  if (event.type === "FIXED_DATE") {
+    await updateSeatsAvailable(event.id)  
+  }
+
   return created
 }
 
@@ -113,8 +121,17 @@ export async function cancelBooking(id: string) {
     },
     data: {
       status: "CANCELADO"
+    },
+    include: {
+      event: true,
     }
   })
+
+  const event= canceled.event
+  if (event.type === "FIXED_DATE") {
+    await updateSeatsAvailable(event.id)
+  }
+
   return canceled
 }
 

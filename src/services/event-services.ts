@@ -1,25 +1,28 @@
-import * as z from "zod"
 import { prisma } from "@/lib/db"
-import { getClient } from "./clientService"
 import { generateSlug } from "@/lib/utils"
 import { EventType } from "@prisma/client"
-import { log } from "node:console"
+import * as z from "zod"
+import { getClient } from "./clientService"
+import { getBookingsDAO } from "./booking-services"
 
 export type EventDAO = {
 	id: string
 	name: string
 	slug: string
   color: string
-	minDuration: number
-	maxDuration: number
+	minDuration: number | undefined
+	maxDuration: number | undefined
 	description: string | undefined
 	address: string | undefined
 	seatsPerTimeSlot: number | undefined
+  seatsAvailable: number | undefined
 	price: number | undefined
 	isArchived: boolean
   availability: string[]
   timezone: string
   type: EventType
+  startDateTime: Date | undefined
+  endDateTime: Date | undefined
 	createdAt: Date
 	updatedAt: Date
 	clientId: string
@@ -31,26 +34,12 @@ export const nameSchema = z.object({
 
 export type NameFormValues = z.infer<typeof nameSchema>
 
-export const eventSchema = z.object({
-	name: z.string().min(1, "name is required."),
-  slug: z.string().min(1, "slug is required."),
-  color: z.string().min(1, "color is required."),
-  minDuration: z.number().min(1, "minDuration is required."),
-  maxDuration: z.number().min(1, "maxDuration is required."),
-  description: z.string().min(1, "description is required."),
-  address: z.string().min(1, "address is required."),
-  seatsPerTimeSlot: z.number().min(1, "seatsPerTimeSlot is required."),
-  price: z.number().min(1, "price is required."),
-})
-
-export type EventFormValues = z.infer<typeof eventSchema>
-
-
-export async function getActiveEventsDAOByClientId(clientId: string) {
+export async function getActiveEventsDAOByClientId(clientId: string, type: EventType) {
   const found = await prisma.event.findMany({
     where: {
       clientId,
-      isArchived: false
+      isArchived: false,
+      type
     },
     orderBy: {
       createdAt: 'asc'
@@ -68,7 +57,7 @@ export async function getEventDAO(id: string) {
   return found as EventDAO
 }
     
-export async function createEvent(clientId: string, name: string) {
+export async function createEvent(clientId: string, name: string, type: EventType) {
   const client= await getClient(clientId)
   if (!client) throw new Error("Client not found")
 
@@ -79,6 +68,7 @@ export async function createEvent(clientId: string, name: string) {
   const created = await prisma.event.create({
     data: {
       clientId,
+      type,
       name,
       slug,
       color: "#bfe1ff",
@@ -87,6 +77,7 @@ export async function createEvent(clientId: string, name: string) {
       description: "Modifica esta descripción",
       address: "Modifica esta dirección",
       seatsPerTimeSlot: 1,
+      seatsAvailable: 1,
       price: 0,
       isArchived: false,
       availability: [],
@@ -105,27 +96,6 @@ async function checkSlugAvailability(clientId: string, slug: string) {
   return found === null
 }
 
-
-export async function updateEvent(id: string, data: EventFormValues) {
-  const price= data.price ? Number(data.price) : 0
-  const minDuration= data.minDuration ? Number(data.minDuration) : 0
-  const maxDuration= data.maxDuration ? Number(data.maxDuration) : 0
-  const seatsPerTimeSlot= data.seatsPerTimeSlot ? Number(data.seatsPerTimeSlot) : 0
-
-  const updated = await prisma.event.update({
-    where: {
-      id
-    },
-    data: {
-      ...data,
-      price,
-      minDuration,
-      maxDuration,
-      seatsPerTimeSlot
-    }
-  })
-  return updated
-}
 
 export async function updateEventField(id: string, field: string, value: string) {
   // if field is name, generate slug, check slug availability and update both
@@ -237,3 +207,49 @@ export async function setAvailability(id: string, availability: string[]): Promi
   return updated !== null  
 }
 
+export async function setEventDateTime(id: string, startDateTime: Date, endDateTime: Date): Promise<boolean> {
+  const updated= await prisma.event.update({
+    where: {
+      id
+    },
+    data: {
+      startDateTime,
+      endDateTime
+    }
+  })
+  return updated !== null
+}
+
+export async function setSeatsPerTimeSlot(id: string, seatsPerTimeSlot: number) {
+  const updated= await prisma.event.update({
+    where: {
+      id
+    },
+    data: {
+      seatsPerTimeSlot,
+    }
+  })
+  await updateSeatsAvailable(id)
+  return updated !== null
+}
+
+export async function updateSeatsAvailable(id: string) {
+  const event= await getEventDAO(id)
+  if (!event) throw new Error("Event not found")
+  if (event.type !== EventType.FIXED_DATE) throw new Error("Event is not a fixed date event")
+
+  const totalSeats= event.seatsPerTimeSlot || 0
+  const allBookings= await getBookingsDAO(id)
+  const bookings= allBookings.filter(booking => booking.status === "RESERVADO" || booking.status === "CONFIRMADO" || booking.status === "PAGADO")
+  const bookedSeats= bookings.reduce((acc, booking) => { return acc + booking.seats }, 0)
+  const seatsAvailable= totalSeats - bookedSeats
+  const updated= await prisma.event.update({
+    where: {
+      id
+    },
+    data: {
+      seatsAvailable
+    }
+  })
+  return updated !== null
+}

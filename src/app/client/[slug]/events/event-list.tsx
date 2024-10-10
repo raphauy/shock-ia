@@ -1,19 +1,16 @@
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { BookingDAO } from "@/services/booking-services"
-import { addMinutes, format, isSameDay } from "date-fns"
-import { es } from "date-fns/locale"
-import { XIcon, Edit2Icon, FilterIcon, PersonStanding } from "lucide-react"
-import { CancelBookingDialog, DeleteBookingDialog } from "../bookings/booking-dialogs"
+import { Card } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
+import { BookingDAO } from "@/services/booking-services"
+import { format, isSameDay } from "date-fns"
+import { es } from "date-fns/locale"
+import { PersonStanding } from "lucide-react"
+import { CancelBookingDialog, DeleteBookingDialog } from "../bookings/booking-dialogs"
 
 type Props = {
   bookings: BookingDAO[]
-  timezone: string
 }
-export default function EventList({bookings, timezone}: Props) {
+export default function EventList({bookings}: Props) {
 
     if (bookings.length === 0) {
         return <p className="text-center text-muted-foreground mt-4">No hay reservas</p>

@@ -46,7 +46,31 @@ const reservarParaEvento=
         "description": "Nombre del usuario. Hay que preguntarle al usuario por su nombre."
       }
     },
-    "required": ["eventId", "start", "duration", "name"]
+    "required": ["conversationId", "eventId", "start", "duration", "name"]
+  }
+}
+
+const reservarParaEventoDeUnicaVez=
+{
+  "name": "reservarParaEventoDeUnicaVez",
+  "description": "Reserva un evento de unica vez para el usuario.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "conversationId": {
+        "type": "string",
+        "description": "Id de la conversación que se proporciona en el prompt."
+      },
+      "eventId": {
+        "type": "string",
+        "description": "Id del evento que se quiere reservar."
+      },
+      "name": {
+        "type": "string",
+        "description": "Nombre del usuario. Hay que preguntarle al usuario por su nombre."
+      }
+    },
+    "required": ["conversationId", "eventId", "name"]
   }
 }
 

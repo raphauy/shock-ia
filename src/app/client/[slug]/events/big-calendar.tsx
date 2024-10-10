@@ -5,7 +5,7 @@ import { Calendar, momentLocalizer, Views, View } from 'react-big-calendar'
 import moment from 'moment-timezone'
 import 'moment/locale/es'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
-import CustomEvent from './CustomEvent'
+import SingleSlotCustomEvent from './single-slot-custom-event'
 
 moment.locale('es')
 moment.tz.setDefault("America/Montevideo")
@@ -29,8 +29,9 @@ export type CalendarEvent = {
   status: string
   clientId: string
   eventId: string
-  availableSeats: number
-  type: "booking" | "free"
+  seatsLeft: number
+  maxSeats: number
+  type: "booking" | "free" | "fixed-date"
 }
 
 type Props = {
@@ -94,7 +95,7 @@ export default function BigCalendar({ initialEvents, timezone }: Props) {
         min={minTime}
         //max={maxTime}
         components={{
-          event: (props) => <CustomEvent {...props} />,
+          event: (props) => <SingleSlotCustomEvent {...props} />,
         }}
         slotPropGetter={(date) => ({
           style: {

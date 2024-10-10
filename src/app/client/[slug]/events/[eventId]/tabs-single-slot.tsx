@@ -9,7 +9,7 @@ type Props = {
     initialEvents: CalendarEvent[]
     timezone: string
 }
-export default async function TabsPage({eventId, initialEvents, timezone}: Props) {
+export default async function SingleSlotTabsPage({eventId, initialEvents, timezone}: Props) {
 
     const bookings= await getFutureBookingsDAOByEventId(eventId, timezone)
     const noBlockedBookings= bookings.filter(booking => booking.status !== "BLOQUEADO")
@@ -28,10 +28,10 @@ export default async function TabsPage({eventId, initialEvents, timezone}: Props
                 <BigCalendar initialEvents={initialEvents} timezone={timezone} />
             </TabsContent>
             <TabsContent value="listado">
-                <EventList bookings={noBlockedBookings} timezone={timezone} />
+                <EventList bookings={noBlockedBookings} />
             </TabsContent>
             <TabsContent value="canceladas">
-                <EventList bookings={canceledBookings} timezone={timezone} />
+                <EventList bookings={canceledBookings} />
             </TabsContent>
         </Tabs>    
     )

@@ -1,11 +1,14 @@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { cn, getEventTypeLabel } from "@/lib/utils"
 import { EventDAO } from "@/services/event-services"
-import { Archive, Calendar, Clock, DollarSign, Edit, MapPin, PersonStanding, Star } from "lucide-react"
+import { Calendar, Clock, Edit, MapPin, PersonStanding } from "lucide-react"
 import Link from "next/link"
 import { DeleteEventDialog } from "../event-dialogs"
-import { cn, getEventTypeLabel } from "@/lib/utils"
+import { EventType } from "@prisma/client"
+import { format, isSameDay } from "date-fns"
+import { toZonedTime } from "date-fns-tz"
 
 type Props= {
   event: EventDAO
@@ -16,6 +19,9 @@ type Props= {
 
     const duration= event.minDuration === event.maxDuration ? event.minDuration : `${event.minDuration}-${event.maxDuration}`
 
+    const bookedSeats= event.seatsPerTimeSlot! - event.seatsAvailable!
+    const seatsLabel= event.type === EventType.FIXED_DATE ? `${bookedSeats} / ${event.seatsPerTimeSlot}` : `${event.seatsPerTimeSlot}`
+
     return (
     <Card className={cn("w-full overflow-hidden pb-4")} style={{borderColor: event.color}}>
         <div style={{backgroundColor: event.color}} className="h-4" />
@@ -24,8 +30,9 @@ type Props= {
         <div className="flex flex-col lg:flex-row gap-4 w-full">
           <div className="text-center md:text-left text-muted-foreground min-w-72 flex flex-col flex-1">
             <h2 className="text-2xl font-bold mb-2">
-              <Link href={`/client/${slug}/events/${event.id}/edit`}>
-                {event.name}
+              <Link href={`/client/${slug}/events/${event.id}/edit`} className="flex items-center gap-2">
+                {event.name}               
+                <Badge variant="secondary" className="whitespace-nowrap text-center border-gray-300">{getEventTypeLabel(event.type)}</Badge>
               </Link>
             </h2>
             <p className="text-sm text-muted-foreground">
@@ -35,14 +42,22 @@ type Props= {
 
           <div className="flex flex-col gap-4 text-sm text-muted-foreground min-w-48">
             <div className="flex text-sm gap-4">
-                <div className="flex items-center gap-1">
-                  <Clock className="w-4 h-4" />
-                  <span>{duration}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <PersonStanding className="w-4 h-4" />
-                  <span>{event.seatsPerTimeSlot}</span>
-                </div>
+              {
+                event.type === EventType.SINGLE_SLOT && (
+                  <div className="flex items-center gap-1">
+                    <Clock className="w-4 h-4" />
+                    <span>{duration}</span>
+                  </div>
+                )
+              }
+              {
+                event.type === EventType.FIXED_DATE && (
+                  <div className="flex items-center gap-1">
+                    <Calendar className="w-4 h-4 mb-0.5" />
+                    <span className={cn("font-bold", (!event.startDateTime || !event.endDateTime) && "text-red-500")}>{getDatesLabel(event)}</span>
+                  </div>
+                )
+              }
             </div>
           </div>
 
@@ -58,7 +73,16 @@ type Props= {
                   <span>{event.address}</span>
                 </div>
               </div>
-              <Badge variant="secondary" className="whitespace-nowrap text-center border-gray-300">{getEventTypeLabel(event.type)}</Badge>
+              <div className="flex items-center gap-1 font-bold">
+                <PersonStanding className="w-5 h-5 mb-0.5" />
+                <span>{seatsLabel}</span>
+                {
+                    event.type === EventType.FIXED_DATE && event.seatsAvailable === 0 && (
+                        <Badge variant="open">Agotado</Badge>
+                    )
+                }
+              </div>
+
               <div className="flex gap-2 mt-2">
                 <Link href={`/client/${slug}/events/${event.id}/edit`}>
                     <Button variant="outline" size="icon">
@@ -75,4 +99,16 @@ type Props= {
       </CardContent>
    </Card>
   )
+}
+
+function getDatesLabel(event: EventDAO) {
+  if (!event.startDateTime || !event.endDateTime) return "Configurar fechas"
+
+  const sameDay= isSameDay(event.startDateTime, event.endDateTime)
+  const startDateTime= toZonedTime(event.startDateTime, event.timezone)
+  const endDateTime= toZonedTime(event.endDateTime, event.timezone)
+  if (sameDay) {
+    return `${format(startDateTime, 'dd/MM/yyyy HH:mm')} - ${format(endDateTime, 'HH:mm')}`
+  }
+  return `${format(startDateTime, 'dd/MM/yyyy HH:mm')} - ${format(endDateTime, 'dd/MM/yyyy HH:mm')}`
 }

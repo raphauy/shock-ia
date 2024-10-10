@@ -5,20 +5,23 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Pencil, PlusCircle, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { DeleteEventForm, EventForm } from "./event-forms";
+import { EventType } from "@prisma/client";
+import { getEventTypeLabel } from "@/lib/utils";
 
-export function EventDialog() {
-  const [open, setOpen] = useState(false);
+type Props = {
+  eventType: EventType
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}
 
+export function EventDialog({ eventType, open, onOpenChange }: Props) {
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="w-full max-w-xs"><PlusCircle size={22} className="mr-2"/>Crear Evento</Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Crear Evento</DialogTitle>
+          <DialogTitle>Crear {getEventTypeLabel(eventType)}</DialogTitle>
         </DialogHeader>
-        <EventForm closeDialog={() => setOpen(false)} />
+        <EventForm closeDialog={() => onOpenChange(false)} eventType={eventType} />
       </DialogContent>
     </Dialog>
   )

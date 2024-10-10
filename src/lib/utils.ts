@@ -198,9 +198,11 @@ export function generateSlug(name: string): string {
 export function getEventTypeLabel(option: EventType) {
   switch (option) {
     case EventType.SINGLE_SLOT:
-      return "Duración fija"
+      return "Evento de duración fija"
     case EventType.MULTIPLE_SLOTS:
-      return "Duración variable"
+      return "Evento de duración variable"
+    case EventType.FIXED_DATE:
+      return "Evento de única vez"
     default:
       return "Evento"
   }

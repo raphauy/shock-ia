@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Availability, Schedule } from "@/services/calcom-sdk-v2";
 import { EventDAO } from "@/services/event-services";
+import { EventType } from "@prisma/client";
 import { Calendar, Eye, Globe } from "lucide-react";
 import Link from "next/link";
 
@@ -16,6 +17,10 @@ type Props= {
   event: EventDAO
 }
 export default function AvailabilityDisplay({ event }: Props) {
+  if (event.type === EventType.FIXED_DATE) {
+    return null
+  }
+  
   const availability= event.availability
 
   return (

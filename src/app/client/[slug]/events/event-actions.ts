@@ -1,30 +1,23 @@
 "use server"
   
-import { revalidatePath } from "next/cache"
-import { EventDAO, EventFormValues, createEvent, updateEvent, getFullEventDAO, deleteEvent, setAvailability, updateEventField, updateEventNumberField, updateEventBooleanField } from "@/services/event-services"
 import { getClientBySlug } from "@/services/clientService"
+import { EventDAO, createEvent, deleteEvent, getFullEventDAO, setAvailability, setEventDateTime, updateEventBooleanField, updateEventField, updateEventNumberField, setSeatsPerTimeSlot } from "@/services/event-services"
+import { EventType } from "@prisma/client"
+import { revalidatePath } from "next/cache"
 
 
 export async function getEventDAOAction(id: string): Promise<EventDAO | null> {
     return getFullEventDAO(id)
 }
 
-export async function createEventAction(clientSlug: string, name: string): Promise<EventDAO | null> {    
+export async function createEventAction(clientSlug: string, name: string, type: EventType): Promise<EventDAO | null> {    
     const client= await getClientBySlug(clientSlug)
     if (!client) throw new Error("Client not found")
-    const created= await createEvent(client.id, name)
+    const created= await createEvent(client.id, name, type)
 
     revalidatePath("/client/[slug]/events", 'page')
 
     return created as EventDAO
-}
-
-export async function updateEventAction(id: string, data: EventFormValues): Promise<EventDAO | null> {    
-    const updated= await updateEvent(id, data)
-
-    revalidatePath("/client/[slug]/events", 'page')
-
-    return updated as EventDAO
 }
 
 export async function deleteEventAction(id: string): Promise<EventDAO | null> {    
@@ -68,6 +61,22 @@ export async function seEventNumberFieldAction(id: string, name: string, value: 
 
 export async function setEventBooleanFieldAction(id: string, name: string, value: boolean): Promise<boolean> {    
     const ok= await updateEventBooleanField(id, name, value)
+
+    revalidatePath("/client/[slug]/events", 'page')
+
+    return ok
+}
+
+export async function setEventDateTimeAction(id: string, startDateTime: Date, endDateTime: Date): Promise<boolean> {    
+    const ok= await setEventDateTime(id, startDateTime, endDateTime)
+
+    revalidatePath("/client/[slug]/events", 'page')
+
+    return ok
+}
+
+export async function updateseatsPerTimeSlotAction(id: string, notUsed: string, seatsPerTimeSlot: number): Promise<boolean> {    
+    const ok= await setSeatsPerTimeSlot(id, seatsPerTimeSlot)
 
     revalidatePath("/client/[slug]/events", 'page')
 

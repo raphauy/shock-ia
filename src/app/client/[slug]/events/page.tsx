@@ -7,6 +7,8 @@ import { DataTable } from "../bookings/booking-table"
 import { CalendarEvent } from "./big-calendar"
 import { EventCard } from "./event-card"
 import { EventDialog } from "./event-dialogs"
+import { EventCreator } from "@/app/client/[slug]/events/event-creator"
+import { EventType } from "@prisma/client"
 
 type Props = {
   params: {
@@ -42,9 +44,11 @@ export default async function EventPage({ params, searchParams }: Props) {
           </div>
         </div>
 
-      <div className="flex justify-center mt-20">
-        <EventDialog />
-      </div>
+        <div className="flex justify-center mt-20">
+          <div className="w-64">
+            <EventCreator />
+          </div>
+        </div>
 
     </div>
   )

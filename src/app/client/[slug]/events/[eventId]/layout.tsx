@@ -4,6 +4,7 @@ import { Bot, PlusCircle } from "lucide-react";
 import { getFullEventsDAO } from "@/services/event-services";
 import { EventCard } from "../event-card";
 import { EventDialog } from "../event-dialogs";
+import { EventCreator } from "@/app/client/[slug]/events/event-creator";
 
 type Props = {
   params: {
@@ -21,7 +22,7 @@ export default async function EventLayout({ params, children }: Props) {
   return (
     <div className="flex flex-grow p-1 w-full gap-2">
       <div className="mt-4 border-r pr-4 border-gray-300 mr-2">
-        <EventDialog />
+        <EventCreator />
         <Link href={`/client/${slug}/events/id/simulator`}>
           <Button variant="outline" className="w-full mt-2">
             <Bot className="w-5 h-5 mr-2 mb-1" />

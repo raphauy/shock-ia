@@ -11,12 +11,14 @@ import { useParams, useRouter } from "next/navigation"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { createEventAction, deleteEventAction } from "./event-actions"
+import { EventType } from "@prisma/client"
 
 type Props= {
+  eventType: EventType
   closeDialog: () => void
 }
 
-export function EventForm({ closeDialog }: Props) {
+export function EventForm({ eventType, closeDialog }: Props) {
   const form = useForm<NameFormValues>({
     resolver: zodResolver(nameSchema),
     defaultValues: {
@@ -34,8 +36,8 @@ export function EventForm({ closeDialog }: Props) {
   const onSubmit = async (data: NameFormValues) => {
     setLoading(true)
     try {
-      const created= await createEventAction(clientSlug, data.name)
-      toast({ title: "Evento creado" })
+      const created= await createEventAction(clientSlug, data.name, eventType)
+      toast({ title: "Evento creado. Redirigiendo..." })
       closeDialog()
       router.push(`/client/${clientSlug}/events/${created?.id}/edit`)
     } catch (error: any) {

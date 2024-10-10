@@ -5,20 +5,28 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Ban, CircleX, Pencil, PlusCircle, Trash2, XIcon } from "lucide-react";
 import { useState } from "react";
 import { BlockSlotForm, BookingForm, CancelBookingForm, DeleteBookingForm } from "./booking-forms";
+import { EventType } from "@prisma/client";
 
 type Props= {
   id?: string
   eventId: string
   clientId: string
   date: Date
-  availableSeats: number  
+  eventType: EventType
 }
 
-const addTrigger= <PlusCircle className="h-4 w-4 text-green-500"/>
+
 const updateTrigger= <Pencil size={30} className="pr-2 hover:cursor-pointer"/>
 
-export function BookingDialog({ id, eventId, clientId, date, availableSeats }: Props) {
+export function BookingDialog({ id, eventId, clientId, date, eventType }: Props) {
   const [open, setOpen] = useState(false);
+
+  const addTrigger= eventType === EventType.SINGLE_SLOT ? <PlusCircle className="h-4 w-4 text-green-500"/> 
+  : 
+  <Button size="sm" className="gap-2">
+    <PlusCircle className="h-4 w-4"/>
+    <p>Crear reserva</p>
+  </Button>
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -30,7 +38,7 @@ export function BookingDialog({ id, eventId, clientId, date, availableSeats }: P
           <DialogTitle>{id ? 'Actualizar' : 'Crear'} Reserva
           </DialogTitle>
         </DialogHeader>
-        <BookingForm closeDialog={() => setOpen(false)} id={id} eventId={eventId} clientId={clientId} date={date} availableSeats={availableSeats} />
+        <BookingForm closeDialog={() => setOpen(false)} id={id} eventId={eventId} clientId={clientId} date={date} />
       </DialogContent>
     </Dialog>
   )
