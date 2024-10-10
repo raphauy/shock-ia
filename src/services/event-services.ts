@@ -39,7 +39,7 @@ export async function getActiveEventsDAOByClientId(clientId: string, type: Event
     where: {
       clientId,
       isArchived: false,
-      type
+      type,
     },
     orderBy: {
       createdAt: 'asc'

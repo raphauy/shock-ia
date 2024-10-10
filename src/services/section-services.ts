@@ -304,7 +304,8 @@ export async function getContext(clientId: string, phone: string, userInput: str
 // eventSeatsPerTimeSlot: ${event.seatsPerTimeSlot}
     })
 
-    const fixedDateEvents= await getActiveEventsDAOByClientId(clientId, EventType.FIXED_DATE)
+    const allFixedDateEvents= await getActiveEventsDAOByClientId(clientId, EventType.FIXED_DATE)
+    const fixedDateEvents= allFixedDateEvents.filter(event => event.startDateTime && event.endDateTime)
 
     contextString+= "Eventos de tipo única vez (fecha fija) que pueden ser relevantes para elaborar una respuesta:\n"
     fixedDateEvents.map((event) => {

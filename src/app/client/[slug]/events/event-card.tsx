@@ -16,6 +16,7 @@ export function EventCard({event}: EventCardProps) {
     const duration= event.minDuration === event.maxDuration ? event.minDuration : `${event.minDuration}-${event.maxDuration}`
     const bookedSeats= event.seatsPerTimeSlot && event.seatsAvailable ? event.seatsPerTimeSlot - event.seatsAvailable : 0
     const seatsLabel= event.type === EventType.FIXED_DATE ? `${bookedSeats} / ${event.seatsPerTimeSlot}` : `${event.seatsPerTimeSlot}`
+    const statusLabel= event.type === EventType.FIXED_DATE && (!event.startDateTime || !event.endDateTime) ? "Configurar fechas" : event.isArchived ? "Archivado" : "Activo"
 
     return (
         <Card className="max-w-md overflow-hidden rounded-lg shadow-md min-w-[300px] mx-auto">
@@ -66,7 +67,7 @@ export function EventCard({event}: EventCardProps) {
                         <Badge variant="open">Agotado</Badge>
                     )
                 }
-                <Badge variant="secondary" className="border-gray-300">{event.isArchived ? "Archivado" : "Activo"}</Badge>
+                <Badge variant={statusLabel === "Configurar fechas" ? "destructive" : "secondary"} className="border-gray-300">{statusLabel}</Badge>
             </CardFooter>    
         </Card>
     )
