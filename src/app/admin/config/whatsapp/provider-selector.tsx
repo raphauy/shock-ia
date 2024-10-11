@@ -6,6 +6,7 @@ import { useEffect, useState } from "react"
 import { DataClient } from "../../clients/(crud)/actions"
 import { setInboxProvidersAction } from "./actions"
 import { toast } from "@/components/ui/use-toast"
+import { useSession } from "next-auth/react"
 
 type Props = {
     client: DataClient
@@ -13,6 +14,8 @@ type Props = {
 export default function ProviderSelector({client}: Props) {
   const [loading, setLoading] = useState(false)
   const [provider, setProvider] = useState<InboxProvider>(client.inboxProvider)
+
+  const currentUser = useSession().data?.user
 
   const providers= Object.values(InboxProvider)
 
@@ -47,7 +50,9 @@ export default function ProviderSelector({client}: Props) {
             </SelectTrigger>
             <SelectContent>
                 {providers.map((provider) => (
-                    <SelectItem key={provider} value={provider}>{provider}</SelectItem>
+                    <SelectItem key={provider} value={provider} disabled={currentUser?.email !== "rapha.uy@rapha.uy" && provider === InboxProvider.CHATWOOT}>
+                        {provider === InboxProvider.OSOM ? "SHOCK_IA" : provider}
+                    </SelectItem>
                 ))}
             </SelectContent>
         </Select>
