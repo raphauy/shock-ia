@@ -594,3 +594,33 @@ export async function getClientIdsWithChatwootData() {
 
   return clients.map((c) => c.clientId)
 }
+
+export async function getChatwootAccountId(clientId: string) {
+  const client = await prisma.whatsappInstance.findFirst({
+    where: {
+      clientId
+    },
+    select: {
+      chatwootAccountId: true
+    }
+  })
+
+  if (!client) return null
+
+  return client.chatwootAccountId
+} 
+
+export async function getClientIdByChatwootAccountId(chatwootAccountId: string) {
+  const client= await prisma.whatsappInstance.findFirst({
+    where: {
+      chatwootAccountId
+    },
+    select: {
+      clientId: true
+    }
+  })
+
+  if (!client) return null
+
+  return client.clientId
+}

@@ -14,7 +14,7 @@ export default async function WhatsappTab({ client, basePath }: Props) {
   const inboxProvider = client.inboxProvider
   console.log("tab", client.nombre, client.inboxProvider)
 
-  if (inboxProvider === "WRC") {
+  if (inboxProvider === "WRC" || inboxProvider === "CHATWOOT") {
     const instance = client.whatsappInstance
     if (!instance) {
       const instanceName = client.slug

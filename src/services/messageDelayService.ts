@@ -12,7 +12,7 @@ export type MessageDelayResponse = {
 // función que recibe un mensaje y lo guarda en la base de datos de la siguiente forma:
 // - Si hay un mensaje para ese phone, ese clientId y que además haya sido actualizado hace menos de 5 segundos, se actualiza el mensaje pegando el texto al final del texto que ya había
 // - Si no, se crea un nuevo mensaje con el texto recibido
-export async function onMessageReceived(phone: string, text: string, clientId: string, role: string, gptData: string, promptTokens?: number, completionTokens?: number): Promise<MessageDelayResponse> {
+export async function onMessageReceived(phone: string, text: string, clientId: string, role: string, gptData: string, promptTokens?: number, completionTokens?: number, chatwootConversationId?: number): Promise<MessageDelayResponse> {
     let messageResponse= null
     let wasCreated= false
 
@@ -26,7 +26,7 @@ export async function onMessageReceived(phone: string, text: string, clientId: s
         }
     } else {
         console.log("message not found")
-        messageResponse= await messageArrived(phone, text, clientId, role, gptData, promptTokens, completionTokens)
+        messageResponse= await messageArrived(phone, text, clientId, role, gptData, promptTokens, completionTokens, chatwootConversationId)
         if (messageResponse) {
             wasCreated= true
         }

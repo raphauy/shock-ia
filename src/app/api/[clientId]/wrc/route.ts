@@ -1,3 +1,4 @@
+import { getClient } from "@/services/clientService";
 import { MessageDelayResponse, onMessageReceived, processDelayedMessage } from "@/services/messageDelayService";
 import { log } from "console";
 import { NextResponse } from "next/server";
@@ -14,6 +15,16 @@ type Props= {
 export async function POST(request: Request, { params }: Props) {
 
     try {
+        const clientId = params.clientId
+        if (!clientId) return NextResponse.json({ error: "clientId not found, probably wrong url" }, { status: 400 })
+        
+        const client= await getClient(clientId)
+        const inboxProvider= client?.inboxProvider
+        if (inboxProvider !== "WRC") {
+            return NextResponse.json({ message: "inboxProvider for " + client?.name + " is not WRC" }, { status: 200 })
+        }
+    
+
         const json= await request.json()
         console.log("json: ", json)
         const event= json.event
@@ -39,9 +50,6 @@ export async function POST(request: Request, { params }: Props) {
         const dateTimestamp= new Date(json.data.messageTimestamp * 1000)
         const zonedDateTimestamp= dateTimestamp.toLocaleString('es-UY', { timeZone: 'America/Montevideo' })
         console.log("zonedDateTimestamp: ", zonedDateTimestamp)
-    
-        const clientId = params.clientId
-        if (!clientId) return NextResponse.json({ error: "clientId not found, probably wrong url" }, { status: 400 })
     
         if (!phone) {
             return NextResponse.json({ error: "phone is required" }, { status: 400 })

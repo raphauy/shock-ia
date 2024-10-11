@@ -11,9 +11,10 @@ import { ChatCompletion } from "groq-sdk/resources/chat/completions.mjs";
 import { getFullModelDAO, getFullModelDAOByName } from "./model-services";
 import { completionInit } from "./function-call-services";
 import { groqCompletionInit } from "./groq-function-call-services";
-import { getClient } from "./clientService";
+import { getChatwootAccountId, getClient } from "./clientService";
 import { getDocument } from "./functions";
 import { sendText } from "./wrc-sdk";
+import { sendTextToConversation } from "./chatwoot";
 
 
 export default async function getConversations() {
@@ -169,7 +170,7 @@ export async function getLastConversation(slug: string) {
 }
 
 // find an active conversation or create a new one to connect the messages
-export async function messageArrived(phone: string, text: string, clientId: string, role: string, gptData: string, promptTokens?: number, completionTokens?: number) {
+export async function messageArrived(phone: string, text: string, clientId: string, role: string, gptData: string, promptTokens?: number, completionTokens?: number, chatwootConversationId?: number) {
 
   if (!clientId) throw new Error("clientId is required")
 
@@ -182,6 +183,7 @@ export async function messageArrived(phone: string, text: string, clientId: stri
       data: {
         phone,
         clientId,
+        chatwootConversationId
       }
     })
     const message= await createMessage(created.id, role, text, gptData, promptTokens, completionTokens)
@@ -292,6 +294,16 @@ export async function processMessage(id: string, modelName?: string) {
     if (inboxProvider === "WRC") {
       console.log("Sending text vía WRC")
       await sendText(client.slug, conversation.phone, assistantResponse)
+      return
+    }
+
+    if (inboxProvider === "CHATWOOT") {
+      console.log("Sending text vía CHATWOOT")
+      const chatwootAccountId= await getChatwootAccountId(client.id)
+      if (!chatwootAccountId) throw new Error("chatwootAccountId not found")
+      const chatwootConversationId= conversation.chatwootConversationId
+      if (!chatwootConversationId) throw new Error("chatwootConversationId not found")
+      await sendTextToConversation(parseInt(chatwootAccountId), chatwootConversationId, assistantResponse)
       return
     }
 
