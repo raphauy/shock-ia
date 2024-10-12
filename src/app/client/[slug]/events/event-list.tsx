@@ -85,7 +85,7 @@ export default function EventList({bookings, clientSlug}: Props) {
                                 <div className="flex items-center gap-4">
                                     <div className="flex items-center gap-1 justify-end text-muted-foreground text-sm">
                                         <TicketCheck className="w-4 h-4 mb-0.5" />
-                                        <span>{format(reservation.createdAt, "dd MMM")}</span>
+                                        <span>{format(reservation.createdAt, "dd MMM", {locale: es})}</span>
                                     </div>
                                     <div className="flex items-center gap-1 justify-end text-muted-foreground">
                                         <PersonStanding className="w-4 h-4 mb-0.5" />
