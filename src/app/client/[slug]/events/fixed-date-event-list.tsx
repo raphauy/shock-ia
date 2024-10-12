@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { BookingDAO } from "@/services/booking-services"
 import { format, isSameDay } from "date-fns"
-import { Calendar, MessageCircle, PersonStanding, Search, X } from "lucide-react"
+import { Calendar, MessageCircle, PersonStanding, Search, TicketCheck, X } from "lucide-react"
 import { BookingDialog, CancelBookingDialog, DeleteBookingDialog } from "../bookings/booking-dialogs"
 import { EventDAO } from "@/services/event-services"
 import { EventType } from "@prisma/client"
@@ -114,10 +114,10 @@ export default function FixedDateEventList({event, bookings, clientSlug}: Props)
                                         {reservation.eventName}
                                     </span>
 
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex items-center gap-4">
                                         <div className="flex items-center gap-1 justify-end text-muted-foreground text-sm">
-                                            <Calendar className="w-4 h-4 mb-0.5" />
-                                            <span>{format(reservation.createdAt, "dd/MM/yyyy")}</span>
+                                            <TicketCheck className="w-4 h-4 mb-0.5" />
+                                            <span>{format(reservation.createdAt, "dd MMM")}</span>
                                         </div>
                                         <div className="flex items-center gap-1 justify-end text-muted-foreground">
                                             <PersonStanding className="w-4 h-4 mb-0.5" />

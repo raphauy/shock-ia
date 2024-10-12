@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils"
 import { BookingDAO } from "@/services/booking-services"
 import { format, isSameDay } from "date-fns"
 import { es } from "date-fns/locale"
-import { Calendar, MessageCircle, PersonStanding } from "lucide-react"
+import { Calendar, MessageCircle, PersonStanding, TicketCheck } from "lucide-react"
 import { CancelBookingDialog, DeleteBookingDialog } from "../bookings/booking-dialogs"
 import BookingDataCard from "./booking-data-card"
 import Link from "next/link"
@@ -82,10 +82,10 @@ export default function EventList({bookings, clientSlug}: Props) {
                             <div className="mt-4 flex justify-between">
                                 <Badge variant="secondary" className="border-gray-300 rounded font-bold">{reservation.eventName}</Badge>
                                 
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-4">
                                     <div className="flex items-center gap-1 justify-end text-muted-foreground text-sm">
-                                        <Calendar className="w-4 h-4 mb-0.5" />
-                                        <span>{format(reservation.createdAt, "dd/MM/yyyy")}</span>
+                                        <TicketCheck className="w-4 h-4 mb-0.5" />
+                                        <span>{format(reservation.createdAt, "dd MMM")}</span>
                                     </div>
                                     <div className="flex items-center gap-1 justify-end text-muted-foreground">
                                         <PersonStanding className="w-4 h-4 mb-0.5" />
