@@ -68,11 +68,11 @@ export default function SideBar() {
       icon: Bot, 
       text: "Modelos"
     },
-    {
-      href: `/admin/repositories`,
-      icon: Database, 
-      text: "Repositorios"
-    },
+    // {
+    //   href: `/admin/repositories`,
+    //   icon: Database, 
+    //   text: "Repositorios"
+    // },
     {
       href: "divider", icon: User
     },  
