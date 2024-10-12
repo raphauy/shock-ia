@@ -5,7 +5,7 @@ import { getChatwootAccountId, getClient } from "./clientService"
 
 export async function sendTextToConversation(accountId: number, conversationId: number, message: string) {
     const chatwootUrl= process.env.CHATWOOT_URL!
-    const chatwootToken= process.env.CHATWOOT_ACCESS_TOKEN!
+    const chatwootToken= process.env.CHATWOOT_AGENT_BOT_ACCESS_TOKEN!
     console.log("chatwootUrl:", chatwootUrl)
     console.log("chatwootToken:", chatwootToken)
     if (!chatwootUrl || !chatwootToken) {
