@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form"
 import { toast } from "@/components/ui/use-toast"
 import { useEffect, useState } from "react"
 import { deleteFieldAction, createOrUpdateFieldAction, getFieldDAOAction } from "./field-actions"
-import { fieldSchema, FieldFormValues } from '@/services/field-services'
+import { repoFieldSchema, FieldFormValues } from '@/services/field-services'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
@@ -17,19 +17,21 @@ import { Textarea } from "@/components/ui/textarea"
 
 type Props= {
   id?: string
-  repoId: string
+  repoId?: string | null | undefined
+  eventId?: string | null | undefined
   closeDialog: () => void
 }
 
-export function FieldForm({ id, repoId, closeDialog }: Props) {
+export function FieldForm({ id, repoId, eventId, closeDialog }: Props) {
   const form = useForm<FieldFormValues>({
-    resolver: zodResolver(fieldSchema),
+    resolver: zodResolver(repoFieldSchema),
     defaultValues: {
       name: "",
       type: "string",
       description: "",
       required: true,
-      repositoryId: repoId,
+      repositoryId: repoId ?? undefined,
+      eventId: eventId ?? undefined,
     },
     mode: "onChange",
   })
@@ -52,7 +54,12 @@ export function FieldForm({ id, repoId, closeDialog }: Props) {
     if (id) {
       getFieldDAOAction(id).then((data) => {
         if (data) {
-          form.reset(data)
+          form.setValue("repositoryId", data.repositoryId ?? undefined)
+          form.setValue("eventId", data.eventId ?? undefined)
+          form.setValue("name", data.name)
+          form.setValue("type", data.type)
+          form.setValue("description", data.description)
+          form.setValue("required", data.required)
         }
         Object.keys(form.getValues()).forEach((key: any) => {
           if (form.getValues(key) === null) {
@@ -138,7 +145,7 @@ export function FieldForm({ id, repoId, closeDialog }: Props) {
                     <Switch checked={field.value} onCheckedChange={field.onChange} />
                   </FormControl>
                 </div>
-                <FormDescription>Si está marcado, el LLM no inovcará la función mientras no obtenga este valor del usuario</FormDescription>
+                <FormDescription>Si está marcado, el LLM debería insistir en que el usuario responda la información de este campo</FormDescription>
                 <FormMessage />
               </FormItem>
             )}

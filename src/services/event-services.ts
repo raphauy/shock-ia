@@ -1,9 +1,10 @@
 import { prisma } from "@/lib/db"
 import { generateSlug } from "@/lib/utils"
-import { EventType } from "@prisma/client"
+import { EventType, FieldType } from "@prisma/client"
 import * as z from "zod"
 import { getClient } from "./clientService"
 import { getBookingsDAO } from "./booking-services"
+import { createField, FieldDAO } from "./field-services"
 
 export type EventDAO = {
 	id: string
@@ -26,6 +27,8 @@ export type EventDAO = {
 	createdAt: Date
 	updatedAt: Date
 	clientId: string
+  metadata: string | null | undefined
+  fields: FieldDAO[]
 }
 
 export const nameSchema = z.object({
@@ -40,6 +43,10 @@ export async function getActiveEventsDAOByClientId(clientId: string, type: Event
       clientId,
       isArchived: false,
       type,
+      OR: [
+        { startDateTime: null },
+        { startDateTime: { gte: new Date() } }
+      ]
     },
     orderBy: {
       createdAt: 'asc'
@@ -83,6 +90,19 @@ export async function createEvent(clientId: string, name: string, type: EventTyp
       availability: [],
     }
   })
+  // create the first field
+  const fieldName= "nombre"
+  const fieldType= FieldType.string
+  const fieldDescription= "Nombre del usuario."
+  const fieldRequired= true
+  await createField({
+    name: fieldName,
+    type: fieldType,
+    description: fieldDescription,
+    required: fieldRequired,
+    eventId: created.id
+  })
+  const updated= await updateEventMetadata(created.id)
   return created
 }
 
@@ -169,6 +189,7 @@ export async function getFullEventsDAO(slug: string) {
     },
     include: {
 			client: true,
+      fields: true,
 		}
   })
   return found as EventDAO[]
@@ -181,6 +202,11 @@ export async function getFullEventDAO(id: string) {
     },
     include: {
 			client: true,
+      fields: {
+        orderBy: {
+          order: "asc"
+        }
+      }
 		}
   })
   return found as EventDAO
@@ -252,4 +278,64 @@ export async function updateSeatsAvailable(id: string) {
     }
   })
   return updated !== null
+}
+
+export async function updateEventMetadata(id: string) {
+  const event= await getFullEventDAO(id)
+  if (!event) throw new Error("Event not found")
+
+  const fields= event.fields.sort((a, b) => a.order - b.order)
+  const properties= fields.map((field) => ({
+    name: field.name,
+    type: field.type,
+    description: field.description,
+    required: field.required
+  }))
+ 
+  const updatedMetadata= generateMetadata(properties)
+
+  const updated = await prisma.event.update({
+    where: {
+      id
+    },
+    data: {
+      metadata: updatedMetadata
+    }
+  })
+
+  console.log("metadata: ", updated.metadata)
+
+  return updated
+}
+
+export type Property= {
+  name: string
+  type: "string" | "number" | "boolean"
+  description: string
+  required: boolean
+}
+
+
+export function generateMetadata(properties: Property[]): string {
+
+  const metadata= properties.reduce((acc: { [key: string]: { type: string; description: string, required: boolean } }, property) => {
+    acc[property.name] = {
+      type: property.type,
+      description: property.description,
+      required: property.required
+    };
+    return acc;
+  }, {})
+
+  const jsonString = JSON.stringify(metadata, null, 2)
+
+  // Verify that the jsonString is valid JSON
+  try {
+    JSON.parse(jsonString);
+  } catch (error) {
+    console.error("Error parsing functionDefinition: ", error);
+    throw new Error("Error parsing functionDefinition");
+  }
+
+  return jsonString;
 }

@@ -144,10 +144,7 @@ export async function POST(req: Request) {
         const messageStored= await messageArrived(phone, completion, client.id, "assistant", "", promptTokens, completionTokens)
         if (messageStored) console.log("assistant message stored")
       } else {
-        console.log("completion")
-        console.log(completion)
-        console.log(JSON.stringify(completion))
-        
+        console.log(JSON.stringify(completion))        
         await saveFunction(phone, completion, client.id)
       }
     },

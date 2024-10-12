@@ -21,7 +21,7 @@ const obtenerDisponibilidad=
 const reservarParaEvento=
 {
   "name": "reservarParaEvento",
-  "description": "Reserva un un evento en una fecha específica.",
+  "description": "Reserva un evento en una fecha específica. Debes preguntar al usuario cada campo de la metadata para crear el objeto y pasarlo como string en el campo metadata.",
   "parameters": {
     "type": "object",
     "properties": {
@@ -38,22 +38,22 @@ const reservarParaEvento=
         "description": "Fecha y hora de inicio de la reserva en formato YYYY-MM-DD HH:mm."
       },
       "duration": {
-        "type": "string",
+        "type": "integer",
         "description": "Duración de la reserva en minutos."
       },
-      "name": {
+      "metadata": {
         "type": "string",
-        "description": "Nombre del usuario. Hay que preguntarle al usuario por su nombre."
+        "description": "Este campo es un objeto JSON serializado. Los campos de la metadata están junto a la información del evento."
       }
     },
-    "required": ["conversationId", "eventId", "start", "duration", "name"]
+    "required": ["conversationId", "eventId", "start", "duration", "metadata"]
   }
 }
 
 const reservarParaEventoDeUnicaVez=
 {
   "name": "reservarParaEventoDeUnicaVez",
-  "description": "Reserva un evento de unica vez para el usuario.",
+  "description": "Reserva un evento de unica vez para el usuario. Debes preguntar al usuario cada campo de la metadata para crear el objeto y pasarlo como string en el campo metadata.",
   "parameters": {
     "type": "object",
     "properties": {
@@ -65,12 +65,12 @@ const reservarParaEventoDeUnicaVez=
         "type": "string",
         "description": "Id del evento que se quiere reservar."
       },
-      "name": {
+      "metadata": {
         "type": "string",
-        "description": "Nombre del usuario. Hay que preguntarle al usuario por su nombre."
+        "description": "Este campo es un objeto JSON serializado. Los campos de la metadata están junto a la información del evento."
       }
     },
-    "required": ["conversationId", "eventId", "name"]
+    "required": ["conversationId", "eventId", "metadata"]
   }
 }
 
@@ -126,3 +126,4 @@ const notificarAsesor=
   },
   "required": ["conversationId"]
 }
+

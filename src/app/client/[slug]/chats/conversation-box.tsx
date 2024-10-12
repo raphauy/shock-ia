@@ -1,21 +1,18 @@
 
-import React from "react"
+import { CustomInfo, getCustomInfoAction } from "@/app/admin/chat/actions"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
-import { removeSectionTexts } from "@/lib/utils"
-import clsx from "clsx"
+import { cn, removeSectionTexts } from "@/lib/utils"
 import { Bot, Car, CircleDollarSign, Terminal, Ticket, User } from "lucide-react"
 import Link from "next/link"
+import { useParams } from "next/navigation"
+import { useEffect, useState } from "react"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import { DeleteConversationDialog } from "./(delete-conversation)/delete-dialogs"
 import { DataConversation } from "./actions"
-import GPTData from "./gpt-data"
-import { useEffect, useState } from "react"
-import { CustomInfo, getCustomInfoAction } from "@/app/admin/chat/actions"
-import { useParams } from "next/navigation"
 
 interface Props {
   conversation: DataConversation
@@ -99,9 +96,8 @@ export default function ConversationBox({ conversation, promptTokensPrice, compl
       {
         messages.map((message, i) => (
           <div key={i} className="w-full">
-            <div className={clsx(
-                "flex w-full items-center justify-between px-1 lg:px-4 border-b border-gray-200 py-5",
-                message.role === "user" ? "bg-gray-100 dark:bg-gray-800" : "bg-background",
+            <div className={cn("flex w-full items-center justify-between px-1 lg:px-4 border-gray-200 py-5",
+                message.role === "user" ? "bg-gray-100 dark:bg-gray-800 border-b border-t" : "bg-background",
               )}
             >
               <div className="flex items-center w-full max-w-screen-md px-5 space-x-4 sm:px-0">
@@ -110,7 +106,7 @@ export default function ConversationBox({ conversation, promptTokensPrice, compl
                   !message.gptData &&
                   <div className="flex flex-col">
                     <div
-                        className={clsx(
+                        className={cn(
                         "p-1.5 text-white flex justify-center",
                         (message.role === "assistant") ? "bg-green-500" : (message.role === "system" || message.role === "function") ? "bg-blue-500" : "bg-black",
                       )}

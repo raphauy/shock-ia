@@ -4,13 +4,16 @@ import { cn } from "@/lib/utils"
 import { BookingDAO } from "@/services/booking-services"
 import { format, isSameDay } from "date-fns"
 import { es } from "date-fns/locale"
-import { PersonStanding } from "lucide-react"
+import { Calendar, MessageCircle, PersonStanding } from "lucide-react"
 import { CancelBookingDialog, DeleteBookingDialog } from "../bookings/booking-dialogs"
+import BookingDataCard from "./booking-data-card"
+import Link from "next/link"
 
 type Props = {
   bookings: BookingDAO[]
+  clientSlug: string
 }
-export default function EventList({bookings}: Props) {
+export default function EventList({bookings, clientSlug}: Props) {
 
     if (bookings.length === 0) {
         return <p className="text-center text-muted-foreground mt-4">No hay reservas</p>
@@ -27,28 +30,63 @@ export default function EventList({bookings}: Props) {
                     {bookings.map((reservation: BookingDAO, index: number) => {
                         const time= `${format(reservation.start, 'HH:mm')} - ${format(reservation.end, 'HH:mm')}`
                         const statusColor= reservation.status === "CANCELADO" ? "bg-gray-200" : reservation.status === "CONFIRMADO" ? "bg-green-200" : reservation.status === "RESERVADO" ? "bg-sky-200" : reservation.status === "PAGADO" ? "bg-blue-200" : reservation.status === "BLOQUEADO" ? "bg-red-200" : "bg-yellow-200"
+
+                        const parsedData = reservation.data ? JSON.parse(reservation.data as string) : {}
+                        const jsonReplaced = Object.keys(parsedData).reduce((acc, key) => {
+                          if (key !== "nombre") {
+                            acc[key] = parsedData[key] === true ? "SI" : parsedData[key] === false ? "NO" : parsedData[key]
+                          }
+                          return acc;
+                        }, {} as Record<string, any>)
+
+                        const conversationId= reservation.conversationId
+                  
                         return (
                         <div key={index} className={`p-4 ${index !== 0 ? 'border-t' : ''}`}>
-                            <div className="flex justify-between items-start">
-                            <div>
-                                <p className="font-semibold">{format(reservation.start, 'dd MMMM', {locale: es})}</p>
-                                <p className="text-sm text-muted-foreground">{time}</p>
-                                <p className="mt-2">{reservation.name}</p>
-                                <p className="mt-2">{reservation.contact}</p>
-                            </div>
-                            <div className="flex space-x-2">
-                                { reservation.status === "CANCELADO" ? 
-                                    <DeleteBookingDialog id={reservation.id} description={`Seguro que desea eliminar la reserva de ${reservation.name}?`} />
+                            <div className="grid grid-cols-3">
+                                {
+                                    conversationId ? (
+                                        <div>
+                                            <Link href={`/client/${clientSlug}/chats?id=${conversationId}`} className="flex items-center gap-4" target="_blank">
+                                                <p className="font-bold">{reservation.name}</p>
+                                                <MessageCircle className="w-5 h-5 mb-1" />
+                                            </Link>
+                                            <p className="mt-2">{reservation.contact}</p>
+                                        </div>                                    
+                                    )
                                     :
-                                    <CancelBookingDialog id={reservation.id} description={`Seguro que desea cancelar la reserva de ${reservation.name}?`} />
+                                    (
+                                        <p className="font-bold">{reservation.name}</p>
+                                    )
                                 }
+                                <div className="">
+                                    <BookingDataCard jsonData={jsonReplaced} />
+                                </div>
+                                <div className="flex flex-col items-end space-y-4">
+                                    <div>
+                                        <p className="font-semibold">{format(reservation.start, 'dd MMMM', {locale: es})}</p>
+                                        <p className="text-sm text-muted-foreground">{time}</p>
+                                    </div>
+
+                                    <div className="flex items-center gap-2">
+                                        { reservation.status === "CANCELADO" ? 
+                                            <DeleteBookingDialog id={reservation.id} description={`Seguro que desea eliminar la reserva de ${reservation.name}?`} />
+                                            :
+                                            <CancelBookingDialog id={reservation.id} description={`Seguro que desea cancelar la reserva de ${reservation.name}?`} />
+                                        }
+
+                                    </div>
+
+                                </div>
                             </div>
-                            </div>
-                            <div className="mt-2 flex justify-between">
-                                <span className="inline-block bg-secondary text-secondary-foreground rounded px-2 py-1 text-xs font-bold border">
-                                    {reservation.eventName}
-                                </span>
+                            <div className="mt-4 flex justify-between">
+                                <Badge variant="secondary" className="border-gray-300 rounded font-bold">{reservation.eventName}</Badge>
+                                
                                 <div className="flex items-center gap-2">
+                                    <div className="flex items-center gap-1 justify-end text-muted-foreground text-sm">
+                                        <Calendar className="w-4 h-4 mb-0.5" />
+                                        <span>{format(reservation.createdAt, "dd/MM/yyyy")}</span>
+                                    </div>
                                     <div className="flex items-center gap-1 justify-end text-muted-foreground">
                                         <PersonStanding className="w-4 h-4 mb-0.5" />
                                         <span>{reservation.seats}</span>

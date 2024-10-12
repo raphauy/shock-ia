@@ -2,6 +2,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { getFutureBookingsDAOByEventId, getBookingsByState } from "@/services/booking-services"
 import BigCalendar, { CalendarEvent } from "../big-calendar"
 import EventList from "../event-list"
+import { getEventDAO } from "@/services/event-services"
+import { getClient } from "@/services/clientService"
 
 
 type Props = {
@@ -10,6 +12,13 @@ type Props = {
     timezone: string
 }
 export default async function SingleSlotTabsPage({eventId, initialEvents, timezone}: Props) {
+
+    const event= await getEventDAO(eventId)
+    const client= await getClient(event.clientId)
+    if (!client) {
+        return <p>No se encontró el cliente</p>
+    }
+
 
     const bookings= await getFutureBookingsDAOByEventId(eventId, timezone)
     const noBlockedBookings= bookings.filter(booking => booking.status !== "BLOQUEADO")
@@ -28,10 +37,10 @@ export default async function SingleSlotTabsPage({eventId, initialEvents, timezo
                 <BigCalendar initialEvents={initialEvents} timezone={timezone} />
             </TabsContent>
             <TabsContent value="listado">
-                <EventList bookings={noBlockedBookings} />
+                <EventList bookings={noBlockedBookings} clientSlug={client.slug} />
             </TabsContent>
             <TabsContent value="canceladas">
-                <EventList bookings={canceledBookings} />
+                <EventList bookings={canceledBookings} clientSlug={client.slug} />
             </TabsContent>
         </Tabs>    
     )

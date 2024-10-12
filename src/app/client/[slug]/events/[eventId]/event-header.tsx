@@ -7,7 +7,7 @@ import { Calendar, Clock, Edit, MapPin, PersonStanding } from "lucide-react"
 import Link from "next/link"
 import { DeleteEventDialog } from "../event-dialogs"
 import { EventType } from "@prisma/client"
-import { format, isSameDay } from "date-fns"
+import { format, isAfter, isSameDay } from "date-fns"
 import { toZonedTime } from "date-fns-tz"
 
 type Props= {
@@ -21,6 +21,8 @@ type Props= {
 
     const bookedSeats= event.seatsPerTimeSlot! - event.seatsAvailable!
     const seatsLabel= event.type === EventType.FIXED_DATE ? `${bookedSeats} / ${event.seatsPerTimeSlot}` : `${event.seatsPerTimeSlot}`
+
+    const isEnded= event.startDateTime && event.endDateTime && isAfter(new Date(), event.endDateTime)
 
     return (
     <Card className={cn("w-full overflow-hidden pb-4")} style={{borderColor: event.color}}>
@@ -58,8 +60,15 @@ type Props= {
                   </div>
                 )
               }
+              </div>
+              {
+                isEnded && (
+                  <div className="flex items-center justify-end">
+                    <Badge variant="ended">Finalizado</Badge>
+                  </div>                    
+                )
+              }
             </div>
-          </div>
 
         </div>
 

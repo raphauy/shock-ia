@@ -11,7 +11,7 @@ type Props = {
 export default function FixedDateEdits({ event }: Props) {
   return (
     <div>
-        <div className="flex items-center gap-x-2">
+        <div className="flex items-center gap-x-2 mt-6">
             <IconBadge icon={Calendar} />
             <h2 className="text-xl">
                 Fecha y hora del evento

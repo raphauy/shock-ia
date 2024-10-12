@@ -6,15 +6,15 @@ import { Reorder } from "framer-motion"
 import { Asterisk, Grip, Loader, X } from "lucide-react"
 import { useEffect, useState } from "react"
 import { FieldDAO } from "@/services/field-services"
-import { deleteFieldAction, updateRepoFieldOrderAction } from "../../fields/field-actions"
-import { FieldDialog } from "../../fields/field-dialogs"
 import { Badge } from "@/components/ui/badge"
+import { deleteFieldAction, updateEventFieldOrderAction } from "@/app/admin/fields/field-actions"
+import { FieldDialog } from "@/app/admin/fields/field-dialogs"
 
 type Props= {
     initialFields: FieldDAO[]
-    repoId: string
+    eventId: string
 }
-export default function FieldsBox({ initialFields, repoId }: Props) {
+export default function EventFieldsBox({ initialFields, eventId }: Props) {
 
     const [fields, setFields] = useState(initialFields)
     const [loading, setLoading] = useState(false)
@@ -25,7 +25,7 @@ export default function FieldsBox({ initialFields, repoId }: Props) {
     }, [initialFields])    
 
     function handleNewOrder(newOrder: FieldDAO[]) {
-        updateRepoFieldOrderAction(newOrder)
+        updateEventFieldOrderAction(newOrder)
         .then(() => {
             setFields(newOrder)
         })
@@ -40,7 +40,7 @@ export default function FieldsBox({ initialFields, repoId }: Props) {
         deleteFieldAction(id)
         .then(() => {
           toast({ title: "Campo eliminado" })
-          setFields(fields.filter((note) => note.id !== id))
+          setFields(fields.filter((field) => field.id !== id))
         })
         .catch((error) => {
           toast({title: "Error", description: error.message, variant: "destructive"})
@@ -53,7 +53,7 @@ export default function FieldsBox({ initialFields, repoId }: Props) {
     return (
         <Reorder.Group values={fields} onReorder={(newOrder) => handleNewOrder(newOrder)} className="">
             <div className="flex justify-end">
-                <FieldDialog repoId={repoId} />
+                <FieldDialog eventId={eventId}/>
             </div>
         {
             fields.map((field, index) => {
@@ -68,18 +68,17 @@ export default function FieldsBox({ initialFields, repoId }: Props) {
                             <Badge className="mr-3">
                                 {field.type}
                             </Badge>
-                            <FieldDialog repoId={field.repositoryId} id={field.id} />
-                            {/* <DeleteCotizationNoteDialog id={note.id} description={`seguro que quieres eliminar la nota ${note.text}?`} /> */}
+                            { field.name !== "nombre" && <FieldDialog repoId={field.repositoryId} id={field.id} />}
                             {
                                 loading && deletingId === field.id ? <Loader className="h-5 w-5 animate-spin" />
                                 : 
-                                <Button variant="ghost" className="px-1" onClick={() => handleDelete(field.id)}>
+                                <Button variant="ghost" className="px-1" onClick={() => handleDelete(field.id)} disabled={field.name === "nombre"}>
                                     <X className="w-5 h-5 text-red-500" />
                                 </Button>
                             }
                         </div>
                     </Reorder.Item>
-                        )
+                )
             })
         }
         </Reorder.Group>

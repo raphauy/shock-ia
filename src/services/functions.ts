@@ -322,11 +322,13 @@ type SlotsResult = {
   available: boolean
 }
 
-export async function obtenerDisponibilidad(clientId: string, conversationId: string, eventId: string, date: string){
+export async function obtenerDisponibilidad(clientId: string, eventId: string, date: string){
   console.log("obtenerDisponibilidad")
-  console.log(`\tconversationId: ${conversationId}`)
   console.log(`\teventId: ${eventId}`)
   console.log(`\tdate: ${date}`)
+
+  if (!eventId) return "eventId es obligatorio"
+  if (!date) return "date es obligatorio"
 
   const event= await getEventDAO(eventId)
   if (!event) return "Evento no encontrado"
@@ -354,12 +356,34 @@ export async function obtenerDisponibilidad(clientId: string, conversationId: st
   return JSON.stringify(result)
 }
 
-export async function reservarParaEvento(clientId: string, conversationId: string, eventId: string, start: string, duration: string, name: string){
+export async function reservarParaEvento(clientId: string, conversationId: string, eventId: string, start: string, duration: string, metadata: string){
   console.log("reservarParaEvento")
   console.log(`\tconversationId: ${conversationId}`)
   console.log(`\teventId: ${eventId}`)
   console.log(`\tstart: ${start}`)
   console.log(`\tduration: ${duration}`)
+  console.log(`\tmetadata: ${metadata}`)
+
+  if (!conversationId) return "conversationId es obligatorio"
+  if (!eventId) return "eventId es obligatorio"
+  if (!start) return "start es obligatorio"
+  if (!duration) return "duration es obligatorio"
+  if (!metadata) return "metadata es obligatorio"
+
+  let name= "No proporcionado"
+  let metadataObj
+
+  try {
+    metadataObj= JSON.parse(metadata)
+  } catch (error) {
+    return "Error al parsear la metadata"
+  }
+  console.log("metadataObj: ", metadataObj)
+  name= metadataObj.nombre
+  console.log("name: ", name)
+  if (!name) {
+    return "No se proporcionó el nombre del usuario en la metadata"
+  }
 
   const startFormatIsCorrect= checkDateTimeFormatForSlot(start)
   if (!startFormatIsCorrect) {
@@ -396,6 +420,7 @@ export async function reservarParaEvento(clientId: string, conversationId: strin
     contact,
     seats: "1",
     name,
+    data: metadata,
     clientId,
     conversationId,
   }
@@ -406,11 +431,30 @@ export async function reservarParaEvento(clientId: string, conversationId: strin
   return "Reserva registrada."
 }
 
-export async function reservarParaEventoDeUnicaVez(clientId: string, conversationId: string, eventId: string, name: string){
+export async function reservarParaEventoDeUnicaVez(clientId: string, conversationId: string, eventId: string, metadata: string){
   console.log("reservarParaEventoDeUnicaVez")
   console.log(`\tconversationId: ${conversationId}`)
   console.log(`\teventId: ${eventId}`)
-  console.log(`\tname: ${name}`)
+  console.log(`\tmetadata: ${metadata}`)
+
+  if (!conversationId) return "conversationId es obligatorio"
+  if (!eventId) return "eventId es obligatorio"
+  if (!metadata) return "metadata es obligatorio"
+
+  let name= "No proporcionado"
+  let metadataObj
+
+  try {
+    metadataObj= JSON.parse(metadata)
+  } catch (error) {
+    return "Error al parsear la metadata"
+  }
+  console.log("metadataObj: ", metadataObj)
+  name= metadataObj.nombre
+  console.log("name: ", name)
+  if (!name) {
+    return "No se proporcionó el nombre del usuario en la metadata"
+  }
 
   const event= await getEventDAO(eventId)
   if (!event) return "Evento no encontrado"
@@ -432,6 +476,7 @@ export async function reservarParaEventoDeUnicaVez(clientId: string, conversatio
     contact,
     seats: "1",
     name,
+    data: metadata,
     clientId,
     conversationId,
   }
@@ -440,7 +485,6 @@ export async function reservarParaEventoDeUnicaVez(clientId: string, conversatio
   if (!created) return "Error al reservar, pregunta al usuario si quiere que tu reintentes"
 
   return "Reserva registrada."
-
 }
 
 type ObtenerReservasResult = {
@@ -660,19 +704,15 @@ export async function processFunctionCall(clientId: string, name: string, args: 
       break
 
     case "obtenerDisponibilidad":
-      content= await obtenerDisponibilidad(clientId,
-        args.conversationId,
-        args.eventId,
-        args.date
-      )
+      content= await obtenerDisponibilidad(clientId, args.eventId, args.date)
       break
 
     case "reservarParaEvento":
-      content= await reservarParaEvento(clientId, args.conversationId, args.eventId, args.start, args.duration, args.name)
+      content= await reservarParaEvento(clientId, args.conversationId, args.eventId, args.start, args.duration, args.metadata)
       break
 
     case "reservarParaEventoDeUnicaVez":
-      content= await reservarParaEventoDeUnicaVez(clientId, args.conversationId, args.eventId, args.name)
+      content= await reservarParaEventoDeUnicaVez(clientId, args.conversationId, args.eventId, args.metadata)
       break
 
     case "obtenerReservas":

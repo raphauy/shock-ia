@@ -1,12 +1,8 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { getFutureBookingsDAOByEventId, getBookingsByState, getBookingsDAO } from "@/services/booking-services"
-import BigCalendar, { CalendarEvent } from "../big-calendar"
-import EventList from "../event-list"
-import FixedDateEventList from "../fixed-date-event-list"
-import { BookingDialog } from "../../bookings/booking-dialogs"
-import { getEventDAO } from "@/services/event-services"
-import { EventType } from "@prisma/client"
+import { getBookingsDAO } from "@/services/booking-services"
 import { getClient } from "@/services/clientService"
+import { getEventDAO } from "@/services/event-services"
+import FixedDateEventList from "../fixed-date-event-list"
 
 
 type Props = {

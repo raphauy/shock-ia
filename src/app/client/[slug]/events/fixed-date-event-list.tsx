@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { BookingDAO } from "@/services/booking-services"
 import { format, isSameDay } from "date-fns"
-import { MessageCircle, PersonStanding, Search, X } from "lucide-react"
+import { Calendar, MessageCircle, PersonStanding, Search, X } from "lucide-react"
 import { BookingDialog, CancelBookingDialog, DeleteBookingDialog } from "../bookings/booking-dialogs"
 import { EventDAO } from "@/services/event-services"
 import { EventType } from "@prisma/client"
@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useMemo, useState } from "react"
 import Link from "next/link"
+import BookingDataCard from "./booking-data-card"
 
 type Props = {
   event: EventDAO
@@ -69,9 +70,18 @@ export default function FixedDateEventList({event, bookings, clientSlug}: Props)
                         {filteredBookings.map((reservation: BookingDAO, index: number) => {
                             const conversationId= reservation.conversationId
                             const statusColor= reservation.status === "CANCELADO" ? "bg-gray-200" : reservation.status === "CONFIRMADO" ? "bg-green-200" : reservation.status === "RESERVADO" ? "bg-sky-200" : reservation.status === "PAGADO" ? "bg-blue-200" : reservation.status === "BLOQUEADO" ? "bg-red-200" : "bg-yellow-200"
+
+                            const parsedData = reservation.data ? JSON.parse(reservation.data as string) : {}
+                            const jsonReplaced = Object.keys(parsedData).reduce((acc, key) => {
+                              if (key !== "nombre") {
+                                acc[key] = parsedData[key] === true ? "SI" : parsedData[key] === false ? "NO" : parsedData[key]
+                              }
+                              return acc;
+                            }, {} as Record<string, any>)
+    
                             return (
                             <div key={index} className={`p-4 ${index !== 0 ? 'border-t' : ''}`}>
-                                <div className="flex justify-between items-start">
+                                <div className="grid grid-cols-3">
                                 {
                                     conversationId ? (
                                         <div>
@@ -87,7 +97,11 @@ export default function FixedDateEventList({event, bookings, clientSlug}: Props)
                                         <p className="font-bold">{reservation.name}</p>
                                     )
                                 }
-                                <div className="flex space-x-2">
+                                <div className="">
+                                    <BookingDataCard jsonData={jsonReplaced} />
+                                </div>
+
+                                <div className="flex flex-col items-end space-y-4">
                                     { reservation.status === "CANCELADO" ? 
                                         <DeleteBookingDialog id={reservation.id} description={`Seguro que desea eliminar la reserva de ${reservation.name}?`} />
                                         :
@@ -99,7 +113,12 @@ export default function FixedDateEventList({event, bookings, clientSlug}: Props)
                                     <span className="inline-block bg-secondary text-secondary-foreground rounded px-2 py-1 text-xs font-bold border">
                                         {reservation.eventName}
                                     </span>
+
                                     <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-1 justify-end text-muted-foreground text-sm">
+                                            <Calendar className="w-4 h-4 mb-0.5" />
+                                            <span>{format(reservation.createdAt, "dd/MM/yyyy")}</span>
+                                        </div>
                                         <div className="flex items-center gap-1 justify-end text-muted-foreground">
                                             <PersonStanding className="w-4 h-4 mb-0.5" />
                                             <span>{reservation.seats}</span>

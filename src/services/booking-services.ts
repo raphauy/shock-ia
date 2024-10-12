@@ -17,7 +17,7 @@ export type BookingDAO = {
 	status: BookingStatus
 	name: string
 	contact: string
-	metadata: string | undefined
+	data: string | undefined
 	createdAt: Date
 	updatedAt: Date
 	eventId: string
@@ -34,7 +34,7 @@ export const bookingSchema = z.object({
 	price: z.number().optional(),	
 	name: z.string().min(1, "name is required."),
 	contact: z.string().min(1, "contact is required."),
-	metadata: z.string().optional(),
+	data: z.string().optional(),
 	eventId: z.string().min(1, "eventId is required."),
 	clientId: z.string().min(1, "clientId is required."),
 	conversationId: z.string().optional(),

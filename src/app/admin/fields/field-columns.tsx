@@ -57,21 +57,6 @@ export const columns: ColumnDef<FieldDAO>[] = [
           </Button>
     )},
   },
-  // {
-  //   accessorKey: "role",
-  //   header: ({ column }) => {
-  //     return (
-  //       <Button variant="ghost" className="pl-0 dark:text-white"
-  //         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-  //         Rol
-  //         <ArrowUpDown className="w-4 h-4 ml-1" />
-  //       </Button>
-  //     )
-  //   },
-  //   filterFn: (row, id, value) => {
-  //     return value.includes(row.getValue(id))
-  //   },
-  // },
   {
     id: "actions",
     cell: ({ row }) => {
@@ -82,7 +67,7 @@ export const columns: ColumnDef<FieldDAO>[] = [
       return (
         <div className="flex items-center justify-end gap-2">
 
-          <FieldDialog id={data.id} repoId={data.repositoryId} />
+          <FieldDialog id={data.id} repoId={data.repositoryId} eventId={data.eventId} />
           <DeleteFieldDialog description={deleteDescription} id={data.id} />
         </div>
 

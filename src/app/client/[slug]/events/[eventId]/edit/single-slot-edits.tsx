@@ -14,10 +14,10 @@ type Props = {
 export default function SingleSlotEdits({ event }: Props) {
   return (
     <div>
-        <div className="flex items-center gap-x-2">
+        <div className="flex items-center gap-x-2 mt-6">
             <IconBadge icon={Calendar} />
             <h2 className="text-xl">
-                Disponibilidad
+                Disponibilidad y duración
             </h2>
         </div>
         <AvailabilitySelector eventId={event.id} initialAvailability={event.availability} />
@@ -40,27 +40,27 @@ export default function SingleSlotEdits({ event }: Props) {
             />
         </div>
         <div className="grid grid-cols-2 gap-2">
-            <div className={cn(event.type !== EventType.SINGLE_SLOT && "hidden")}>
-            <SelectNumberForm
-                label="Duración"
-                initialValue={event.maxDuration!}
-                id={event.id}
-                fieldName="duration"
-                options={[30, 60, 120, 180, 240, 300]}
-                update={seEventNumberFieldAction}
-            />
+            <div className="col-span-2">
+                <SelectNumberForm
+                    label="Duración"
+                    initialValue={event.maxDuration!}
+                    id={event.id}
+                    fieldName="duration"
+                    options={[30, 60, 120, 180, 240, 300]}
+                    update={seEventNumberFieldAction}
+                />
             </div>
-            <div className={cn(event.type !== EventType.SINGLE_SLOT && "col-span-2")}>
-            <NumberForm
-                disabled={true}
-                id={event.id}
-                icon={<PersonStanding className="w-6 h-6" />}
-                label="Cupos"
-                initialValue={event.seatsPerTimeSlot || 1}
-                fieldName="seatsPerTimeSlot"
-                update={seEventNumberFieldAction}
-            />
-            </div>
+            {/* <div>
+                <NumberForm
+                    disabled={true}
+                    id={event.id}
+                    icon={<PersonStanding className="w-6 h-6" />}
+                    label="Cupos"
+                    initialValue={event.seatsPerTimeSlot || 1}
+                    fieldName="seatsPerTimeSlot"
+                    update={seEventNumberFieldAction}
+                />
+            </div> */}
         </div>
     </div>
   )

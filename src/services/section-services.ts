@@ -293,9 +293,10 @@ export async function getContext(clientId: string, phone: string, userInput: str
     eventAddress: "${event.address}",
     timezone: "${event.timezone}",
     duration: ${event.minDuration},
+    metadata: ${event.metadata}
 }
 `
-    const hoy = format(toZonedTime(new Date(), event.timezone), "EEEE, dd/MM/yyyy HH:mm:ss", {
+    const hoy = format(toZonedTime(new Date(), event.timezone), "EEEE, PPP HH:mm:ss", {
       locale: es,
     })
     contextString+= `Ahora es ${hoy} en el timezone del evento (${event.timezone})\n`
@@ -307,28 +308,35 @@ export async function getContext(clientId: string, phone: string, userInput: str
     const allFixedDateEvents= await getActiveEventsDAOByClientId(clientId, EventType.FIXED_DATE)
     const fixedDateEvents= allFixedDateEvents.filter(event => event.startDateTime && event.endDateTime)
 
-    contextString+= "Eventos de tipo única vez (fecha fija) que pueden ser relevantes para elaborar una respuesta:\n"
-    fixedDateEvents.map((event) => {
-    contextString += `{
-    eventId: "${event.id}",
-    eventName: "${event.name}",
-    eventDescription: "${event.description}",
-    eventAddress: "${event.address}",
-    timezone: "${event.timezone}",
-    seatsAvailable: ${event.seatsAvailable},
-    seatsTotal: ${event.seatsPerTimeSlot},
-    startDateTime: "${format(toZonedTime(event.startDateTime!, event.timezone), "dd/MM/yyyy HH:mm")}",
-    endDateTime: "${format(toZonedTime(event.endDateTime!, event.timezone), "dd/MM/yyyy HH:mm")}",
+    if (fixedDateEvents.length === 0) {
+      contextString+= "No hay eventos de tipo única vez (fecha fija) disponibles para reservar en este momento.\n"
+    } else {
+      contextString+= "Eventos de tipo única vez (fecha fija) que pueden ser relevantes para elaborar una respuesta:\n"
+      fixedDateEvents.map((event) => {
+      contextString += `{
+  eventId: "${event.id}",
+  eventName: "${event.name}",
+  eventDescription: "${event.description}",
+  eventAddress: "${event.address}",
+  timezone: "${event.timezone}",
+  seatsAvailable: ${event.seatsAvailable},
+  seatsTotal: ${event.seatsPerTimeSlot},
+  startDateTime: "${format(toZonedTime(event.startDateTime!, event.timezone), "dd/MM/yyyy HH:mm")}",
+  endDateTime: "${format(toZonedTime(event.endDateTime!, event.timezone), "dd/MM/yyyy HH:mm")}",
+  metadata: ${event.metadata}
 }
-`
-    const hoy = format(toZonedTime(new Date(), event.timezone), "EEEE, dd/MM/yyyy HH:mm:ss", {
-      locale: es,
-    })
+    `
+      const hoy = format(toZonedTime(new Date(), event.timezone), "EEEE, dd/MM/yyyy HH:mm:ss", {
+        locale: es,
+      })
+  
+      contextString+= `Ahora es ${hoy} en el timezone del evento (${event.timezone})\n`
+      contextString+= `---------------\n\n`
+  
+      })
+        
+    }
 
-    contextString+= `Ahora es ${hoy} en el timezone del evento (${event.timezone})\n`
-    contextString+= `---------------\n\n`
-
-    })
 
   }
 

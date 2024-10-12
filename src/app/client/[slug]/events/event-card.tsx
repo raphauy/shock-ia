@@ -3,7 +3,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { getEventTypeLabel } from "@/lib/utils"
 import { EventDAO } from "@/services/event-services"
 import { EventType } from "@prisma/client"
-import { format } from "date-fns"
+import { format, isAfter } from "date-fns"
 import { toZonedTime } from "date-fns-tz"
 import { Calendar, Clock, DollarSign, MapPin, PersonStanding } from "lucide-react"
 
@@ -16,7 +16,10 @@ export function EventCard({event}: EventCardProps) {
     const duration= event.minDuration === event.maxDuration ? event.minDuration : `${event.minDuration}-${event.maxDuration}`
     const bookedSeats= event.seatsPerTimeSlot && event.seatsAvailable ? event.seatsPerTimeSlot - event.seatsAvailable : 0
     const seatsLabel= event.type === EventType.FIXED_DATE ? `${bookedSeats} / ${event.seatsPerTimeSlot}` : `${event.seatsPerTimeSlot}`
-    const statusLabel= event.type === EventType.FIXED_DATE && (!event.startDateTime || !event.endDateTime) ? "Configurar fechas" : event.isArchived ? "Archivado" : "Activo"
+
+    const isEnded= event.startDateTime && event.endDateTime && isAfter(new Date(), event.endDateTime)
+    const statusLabel= isEnded ? "Finalizado" : event.type === EventType.FIXED_DATE && (!event.startDateTime || !event.endDateTime) ? "Configurar fechas" : event.isArchived ? "Archivado" : "Activo"
+    const badgeVariant= isEnded ? "ended" : event.isArchived ? "archived" : statusLabel === "Configurar fechas" ? "destructive" : "active"
 
     return (
         <Card className="max-w-md overflow-hidden rounded-lg shadow-md min-w-[300px] mx-auto">
@@ -67,7 +70,7 @@ export function EventCard({event}: EventCardProps) {
                         <Badge variant="open">Agotado</Badge>
                     )
                 }
-                <Badge variant={statusLabel === "Configurar fechas" ? "destructive" : "secondary"} className="border-gray-300">{statusLabel}</Badge>
+                <Badge variant={badgeVariant} className="border-gray-300">{statusLabel}</Badge>
             </CardFooter>    
         </Card>
     )

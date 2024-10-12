@@ -347,8 +347,11 @@ model Field {
   required            Boolean                            // gennext: show.column
   order               Int       @default(0)
 
-  repository          Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
-  repositoryId        String
+  repository          Repository? @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  repositoryId        String?
+
+  event               Event? @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId             String?
 
   createdAt           DateTime     @default(now())       // gennext: skip.zod
   updatedAt           DateTime     @updatedAt            // gennext: skip.zod
@@ -410,6 +413,9 @@ model Event {
   clientId          String
 
   bookings          Booking[]                            // gennext: skip.list
+
+  metadata          String?
+  fields            Field[]                            // gennext: skip.list
 }
 
 enum BookingStatus {
@@ -432,7 +438,7 @@ model Booking {
 
   name              String
   contact           String
-  metadata          String?
+  data              String?
 
   createdAt         DateTime    @default(now())                 // gennext: skip.zod
   updatedAt         DateTime    @updatedAt                      // gennext: skip.zod

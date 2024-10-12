@@ -8,7 +8,7 @@ import { CloseConversationDialog, DeleteConversationDialog } from "@/app/client/
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { getFormat } from "@/lib/utils";
+import { cn, getFormat } from "@/lib/utils";
 import { ModelDAO } from "@/services/model-services";
 import { useChat } from "ai/react";
 import clsx from "clsx";
@@ -224,17 +224,15 @@ export default function SimulatorBox() {
               <div key={i} className="w-full">
                 <div
                   key={i}
-                  className={clsx(
-                    "flex w-full px-1 items-center justify-center border-b border-gray-200 py-4",
-                    message.role === "user" ? "bg-gray-100" : "bg-white",
+                  className={cn("flex w-full px-1 items-center justify-center border-gray-200 py-4",
+                    message.role === "user" ? "bg-gray-100 border-b border-t" : "bg-white",
                   )}
                 >
                   <div className="flex items-start w-full max-w-screen-md px-5 space-x-4 sm:px-0">
                   {
                     !gptData &&
                     <div
-                        className={clsx(
-                          "p-1.5 text-white",
+                        className={cn("p-1.5 text-white",
                           (message.role === "assistant") ? "bg-green-500" : (message.role === "system" || message.role === "function") ? "bg-blue-500" : "bg-black",
                         )}
                       >

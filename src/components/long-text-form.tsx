@@ -46,7 +46,7 @@ export function LongTextForm({ id, label, initialValue, fieldName, update }: Pro
 
 
   return (
-    <div className="mt-6 border bg-slate-100 rounded-md p-4 dark:bg-black">
+    <div className="mt-6 border rounded-md p-4 bg-muted">
       <div className="font-medium flex flex-col">
         {label ? <p className="border-b mb-2">{label}:</p> : "Descripción:"}
 

@@ -2,6 +2,7 @@ import * as z from "zod"
 import { prisma } from "@/lib/db"
 import { Parameters, RepositoryDAO, generateFunctionDefinition, getFullRepositoryDAO, updateFunctionDefinition } from "./repository-services"
 import { FieldType } from "@prisma/client"
+import { updateEventMetadata } from "./event-services"
 
 export type FieldDAO = {
 	id: string
@@ -10,21 +11,22 @@ export type FieldDAO = {
 	description: string
 	required: boolean
   order: number
-	repositoryId: string
+	repositoryId: string | null | undefined
+  eventId: string | null | undefined
 	createdAt: Date
 	updatedAt: Date
 }
 
-export const fieldSchema = z.object({
+export const repoFieldSchema = z.object({
 	name: z.string().min(1, "name is required."),
 	type: z.nativeEnum(FieldType),
 	description: z.string().min(1, "description is required."),
 	required: z.boolean().default(false),
-	repositoryId: z.string().min(1, "repositoryId is required."),
+	repositoryId: z.string().optional(),
+  eventId: z.string().optional(),
 })
 
-export type FieldFormValues = z.infer<typeof fieldSchema>
-
+export type FieldFormValues = z.infer<typeof repoFieldSchema>
 
 export async function getFieldsDAO() {
   const found = await prisma.field.findMany({
@@ -53,7 +55,13 @@ export async function createField(data: FieldFormValues) {
     }
   })
 
-  await updateFunctionDefinition(data.repositoryId)
+  if (data.repositoryId) {
+    await updateFunctionDefinition(data.repositoryId)
+  }
+
+  if (data.eventId) {
+    await updateEventMetadata(data.eventId)
+  }
 
   return created
 }
@@ -66,7 +74,13 @@ export async function updateField(id: string, data: FieldFormValues) {
     data
   })
 
-  await updateFunctionDefinition(data.repositoryId)
+  if (data.repositoryId) {
+    await updateFunctionDefinition(data.repositoryId)
+  }
+
+  if (data.eventId) {
+    await updateEventMetadata(data.eventId)
+  }
 
   return updated
 }
@@ -78,7 +92,13 @@ export async function deleteField(id: string) {
     },
   })
 
-  await updateFunctionDefinition(deleted.repositoryId)
+  if (deleted.repositoryId) {
+    await updateFunctionDefinition(deleted.repositoryId)
+  }
+
+  if (deleted.eventId) {
+    await updateEventMetadata(deleted.eventId)
+  }
 
   return deleted
 }
@@ -91,6 +111,7 @@ export async function getFullFieldsDAO() {
     },
     include: {
 			repository: true,
+      event: true
 		}
   })
   return found as FieldDAO[]
@@ -103,12 +124,13 @@ export async function getFullFieldDAO(id: string) {
     },
     include: {
 			repository: true,
+      event: true
 		}
   })
   return found as FieldDAO
 }
     
-export async function updateOrder(fields: FieldDAO[]): Promise<string> {
+export async function updateRepoFieldsOrder(fields: FieldDAO[]): Promise<string> {
   for (let i = 0; i < fields.length; i++) {
     const field = fields[i]
     await prisma.field.update({
@@ -121,15 +143,52 @@ export async function updateOrder(fields: FieldDAO[]): Promise<string> {
     })
   }
 
-  await updateFunctionDefinition(fields[0].repositoryId)
+  if (fields[0].repositoryId) {
+    await updateFunctionDefinition(fields[0].repositoryId)
+    return fields[0].repositoryId
+  } else {
+    throw new Error("Repository ID is required")
+  }  
+}
 
-  return fields[0].repositoryId
+export async function updateEventFieldsOrder(fields: FieldDAO[]): Promise<string> {
+  for (let i = 0; i < fields.length; i++) {
+    const field = fields[i]
+    await prisma.field.update({
+      where: {
+        id: field.id,
+      },
+      data: {
+        order: i,
+      },
+    })
+  }
+
+  if (fields[0].eventId) {
+    await updateEventMetadata(fields[0].eventId)
+    return fields[0].eventId
+  } else {
+    throw new Error("Event ID is required")
+  }  
+
 }
 
 export async function getFieldsDAOByRepositoryId(repositoryId: string) {
   const found = await prisma.field.findMany({
     where: {
       repositoryId
+    },
+    orderBy: {
+      order: "asc"
+    },
+  })
+  return found as FieldDAO[]
+}
+
+export async function getFieldsDAOByEventId(eventId: string) {
+  const found = await prisma.field.findMany({
+    where: {
+      eventId
     },
     orderBy: {
       order: "asc"

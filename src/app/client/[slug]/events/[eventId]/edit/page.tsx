@@ -2,20 +2,18 @@ import { BooleanForm } from "@/components/boolean-form";
 import { ColorForm } from "@/components/color-form";
 import { IconBadge } from "@/components/icon-badge";
 import { LongTextForm } from "@/components/long-text-form";
-import { NumberForm } from "@/components/number-form";
-import { SelectTypeForm } from "@/components/select-form-type";
-import { SelectNumberForm } from "@/components/select-number-form";
 import { SelectTimezoneForm } from "@/components/select-timezone";
 import { ShortTextForm } from "@/components/short-text-form";
-import { getEventDAO } from "@/services/event-services";
-import { EventType } from "@prisma/client";
-import { Archive, Calendar, Globe, LayoutDashboard, Palette, PersonStanding, Settings } from "lucide-react";
-import { seEventNumberFieldAction, setEventBooleanFieldAction, setEventFieldAction } from "../../event-actions";
-import AvailabilitySelector from "../availability-selector";
-import { cn, getEventTypeLabel } from "@/lib/utils";
-import SingleSlotEdits from "./single-slot-edits";
-import FixedDateEdits from "./fixed-date-edits";
 import { Badge } from "@/components/ui/badge";
+import { cn, getEventTypeLabel } from "@/lib/utils";
+import { getEventDAO, getFullEventDAO } from "@/services/event-services";
+import { EventType } from "@prisma/client";
+import { Archive, Globe, LayoutDashboard, Palette, Settings, Tag } from "lucide-react";
+import { setEventBooleanFieldAction, setEventFieldAction } from "../../event-actions";
+import EventFieldsBox from "./event-fields-box";
+import FixedDateEdits from "./fixed-date-edits";
+import SingleSlotEdits from "./single-slot-edits";
+import { isAfter } from "date-fns";
 
 type Props= {
     params: {
@@ -24,12 +22,11 @@ type Props= {
     }
 }
 export default async function EditEventPage({ params }: Props) {
-  const event= await getEventDAO(params.eventId)
+  const event= await getFullEventDAO(params.eventId)
   if (!event) return <div>Event not found</div>
 
-  const selectDescription= `
-Duración fija: todas las reservas tienen la misma duración, ej: 60 minutos \n
-Duración variable: el usuario puede reservar tiempo variable, abajo puedes configurar el mínimo y máximo de tiempo reservable, ej: mínimo de 30 minutos y máximo de 60 minutos`
+  const isEnded= event.startDateTime && event.endDateTime && isAfter(new Date(), event.endDateTime)
+
   return (
     <div className=" mt-4 border rounded-lg w-full">
       <div style={{backgroundColor: event.color}} className="h-4 rounded-t-lg" />
@@ -43,7 +40,7 @@ Duración variable: el usuario puede reservar tiempo variable, abajo puedes conf
                           Información del evento
                       </h2>                      
                     </div>
-                    <Badge>{getEventTypeLabel(event.type)}</Badge>
+                    <Badge className={cn(isEnded && "bg-orange-500")}>{isEnded ? "Finalizado" : getEventTypeLabel(event.type)}</Badge>
                   </div>
                   <ShortTextForm
                       label="Nombre"
@@ -66,12 +63,22 @@ Duración variable: el usuario puede reservar tiempo variable, abajo puedes conf
                     fieldName="address"
                     update={setEventFieldAction}
                   />
+
                   <div className="flex items-center gap-x-2 mt-6">
                     <IconBadge icon={Settings} />
                     <h2 className="text-xl">
                       Otros
                     </h2>
                   </div>
+                  <SelectTimezoneForm
+                    id={event.id}
+                    icon={<Globe className="w-5 h-5" />}
+                    label="Zona horaria"
+                    initialValue={event.timezone}
+                    fieldName="timezone"
+                    update={setEventFieldAction}
+                  />
+
                   <ColorForm
                     id={event.id}
                     icon={<Palette className="w-5 h-5" />}
@@ -81,6 +88,7 @@ Duración variable: el usuario puede reservar tiempo variable, abajo puedes conf
                     colors={["#bfe1ff", "#d0f0c0", "#ffd0d0", "#ffcc99", "#e8d0ff", "#c9cfd4"]}
                     update={setEventFieldAction}
                   />
+
                   <BooleanForm
                     id={event.id}
                     icon={<Archive className="w-5 h-5" />}
@@ -94,6 +102,18 @@ Duración variable: el usuario puede reservar tiempo variable, abajo puedes conf
 
               </div>
               <div className="min-w-96">
+                <div className="flex items-center gap-x-2">
+                  <IconBadge icon={Tag} />
+                  <h2 className="text-xl">
+                      Campos para la reserva
+                  </h2>
+                </div>
+
+                <div className="mt-6 border bg-slate-100 rounded-md p-2 dark:bg-black">
+                  <EventFieldsBox initialFields={event.fields} eventId={event.id} />
+                </div>
+
+
 
                 {
                   event.type === EventType.SINGLE_SLOT && <SingleSlotEdits event={event} />
@@ -101,14 +121,6 @@ Duración variable: el usuario puede reservar tiempo variable, abajo puedes conf
                 {
                   event.type === EventType.FIXED_DATE && <FixedDateEdits event={event} />
                 }
-                <SelectTimezoneForm
-                  id={event.id}
-                  icon={<Globe className="w-5 h-5" />}
-                  label="Zona horaria"
-                  initialValue={event.timezone}
-                  fieldName="timezone"
-                  update={setEventFieldAction}
-                />
               </div>
           </div> 
       </div>

@@ -1,7 +1,7 @@
 "use server"
   
 import { revalidatePath } from "next/cache"
-import { FieldDAO, FieldFormValues, createField, updateField, getFullFieldDAO, deleteField, updateOrder } from "@/services/field-services"
+import { FieldDAO, FieldFormValues, createField, updateField, getFullFieldDAO, deleteField, updateRepoFieldsOrder, updateEventFieldsOrder } from "@/services/field-services"
 
 
 export async function getFieldDAOAction(id: string): Promise<FieldDAO | null> {
@@ -25,14 +25,21 @@ export async function deleteFieldAction(id: string): Promise<FieldDAO | null> {
     const deleted= await deleteField(id)
 
     revalidatePath(`/admin/repositories/${deleted.repositoryId}`)
+    revalidatePath("/client/[slug]/events", 'page')
 
     return deleted as FieldDAO
 }
 
-export async function updateOrderAction(notes: FieldDAO[]) {
+export async function updateRepoFieldOrderAction(fields: FieldDAO[]) {
     
-    const repositoryId= await updateOrder(notes)
+    const repositoryId= await updateRepoFieldsOrder(fields)
 
     revalidatePath(`/admin/repositories/${repositoryId}`)    
 }
 
+export async function updateEventFieldOrderAction(fields: FieldDAO[]) {
+    
+    const eventId= await updateEventFieldsOrder(fields)
+
+    revalidatePath(`/admin/events/${eventId}`)    
+}
