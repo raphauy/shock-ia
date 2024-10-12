@@ -9,7 +9,7 @@ export async function sendTextToConversation(accountId: number, conversationId: 
     console.log("chatwootUrl:", chatwootUrl)
     console.log("chatwootToken:", chatwootToken)
     if (!chatwootUrl || !chatwootToken) {
-        console.error("CHATWOOT_URL or CHATWOOT_TOKEN is not set")
+        console.error("CHATWOOT_URL or CHATWOOT_AGENT_BOT_ACCESS_TOKEN is not set")
         return
     }
 
@@ -22,7 +22,7 @@ export async function sendTextToConversation(accountId: number, conversationId: 
         }
     });
 
-    client.messages.create({
+    await client.messages.create({
         accountId: accountId,
         conversationId: conversationId,
         data: {
