@@ -415,6 +415,7 @@ model Event {
   bookings          Booking[]                            // gennext: skip.list
 
   metadata          String?
+  askInSequence     Boolean   @default(false)
   fields            Field[]                            // gennext: skip.list
 }
 

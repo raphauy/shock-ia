@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn, getEventTypeLabel } from "@/lib/utils";
 import { getEventDAO, getFullEventDAO } from "@/services/event-services";
 import { EventType } from "@prisma/client";
-import { Archive, Globe, LayoutDashboard, Palette, Settings, Tag } from "lucide-react";
+import { Archive, Globe, LayoutDashboard, ListChecks, Palette, Settings, Tag } from "lucide-react";
 import { setEventBooleanFieldAction, setEventFieldAction } from "../../event-actions";
 import EventFieldsBox from "./event-fields-box";
 import FixedDateEdits from "./fixed-date-edits";
@@ -112,6 +112,17 @@ export default async function EditEventPage({ params }: Props) {
                 <div className="mt-6 border bg-slate-100 rounded-md p-2 dark:bg-black">
                   <EventFieldsBox initialFields={event.fields} eventId={event.id} />
                 </div>
+
+                <BooleanForm
+                  id={event.id}
+                  icon={<ListChecks className="w-5 h-5" />}
+                  label="Preguntar en secuencia"
+                  description="Si está marcado, se le instruirá al LLM que espere la respuesta de cada campo antes de continuar con el siguiente"
+                  initialValue={event.askInSequence}
+                  fieldName="askInSequence"
+                  update={setEventBooleanFieldAction}
+                />
+
 
 
 

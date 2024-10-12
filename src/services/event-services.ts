@@ -28,6 +28,7 @@ export type EventDAO = {
 	updatedAt: Date
 	clientId: string
   metadata: string | null | undefined
+  askInSequence: boolean
   fields: FieldDAO[]
 }
 

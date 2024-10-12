@@ -21,7 +21,7 @@ const obtenerDisponibilidad=
 const reservarParaEvento=
 {
   "name": "reservarParaEvento",
-  "description": "Reserva un evento en una fecha específica. Debes preguntar al usuario cada campo de la metadata para crear el objeto y pasarlo como string en el campo metadata.",
+  "description": "Reserva un evento en una fecha específica que indique el usuario. Debes preguntar al usuario cada campo de la metadata para crear el objeto y pasarlo como string en el campo metadata.",
   "parameters": {
     "type": "object",
     "properties": {

@@ -279,6 +279,7 @@ export async function getContext(clientId: string, phone: string, userInput: str
   // info de eventos y disponibilidad si tiene la función obtenerDisponibilidad
 
   if (functionsNames.includes("obtenerDisponibilidad")) {
+    const askInSequenceText= `Para este evento, los campos de la metadata se deben preguntar en secuencia. Esperar la respuesta de cada campo antes de preguntar el siguiente campo.\n`
     const events= await getActiveEventsDAOByClientId(clientId, EventType.SINGLE_SLOT)
     const availableEvents= events.filter(event => event.availability.length > 0)
     console.log("availableEvents: ", availableEvents.map((event) => event.name))
@@ -296,6 +297,11 @@ export async function getContext(clientId: string, phone: string, userInput: str
     metadata: ${event.metadata}
 }
 `
+
+    if (event.askInSequence) {
+      contextString+= askInSequenceText
+    }
+
     const hoy = format(toZonedTime(new Date(), event.timezone), "EEEE, PPP HH:mm:ss", {
       locale: es,
     })
@@ -325,7 +331,10 @@ export async function getContext(clientId: string, phone: string, userInput: str
   endDateTime: "${format(toZonedTime(event.endDateTime!, event.timezone), "dd/MM/yyyy HH:mm")}",
   metadata: ${event.metadata}
 }
-    `
+`
+      if (event.askInSequence) {
+        contextString+= askInSequenceText
+      }
       const hoy = format(toZonedTime(new Date(), event.timezone), "EEEE, dd/MM/yyyy HH:mm:ss", {
         locale: es,
       })
