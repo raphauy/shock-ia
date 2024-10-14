@@ -165,3 +165,50 @@ export async function removeAgentBotFromClient(botId: string) {
         console.error('Error removing agent bot:', error)
     }
 }
+
+
+function getChatwootConfig(chatwootToken: string | undefined) {
+    if (!chatwootToken) {
+        console.error("CHATWOOT_ACCESS_TOKEN is not set")
+        throw new Error("CHATWOOT_ACCESS_TOKEN is not set")
+    }
+    const chatwootUrl = process.env.CHATWOOT_URL!
+    
+    console.log("chatwootUrl:", chatwootUrl)
+    console.log("chatwootToken:", chatwootToken)
+    if (!chatwootUrl) {
+        console.error("CHATWOOT_URL is not set")
+        throw new Error("CHATWOOT_URL is not set")
+    }
+
+    return { chatwootUrl, chatwootToken }
+}
+
+async function getChatwootClient(token: string | undefined) {
+    if (!token) {
+        console.error("CHATWOOT_ACCESS_TOKEN is not set")
+        throw new Error("CHATWOOT_ACCESS_TOKEN is not set")
+    }
+    const chatwootUrl = process.env.CHATWOOT_URL!
+    
+    console.log("chatwootUrl:", chatwootUrl)
+    console.log("chatwootToken:", token)
+    if (!chatwootUrl || !token) {
+        console.error("CHATWOOT_URL or CHATWOOT_ACCESS_TOKEN is not set")
+        throw new Error("CHATWOOT_URL or CHATWOOT_ACCESS_TOKEN is not set")
+    }
+
+    const client = new ChatwootClient({
+        config: {
+            basePath: chatwootUrl,
+            with_credentials: true,
+            credentials: "include",
+            token
+        }
+    })
+    if (!client) {
+        console.error("Chatwoot client not found")
+        throw new Error("Problem creating chatwoot client")
+    }
+    return client
+}

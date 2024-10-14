@@ -68,7 +68,7 @@ export default function EventFieldsBox({ initialFields, eventId }: Props) {
                             <Badge className="mr-3">
                                 {field.type}
                             </Badge>
-                            { field.name !== "nombre" && <FieldDialog repoId={field.repositoryId} id={field.id} />}
+                            <FieldDialog repoId={field.repositoryId} id={field.id} />
                             {
                                 loading && deletingId === field.id ? <Loader className="h-5 w-5 animate-spin" />
                                 : 

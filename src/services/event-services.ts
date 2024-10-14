@@ -94,7 +94,7 @@ export async function createEvent(clientId: string, name: string, type: EventTyp
   // create the first field
   const fieldName= "nombre"
   const fieldType= FieldType.string
-  const fieldDescription= "Nombre del usuario."
+  const fieldDescription= "Nombre para la reserva."
   const fieldRequired= true
   await createField({
     name: fieldName,

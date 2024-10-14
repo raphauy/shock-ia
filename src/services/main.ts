@@ -1,4 +1,3 @@
-import { addLabelToConversation, createAgentBotToClient, removeAgentBotFromClient, sendTextToConversation } from "./chatwoot"
 
 import { config } from "dotenv"
 config()
@@ -18,11 +17,6 @@ async function main() {
 
     //await sendTextToConversation(accountId, conversationId, "Hola, ¿cómo estás?")
 
-    const clientId= "clsnvcntc003okaqc2gfrme4b"
-    const botId= "3"
-
-    //await createAgentBotToClient(clientId)
-    await removeAgentBotFromClient(botId)
 }
   
 //main()

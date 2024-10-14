@@ -82,7 +82,7 @@ export function FieldForm({ id, repoId, eventId, closeDialog }: Props) {
               <FormItem>
                 <FormLabel>Nombre</FormLabel>
                 <FormControl>
-                  <Input placeholder="ej: nombre" {...field} />
+                  <Input placeholder="ej: nombre" {...field} disabled={field.value === "nombre"}/>
                 </FormControl>
                 <FormDescription>Sin espacios y sin tildes ni eñes, para más de una palabra se recomienda camelCase, ej: nombreCompleto</FormDescription>
                 <FormMessage />
