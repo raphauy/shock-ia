@@ -11,6 +11,7 @@ export type EventDAO = {
 	name: string
 	slug: string
   color: string
+  tags: string[]
 	minDuration: number | undefined
 	maxDuration: number | undefined
 	description: string | undefined
@@ -339,4 +340,25 @@ export function generateMetadata(properties: Property[]): string {
   }
 
   return jsonString;
+}
+
+export async function getTagsOfEvent(eventId: string) {
+  const found = await prisma.event.findUnique({
+    where: {
+      id: eventId
+    }
+  })
+
+  return found?.tags
+}
+
+export async function setTagsOfEvent(eventId: string, tags: string[]) {
+  const updated = await prisma.event.update({
+    where: {
+      id: eventId
+    },
+    data: {
+      tags
+    }
+  })
 }

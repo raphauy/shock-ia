@@ -391,6 +391,7 @@ model Event {
   minDuration       Int?                                        // gennext: show.column
   maxDuration       Int?                                        // gennext: show.column
   color             String                                      // gennext: show.column
+  tags              String[]                                    // gennext: show.column
 
   description       String?
   address           String?                                     // gennext: show.column

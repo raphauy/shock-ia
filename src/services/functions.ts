@@ -411,7 +411,10 @@ export async function reservarParaEvento(clientId: string, conversationId: strin
   if (!isAvailable) 
     return `El slot ${format(startDate, dateTimeFormat)} - ${format(endDate, dateTimeFormat)} no está disponible`
 
-  let contact= await getConversationPhone(conversationId)
+  const conversation= await getConversation(conversationId)
+  if (!conversation) return "No se encontró la conversación, revisar el conversationId"
+
+  let contact= conversation.phone
   if (!contact) contact= "Ocurrió un error al obtener la conversación"
 
   const data: BookingFormValues = {
@@ -428,6 +431,18 @@ export async function reservarParaEvento(clientId: string, conversationId: strin
 
   const created= await createBooking(data)
   if (!created) return "Error al reservar, pregunta al usuario si quiere que tu reintentes"
+
+  const tags= event.tags
+  const eventIsTaggedAgente= tags?.some(tag => tag === "agente")
+  const chatwootAccountId= conversation.client.whatsappInstances[0].chatwootAccountId ? parseInt(conversation.client.whatsappInstances[0].chatwootAccountId) : undefined
+  const chatwootConversationId= conversation.chatwootConversationId
+  if (eventIsTaggedAgente && chatwootAccountId && chatwootConversationId) {
+    await toggleConversationStatus(chatwootAccountId, chatwootConversationId, "open")
+    console.log("Conversation status updated to open")
+  }
+  if (tags && chatwootAccountId && chatwootConversationId) {
+    await addLabelToConversation(chatwootAccountId, chatwootConversationId, tags)
+  }
 
   return "Reserva registrada."
 }
@@ -467,7 +482,10 @@ export async function reservarParaEventoDeUnicaVez(clientId: string, conversatio
   if (setsLeft === undefined || setsLeft <= 0)
     return "No hay cupos disponibles para este evento"
 
-  let contact= await getConversationPhone(conversationId)
+  const conversation= await getConversation(conversationId)
+  if (!conversation) return "No se encontró la conversación, revisar el conversationId"
+
+  let contact= conversation.phone
   if (!contact) contact= "Ocurrió un error al obtener la conversación"
 
   const data: BookingFormValues = {
@@ -484,6 +502,18 @@ export async function reservarParaEventoDeUnicaVez(clientId: string, conversatio
 
   const created= await createBooking(data)
   if (!created) return "Error al reservar, pregunta al usuario si quiere que tu reintentes"
+
+  const tags= event.tags
+  const eventIsTaggedAgente= tags?.some(tag => tag === "agente")
+  const chatwootAccountId= conversation.client.whatsappInstances[0].chatwootAccountId ? parseInt(conversation.client.whatsappInstances[0].chatwootAccountId) : undefined
+  const chatwootConversationId= conversation.chatwootConversationId
+  if (eventIsTaggedAgente && chatwootAccountId && chatwootConversationId) {
+    await toggleConversationStatus(chatwootAccountId, chatwootConversationId, "open")
+    console.log("Conversation status updated to open")
+  }
+  if (tags && chatwootAccountId && chatwootConversationId) {
+    await addLabelToConversation(chatwootAccountId, chatwootConversationId, tags)
+  }
 
   return "Reserva registrada."
 }
@@ -633,7 +663,6 @@ export async function defaultFunction(clientId: string, name: string, args: any)
       await toggleConversationStatus(chatwootAccountId, chatwootConversationId, "open")
       console.log("Conversation status updated to open")
     }
-
     if (tags && chatwootAccountId && chatwootConversationId) {
       await addLabelToConversation(chatwootAccountId, chatwootConversationId, tags)
     }

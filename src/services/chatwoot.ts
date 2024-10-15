@@ -37,7 +37,7 @@ export async function addLabelToConversation(accountId: number, conversationId: 
     console.log("chatwootUrl:", chatwootUrl)
     console.log("chatwootToken:", chatwootToken)
     if (!chatwootUrl || !chatwootToken) {
-        console.error("CHATWOOT_URL or CHATWOOT_TOKEN is not set")
+        console.error("CHATWOOT_URL or CHATWOOT_ACCESS_TOKEN is not set")
         return
     }
 
@@ -50,6 +50,7 @@ export async function addLabelToConversation(accountId: number, conversationId: 
         }
     });
 
+    console.log("labels:", labels)
 
     const addTagResponse = await client.conversationLabels.add({
         accountId,
@@ -64,11 +65,12 @@ export async function addLabelToConversation(accountId: number, conversationId: 
 
 export async function addLabelToConversationByPhone(accountId: number, phone: string, labels: string[]) {
     const chatwootUrl= process.env.CHATWOOT_URL!
-    const chatwootToken= process.env.CHATWOOT_ACCESS_TOKEN!
+//    const chatwootToken= process.env.CHATWOOT_ACCESS_TOKEN!
+    const chatwootToken = process.env.CHATWOOT_AGENT_BOT_ACCESS_TOKEN!
     console.log("chatwootUrl:", chatwootUrl)
     console.log("chatwootToken:", chatwootToken)
     if (!chatwootUrl || !chatwootToken) {
-        console.error("CHATWOOT_URL or CHATWOOT_TOKEN is not set")
+        console.error("CHATWOOT_URL or CHATWOOT_AGENT_BOT_ACCESS_TOKEN is not set")
         return
     }
 
@@ -246,11 +248,12 @@ async function getChatwootClient(token: string | undefined) {
 
 export async function toggleConversationStatus(accountId: number, conversationId: number, status: "open" | "resolved" | "pending") {
     const chatwootUrl = process.env.CHATWOOT_URL!
-    const chatwootToken = process.env.CHATWOOT_ACCESS_TOKEN!
+    const chatwootToken= process.env.CHATWOOT_AGENT_BOT_ACCESS_TOKEN!
+//    const chatwootToken = process.env.CHATWOOT_ACCESS_TOKEN!
     console.log("chatwootUrl:", chatwootUrl)
     console.log("chatwootToken:", chatwootToken)
     if (!chatwootUrl || !chatwootToken) {
-        console.error("CHATWOOT_URL or CHATWOOT_ACCESS_TOKEN is not set")
+        console.error("CHATWOOT_URL or CHATWOOT_AGENT_BOT_ACCESS_TOKEN is not set")
         return
     }
 

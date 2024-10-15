@@ -8,12 +8,13 @@ import { Badge } from "@/components/ui/badge";
 import { cn, getEventTypeLabel } from "@/lib/utils";
 import { getEventDAO, getFullEventDAO } from "@/services/event-services";
 import { EventType } from "@prisma/client";
-import { Archive, Globe, LayoutDashboard, ListChecks, Palette, Settings, Tag } from "lucide-react";
+import { Archive, Globe, LayoutDashboard, ListChecks, ListCollapse, Palette, Settings, Tag } from "lucide-react";
 import { setEventBooleanFieldAction, setEventFieldAction } from "../../event-actions";
 import EventFieldsBox from "./event-fields-box";
 import FixedDateEdits from "./fixed-date-edits";
 import SingleSlotEdits from "./single-slot-edits";
 import { isAfter } from "date-fns";
+import { EventTaggerComponent } from "./event-tagger";
 
 type Props= {
     params: {
@@ -65,6 +66,14 @@ export default async function EditEventPage({ params }: Props) {
                   />
 
                   <div className="flex items-center gap-x-2 mt-6">
+                    <IconBadge icon={Tag} />
+                    <h2 className="text-xl">
+                          Etiquetas
+                      </h2>                      
+                    </div>
+                    <EventTaggerComponent event={event} />
+
+                  <div className="flex items-center gap-x-2 mt-6">
                     <IconBadge icon={Settings} />
                     <h2 className="text-xl">
                       Otros
@@ -103,7 +112,7 @@ export default async function EditEventPage({ params }: Props) {
               </div>
               <div className="min-w-96">
                 <div className="flex items-center gap-x-2">
-                  <IconBadge icon={Tag} />
+                  <IconBadge icon={ListCollapse} />
                   <h2 className="text-xl">
                       Campos para la reserva
                   </h2>
