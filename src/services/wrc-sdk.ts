@@ -65,42 +65,17 @@ export async function fetchInstance(instanceName: string): Promise<WRCInstance |
 }
 
 
-type CreateInstanceBasicParams = {
-    instanceName: string
-    integration?: "WHATSAPP-BUSINESS" | "WHATSAPP-BAILEYS"
-    webhookUrl: string
-}
-
-export async function createInstanceBasic(params: CreateInstanceBasicParams): Promise<CreateInstanceResponse> {
+export async function createInstanceBasic(instanceName: string): Promise<CreateInstanceResponse> {
     if (!baseURL || !apiKey) {
         throw new Error('WRC_BASE_URL or WRC_API_KEY is not set')
     }
-
-    const inboundToken = process.env.API_TOKEN
-
-    const newParams = {
-        ...params,
-        rabbitmq: {
-            enabled: false,
-            events: events
-        },
-        webhook: {
-            url: params.webhookUrl,
-            byEvents: false,
-            base64: false,
-            headers: {
-                "autorization": `Bearer ${inboundToken}`,
-                "Content-Type": "application/json"
-            },
-            events: [
-                "MESSAGES_UPSERT",
-                "CONNECTION_UPDATE",
-            ]
-        }
+    const isDevelopment = process.env.NODE_ENV === 'development'
+    if (isDevelopment) {
+        instanceName = "dev-" + instanceName
     }
 
     try {
-        const response = await axios.post<CreateInstanceResponse>(`${baseURL}/instance/create`, newParams, {
+        const response = await axios.post<CreateInstanceResponse>(`${baseURL}/instance/create`, { instanceName }, {
             headers: {
                 'apiKey': `${apiKey}`,
             },
@@ -292,3 +267,4 @@ export async function sendText(instanceName: string, phone: string, text: string
     }
 
 }
+

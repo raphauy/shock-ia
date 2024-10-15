@@ -120,7 +120,11 @@ export async function getConversation(id: string) {
       id
     },
     include: {
-      client: true,
+      client: {
+        include: {
+          whatsappInstances: true
+        }
+      },
       messages:  {
         orderBy: {
           createdAt: 'asc',

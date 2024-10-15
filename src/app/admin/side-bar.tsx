@@ -97,7 +97,6 @@ export default function SideBar() {
           if (href === "divider") return divider(index)
 
           if (href === "/admin/repositories" && user?.email !== "rapha.uy@rapha.uy") return null
-          if (href === "/admin/tags" && user?.email !== "rapha.uy@rapha.uy") return null
           
           const selected= path.endsWith(href)
           const classes= cn(commonClasses, selected && selectedClasses)

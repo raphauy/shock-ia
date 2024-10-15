@@ -12,18 +12,30 @@ export async function POST(request: Request) {
     try {
         const json= await request.json()
         //console.log("general api json: ", json)
+        if (!json.account || !json.conversation) {
+            console.log("error: ", "account or conversation is missing")
+            return NextResponse.json({ data: "ACK" }, { status: 200 })
+        }
         const accountId= json.account.id
         const conversationId= json.conversation.id
         const contentType= json.content_type
         const content= json.content
         const messageType= json.message_type
         const inboxName= json.inbox.name
+        const conversationStatus= json.conversation.status
         console.log("accountId: ", accountId)
         console.log("conversationId: ", conversationId)
         console.log("contentType: ", contentType)
         console.log("content: ", content)
         console.log("messageType: ", messageType)
         console.log("inboxName: ", inboxName)
+        console.log("conversationStatus: ", conversationStatus)
+
+        if (conversationStatus !== "pending") {
+            console.log("skipping message because conversationStatus is not pending: ", conversationStatus)
+            return NextResponse.json({ data: "ACK" }, { status: 200 })
+        }
+
 
         if (!accountId || !conversationId || !contentType) {
             console.log("error: ", "accountId, conversationId or contentType is missing")

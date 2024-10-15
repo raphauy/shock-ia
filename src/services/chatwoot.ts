@@ -31,7 +31,38 @@ export async function sendTextToConversation(accountId: number, conversationId: 
     })
 }
 
-export async function addLabelToConversation(accountId: number, phone: string, tagName: string) {
+export async function addLabelToConversation(accountId: number, conversationId: number, labels: string[]) {
+    const chatwootUrl= process.env.CHATWOOT_URL!
+    const chatwootToken= process.env.CHATWOOT_ACCESS_TOKEN!
+    console.log("chatwootUrl:", chatwootUrl)
+    console.log("chatwootToken:", chatwootToken)
+    if (!chatwootUrl || !chatwootToken) {
+        console.error("CHATWOOT_URL or CHATWOOT_TOKEN is not set")
+        return
+    }
+
+    const client = new ChatwootClient({
+        config: {
+            basePath: chatwootUrl,
+            with_credentials: true,
+            credentials: "include",
+            token: chatwootToken
+        }
+    });
+
+
+    const addTagResponse = await client.conversationLabels.add({
+        accountId,
+        conversationId,
+        data: {
+            labels: labels
+        }
+    })
+    
+    console.log("Etiqueta añadida:", addTagResponse)
+}
+
+export async function addLabelToConversationByPhone(accountId: number, phone: string, labels: string[]) {
     const chatwootUrl= process.env.CHATWOOT_URL!
     const chatwootToken= process.env.CHATWOOT_ACCESS_TOKEN!
     console.log("chatwootUrl:", chatwootUrl)
@@ -77,7 +108,7 @@ export async function addLabelToConversation(accountId: number, phone: string, t
             accountId: accountId,
             conversationId: conversationId,
             data: {
-                labels: [tagName]
+                labels: labels
             }
         })
     
@@ -212,3 +243,27 @@ async function getChatwootClient(token: string | undefined) {
     }
     return client
 }
+
+export async function toggleConversationStatus(accountId: number, conversationId: number, status: "open" | "resolved" | "pending") {
+    const chatwootUrl = process.env.CHATWOOT_URL!
+    const chatwootToken = process.env.CHATWOOT_ACCESS_TOKEN!
+    console.log("chatwootUrl:", chatwootUrl)
+    console.log("chatwootToken:", chatwootToken)
+    if (!chatwootUrl || !chatwootToken) {
+        console.error("CHATWOOT_URL or CHATWOOT_ACCESS_TOKEN is not set")
+        return
+    }
+
+    const client = await getChatwootClient(chatwootToken)
+
+    await client.conversations.toggleStatus({
+        accountId: accountId,
+        conversationId: conversationId,
+        data: {
+            status: status
+        }
+    })
+
+    console.log("Conversation status updated to:", status)
+}
+

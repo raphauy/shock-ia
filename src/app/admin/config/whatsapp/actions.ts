@@ -11,8 +11,8 @@ export async function createInstanceAction(instanceName: string) {
     if (!client) {
         throw new Error('Client not found')
     }
-    const webhookUrl= `${process.env.NEXTAUTH_URL}/api/${client.id}/wrc`
-    const response = await createInstanceBasic({ instanceName, webhookUrl })
+    //const webhookUrl= `${process.env.NEXTAUTH_URL}/api/${client.id}/wrc`
+    const response = await createInstanceBasic(instanceName)
     const instanceData: WhatsappInstanceDAO = {
         name: response.instance.instanceName,
         externalId: response.instance.instanceId,
