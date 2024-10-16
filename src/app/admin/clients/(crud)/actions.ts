@@ -30,6 +30,7 @@ export type DataClient = {
     completionCostTokenPrice: number
     modelName: string
     haveEvents: boolean
+    haveAgents: boolean
     whatsappInstance?: WhatsappInstanceDAO
     inboxProvider: InboxProvider
   }
@@ -62,6 +63,7 @@ export async function getDataClient(clientId: string): Promise<DataClient | null
         completionCostTokenPrice: completionCostTokenPrice,
         modelName: model?.name || '',
         haveEvents: client.haveEvents,
+        haveAgents: client.haveAgents,
         inboxProvider: client.inboxProvider
     }
     return data
@@ -98,6 +100,7 @@ export async function getDataClientOfUser(userId: string): Promise<DataClient | 
         completionCostTokenPrice,
         modelName: model?.name || '',
         haveEvents: client.haveEvents,
+        haveAgents: client.haveAgents,
         inboxProvider: client.inboxProvider
     }
     return data
@@ -132,6 +135,7 @@ export async function getDataClientBySlug(slug: string): Promise<DataClient | nu
         completionCostTokenPrice,
         modelName: model?.name || '',
         haveEvents: client.haveEvents,
+        haveAgents: client.haveAgents,
         inboxProvider: client.inboxProvider
     }
     return data
@@ -164,6 +168,7 @@ export async function getLastClientAction(): Promise<DataClient | null>{
         completionCostTokenPrice,
         modelName: model?.name || '',
         haveEvents: client.haveEvents,
+        haveAgents: client.haveAgents,
         inboxProvider: client.inboxProvider
     }
     return data
@@ -203,6 +208,7 @@ export async function getDataClients() {
                 completionCostTokenPrice,
                 modelName: model?.name || '',
                 haveEvents: client.haveEvents,
+                haveAgents: client.haveAgents,
                 whatsappInstance: client.whatsappInstances.length === 0 ? undefined : client.whatsappInstances[0],
                 inboxProvider: client.inboxProvider
             };

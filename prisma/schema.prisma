@@ -82,6 +82,7 @@ model Client {
   promptTokensPrice     Float      @default(0)
   completionTokensPrice Float  @default(0)
   haveEvents            Boolean   @default(false)
+  haveAgents            Boolean   @default(false)
 
   functions             ClientFunction[]
 

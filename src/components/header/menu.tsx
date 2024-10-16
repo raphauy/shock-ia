@@ -4,6 +4,7 @@ import getClients from "@/services/clientService";
 import { getUser } from "@/services/userService";
 import { ClientSelector, SelectorData } from "./client-selector";
 import MenuAdmin from "./menu-admin";
+import MenuCliente from "./menu-cliente";
 
 export default async function Menu() {
     
@@ -20,7 +21,6 @@ export default async function Menu() {
                 <div className="flex">
                     <ClientSelector selectors={selectorData} />
                     <MenuAdmin />
-                    {/* <MenuOsom /> */}
                 </div>
             </div>
         )
@@ -29,7 +29,10 @@ export default async function Menu() {
         const dbUser= await getUser(user.id)
         const clientName= dbUser?.client?.name
         return (
-            <p className="text-2xl font-bold"> / {clientName}</p>
+            <div className="flex items-center">
+                <p className="text-2xl font-bold"> / {clientName}</p>
+                <MenuCliente />
+            </div>
         )
     }
 

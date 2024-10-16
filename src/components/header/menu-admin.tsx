@@ -21,7 +21,7 @@ export default function MenuAdmin() {
                     setSlug(newSlug)
                 } else {
                     setSlug("")
-                }
+                }                
             })
             .catch((error) => {
                 console.log(error)
@@ -44,6 +44,13 @@ export default function MenuAdmin() {
                             <Link href={`/client/${slug}/events`}><Button className="text-lg" variant="ghost">Reservas</Button></Link>
                         </li>
                     }
+                    <li className={`flex items-center border-b-shock-color hover:border-b-shock-color hover:border-b-2 h-11 whitespace-nowrap ${path === "/agentes" && "border-b-2"}`}>
+                        <Link href={`/agentes`}>
+                            <Button className="text-lg" variant="ghost">
+                                Agentes
+                            </Button>
+                        </Link>
+                    </li>
                 </ul>
             </nav>
         </div>

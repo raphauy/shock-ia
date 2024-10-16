@@ -1,13 +1,10 @@
 import { Metadata, Viewport } from "next"
 import React from "react"
 import './globals.css'
-
 import { Toaster } from "@/components/ui/toaster"
-
 import { TailwindIndicator } from '@/components/shadcn/tailwind-indicator'
 import { ThemeProvider } from '@/components/shadcn/theme-provider'
 import getSession from '@/lib/auth'
-//import { fontSans } from '@/lib/fonts'
 import Menu from "@/components/header/menu"
 import SessionProvider from '@/components/SessionProvider'
 import { cn } from "@/lib/utils"

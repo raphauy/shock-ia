@@ -624,3 +624,16 @@ export async function getClientIdByChatwootAccountId(chatwootAccountId: string) 
 
   return client.clientId
 }
+
+export async function setHaveAgents(clientId: string, haveAgents: boolean) {
+  const client= await prisma.client.update({
+    where: {
+      id: clientId
+    },
+    data: {
+      haveAgents
+    }
+  })
+
+  return client
+}

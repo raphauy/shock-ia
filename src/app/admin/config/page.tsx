@@ -57,7 +57,7 @@ export default async function ConfigPage({ searchParams }: Props) {
                     <ClientFunctionsBox clientId={client.id} />
                 </TabsContent>
                 <TabsContent value="props" className="space-y-6">
-                    <PropsEdit clientId={client.id} haveEvents={client.haveEvents} />
+                    <PropsEdit clientId={client.id} haveEvents={client.haveEvents} haveAgents={client.haveAgents} inboxProvider={client.inboxProvider} />
                     <WhatsappNumbersForm id={client.id} update={updateWhatsAppNumbersAction} whatsappNumbers={client.whatsappNumbers} />
                     <TokensPrice clientId={client.id} promptTokensPrice={client.promptTokensPrice} completionTokensPrice={client.completionTokensPrice} />
                 </TabsContent>
