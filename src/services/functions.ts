@@ -507,7 +507,9 @@ export async function reservarParaEventoDeUnicaVez(clientId: string, conversatio
 
   const tags= event.tags
   const eventIsTaggedAgente= tags?.some(tag => tag === "agente")
-  const chatwootAccountId= conversation.client.whatsappInstances[0].chatwootAccountId ? parseInt(conversation.client.whatsappInstances[0].chatwootAccountId) : undefined
+  const chatwootAccountId = conversation.client.whatsappInstances[0]?.chatwootAccountId 
+    ? parseInt(conversation.client.whatsappInstances[0].chatwootAccountId) 
+    : undefined;
   const chatwootConversationId= conversation.chatwootConversationId
   if (eventIsTaggedAgente && chatwootAccountId && chatwootConversationId) {
     await toggleConversationStatus(chatwootAccountId, chatwootConversationId, "open")
