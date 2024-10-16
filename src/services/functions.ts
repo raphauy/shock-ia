@@ -434,8 +434,10 @@ export async function reservarParaEvento(clientId: string, conversationId: strin
 
   const tags= event.tags
   const eventIsTaggedAgente= tags?.some(tag => tag === "agente")
-  const chatwootAccountId= conversation.client.whatsappInstances[0].chatwootAccountId ? parseInt(conversation.client.whatsappInstances[0].chatwootAccountId) : undefined
-  const chatwootConversationId= conversation.chatwootConversationId
+  const chatwootAccountId = conversation.client.whatsappInstances[0]?.chatwootAccountId 
+    ? parseInt(conversation.client.whatsappInstances[0].chatwootAccountId) 
+    : undefined;
+  const chatwootConversationId = conversation.chatwootConversationId;
   if (eventIsTaggedAgente && chatwootAccountId && chatwootConversationId) {
     await toggleConversationStatus(chatwootAccountId, chatwootConversationId, "open")
     console.log("Conversation status updated to open")
@@ -657,8 +659,10 @@ export async function defaultFunction(clientId: string, name: string, args: any)
     const func= await getFunctionDAO(repo.functionId)
     const tags= func?.tags
     const funcIsTaggedAgente= tags?.some(tag => tag === "agente")
-    const chatwootAccountId= conversation.client.whatsappInstances[0].chatwootAccountId ? parseInt(conversation.client.whatsappInstances[0].chatwootAccountId) : undefined
-    const chatwootConversationId= conversation.chatwootConversationId
+    const chatwootAccountId= conversation.client.whatsappInstances[0]?.chatwootAccountId 
+      ? parseInt(conversation.client.whatsappInstances[0].chatwootAccountId) 
+      : undefined;
+    const chatwootConversationId= conversation.chatwootConversationId;
     if (funcIsTaggedAgente && chatwootAccountId && chatwootConversationId) {
       await toggleConversationStatus(chatwootAccountId, chatwootConversationId, "open")
       console.log("Conversation status updated to open")
