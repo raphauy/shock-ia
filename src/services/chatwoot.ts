@@ -249,7 +249,6 @@ async function getChatwootClient(token: string | undefined) {
 export async function toggleConversationStatus(accountId: number, conversationId: number, status: "open" | "resolved" | "pending") {
     const chatwootUrl = process.env.CHATWOOT_URL!
     const chatwootToken= process.env.CHATWOOT_AGENT_BOT_ACCESS_TOKEN!
-//    const chatwootToken = process.env.CHATWOOT_ACCESS_TOKEN!
     console.log("chatwootUrl:", chatwootUrl)
     console.log("chatwootToken:", chatwootToken)
     if (!chatwootUrl || !chatwootToken) {
