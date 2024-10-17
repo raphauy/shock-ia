@@ -7,7 +7,6 @@ import axios from "axios";
 type RepoDataEntryResponse = {
     id: string,
     phone: string,
-    repoName: string,
     functionName: string,
     clientId: string,
     clientName: string,
@@ -36,7 +35,6 @@ export async function sendWebhookNotification(webhookUrl: string, repoData: Repo
     const data: RepoDataEntryResponse = {
         id: repoData.id,
         phone: repoData.phone,
-        repoName: repoData.repoName,
         functionName: repoData.functionName,
         clientId: repoData.clientId,
         clientName: repoData.client.name,

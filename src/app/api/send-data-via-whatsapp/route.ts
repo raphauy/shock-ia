@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getClient } from "@/services/clientService";
 import { sendWapMessage } from "@/services/osomService";
 import { camelCaseToNormal, putTildes } from "@/lib/utils";
+import { getRepositoryDAOByFunctionName } from "@/services/repository-services";
 
 export const maxDuration = 59
 export const dynamic = 'force-dynamic'
@@ -26,7 +27,11 @@ export async function POST(request: Request) {
         console.log("data: ", data)
 
         const phone= json.phone
-        const repoName= json.repoName
+        const functionName= json.functionName
+        if (!functionName) return NextResponse.json({ error: "functionName not found" }, { status: 502 })
+        const repo= await getRepositoryDAOByFunctionName(functionName)
+        if (!repo) return NextResponse.json({ error: "repo not found" }, { status: 502 })
+        const repoName= repo.name
         const clientSlug= json.clientSlug
         const conversationId= json.conversationId
         const baseUrl= process.env.NEXTAUTH_URL
@@ -37,7 +42,7 @@ export async function POST(request: Request) {
         text+= `**${repoName}**\n\n`
 
         const parsedData= JSON.parse(data)
-        const keys= Object.keys(JSON.parse(data))
+        const keys= Object.keys(parsedData)
         for (const key of keys) {
             const value = parsedData[key]
             const normalKey = camelCaseToNormal(key)
