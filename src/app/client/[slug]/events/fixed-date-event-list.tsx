@@ -81,10 +81,10 @@ export default function FixedDateEventList({event, bookings, clientSlug}: Props)
     
                             return (
                             <div key={index} className={`p-4 ${index !== 0 ? 'border-t' : ''}`}>
-                                <div className="grid grid-cols-3">
+                                <div className="flex">
                                 {
                                     conversationId ? (
-                                        <div>
+                                        <div className="w-48">
                                             <Link href={`/client/${clientSlug}/chats?id=${conversationId}`} className="flex items-center gap-4" target="_blank">
                                                 <p className="font-bold">{reservation.name}</p>
                                                 <MessageCircle className="w-5 h-5 mb-1" />
@@ -97,11 +97,11 @@ export default function FixedDateEventList({event, bookings, clientSlug}: Props)
                                         <p className="font-bold">{reservation.name}</p>
                                     )
                                 }
-                                <div className="">
+                                <div className="flex-1">
                                     <BookingDataCard jsonData={jsonReplaced} />
                                 </div>
 
-                                <div className="flex flex-col items-end space-y-4">
+                                <div className="flex flex-col items-end space-y-4 justify-self-end">
                                     { reservation.status === "CANCELADO" ? 
                                         <DeleteBookingDialog id={reservation.id} description={`Seguro que desea eliminar la reserva de ${reservation.name}?`} />
                                         :
