@@ -68,6 +68,7 @@ export async function POST(request: Request) {
         const client= await getClient(clientId)
         const inboxProvider= client?.inboxProvider
         if (inboxProvider !== "CHATWOOT") {
+            console.log("inboxProvider for " + client?.name + " is not CHATWOOT")
             return NextResponse.json({ message: "inboxProvider for " + client?.name + " is not CHATWOOT" }, { status: 200 })
         }
 
