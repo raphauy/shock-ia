@@ -20,6 +20,7 @@ import { sendWebhookNotification } from "./webhook-notifications-service";
 import moment from 'moment-timezone'
 import { EventType } from "@prisma/client";
 import { addLabelToConversation, toggleConversationStatus } from "./chatwoot";
+import { createExternalPayment } from "./cobros-wap";
 
 export type CompletionInitResponse = {
   assistantResponse: string | null
@@ -600,6 +601,24 @@ export async function notificarAsesor(clientId: string, conversationId: string){
   return message
 }
 
+export async function obtenerLinkDePago(clientId: string, conversationId: string, companyId: string, unitPrice: number, quantity: number, concept: string){
+  console.log("obtenerLinkDePago")
+  console.log(`\tconversationId: ${conversationId}`)
+  console.log(`\tcompanyId: ${companyId}`)
+  console.log(`\tunitPrice: ${unitPrice}`)
+  console.log(`\tquantity: ${quantity}`)
+  console.log(`\tconcept: ${concept}`)
+
+  try {
+    const amount= unitPrice * quantity
+    const currency= "UYU"
+    const link= await createExternalPayment(amount, currency, companyId, concept)
+    return link
+  } catch (error) {
+    return "Error al obtener el link de pago"
+  }
+}
+
 
 export async function defaultFunction(clientId: string, name: string, args: any) {
   console.log("defaultFunction")
@@ -775,6 +794,10 @@ export async function processFunctionCall(clientId: string, name: string, args: 
 
     case "notificarAsesor":
       content= await notificarAsesor(clientId, args.conversationId)
+      break
+
+    case "obtenerLinkDePago":
+      content= await obtenerLinkDePago(clientId, args.conversationId, args.companyId, args.unitPrice, args.quantity, args.concept)
       break
 
     default:

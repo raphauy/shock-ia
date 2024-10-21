@@ -1,5 +1,6 @@
 
 import { config } from "dotenv"
+import { createExternalPayment } from "./cobros-wap"
 config()
 
 async function main() {
@@ -16,6 +17,18 @@ async function main() {
 
 
     //await sendTextToConversation(accountId, conversationId, "Hola, ¿cómo estás?")
+
+    const unitPrice= 100
+    const quantity= 1
+    const currency= "UYU"
+    const companyId= "e57728b3-ab30-44de-846c-cbad1e3933f3"
+    const concept= "Pago de prueba"
+
+    const amount= unitPrice * quantity
+
+    const paymentLink= await createExternalPayment(amount, currency, companyId, concept)
+
+    console.log(paymentLink)
 
 }
   

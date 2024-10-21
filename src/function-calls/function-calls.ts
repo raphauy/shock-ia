@@ -127,3 +127,34 @@ const notificarAsesor=
   "required": ["conversationId"]
 }
 
+const obtenerLinkDePago=
+{
+  "name": "obtenerLinkDePago",
+  "description": "Devuelve el link de pago para un producto o servicio.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "conversationId": {
+        "type": "string",
+        "description": "Id de la conversación que se proporciona en el prompt."
+      },
+      "companyId": {
+        "type": "string",
+        "description": "Id de la empresa que se va a pagar. Esta información se proporciona en el prompt."
+      },
+      "unitPrice": {
+        "type": "number",
+        "description": "Precio unitario del producto o servicio. Este precio está expresado en UYU, pesos uruguayos."
+      },
+      "quantity": {
+        "type": "number",
+        "description": "Cantidad de productos o servicios. Por ejemplo, si el usuario quiere comprar 2 entradas, la cantidad es 2."
+      },
+      "concept": {
+        "type": "string",
+        "description": "Concepto de la compra. Menos de 20 caracteres."
+      }
+    },
+    "required": ["conversationId", "companyId", "unitPrice", "quantity", "concept"]
+  }
+}
