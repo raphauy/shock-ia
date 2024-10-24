@@ -67,6 +67,10 @@ export async function POST(request: Request) {
         }
 
         const client= await getClient(clientId)
+        if (!client) {
+            console.log("error: ", "client not found")
+            return NextResponse.json({ data: "ACK" }, { status: 200 })
+        }
         const inboxProvider= client?.inboxProvider
         if (inboxProvider !== "CHATWOOT") {
             console.log("inboxProvider for " + client?.name + " is not CHATWOOT")
@@ -76,7 +80,7 @@ export async function POST(request: Request) {
 
         if (contentType !== "text" || !content) {
             console.log("error: ", "contentType is not text or content is empty")
-            await sendText(clientId, "Por el momento no podemos procesar mensajes que no sean de texto.", conversationId)
+            await sendText(client.slug, "Por el momento no podemos procesar mensajes que no sean de texto.", conversationId)
             return NextResponse.json({ data: "ACK" }, { status: 200 })
         }
 
