@@ -1,8 +1,7 @@
-import { getChatwootAccountId, getClient, getClientIdByChatwootAccountId } from "@/services/clientService";
+import { sendTextToConversation } from "@/services/chatwoot";
+import { getClient, getClientIdByChatwootAccountId } from "@/services/clientService";
 import { MessageDelayResponse, onMessageReceived, processDelayedMessage } from "@/services/messageDelayService";
-import { sendText } from "@/services/wrc-sdk";
 import { waitUntil } from "@vercel/functions";
-import { log } from "console";
 import { NextResponse } from "next/server";
 
 
@@ -80,7 +79,7 @@ export async function POST(request: Request) {
 
         if (contentType !== "text" || !content) {
             console.log("error: ", "contentType is not text or content is empty")
-            await sendText(client.slug, "Por el momento no podemos procesar mensajes que no sean de texto.", conversationId)
+            await sendTextToConversation(parseInt(accountId), conversationId, "Por el momento no podemos procesar mensajes que no sean de texto.")
             return NextResponse.json({ data: "ACK" }, { status: 200 })
         }
 
