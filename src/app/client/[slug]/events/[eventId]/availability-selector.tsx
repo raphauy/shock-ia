@@ -17,7 +17,7 @@ import { toast } from "@/components/ui/use-toast"
 const daysOfWeek = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'] as const
 const dayIndices = { 'Lunes': 1, 'Martes': 2, 'Miércoles': 3, 'Jueves': 4, 'Viernes': 5, 'Sábado': 6, 'Domingo': 0 }
 
-const interval= 60
+const interval= 30
 
 type Props = {
   eventId: string

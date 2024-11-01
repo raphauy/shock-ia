@@ -47,7 +47,8 @@ export function getSlots(dateStr: string, bookings: BookingDAO[], availability: 
     let rangeEnd= date.setHours(hourRangeEnd, minuteRangeEnd, 0, 0)
     const rangeEndDate= new Date(rangeEnd)
 
-    const timeStart = toZonedTime(startOfDay(date), timezone)
+//    const timeStart = toZonedTime(startOfDay(date), timezone)
+    const timeStart = toZonedTime(rangeStartDate, timezone)
     let timeEnd = addHours(timeStart, 24)
     const offsetInMinutes = moment.tz(date, timezone).utcOffset()
     timeEnd = moment(timeEnd).subtract(offsetInMinutes, 'minutes').toDate()
