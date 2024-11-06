@@ -2,9 +2,10 @@
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Pencil, PlusCircle, Trash2 } from "lucide-react";
+import { Expand, Pencil, PlusCircle, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { ContactForm, DeleteContactForm } from "./contact-forms";
+import { ContactDAO } from "@/services/contact-services";
 
   
 type Props= {
@@ -53,6 +54,32 @@ export function DeleteContactDialog({ id, description }: DeleteProps) {
           <DialogDescription className="py-8">{description}</DialogDescription>
         </DialogHeader>
         <DeleteContactForm closeDialog={() => setOpen(false)} id={id} />
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+type DisplayProps= {
+  contact: ContactDAO
+}
+
+export function DisplayContactDialog({ contact }: DisplayProps) {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="icon" className="size-8">
+          <Expand className="h-4 w-4" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{contact.name}</DialogTitle>
+        </DialogHeader>
+        <DialogContent>
+          <p>Aquí estará el detalle del contacto</p>
+        </DialogContent>
       </DialogContent>
     </Dialog>
   )

@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { ContactDAO } from "@/services/contact-services";
 import { Draggable } from "@hello-pangea/dnd";
 import { Expand } from "lucide-react";
+import { DisplayContactDialog } from "../contacts/contact-dialogs";
 
 type Props = {
   contact: ContactDAO
@@ -16,7 +17,7 @@ type Props = {
 export default function ContactCard({ contact, index }: Props) {
     return (
         <Draggable draggableId={contact.id} index={index}>
-            {(provided): React.ReactNode => (
+            {(provided): JSX.Element => (
               <>
                 <Card {...provided.draggableProps} {...provided.dragHandleProps} ref={provided.innerRef}>
                   <CardContent className="p-3">
@@ -31,9 +32,7 @@ export default function ContactCard({ contact, index }: Props) {
                           <p className="text-sm text-gray-500">{contact.phone}</p>
                         </div>
                       </div>
-                      <Button variant="outline" size="icon" className="size-8">
-                        <Expand className="h-4 w-4" />
-                      </Button>
+                      <DisplayContactDialog contact={contact} />
                     </div>
                     <div className={cn("mt-3 flex flex-wrap justify-center gap-1", contact.tags.length === 0 && "hidden")}>
                       {contact.tags.map((tag, index) => (
