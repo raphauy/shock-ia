@@ -33,7 +33,7 @@ export default function StageColumn({ stage, index }: Props) {
                   <StageMenu stageId={stage.id} stageName={stage.name} />
                 </div>
               </div>
-              <p className="text-sm text-gray-500">{stage.description}</p>
+              <p className="text-sm text-gray-500 line-clamp-1">{stage.description}</p>
             </CardHeader>
             <CardContent className="h-full px-2">
               <Droppable droppableId={stage.id} type="contact">
