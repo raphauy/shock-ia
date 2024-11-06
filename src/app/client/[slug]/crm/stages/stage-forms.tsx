@@ -138,8 +138,7 @@ export function DeleteStageForm({ id, closeDialog }: Props) {
       toast({title: "Stage deleted" })
     })
     .catch((error) => {
-      const isStageNotEmptyError= error.message.includes("Contact_stageId_fkey")
-      const description= isStageNotEmptyError ? "No se puede eliminar el estado porque tiene contactos asociados. Debe mover los contactos a otro estado." : error.message
+      const description= "Error al eliminar el estado. Asegúrate de que el estado no tiene contactos asociados. Debes mover los contactos a otro estado."
       toast({title: "Error", description, variant: "destructive"})
     })
     .finally(() => {

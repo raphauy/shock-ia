@@ -11,7 +11,7 @@ type Props= {
   clientId?: string
 }
 
-const addTrigger= <Button><PlusCircle size={22} className="mr-2"/>Crear estado</Button>
+const addTrigger= <Button className="whitespace-nowrap"><PlusCircle size={22} className="mr-2"/>Crear estado</Button>
 const updateTrigger= (
   <div className="flex items-center gap-2 hover:bg-slate-100 h-9 rounded-sm hover:cursor-pointer px-2">
     <Pencil size={20} className="mr-2 mb-1"/>
