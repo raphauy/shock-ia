@@ -52,7 +52,7 @@ export default async function SlugLayout({ children, params }: Props) {
     <>
       <div className="flex flex-grow w-full">
         <SideBar slug={slug} showRegistro={showRegistro} showCarServices={showCarServices} showRepoData={showRepoData} repoLabel="Registros" />
-        <CRMSideBar slug={slug} />
+        {/* <CRMSideBar slug={slug} /> */}
         <div className="flex flex-col items-center flex-grow p-1">
           <TooltipProvider>
             {children}
