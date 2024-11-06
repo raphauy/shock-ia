@@ -18,8 +18,8 @@ export default function ContactCard({ contact, index }: Props) {
       <>
         <Draggable draggableId={contact.id} index={index}>
             {(provided) => (
-              <>
-                <Card {...provided.draggableProps} {...provided.dragHandleProps} ref={provided.innerRef}>
+              <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+                <Card>
                   <CardContent className="p-3">
                     <div className="flex justify-between items-center">
                       <div className="flex items-center space-x-4">
@@ -41,7 +41,7 @@ export default function ContactCard({ contact, index }: Props) {
                     </div>
                   </CardContent>
                 </Card>
-              </>
+              </div>
             )}
         </Draggable>
       </>
