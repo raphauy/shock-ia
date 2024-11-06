@@ -83,6 +83,7 @@ model Client {
   completionTokensPrice Float  @default(0)
   haveEvents            Boolean   @default(false)
   haveAgents            Boolean   @default(false)
+  haveCRM               Boolean   @default(false)
 
   functions             ClientFunction[]
 
@@ -96,6 +97,11 @@ model Client {
 
   whatsappInstances     WhatsappInstance[]
   inboxProvider         InboxProvider @default(OSOM)
+
+  contacts     Contact[]      // gennext: skip.list
+  customFields CustomField[]  // gennext: skip.list
+  stages       Stage[]        // gennext: skip.list
+  tags         Tag[]          // gennext: skip.list
 }
 
 model Document {
@@ -471,4 +477,104 @@ model WhatsappInstance {
 
   createdAt           DateTime     @default(now())       // gennext: skip.zod
   updatedAt           DateTime     @updatedAt            // gennext: skip.zod
+}
+
+model Contact {
+  id         String      @id @default(cuid())
+  chatwootId String?
+  name       String                                      // gennext: show.column
+  phone      String?                                     // gennext: show.column
+  imageUrl   String?                                     // gennext: show.column
+  tags       String[]                                    // gennext: show.column
+
+  src        String                                      // gennext: show.column
+
+  order      Int         @default(0)
+
+  client     Client      @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId   String
+
+  stage      Stage      @relation(fields: [stageId], references: [id], onDelete: Restrict)
+  stageId    String
+
+  fieldValues FieldValue[]                               // gennext: skip.list
+  stageHistory StageHistory[]                           // gennext: skip.list
+  
+  createdAt  DateTime    @default(now())                 // gennext: skip.zod
+  updatedAt  DateTime    @updatedAt                      // gennext: skip.zod
+}
+
+model CustomField {
+  id          String     @id @default(cuid())            
+  name        String                                      // gennext: show.column
+  description String?                                     // gennext: show.column
+  type        String                                      // gennext: show.column
+  order       Int                                         // gennext: show.column
+
+  client      Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId    String
+
+  fieldValues FieldValue[]                               // gennext: skip.list
+  
+  createdAt   DateTime   @default(now())                 // gennext: skip.zod
+  updatedAt   DateTime   @updatedAt                      // gennext: skip.zod
+}
+
+model Stage {
+  id          String     @id @default(cuid())            
+  name        String                                      // gennext: show.column
+  description String?                                     // gennext: show.column
+  order       Int                                         // gennext: show.column
+  isFinal     Boolean    @default(false)                  // gennext: show.column
+  color       String?                                     // gennext: show.column
+
+  client      Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId    String
+
+  contacts    Contact[]                                  // gennext: skip.list
+  stageHistory StageHistory[]                            // gennext: skip.list
+  
+  createdAt   DateTime   @default(now())                 // gennext: skip.zod
+  updatedAt   DateTime   @updatedAt                      // gennext: skip.zod
+}
+
+model FieldValue {
+  id           String     @id @default(cuid())           
+  value        String                                      // gennext: show.column
+
+  contact      Contact    @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  contactId    String
+
+  customField  CustomField @relation(fields: [customFieldId], references: [id], onDelete: Cascade)
+  customFieldId String
+  
+  createdAt    DateTime   @default(now())                 // gennext: skip.zod
+  updatedAt    DateTime   @updatedAt                      // gennext: skip.zod
+}
+
+model Tag {
+  id          String     @id @default(cuid())            
+  name        String                                      // gennext: show.column
+  
+  client      Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId    String
+  
+  createdAt   DateTime   @default(now())                 // gennext: skip.zod
+  updatedAt   DateTime   @updatedAt                      // gennext: skip.zod
+}
+
+model StageHistory {
+  id            String     @id @default(cuid())       
+  startDate     DateTime                               // gennext: show.column
+  endDate       DateTime?                              // gennext: show.column
+  durationHours Float                                  // gennext: show.column
+
+  contact       Contact    @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  contactId     String
+
+  stage         Stage      @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  stageId       String
+
+  createdAt     DateTime   @default(now())             // gennext: skip.zod
+  updatedAt     DateTime   @updatedAt                  // gennext: skip.zod
 }

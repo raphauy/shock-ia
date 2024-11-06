@@ -1,6 +1,6 @@
 "use server"
 
-import getClients, { clientHaveEvents, createClient, deleteClient, editClient, getClient, getClientBySlug, getComplementaryFunctionsOfClient, getFunctionsOfClient, getLastClient, setFunctions, setPrompt, setWhatsAppEndpoing, setWhatsAppNumbers } from "@/services/clientService";
+import getClients, { clientHaveCRM, clientHaveEvents, createClient, deleteClient, editClient, getClient, getClientBySlug, getComplementaryFunctionsOfClient, getFunctionsOfClient, getLastClient, setFunctions, setPrompt, setWhatsAppEndpoing, setWhatsAppNumbers } from "@/services/clientService";
 import { getUser } from "@/services/userService";
 import { Client, InboxProvider } from "@prisma/client";
 import { revalidatePath } from "next/cache";
@@ -31,6 +31,7 @@ export type DataClient = {
     modelName: string
     haveEvents: boolean
     haveAgents: boolean
+    haveCRM: boolean
     whatsappInstance?: WhatsappInstanceDAO
     inboxProvider: InboxProvider
   }
@@ -64,6 +65,7 @@ export async function getDataClient(clientId: string): Promise<DataClient | null
         modelName: model?.name || '',
         haveEvents: client.haveEvents,
         haveAgents: client.haveAgents,
+        haveCRM: client.haveCRM,
         inboxProvider: client.inboxProvider
     }
     return data
@@ -101,6 +103,7 @@ export async function getDataClientOfUser(userId: string): Promise<DataClient | 
         modelName: model?.name || '',
         haveEvents: client.haveEvents,
         haveAgents: client.haveAgents,
+        haveCRM: client.haveCRM,
         inboxProvider: client.inboxProvider
     }
     return data
@@ -136,6 +139,7 @@ export async function getDataClientBySlug(slug: string): Promise<DataClient | nu
         modelName: model?.name || '',
         haveEvents: client.haveEvents,
         haveAgents: client.haveAgents,
+        haveCRM: client.haveCRM,
         inboxProvider: client.inboxProvider
     }
     return data
@@ -169,6 +173,7 @@ export async function getLastClientAction(): Promise<DataClient | null>{
         modelName: model?.name || '',
         haveEvents: client.haveEvents,
         haveAgents: client.haveAgents,
+        haveCRM: client.haveCRM,
         inboxProvider: client.inboxProvider
     }
     return data
@@ -209,6 +214,7 @@ export async function getDataClients() {
                 modelName: model?.name || '',
                 haveEvents: client.haveEvents,
                 haveAgents: client.haveAgents,
+                haveCRM: client.haveCRM,
                 whatsappInstance: client.whatsappInstances.length === 0 ? undefined : client.whatsappInstances[0],
                 inboxProvider: client.inboxProvider
             };
@@ -296,4 +302,9 @@ export async function getLastClientIdAction() {
 export async function clientHaveEventsAction(slug: string): Promise<boolean> {
     const haveEvents= await clientHaveEvents(slug)
     return haveEvents
+}
+
+export async function clientHaveCRMAction(slug: string): Promise<boolean> {
+    const haveCRM= await clientHaveCRM(slug)
+    return haveCRM
 }

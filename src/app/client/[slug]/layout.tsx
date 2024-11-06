@@ -7,6 +7,7 @@ import { getClientsOfFunctionByName, getClientsWithSomeFunctionWithRepository } 
 import { getFullModelDAO, getFullModelsDAO } from "@/services/model-services";
 import { ModelSelector, SelectorData } from "@/components/header/model-selector";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import CRMSideBar from "./crm-side-bar";
 
 type Props= {
   children: React.ReactNode
@@ -51,6 +52,7 @@ export default async function SlugLayout({ children, params }: Props) {
     <>
       <div className="flex flex-grow w-full">
         <SideBar slug={slug} showRegistro={showRegistro} showCarServices={showCarServices} showRepoData={showRepoData} repoLabel="Registros" />
+        <CRMSideBar slug={slug} />
         <div className="flex flex-col items-center flex-grow p-1">
           <TooltipProvider>
             {children}

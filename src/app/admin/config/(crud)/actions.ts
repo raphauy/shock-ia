@@ -1,6 +1,6 @@
 "use server"
 
-import { setHaveAgents, setHaveEvents, setTokensPrice } from "@/services/clientService"
+import { setHaveAgents, setHaveCRM, setHaveEvents, setTokensPrice } from "@/services/clientService"
 import { revalidatePath } from "next/cache"
 
 
@@ -22,6 +22,14 @@ export async function setHaveEventsAction(clientId: string, haveEvents: boolean)
 
 export async function setHaveAgentsAction(clientId: string, haveAgents: boolean) {
     const client= await setHaveAgents(clientId, haveAgents)
+
+    revalidatePath(`/admin/config`)
+
+    return client    
+}
+
+export async function setHaveCRMAction(clientId: string, haveCRM: boolean) {
+    const client= await setHaveCRM(clientId, haveCRM)
 
     revalidatePath(`/admin/config`)
 

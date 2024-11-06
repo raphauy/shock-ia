@@ -68,8 +68,9 @@ export default function SideBar({ slug, showRegistro, showCarServices, showRepoD
 
   const isChatPage= path.startsWith(`/client/${slug}/chats`)
   const isEventsPage= path.startsWith(`/client/${slug}/events`)
+  const isCRMPage= path.startsWith(`/client/${slug}/crm`)
 
-  if (isEventsPage) return null
+  if (isEventsPage || isCRMPage) return null
 
   return (
     <div className={cn("flex flex-col justify-between border-r border-r-shock-color/50", !isChatPage && "lg:pl-8")}>

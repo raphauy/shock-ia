@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { addFunctionToClient, FunctionDAO, getFunctionIdByFunctionName, removeFunctionFromClient } from "./function-services";
 import { InboxProvider } from "@prisma/client";
 import { WhatsappInstanceDAO } from "./wrc-sdk-types";
+import { createDefaultStages, getFirstStageOfClient } from "./stage-services";
 
 
 export default async function getClients() {
@@ -636,4 +637,34 @@ export async function setHaveAgents(clientId: string, haveAgents: boolean) {
   })
 
   return client
+}
+
+export async function clientHaveCRM(slug: string) {
+  const client= await prisma.client.findUnique({
+    where: {
+      slug
+    },
+  })
+  if (!client) return false
+
+  return client.haveCRM
+}
+
+export async function setHaveCRM(clientId: string, haveCRM: boolean) {
+  const firstStage= await getFirstStageOfClient(clientId)
+  if (!firstStage) {
+    console.log('No first stage found, creating default stages')
+    await createDefaultStages(clientId)
+  }
+
+  const updated= await prisma.client.update({
+    where: {
+      id: clientId
+    },
+    data: {
+      haveCRM
+    }
+  })
+
+  return updated
 }

@@ -12,6 +12,8 @@ export async function POST(request: Request) {
     try {
         const json= await request.json()
         //console.log("general api json: ", json)
+        const sender= json.sender
+        //console.log("sender: ", sender)
         if (!json.account || !json.conversation) {
             console.log("error: ", "account or conversation is missing")
             return NextResponse.json({ data: "ACK" }, { status: 200 })

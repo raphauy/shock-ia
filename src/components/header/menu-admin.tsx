@@ -4,32 +4,50 @@ import Link from "next/link"
 import { Button } from "../ui/button"
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { clientHaveEventsAction } from "@/app/admin/clients/(crud)/actions";
+import { clientHaveCRMAction, clientHaveEventsAction } from "@/app/admin/clients/(crud)/actions";
 
 export default function MenuAdmin() {
 
     const path= usePathname()
 
     const [slug, setSlug]= useState("")
+    const [haveEvents, setHaveEvents]= useState(false)
+    const [haveCRM, setHaveCRM]= useState(false)
 
     useEffect(() => {
         const newSlug= path.split('/')[2]
         if (newSlug) {
-            clientHaveEventsAction(newSlug)
-            .then((haveEvents) => {
-                if (haveEvents) {
-                    setSlug(newSlug)
-                } else {
-                    setSlug("")
-                }                
-            })
-            .catch((error) => {
-                console.log(error)
-            })
+            setSlug(newSlug)
         } else {
             setSlug("")
         }
     }, [path])
+
+    useEffect(() => {
+        clientHaveEventsAction(slug)
+        .then((haveEvents) => {
+            if (haveEvents) {
+                setHaveEvents(true)
+            } else {
+                setHaveEvents(false)
+            }                
+        })
+        .catch((error) => {
+            console.log(error)
+        })
+        clientHaveCRMAction(slug)        
+        .then((haveCRM) => {
+            if (haveCRM) {
+                setHaveCRM(true)
+            } else {
+                setHaveCRM(false)
+            }
+        })
+        .catch((error) => {
+            console.log(error)
+        })
+    }, [slug])
+
 
     return (
         <div className="flex-1 hidden gap-6 pl-5 lg:flex md:gap-5">
@@ -39,9 +57,15 @@ export default function MenuAdmin() {
                         <Link href="/admin"><Button className="text-lg" variant="ghost">Admin</Button></Link>
                     </li>
                     {
-                        slug &&
+                        haveEvents &&
                         <li className={`flex items-center border-b-shock-color hover:border-b-shock-color hover:border-b-2 h-11 ${path.includes("events") && "border-b-2"}`}>
                             <Link href={`/client/${slug}/events`}><Button className="text-lg" variant="ghost">Reservas</Button></Link>
+                        </li>
+                    }
+                    {
+                        haveCRM &&
+                        <li className={`flex items-center border-b-shock-color hover:border-b-shock-color hover:border-b-2 h-11 ${path.includes("crm") && "border-b-2"}`}>
+                            <Link href={`/client/${slug}/crm`}><Button className="text-lg" variant="ghost">CRM</Button></Link>
                         </li>
                     }
                     <li className={`flex items-center border-b-shock-color hover:border-b-shock-color hover:border-b-2 h-11 whitespace-nowrap ${path === "/agentes" && "border-b-2"}`}>

@@ -72,6 +72,7 @@ export async function getDataClientWithModel(slug: string, modelName?: string): 
       modelName: model && model.name ? model.name : '',
       haveEvents: client.haveEvents,
       haveAgents: client.haveAgents,
+      haveCRM: client.haveCRM,
       inboxProvider: client.inboxProvider
   }
   return data
