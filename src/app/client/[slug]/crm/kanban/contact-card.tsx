@@ -2,12 +2,10 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { ContactDAO } from "@/services/contact-services";
 import { Draggable } from "@hello-pangea/dnd";
-import { Expand } from "lucide-react";
 import { DisplayContactDialog } from "../contacts/contact-dialogs";
 
 type Props = {
@@ -17,9 +15,9 @@ type Props = {
 export default function ContactCard({ contact, index }: Props) {
     return (
         <Draggable draggableId={contact.id} index={index}>
-            {(provided): JSX.Element => (
-              <>
-                <Card {...provided.draggableProps} {...provided.dragHandleProps} ref={provided.innerRef}>
+            {(provided): React.ReactNode => (
+              <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+                <Card>
                   <CardContent className="p-3">
                     <div className="flex justify-between items-center">
                       <div className="flex items-center space-x-4">
@@ -41,7 +39,7 @@ export default function ContactCard({ contact, index }: Props) {
                     </div>
                   </CardContent>
                 </Card>
-              </>
+              </div>
             )}
         </Draggable>
     )
