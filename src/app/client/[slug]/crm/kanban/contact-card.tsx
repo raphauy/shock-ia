@@ -16,7 +16,7 @@ type Props = {
 export default function ContactCard({ contact, index }: Props) {
     return (
         <Draggable draggableId={contact.id} index={index}>
-            {(provided) => (
+            {(provided): React.ReactNode => (
               <>
                 <Card {...provided.draggableProps} {...provided.dragHandleProps} ref={provided.innerRef}>
                   <CardContent className="p-3">
