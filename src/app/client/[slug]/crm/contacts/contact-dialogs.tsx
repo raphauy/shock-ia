@@ -77,9 +77,7 @@ export function DisplayContactDialog({ contact }: DisplayProps) {
         <DialogHeader>
           <DialogTitle>{contact.name}</DialogTitle>
         </DialogHeader>
-        <DialogContent>
-          <p>Aquí estará el detalle del contacto</p>
-        </DialogContent>
+        <p className="h-96 flex items-center justify-center">Aquí estará el detalle del contacto</p>
       </DialogContent>
     </Dialog>
   )
