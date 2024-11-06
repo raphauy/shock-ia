@@ -2,13 +2,12 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { ContactDAO } from "@/services/contact-services";
 import { Draggable } from "@hello-pangea/dnd";
-import { Expand } from "lucide-react";
 import { DisplayContactDialog } from "../contacts/contact-dialogs";
+import React from "react";
 
 type Props = {
   contact: ContactDAO
