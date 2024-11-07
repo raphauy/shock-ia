@@ -152,7 +152,7 @@ export async function createDefaultStages(clientId: string) {
       {
         name: 'Bot',
         description: 'Estado inicial de un contacto, respuestas con IA en función del prompt',
-        order: 1,
+        order: 0,
         isFinal: false,
         isBotEnabled: true,
         color: '#D3D3D3',
@@ -161,7 +161,7 @@ export async function createDefaultStages(clientId: string) {
       {
         name: 'Comercial',
         description: 'Contacto derivado a un comercial',
-        order: 2,
+        order: 1,
         isFinal: false,
         isBotEnabled: false,
         color: '#D3D3D3',
@@ -170,7 +170,7 @@ export async function createDefaultStages(clientId: string) {
       {
         name: 'Finalizado',
         description: 'Contacto ganado, este es un estado final',
-        order: 3,
+        order: 2,
         isFinal: true,
         isBotEnabled: false,
         color: '#D3D3D3',

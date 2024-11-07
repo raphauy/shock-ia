@@ -55,9 +55,9 @@ export default function StageColumn({ stage, index }: Props) {
     
 }
 
-function getSatusIcon(order: number, isFinal: boolean, color: string | undefined) {
-  if (isFinal) return <CircleCheckIcon size={16} className={cn("mb-0.5", color && `text-[${color}]`)} />
-  if (order === 0) return <CircleDashedIcon size={16} className={cn("mb-0.5", color && `text-[${color}]`)} />
+function getSatusIcon(stage: KanbanStageDAOWithContacts) {
+  if (stage.isFinal) return <CircleCheckIcon size={16} className={cn("mb-0.5", stage.color && `text-[${stage.color}]`)} />
+  if (stage.isBotEnabled) return <CircleDashedIcon size={16} className={cn("mb-0.5", stage.color && `text-[${stage.color}]`)} />
 
-  return <CircleIcon size={16} className={cn("mb-0.5", color && `text-[${color}]`)} />
+  return <CircleIcon size={16} className={cn("mb-0.5", stage.color && `text-[${stage.color}]`)} />
 }
