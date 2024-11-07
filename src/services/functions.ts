@@ -661,12 +661,7 @@ export async function defaultFunction(clientId: string, name: string, args: any)
     const functionClient= await getFunctionClientDAO(repo.functionId, conversation.client.id)
     if (functionClient && functionClient.webHookUrl) {
       try {
-        const whatsappNumbers= conversation.client.whatsappNumbers
-        if (whatsappNumbers) {
-          await sendWebhookNotification(functionClient.webHookUrl, created)
-        } else {
-          console.log("No hay números de whatsapp para enviar notificación")
-        }
+        await sendWebhookNotification(functionClient.webHookUrl, created)
       } catch (error) {
         console.log("Error al enviar notificación a webhook")
       }

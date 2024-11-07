@@ -18,7 +18,7 @@ export async function POST(request: Request) {
         const client= await getClient(clientId)
         if (!client) return NextResponse.json({ error: "client not found" }, { status: 502 })
 
-        const whatsappNumbers= client.whatsappNumbers
+        const whatsappNumbers= client.whatsappNumbers?.trim()
         if (!whatsappNumbers) return NextResponse.json({ error: "whatsappNumbers not found" }, { status: 400 })
         console.log("whatsappNumbers: ", whatsappNumbers)
 
