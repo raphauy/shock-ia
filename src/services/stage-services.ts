@@ -196,9 +196,14 @@ export async function getKanbanStagesDAO(clientId: string) {
     },
     include: {
       contacts: {
-        orderBy: {
-          order: 'asc'
-        }
+        orderBy: [
+          {
+            order: 'asc',
+          },
+          {
+            createdAt: 'desc',
+          }
+        ]
       }
     }
   })
@@ -240,3 +245,18 @@ export async function getStageByChatwootId(chatwootId: string, clientId: string)
   })
   return found
 }
+
+export async function getStageByName(clientId: string, name: string) {
+  name= name.toLowerCase()
+  const found= await prisma.stage.findFirst({
+    where: {
+      name: {
+        contains: name,
+        mode: 'insensitive'
+      },
+      clientId
+    }
+  })
+  return found
+}
+

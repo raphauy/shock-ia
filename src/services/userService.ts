@@ -89,3 +89,12 @@ export async function deleteUser(id: string) {
 
   return deleted
 }
+
+export async function getUserByEmail(email: string) {
+  const found= await prisma.user.findUnique({
+    where: {
+      email
+    }
+  })
+  return found
+}

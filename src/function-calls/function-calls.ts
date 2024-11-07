@@ -158,3 +158,23 @@ const obtenerLinkDePago=
     "required": ["conversationId", "companyId", "unitPrice", "quantity", "concept"]
   }
 }
+
+const cambiarEstadoDeContacto=
+{
+  "name": "cambiarEstadoDeContacto",
+  "description": "Cambia el estado de un contacto. La instrucción del nuevo estado estará en el prompt.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "contactId": {
+        "type": "string",
+        "description": "Id del contacto que se obtiene con la función obtenerContactos."
+      },
+      "nuevoEstado": {
+        "type": "string",
+        "description": "Nuevo estado del contacto."
+      }
+    },
+    "required": ["contactId", "nuevoEstado"]
+  }
+}

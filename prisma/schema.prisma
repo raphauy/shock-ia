@@ -505,6 +505,8 @@ model Contact {
   
   createdAt     DateTime    @default(now())                 // gennext: skip.zod
   updatedAt     DateTime    @updatedAt                      // gennext: skip.zod
+
+  @@unique([clientId, chatwootId])
 }
 
 model CustomField {

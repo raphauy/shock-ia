@@ -197,3 +197,32 @@ export async function updateStageContacts(contacts: ContactDAO[]) {
     throw "Error al reordenar los contactos"
   }
 }
+
+export async function setNewStage(contactId: string, stageId: string) {
+  // get the first order and then substract one
+  const firstOrder= await getMinOrderOfStage(stageId)
+  const order= firstOrder - 1
+  const updated= await prisma.contact.update({
+    where: {
+      id: contactId
+    },
+    data: {
+      stageId,
+      order
+    }
+  })
+  return updated
+}
+
+export async function getContactByPhone(phone: string, clientId: string) {
+  const found = await prisma.contact.findFirst({
+    where: {
+      phone,
+      clientId
+    },
+    include: {
+      stage: true,
+    }
+  })
+  return found
+}

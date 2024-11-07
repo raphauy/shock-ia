@@ -21,6 +21,8 @@ import moment from 'moment-timezone'
 import { EventType } from "@prisma/client";
 import { addLabelToConversation, toggleConversationStatus } from "./chatwoot";
 import { createExternalPayment } from "./cobros-wap";
+import { getContactDAO, setNewStage, updateContact } from "./contact-services";
+import { getStageByName, getStagesDAO } from "./stage-services";
 
 export type CompletionInitResponse = {
   assistantResponse: string | null
@@ -619,6 +621,27 @@ export async function obtenerLinkDePago(clientId: string, conversationId: string
   }
 }
 
+export async function cambiarEstadoDeContacto(clientId: string, contactId: string, nuevoEstado: string) {
+  console.log("cambiarEstadoDeContacto")
+  console.log(`\tcontactId: ${contactId}`)
+  console.log(`\tnuevoEstado: ${nuevoEstado}`)
+
+  const contact= await getContactDAO(contactId)
+  if (!contact) return `No se encontró un contacto con id ${contactId}`
+  console.log("contact: ", contact)
+  const newStage= await getStageByName(clientId, nuevoEstado)
+  if (!newStage) {
+    const stages= await getStagesDAO(clientId)
+    const stageNames= stages.map(stage => stage.name)
+    return `No se encontró un estado con el nombre ${nuevoEstado}. Los estados posibles son: ${stageNames.join(", ")}`
+  }
+  console.log("newStage: ", newStage)
+
+  const updated= await setNewStage(contactId, newStage.id)
+  if (!updated) return "Error al cambiar el estado del contacto"
+
+  return `Estado del contacto cambiado correctamente. Mensaje para el usuario: 'Un agente se pondrá en contacto contigo a la brevedad' y no le preguntes más nada.`
+}
 
 export async function defaultFunction(clientId: string, name: string, args: any) {
   console.log("defaultFunction")
@@ -793,6 +816,10 @@ export async function processFunctionCall(clientId: string, name: string, args: 
 
     case "obtenerLinkDePago":
       content= await obtenerLinkDePago(clientId, args.conversationId, args.companyId, args.unitPrice, args.quantity, args.concept)
+      break
+
+    case "cambiarEstadoDeContacto":
+      content= await cambiarEstadoDeContacto(clientId, args.contactId, args.nuevoEstado)
       break
 
     default:

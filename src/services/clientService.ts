@@ -668,3 +668,12 @@ export async function setHaveCRM(clientId: string, haveCRM: boolean) {
 
   return updated
 }
+
+export async function getClientHaveCRM(clientId: string) {
+  const client= await prisma.client.findUnique({
+    where: {
+      id: clientId
+    }
+  })
+  return client?.haveCRM || false
+}

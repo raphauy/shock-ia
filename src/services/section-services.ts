@@ -5,11 +5,12 @@ import pgvector from 'pgvector/utils';
 import { DocumentDAO, getDocumentsDAOByClient } from "./document-services";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { getFunctionsOfClient } from "./clientService";
+import { getClient, getClientHaveCRM, getFunctionsOfClient } from "./clientService";
 import { getActiveConversation } from "./conversationService";
 import { toZonedTime } from "date-fns-tz";
 import { getActiveEventsDAOByClientId } from "./event-services";
 import { EventType } from "@prisma/client";
+import { getContactByPhone } from "./contact-services";
 
 export type SectionDAO = {
 	id: string
@@ -220,8 +221,15 @@ export async function getContext(clientId: string, phone: string, userInput: str
   let sectionsIds: string[] = []
 
   const conversation= await getActiveConversation(phone, clientId)
+  let contact= conversation?.contact
+  let clientHaveCRM= false
   if (conversation) {
+    clientHaveCRM= conversation.client.haveCRM
     contextString+= "\nconversationId para invocar funciones: " + conversation.id + "\n"
+  } else {
+    console.log("No hay conversación activa");
+    contact= await getContactByPhone(phone, clientId)
+    clientHaveCRM= await getClientHaveCRM(clientId)
   }
 
   if (functionsNames.includes("getDateOfNow")) {
@@ -342,11 +350,23 @@ export async function getContext(clientId: string, phone: string, userInput: str
       contextString+= `Ahora es ${hoy} en el timezone del evento (${event.timezone})\n`
       contextString+= `---------------\n\n`
   
-      })
-        
+      })        
     }
+  }
 
-
+  if (contact && clientHaveCRM) {
+    contextString+= "\n**** Información del Contacto asociado al usuario de esta conversación ****\n"
+    contextString+= `{
+    contactId: "${contact.id}",
+    contactName: "${contact.name}",
+    contactPhone: "${contact.phone}",
+    contactStage: "${contact.stage?.name}"
+}
+`
+    contextString+= "***************************************************************************\n"
+  } else {
+    console.log("contact: ", contact);
+    
   }
 
   const res= {

@@ -16,6 +16,7 @@ import { getDocument } from "./functions";
 import { sendText } from "./wrc-sdk";
 import { sendTextToConversation } from "./chatwoot";
 import { ContactFormValues, createContact, getContactByChatwootId } from "./contact-services";
+import { getUserByEmail } from "./userService";
 
 
 export default async function getConversations() {
@@ -90,7 +91,12 @@ export async function getActiveConversation(phone: string, clientId: string) {
       createdAt: 'desc',
     },
     include: {
-      client: true
+      client: true,
+      contact: {
+        include: {
+          stage: true
+        }
+      }
     }
   })
 
@@ -186,29 +192,38 @@ export async function messageArrived(phone: string, text: string, clientId: stri
   } else {
     // sleep 1 second
     await new Promise(resolve => setTimeout(resolve, 1000));
+    console.log("chatwootContactId on create conversation: ", chatwootContactId)
     let contact= await getContactByChatwootId(String(chatwootContactId), clientId)
 
-    let chatwootId
+    let chatwootId= String(chatwootContactId)
     if (!contact) {
       const isSimulator= phone && phone.includes("@")
       let src= isSimulator ? "simulador" : phone ? "whatsapp" : "chatwoot"
       
-      if (chatwootContactId) {
-        chatwootId= String(chatwootContactId)
-      } else if (isSimulator) {
+      let name= phone
+      if (isSimulator) {
+        const user= await getUserByEmail(phone)
+        if (user) {
+          name= user.name || phone
+        }
         chatwootId= phone
       }
 
       if (chatwootId) {
         const contactValues: ContactFormValues= {
-          name: phone,
+          name,
           phone,
           src,
           clientId,
           chatwootId
         }
         console.log("creating contact from messageArrived")
-        contact= await createContact(contactValues)
+        try {
+          contact= await createContact(contactValues)
+        } catch (error) {
+          console.log("error creating contact from messageArrived, probably already exists")
+          contact= await getContactByChatwootId(chatwootId, clientId)
+        }
       }
     }
     const created= await prisma.conversation.create({
