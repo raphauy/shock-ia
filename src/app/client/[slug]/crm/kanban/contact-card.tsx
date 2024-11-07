@@ -29,7 +29,7 @@ export default function ContactCard({ contact, index }: Props) {
                         </Avatar>
                         <div>
                           <h3 className="font-medium">{contact.name}</h3>
-                          <p className="text-sm text-gray-500">{contact.phone}</p>
+                          <p className="text-sm text-gray-500">{contact.name === contact.phone ? "" : contact.phone}</p>
                         </div>
                       </div>
                       <DisplayContactDialog contact={contact} />
