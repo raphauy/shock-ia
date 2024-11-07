@@ -159,6 +159,7 @@ export default function SimulatorBox() {
 
   const disabled = isLoading || input.length === 0;
 
+  const errorMessage= error?.message && error.message.includes("Bot disabled") ? "El bot está deshabilitado para este contacto." : error?.message
 
 
   return (
@@ -301,7 +302,7 @@ export default function SimulatorBox() {
         )}
       </div>
 
-      {error && <p className="mt-10 text-base text-center text-red-500">{error.message && "Ocurrió un error al procesar la solicitud"}</p>}
+      {error && <p className="mt-10 text-base text-center text-red-500">{errorMessage}</p>}
 
       <div className="fixed bottom-0 flex flex-col items-center w-full p-5 pb-3 space-y-3 max-w-[350px] sm:max-w-[400px] md:max-w-[550px] lg:max-w-screen-md bg-gradient-to-b from-transparent via-gray-100 to-gray-100 sm:px-0">
         <form

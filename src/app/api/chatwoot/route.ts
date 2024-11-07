@@ -25,6 +25,7 @@ export async function POST(request: Request) {
         const messageType= json.message_type
         const inboxName= json.inbox.name
         const conversationStatus= json.conversation.status
+        const senderId= json.sender.id
         console.log("accountId: ", accountId)
         console.log("conversationId: ", conversationId)
         console.log("contentType: ", contentType)
@@ -32,6 +33,7 @@ export async function POST(request: Request) {
         console.log("messageType: ", messageType)
         console.log("inboxName: ", inboxName)
         console.log("conversationStatus: ", conversationStatus)
+        console.log("senderId: ", senderId)
 
         if (conversationStatus !== "pending") {
             console.log("skipping message because conversationStatus is not pending: ", conversationStatus)
@@ -90,7 +92,7 @@ export async function POST(request: Request) {
             phone= json.sender.name
         }
 
-        const delayResponse: MessageDelayResponse= await onMessageReceived(phone, content, clientId, "user", "", undefined, undefined, conversationId)
+        const delayResponse: MessageDelayResponse= await onMessageReceived(phone, content, clientId, "user", "", undefined, undefined, conversationId, senderId)
         
         if (delayResponse.wasCreated ) {
             if (delayResponse.message) {

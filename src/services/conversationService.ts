@@ -15,6 +15,7 @@ import { getChatwootAccountId, getClient } from "./clientService";
 import { getDocument } from "./functions";
 import { sendText } from "./wrc-sdk";
 import { sendTextToConversation } from "./chatwoot";
+import { ContactFormValues, createContact, getContactByChatwootId } from "./contact-services";
 
 
 export default async function getConversations() {
@@ -174,7 +175,7 @@ export async function getLastConversation(slug: string) {
 }
 
 // find an active conversation or create a new one to connect the messages
-export async function messageArrived(phone: string, text: string, clientId: string, role: string, gptData: string, promptTokens?: number, completionTokens?: number, chatwootConversationId?: number) {
+export async function messageArrived(phone: string, text: string, clientId: string, role: string, gptData: string, promptTokens?: number, completionTokens?: number, chatwootConversationId?: number, chatwootContactId?: number) {
 
   if (!clientId) throw new Error("clientId is required")
 
@@ -183,11 +184,39 @@ export async function messageArrived(phone: string, text: string, clientId: stri
     const message= await createMessage(activeConversation.id, role, text, gptData, promptTokens, completionTokens)
     return message    
   } else {
+    // sleep 1 second
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    let contact= await getContactByChatwootId(String(chatwootContactId), clientId)
+
+    let chatwootId
+    if (!contact) {
+      const isSimulator= phone && phone.includes("@")
+      let src= isSimulator ? "simulador" : phone ? "whatsapp" : "chatwoot"
+      
+      if (chatwootContactId) {
+        chatwootId= String(chatwootContactId)
+      } else if (isSimulator) {
+        chatwootId= phone
+      }
+
+      if (chatwootId) {
+        const contactValues: ContactFormValues= {
+          name: phone,
+          phone,
+          src,
+          clientId,
+          chatwootId
+        }
+        console.log("creating contact from messageArrived")
+        contact= await createContact(contactValues)
+      }
+    }
     const created= await prisma.conversation.create({
       data: {
         phone,
         clientId,
-        chatwootConversationId
+        chatwootConversationId,
+        contactId: chatwootId ? contact?.id : undefined
       }
     })
     const message= await createMessage(created.id, role, text, gptData, promptTokens, completionTokens)
@@ -211,6 +240,11 @@ export async function processMessage(id: string, modelName?: string) {
               createdAt: 'asc',
             },
           },
+          contact: {
+            include: {
+              stage: true
+            }
+          },
           client: true
         }
       }
@@ -219,6 +253,11 @@ export async function processMessage(id: string, modelName?: string) {
   if (!message) throw new Error("Message not found")
 
   const conversation= message.conversation
+  const stage= conversation.contact?.stage
+  if (stage && !stage.isBotEnabled) {
+    console.log("stage is not bot enabled, skipping")
+    return
+  }
 
   const client= conversation.client
 

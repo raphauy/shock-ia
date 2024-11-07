@@ -1,8 +1,5 @@
-import { sendTextToConversation } from "@/services/chatwoot";
-import { getClient, getClientIdByChatwootAccountId } from "@/services/clientService";
+import { getClientIdByChatwootAccountId } from "@/services/clientService";
 import { ContactFormValues, createContact, getContactByChatwootId, updateContact } from "@/services/contact-services";
-import { MessageDelayResponse, onMessageReceived, processDelayedMessage } from "@/services/messageDelayService";
-import { waitUntil } from "@vercel/functions";
 import { NextResponse } from "next/server";
 
 
@@ -12,7 +9,7 @@ export async function POST(request: Request) {
 
     try {
         const json= await request.json()
-        console.log("general api json: ", json)
+        //console.log("general api json: ", json)
         const event= json.event
         console.log("event: ", event)
         const accountId= json.account.id
@@ -39,12 +36,19 @@ export async function POST(request: Request) {
             console.log("contact_created")
             await createContact(contactValues)
         } else if (event === "contact_updated") {
-            const contact= await getContactByChatwootId(String(json.id))
+            let contact= await getContactByChatwootId(String(json.id), clientId)
             if (!contact) {
-                console.log("contact not found on contact_updated, creating contact")
+                console.log("sleeping 1 second to check if contact was created")
                 // sleep 1 second
                 await new Promise(resolve => setTimeout(resolve, 1000));
-                await createContact(contactValues)
+                contact= await getContactByChatwootId(String(json.id), clientId)
+                if (!contact) {
+                    console.log("contact not found on contact_updated, creating contact")
+                    await createContact(contactValues)
+                } else {
+                    console.log("contact found on contact_updated, updating contact")
+                    await updateContact(contact.id, contactValues)
+                }
             } else {
                 console.log("updating contact")
                 await updateContact(contact.id, contactValues)

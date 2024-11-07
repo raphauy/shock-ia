@@ -27,6 +27,7 @@ export function StageForm({ id, clientId, closeDialog }: Props) {
       name: "",
       description: "",
       isFinal: false,
+      isBotEnabled: false,
       color: ""
     },
     mode: "onChange",
@@ -101,20 +102,41 @@ export function StageForm({ id, clientId, closeDialog }: Props) {
             name="isFinal"
             render={({ field }) => (
               <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-                <FormLabel>Final</FormLabel>
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <FormLabel>(indica si es el estado final)</FormLabel>
-                <FormMessage />
+                <div className="border p-2 rounded-md w-full">
+                  <div className="flex items-center mb-2 space-x-1">
+                    <FormLabel className="w-24 mt-1">Final</FormLabel>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                    <FormLabel className="text-xs text-muted-foreground mt-2">Indica si es el estado final</FormLabel>
+                  </div>
+                </div>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="isBotEnabled"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                <div className="border p-2 rounded-md w-full">
+                  <div className="flex items-center mb-2 space-x-1">
+                    <FormLabel className="w-24 mt-1">Bot habilitado</FormLabel>
+                    <FormControl>
+                      <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                    <FormLabel className="text-xs text-muted-foreground">Indica si el bot puede responder en este estado</FormLabel>
+                    </div>
+                </div>
               </FormItem>
             )}
           />
           
-      
         <div className="flex justify-end">
             <Button onClick={() => closeDialog()} type="button" variant={"secondary"} className="w-32">Cancel</Button>
             <Button type="submit" className="w-32 ml-2">

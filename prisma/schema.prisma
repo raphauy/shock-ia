@@ -164,6 +164,8 @@ model Conversation {
   carService  CarService?
 
   chatwootConversationId Int?
+  contact     Contact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  contactId   String?
 
   repoData    RepoData[]
   bookings    Booking[]
@@ -480,28 +482,29 @@ model WhatsappInstance {
 }
 
 model Contact {
-  id         String      @id @default(cuid())
-  chatwootId String?
-  name       String                                      // gennext: show.column
-  phone      String?                                     // gennext: show.column
-  imageUrl   String?                                     // gennext: show.column
-  tags       String[]                                    // gennext: show.column
+  id            String      @id @default(cuid())
+  chatwootId    String?
+  name          String                                      // gennext: show.column
+  phone         String?                                     // gennext: show.column
+  imageUrl      String?                                     // gennext: show.column
+  tags          String[]                                    // gennext: show.column
 
-  src        String                                      // gennext: show.column
+  src           String                                      // gennext: show.column
 
-  order      Int         @default(0)
+  order         Int         @default(0)
 
-  client     Client      @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  clientId   String
+  client        Client      @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId      String
 
-  stage      Stage      @relation(fields: [stageId], references: [id], onDelete: Restrict)
-  stageId    String
+  stage         Stage      @relation(fields: [stageId], references: [id], onDelete: Restrict)
+  stageId       String
 
-  fieldValues FieldValue[]                               // gennext: skip.list
-  stageHistory StageHistory[]                           // gennext: skip.list
+  fieldValues   FieldValue[]                               // gennext: skip.list
+  stageHistory  StageHistory[]                           // gennext: skip.list
+  conversations Conversation[]                         // gennext: skip.list
   
-  createdAt  DateTime    @default(now())                 // gennext: skip.zod
-  updatedAt  DateTime    @updatedAt                      // gennext: skip.zod
+  createdAt     DateTime    @default(now())                 // gennext: skip.zod
+  updatedAt     DateTime    @updatedAt                      // gennext: skip.zod
 }
 
 model CustomField {
@@ -526,6 +529,7 @@ model Stage {
   description String?                                     // gennext: show.column
   order       Int                                         // gennext: show.column
   isFinal     Boolean    @default(false)                  // gennext: show.column
+  isBotEnabled Boolean    @default(false)                  // gennext: show.column
   color       String?                                     // gennext: show.column
 
   client      Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)

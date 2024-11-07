@@ -59,11 +59,14 @@ export async function getContactDAO(id: string) {
 export async function createContact(data: ContactFormValues) {
 
   // check if contact already exists
-  const existingContact= await getContactByChatwootId(data.chatwootId || "")
+  const existingContact= await getContactByChatwootId(data.chatwootId || "", data.clientId)
   if (existingContact) {
     const updated= await updateContact(existingContact.id, data)
     return updated
   }
+
+  console.log("createContact: ", data)
+
 
   let firstStage= await getFirstStageOfClient(data.clientId)
   if (!firstStage){
@@ -152,10 +155,11 @@ export async function getFullContactDAO(id: string) {
   return found as ContactDAO
 }
     
-export async function getContactByChatwootId(chatwootId: string) {
+export async function getContactByChatwootId(chatwootId: string, clientId: string) {
   const found = await prisma.contact.findFirst({
     where: {
-      chatwootId
+      chatwootId,
+      clientId
     }
   })
   return found

@@ -9,6 +9,7 @@ export type KanbanStageDAO = {
 	description: string | undefined
 	order: number
 	isFinal: boolean
+	isBotEnabled: boolean
 	color: string | undefined
 	clientId: string
 }
@@ -22,6 +23,7 @@ export type StageDAO = {
 	description: string | undefined
 	order: number
 	isFinal: boolean
+	isBotEnabled: boolean
 	color: string | undefined
 	clientId: string
 	createdAt: Date
@@ -32,6 +34,7 @@ export const stageSchema = z.object({
 	name: z.string().min(1, "name is required."),
 	description: z.string().optional(),
 	isFinal: z.boolean().optional(),
+	isBotEnabled: z.boolean().optional(),
 	color: z.string().optional(),
 	clientId: z.string().min(1, "clientId is required."),
 })
@@ -151,6 +154,7 @@ export async function createDefaultStages(clientId: string) {
         description: 'Estado inicial de un contacto, respuestas con IA en función del prompt',
         order: 1,
         isFinal: false,
+        isBotEnabled: true,
         color: '#D3D3D3',
         clientId
       },
@@ -159,6 +163,7 @@ export async function createDefaultStages(clientId: string) {
         description: 'Contacto derivado a un comercial',
         order: 2,
         isFinal: false,
+        isBotEnabled: false,
         color: '#D3D3D3',
         clientId
       },
@@ -167,6 +172,7 @@ export async function createDefaultStages(clientId: string) {
         description: 'Contacto ganado, este es un estado final',
         order: 3,
         isFinal: true,
+        isBotEnabled: false,
         color: '#D3D3D3',
         clientId
       }
@@ -219,4 +225,18 @@ export async function updateKanbanStages(clientId: string, stages: KanbanStageDA
     console.error(error)
     throw "Error al reordenar los estados"
   }
+}
+
+export async function getStageByChatwootId(chatwootId: string, clientId: string) {
+  const found= await prisma.stage.findFirst({
+    where: {      
+      clientId,
+      contacts: {
+        some: {
+          chatwootId
+        }
+      }
+    }
+  })
+  return found
 }

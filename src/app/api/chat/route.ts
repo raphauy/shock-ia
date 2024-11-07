@@ -1,11 +1,13 @@
 import { getCurrentUser } from "@/lib/auth"
 import { removeSectionTexts } from "@/lib/utils"
 import { getClient } from "@/services/clientService"
-import { getSystemMessage, messageArrived, saveFunction } from "@/services/conversationService"
+import { getContactByChatwootId } from "@/services/contact-services"
+import { getActiveConversation, getSystemMessage, messageArrived, saveFunction } from "@/services/conversationService"
 import { getFunctionsDefinitions } from "@/services/function-services"
 import { processFunctionCall } from "@/services/functions"
 import { getFullModelDAO, getFullModelDAOByName } from "@/services/model-services"
 import { getContext, setSectionsToMessage } from "@/services/section-services"
+import { getStageByChatwootId } from "@/services/stage-services"
 import { OpenAIStream, StreamingTextResponse } from "ai"
 import { NextResponse } from "next/server"
 import { OpenAI } from "openai"
@@ -34,8 +36,14 @@ export async function POST(req: Request) {
     return new Response("Client prompt not found", { status: 404 })
   }
 
+
   const currentUser= await getCurrentUser()
   const phone= currentUser?.email || "web-chat"
+
+  const stage= await getStageByChatwootId(phone, clientId)
+  if (stage && !stage.isBotEnabled) {
+    return new Response("Bot disabled", { status: 404 })
+  }
 
   // get rid of messages of type system
   const input= messages[messages.length - 1].content
