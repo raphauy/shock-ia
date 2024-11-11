@@ -3,6 +3,7 @@ import { getKanbanStagesDAO } from "@/services/stage-services";
 import { notFound } from "next/navigation";
 import { KanbanComponent } from "./kanban/kanban";
 import DatesFilter from "./kanban/dates-filter";
+import { fromZonedTime, toZonedTime } from "date-fns-tz";
 
 type Props = {
   params: {
@@ -46,8 +47,9 @@ export default async function CRMKanban({ params, searchParams }: Props) {
       to= searchParams.to ? new Date(searchParams.to) : null
   }
 
-  console.log("from: ", from)
-  console.log("to: ", to)
+  from= from ? fromZonedTime(from, "America/Montevideo") : null
+  to= to ? fromZonedTime(to, "America/Montevideo") : null
+
   console.log("last: ", last)
 
   const client = await getClientBySlug(params.slug)

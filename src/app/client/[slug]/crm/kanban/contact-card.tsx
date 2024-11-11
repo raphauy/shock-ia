@@ -8,6 +8,7 @@ import { ContactDAO } from "@/services/contact-services";
 import { Draggable } from "@hello-pangea/dnd";
 import { DisplayContactDialog } from "../contacts/contact-dialogs";
 import React from "react";
+import { toZonedTime } from "date-fns-tz";
 
 type Props = {
   contact: ContactDAO
@@ -39,7 +40,7 @@ export default function ContactCard({ contact, index }: Props) {
                         <Badge key={index} variant="secondaryWithBorder">{tag}</Badge>
                       ))}
                     </div>
-                    <p className="mt-2 text-sm text-gray-500 text-right">{formatWhatsAppStyle(contact.updatedAt ?? "")}</p>
+                   <p className="mt-2 text-sm text-gray-500 text-right">{formatWhatsAppStyle(contact.updatedAt)}</p>
                   </CardContent>
                 </Card>
               </div>

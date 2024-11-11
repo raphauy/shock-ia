@@ -187,6 +187,8 @@ export async function createDefaultStages(clientId: string) {
 }
 
 export async function getKanbanStagesDAO(clientId: string, from: Date | null, to: Date | null) {
+  console.log("from: ", from)
+  console.log("to: ", to)
   const stages = await prisma.stage.findMany({
     where: {
       clientId
@@ -204,11 +206,11 @@ export async function getKanbanStagesDAO(clientId: string, from: Date | null, to
         },
         orderBy: [
           {
-            order: 'asc',
+            updatedAt: 'desc',
           },
           {
-            createdAt: 'desc',
-          }
+            order: 'asc',
+          },
         ]
       }
     }

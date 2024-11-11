@@ -3,7 +3,7 @@ import { type ClassValue, clsx } from "clsx";
 import { isThisWeek } from "date-fns";
 import { isToday, isYesterday } from "date-fns";
 import { parseISO } from "date-fns";
-import { format, format as formatTZ, toZonedTime } from "date-fns-tz";
+import { format, format as formatTZ, toDate, toZonedTime } from "date-fns-tz";
 import { es } from "date-fns/locale";
 import he from 'he';
 import { twMerge } from "tailwind-merge";
@@ -271,6 +271,7 @@ export function getMonthName(month: string) {
 }
 
 export function formatWhatsAppStyle(date: Date | string): string {
+
   let parsedDate = typeof date === 'string' ? parseISO(date) : date;
 
   if (isToday(parsedDate)) {
