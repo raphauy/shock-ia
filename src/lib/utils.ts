@@ -1,6 +1,9 @@
 import { EventType } from "@prisma/client";
 import { type ClassValue, clsx } from "clsx";
-import { format as formatTZ, toZonedTime } from "date-fns-tz";
+import { isThisWeek } from "date-fns";
+import { isToday, isYesterday } from "date-fns";
+import { parseISO } from "date-fns";
+import { format, format as formatTZ, toZonedTime } from "date-fns-tz";
 import { es } from "date-fns/locale";
 import he from 'he';
 import { twMerge } from "tailwind-merge";
@@ -229,5 +232,54 @@ export function getStatusColorAndLabel(status: string) {
     return "Conectando"
   } else {
     return "Desconocido"
+  }
+}
+
+export function getMonthName(month: string) {
+  
+  if (month.length === 7) month = (Number(month.slice(5, 7))).toString()
+  if (month.length === 1) month = "0" + month
+
+  switch (month) {
+    case "01":
+      return "enero"
+    case "02":
+      return "febrero"
+    case "03":
+      return "marzo"
+    case "04":
+      return "abril"
+    case "05":
+      return "mayo"
+    case "06":
+      return "junio"
+    case "07":
+      return "julio"
+    case "08":
+      return "agosto"
+    case "09":
+      return "septiembre"
+    case "10":
+      return "octubre"
+    case "11":
+      return "noviembre"
+    case "12":
+      return "diciembre"
+    default:
+      return "mes"
+  }
+}
+
+export function formatWhatsAppStyle(date: Date | string): string {
+  let parsedDate = typeof date === 'string' ? parseISO(date) : date;
+
+  if (isToday(parsedDate)) {
+    return format(parsedDate, 'HH:mm');
+  } else if (isYesterday(parsedDate)) {
+    return 'Ayer';
+  } else if (isThisWeek(parsedDate)) {
+    return format(parsedDate, 'eeee', { locale: es });
+  } else {
+    return format(parsedDate, 'dd/MM/yyyy');
   }
 }
