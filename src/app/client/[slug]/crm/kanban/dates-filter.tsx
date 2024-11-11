@@ -60,7 +60,7 @@ export default function DatesFilter() {
   const actualMonthLabel= getMonthName(actualMonth)
 
   return (
-    <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-6 w-full mb-2">
+    <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background w-full mb-2">
       <div className="flex items-center gap-4">
         <Link href={`/client/${slug}/crm?last=HOY${restOfTheParams}`}>
           <Button variant={last === "HOY" ? "outline" : "ghost"} >Hoy</Button>
