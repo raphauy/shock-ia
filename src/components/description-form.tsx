@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 
 import { toast } from "@/components/ui/use-toast"
 import { Loader, Pencil } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 
 type Props= {
@@ -23,6 +23,10 @@ export function DescriptionForm({ id, label, initialValue, update }: Props) {
 
   const [loading, setLoading] = useState(false)
   const [description, setDescription] = useState(initialValue)
+
+  useEffect(() => {
+    setDescription(initialValue)
+  }, [initialValue])
 
   async function onSubmit() {
     if (description === initialValue) {

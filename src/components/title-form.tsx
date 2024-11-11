@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { toast } from "@/components/ui/use-toast"
 import { Loader, Pencil } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 type Props= {
   id: string
@@ -19,6 +19,10 @@ export function TitleForm({ id, label, initialValue, update }: Props) {
 
   const [loading, setLoading] = useState(false)
   const [title, setTitle] = useState(initialValue)
+
+  useEffect(() => {
+    setTitle(initialValue)
+  }, [initialValue])
 
   async function onSubmit() {
     toggleEdit()
