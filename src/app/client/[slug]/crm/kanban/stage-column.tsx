@@ -9,6 +9,7 @@ import ContactCard from "./contact-card";
 import { CircleCheckIcon, CircleDashedIcon, CircleIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import StageMenu from "./stage-menu";
+import { Badge } from "@/components/ui/badge";
 
 type Props = {
     stage: KanbanStageDAOWithContacts
@@ -28,7 +29,7 @@ export default function StageColumn({ stage, index }: Props) {
           <Card className="bg-muted h-full group" {...provided.dragHandleProps}>
             <CardHeader className="pb-2 px-3">
               <div className="flex justify-between items-center">
-                <CardTitle className="flex items-center gap-1 text-lg font-medium" >{getSatusIcon(stage)} {stage.name}</CardTitle>
+                <CardTitle className="flex items-center gap-1 text-lg font-medium" >{getSatusIcon(stage)} {stage.name} &nbsp; {contacts.length}</CardTitle>
                 <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <StageMenu stageId={stage.id} stageName={stage.name} />
                 </div>
