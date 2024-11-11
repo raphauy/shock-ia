@@ -199,14 +199,14 @@ export async function getKanbanStagesDAO(clientId: string, from: Date | null, to
     include: {
       contacts: {
         where: {
-          updatedAt: from && to ? {
+          createdAt: from && to ? {
             gte: from,
             lte: to
           } : undefined
         },
         orderBy: [
           {
-            updatedAt: 'desc',
+            createdAt: 'desc',
           },
           {
             order: 'asc',
