@@ -15,10 +15,13 @@ import RegistrosHook from "./registros-hook"
 import PropsEdit from "./props-edit-box"
 import ProviderSelector from "./whatsapp/provider-selector"
 import WhatsappTab from "./whatsapp/whatsapp-tab"
+import FCTab from "./fc-tab"
+import { getReposOfClient } from "@/services/repository-services"
 
 type Props = {
     searchParams: {
         clientId: string
+        fcId: string
     }
 }
 export default async function ConfigPage({ searchParams }: Props) {
@@ -55,6 +58,7 @@ export default async function ConfigPage({ searchParams }: Props) {
                 </TabsContent>
                 <TabsContent value="functions">
                     <ClientFunctionsBox clientId={client.id} />
+                    <FCTab client={client} searchParams={searchParams} />
                 </TabsContent>
                 <TabsContent value="props" className="space-y-6">
                     <PropsEdit clientId={client.id} haveEvents={client.haveEvents} haveAgents={client.haveAgents} haveCRM={client.haveCRM} inboxProvider={client.inboxProvider} />

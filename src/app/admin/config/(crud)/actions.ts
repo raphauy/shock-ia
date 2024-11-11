@@ -1,6 +1,7 @@
 "use server"
 
 import { setHaveAgents, setHaveCRM, setHaveEvents, setTokensPrice } from "@/services/clientService"
+import { addTagToFunction, removeTagFromFunction } from "@/services/function-services"
 import { revalidatePath } from "next/cache"
 
 
@@ -34,4 +35,20 @@ export async function setHaveCRMAction(clientId: string, haveCRM: boolean) {
     revalidatePath(`/admin/config`)
 
     return client    
+}
+
+export async function addTagToFunctionAction(clientId: string, functionId: string, tag: string) {
+    const updated= await addTagToFunction(clientId, functionId, tag)
+
+    revalidatePath(`/admin/config`)
+
+    return updated
+}
+
+export async function removeTagFromFunctionAction(clientId: string, functionId: string, tag: string) {
+    const updated= await removeTagFromFunction(clientId, functionId, tag)
+
+    revalidatePath(`/admin/config`)
+
+    return updated
 }

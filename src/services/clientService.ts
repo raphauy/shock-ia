@@ -275,55 +275,89 @@ export async function getCountDataOfAllClients(): Promise<CountData[]> {
   return data
 }
 
+// export async function getFunctionsOfClient(clientId: string) {
+//   const client= await prisma.client.findUnique({
+//     where: {
+//       id: clientId
+//     },
+//     include: {
+//       functions: true,      
+//     }
+//   })
+
+//   if (!client) return []
+
+//   const functionsIds= client.functions.map((f) => f.functionId)
+
+//   const functions= await prisma.function.findMany({
+//     where: {
+//       id: {
+//         in: functionsIds
+//       }
+//     },
+//     include: {
+//       repositories: true
+//     },
+//   })
+
+//   return functions
+// }
+
+// get functions of client in one query
 export async function getFunctionsOfClient(clientId: string) {
-  const client= await prisma.client.findUnique({
+  const functions = await prisma.function.findMany({
     where: {
-      id: clientId
-    },
-    include: {
-      functions: true,      
-    }
-  })
-
-  if (!client) return []
-
-  const functionsIds= client.functions.map((f) => f.functionId)
-
-  const functions= await prisma.function.findMany({
-    where: {
-      id: {
-        in: functionsIds
+      clients: {
+        some: {
+          clientId
+        }
       }
     },
     include: {
       repositories: true
-    },
-  })
-
-  return functions
-}
-
-export async function getComplementaryFunctionsOfClient(clientId: string) {
-  const client= await prisma.client.findUnique({
-    where: {
-      id: clientId
-    },
-    include: {
-      functions: true
     }
   })
 
-  if (!client) return []
-
-  const clientFunctions= client.functions
-
-  const allFunctions= await prisma.function.findMany()
-
-  const complementary= allFunctions.filter((f) => !clientFunctions.find((cf) => cf.functionId === f.id))
-
-  return complementary
+  return functions as FunctionDAO[]
 }
 
+// export async function getComplementaryFunctionsOfClient(clientId: string) {
+//   const client= await prisma.client.findUnique({
+//     where: {
+//       id: clientId
+//     },
+//     include: {
+//       functions: true
+//     }
+//   })
+
+//   if (!client) return []
+
+//   const clientFunctions= client.functions
+
+//   const allFunctions= await prisma.function.findMany()
+
+//   const complementary= allFunctions.filter((f) => !clientFunctions.find((cf) => cf.functionId === f.id))
+
+//   return complementary
+// }
+
+export async function getComplementaryFunctionsOfClient(clientId: string) {
+  const functions = await prisma.function.findMany({
+    where: {
+      clients: {
+        none: {
+          clientId
+        }
+      },
+      repositories: {
+        none: {}
+      }
+    }
+  })
+
+  return functions as FunctionDAO[]
+}
 
 // model Function {
 //   id             String       @id @default(cuid())

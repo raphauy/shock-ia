@@ -19,6 +19,7 @@ export type FunctionClientDAO= {
   client: ClientDAO
   webHookUrl: string | null
   uiLabel: string
+  tags: string[]
 }
 type ClientDAO= {
   id: string
@@ -325,4 +326,49 @@ export async function setTagsOfFunction(functionId: string, tags: string[]) {
       tags
     }
   })
+}
+
+export async function addTagToFunction(clientId: string, functionId: string, tag: string) {
+  const updated = await prisma.clientFunction.update({
+    where: {
+      clientId_functionId: {
+        clientId,
+        functionId
+      }
+    },
+    data: {
+      tags: { 
+        push: tag 
+      }
+    }
+  })
+
+  return updated
+}
+
+export async function removeTagFromFunction(clientId: string, functionId: string, tag: string) {
+  const client = await prisma.clientFunction.findUnique({
+    where: {
+      clientId_functionId: {
+        clientId,
+        functionId
+      }
+    }
+  });
+
+  const updated = await prisma.clientFunction.update({
+    where: {
+      clientId_functionId: {
+        clientId,
+        functionId
+      }
+    },
+    data: {
+      tags: {
+        set: client?.tags.filter(t => t !== tag) || []
+      }
+    }
+  })
+
+  return updated
 }

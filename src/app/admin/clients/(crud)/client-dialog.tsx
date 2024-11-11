@@ -11,6 +11,9 @@ import { getComplementaryFunctionsOfClientAction, getFunctionsOfClientAction, se
 import { toast } from "@/components/ui/use-toast"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { ScrollArea } from "@/components/ui/scroll-area"
+
+const excludedFunctions= ["", "cancelarReserva", "obtenerDisponibilidad", "reservarParaEvento", "obtenerReservas", "reservarParaEventoDeUnicaVez"]
 
 interface Props{
   title: string
@@ -85,8 +88,9 @@ export function ClientFunctionsBox({ clientId, closeDialog }: ClientFunctionBoxP
     getFunctionsOfClientAction(clientId)
     .then((data) => {
         if(!data) return null
-        // @ts-ignore
-        setFunctions(data)
+        // filter and exclude event functions
+        const eventFunctions= data.filter((f) => !excludedFunctions.includes(f.name))
+        setFunctions(eventFunctions)
     })
     .catch((error) => {
         console.error(error)
@@ -95,8 +99,9 @@ export function ClientFunctionsBox({ clientId, closeDialog }: ClientFunctionBoxP
     getComplementaryFunctionsOfClientAction(clientId)
     .then((data) => {
         if(!data) return null
-        // @ts-ignore
-        setComplementary(data)
+        // filter and exclude event functions
+        const eventFunctions= data.filter((f) => !excludedFunctions.includes(f.name))
+        setComplementary(eventFunctions)
     })
     .catch((error) => {
         console.error(error)
@@ -157,52 +162,49 @@ export function ClientFunctionsBox({ clientId, closeDialog }: ClientFunctionBoxP
             <p>👇🏼 Funciones aplicadas a este cliente</p>
             <p>👇🏼 Funciones a un click de ser aplicadas a este cliente</p>
           </div>
-          <div className="grid grid-cols-2 gap-4 p-3 border rounded-md min-w-[400px] w-full min-h-[500px]">
+          <div className="grid grid-cols-2 gap-4 p-3 border rounded-md min-w-[400px] w-full">
             {
               loading ? <div className="flex items-center justify-center w-full h-full col-span-2"><Loader className="w-10 h-10 animate-spin" /></div> : 
               <>
-              <div className="flex flex-col border-r">
-              {
-                  functions.map((item) => {
-                    // eventos functions:
-                    // cancelarReserva
-                    // obtenerDisponibilidad
-                    // reservarParaEvento
-                    // obtenerReservas
-                    // reservarParaEventoDeUnicaVez
-                    const isEventosFunction= item.name === "cancelarReserva" || item.name === "obtenerDisponibilidad" || item.name === "reservarParaEvento" || item.name === "obtenerReservas" || item.name === "reservarParaEventoDeUnicaVez"
-                    return (
-                        <div key={item.id} className="flex items-center justify-between gap-2 mb-1 mr-5">
-                            <p className="text-green-500 whitespace-nowrap">{item.name}</p>
-                            <Button variant="secondary" className="h-7" onClick={() => complementaryOut(item.id)} disabled={isEventosFunction}>
-                              <ChevronsRight />
-                            </Button>
-                        </div>
-                    )})
-              }
-                      <div className="flex items-end justify-between flex-1 gap-2 mb-1 mr-5">
-                          <p>Todos</p>
-                          <Button variant="secondary" className="h-7" onClick={() => allOut()}><ChevronsRight /></Button>
-                      </div>
-              </div>
-              <div className="flex flex-col">
-              {
-                  complementary.map((item) => {
-                    const isEventosFunction= item.name === "cancelarReserva" || item.name === "obtenerDisponibilidad" || item.name === "reservarParaEvento" || item.name === "obtenerReservas" || item.name === "reservarParaEventoDeUnicaVez"
-                    return (
-                        <div key={item.id} className="flex items-center gap-2 mb-1">
-                            <Button variant="secondary" className="h-7 x-7" onClick={() => complementaryIn(item.id)} disabled={isEventosFunction}>
-                                <ChevronsLeft />
-                            </Button>
-                            <p className="whitespace-nowrap">{item.name}</p>
-                        </div>
-                    )})
-              }
-                  <div className="flex items-end flex-1 gap-2 mb-1">
-                      <Button variant="secondary" className="h-7" onClick={() => allIn()}><ChevronsLeft /></Button>
-                      <p>Todos</p>
-                  </div>
-              </div>
+              <ScrollArea className="h-[300px] border-r">
+                <div className="flex flex-col">
+                {
+                    functions.map((item) => {
+                      const haveRepository= item.repositories && item.repositories.length > 0
+                      return (
+                          <div key={item.id} className="flex items-center justify-between gap-2 mb-1 mr-5">
+                              <p className="text-green-500 whitespace-nowrap">{item.name}</p>
+                              <Button variant="secondary" className="h-7" onClick={() => complementaryOut(item.id)} disabled={haveRepository}>
+                                <ChevronsRight />
+                              </Button>
+                          </div>
+                      )})
+                }
+                        {/* <div className="flex items-end justify-between flex-1 gap-2 mb-1 mr-5">
+                            <p>Todos</p>
+                            <Button variant="secondary" className="h-7" onClick={() => allOut()}><ChevronsRight /></Button>
+                        </div> */}
+                </div>
+              </ScrollArea>
+              <ScrollArea className="h-[300px]">
+                <div className="flex flex-col">
+                {
+                    complementary.map((item) => {
+                      return (
+                          <div key={item.id} className="flex items-center gap-2 mb-1">
+                              <Button variant="secondary" className="h-7 x-7" onClick={() => complementaryIn(item.id)}>
+                                  <ChevronsLeft />
+                              </Button>
+                              <p className="whitespace-nowrap">{item.name}</p>
+                          </div>
+                      )})
+                }
+                    <div className="flex items-end flex-1 gap-2 mb-1">
+                        <Button variant="secondary" className="h-7" onClick={() => allIn()}><ChevronsLeft /></Button>
+                        <p>Todos</p>
+                    </div>
+                </div>
+              </ScrollArea>
               </>
             }
             </div>

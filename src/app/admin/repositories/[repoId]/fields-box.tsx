@@ -13,8 +13,9 @@ import { Badge } from "@/components/ui/badge"
 type Props= {
     initialFields: FieldDAO[]
     repoId: string
+    fullMode: boolean
 }
-export default function FieldsBox({ initialFields, repoId }: Props) {
+export default function FieldsBox({ initialFields, repoId, fullMode }: Props) {
 
     const [fields, setFields] = useState(initialFields)
     const [loading, setLoading] = useState(false)
@@ -53,7 +54,7 @@ export default function FieldsBox({ initialFields, repoId }: Props) {
     return (
         <Reorder.Group values={fields} onReorder={(newOrder) => handleNewOrder(newOrder)} className="">
             <div className="flex justify-end">
-                <FieldDialog repoId={repoId} />
+                { fullMode && <FieldDialog repoId={repoId} /> }
             </div>
         {
             fields.map((field, index) => {

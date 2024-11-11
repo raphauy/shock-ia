@@ -413,3 +413,17 @@ export async function setWebHookUrl(clientId: string, functionId: string, webHoo
 
   return updated
 }
+
+export async function getReposOfClient(clientId: string) {
+  const repos= await prisma.repository.findMany({
+    where: {
+      function: {
+        clients: {
+          some: { clientId }
+        }
+      }
+    }
+  })
+
+  return repos as RepositoryDAO[]
+}
