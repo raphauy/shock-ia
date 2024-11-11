@@ -131,16 +131,16 @@ export default async function FCConfig({ clientId, repoId, fullMode, haveCRM }: 
                       </div>
                     }
 
-                    <div className="flex items-center gap-x-2 mt-6">
-                      <IconBadge icon={Tag} />
-                      <h2 className="text-xl">
-                          Configuración de CRM
-                      </h2>
-                    </div>
 
                     { 
                       functionClient && haveCRM &&
                       <>
+                        <div className="flex items-center gap-x-2 mt-6">
+                          <IconBadge icon={Tag} />
+                          <h2 className="text-xl">
+                              Configuración de CRM
+                          </h2>
+                        </div>
                         <div className="p-4 bg-muted border rounded-md mt-6">
                           <TagInputBox functionClient={functionClient} />
                         </div>
