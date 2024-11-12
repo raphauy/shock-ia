@@ -1,6 +1,6 @@
 "use client"
 
-import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
+import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { BookOpen, Bot, ChevronRightSquare, Kanban, LayoutDashboard, MessageCircle, MessagesSquare, Phone, RectangleEllipsis, Tag, User } from "lucide-react";
 import { useParams, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -110,6 +110,7 @@ export function AppSidebar() {
                 <SidebarFooter>
                     <div></div>
                 </SidebarFooter>
+                <SidebarRail />
             </Sidebar>
         </div>
     )
