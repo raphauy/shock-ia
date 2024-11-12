@@ -13,7 +13,7 @@ type Props= {
   clientId: string
 }
 
-const addTrigger= <Button><PlusCircle size={22} className="mr-2"/>Create Contact</Button>
+const addTrigger= <Button><PlusCircle size={22} className="mr-2"/>Crear contacto</Button>
 const updateTrigger= <Pencil className="hover:cursor-pointer text-muted-foreground"/>
 
 export function ContactDialog({ id, clientId }: Props) {
@@ -26,7 +26,7 @@ export function ContactDialog({ id, clientId }: Props) {
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{id ? 'Update' : 'Create'} Contact
+          <DialogTitle>{id ? 'Actualizar' : 'Crear'} contacto
           </DialogTitle>
         </DialogHeader>
         <ContactForm closeDialog={() => setOpen(false)} id={id} clientId={clientId} />
@@ -50,7 +50,7 @@ export function DeleteContactDialog({ id, description }: DeleteProps) {
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete Contact</DialogTitle>
+          <DialogTitle>Eliminar contacto</DialogTitle>
           <DialogDescription className="py-8">{description}</DialogDescription>
         </DialogHeader>
         <DeleteContactForm closeDialog={() => setOpen(false)} id={id} />

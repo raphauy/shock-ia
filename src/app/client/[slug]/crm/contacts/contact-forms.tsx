@@ -72,9 +72,9 @@ export function ContactForm({ id, clientId, closeDialog }: Props) {
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Name</FormLabel>
+                <FormLabel>Nombre</FormLabel>
                 <FormControl>
-                  <Input placeholder="Contact's name" {...field} />
+                  <Input placeholder="Nombre del contacto" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -87,9 +87,9 @@ export function ContactForm({ id, clientId, closeDialog }: Props) {
             name="phone"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Phone</FormLabel>
+                <FormLabel>Teléfono</FormLabel>
                 <FormControl>
-                  <Input placeholder="Contact's phone" {...field} />
+                  <Input placeholder="Teléfono del contacto" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -102,9 +102,9 @@ export function ContactForm({ id, clientId, closeDialog }: Props) {
             name="imageUrl"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>ImageUrl</FormLabel>
+                <FormLabel>Imagen (URL)</FormLabel>
                 <FormControl>
-                  <Input placeholder="Contact's imageUrl" {...field} />
+                  <Input placeholder="Imagen del contacto" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -117,9 +117,9 @@ export function ContactForm({ id, clientId, closeDialog }: Props) {
             name="src"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Src</FormLabel>
+                <FormLabel>Fuente</FormLabel>
                 <FormControl>
-                  <Input placeholder="Contact's src" {...field} />
+                  <Input placeholder="Fuente del contacto" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -127,9 +127,9 @@ export function ContactForm({ id, clientId, closeDialog }: Props) {
           />
       
         <div className="flex justify-end">
-            <Button onClick={() => closeDialog()} type="button" variant={"secondary"} className="w-32">Cancel</Button>
+            <Button onClick={() => closeDialog()} type="button" variant={"secondary"} className="w-32">Cancelar</Button>
             <Button type="submit" className="w-32 ml-2">
-              {loading ? <Loader className="h-4 w-4 animate-spin" /> : <p>Save</p>}
+              {loading ? <Loader className="h-4 w-4 animate-spin" /> : <p>Guardar</p>}
             </Button>
           </div>
         </form>
