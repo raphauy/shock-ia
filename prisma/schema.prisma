@@ -98,10 +98,10 @@ model Client {
   whatsappInstances     WhatsappInstance[]
   inboxProvider         InboxProvider @default(OSOM)
 
-  contacts     Contact[]      // gennext: skip.list
-  customFields CustomField[]  // gennext: skip.list
-  stages       Stage[]        // gennext: skip.list
-  tags         Tag[]          // gennext: skip.list
+  contacts              Contact[]      // gennext: skip.list
+  customFields          CustomField[]  // gennext: skip.list
+  stages                Stage[]        // gennext: skip.list
+  tags         String[]       // gennext: skip.list
 }
 
 model Document {
@@ -558,17 +558,6 @@ model FieldValue {
   
   createdAt    DateTime   @default(now())                 // gennext: skip.zod
   updatedAt    DateTime   @updatedAt                      // gennext: skip.zod
-}
-
-model Tag {
-  id          String     @id @default(cuid())            
-  name        String                                      // gennext: show.column
-  
-  client      Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  clientId    String
-  
-  createdAt   DateTime   @default(now())                 // gennext: skip.zod
-  updatedAt   DateTime   @updatedAt                      // gennext: skip.zod
 }
 
 model StageHistory {

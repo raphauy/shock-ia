@@ -15,7 +15,7 @@ import FunctionClientBox from "./function-client-box"
 import RemoveClientButton from "./remove-client-button"
 import SwitchBox from "./switch-box"
 import { HookForm } from "./hook-form"
-import TagInputBox from "./tag-input"
+import TagInputFunctionBox from "./tag-input-function"
 
 type Props = {
   clientId?: string
@@ -142,7 +142,7 @@ export default async function FCConfig({ clientId, repoId, fullMode, haveCRM }: 
                           </h2>
                         </div>
                         <div className="p-4 bg-muted border rounded-md mt-6">
-                          <TagInputBox functionClient={functionClient} />
+                          <TagInputFunctionBox functionName={repository.functionName} functionClient={functionClient} tagsUI={false} />
                         </div>
                         <div className="p-4 bg-muted border rounded-md mt-6">
                           <p className="font-medium border-b pb-2">Cambiar estado:</p>

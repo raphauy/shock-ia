@@ -711,3 +711,40 @@ export async function getClientHaveCRM(clientId: string) {
   })
   return client?.haveCRM || false
 }
+
+export async function addTag(clientId: string, tag: string) {
+  const updated= await prisma.client.update({
+    where: {
+      id: clientId
+    },
+    data: {
+      tags: {
+        push: tag
+      }
+    }
+  })
+
+  return updated
+}
+
+export async function removeTag(clientId: string, tag: string) {
+  const client= await prisma.client.findUnique({
+    where: {
+      id: clientId
+    }
+  })
+  if (!client) throw new Error('Client not found')
+
+  const updated= await prisma.client.update({
+    where: {
+      id: clientId
+    },
+    data: {
+      tags: {
+        set: client.tags.filter((t) => t !== tag)
+      }
+    }
+  })
+
+  return updated
+}

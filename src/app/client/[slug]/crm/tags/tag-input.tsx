@@ -2,22 +2,23 @@
 
 import React, { useState } from 'react';
 import { Tag, TagInput } from 'emblor';
-import { addTagToFunctionAction, removeTagFromFunctionAction } from '../../config/(crud)/actions';
 import { toast } from '@/components/ui/use-toast';
 import { FunctionClientDAO } from '@/services/function-services';
 import { Loader } from 'lucide-react';
+import { addTagAction, removeTagAction } from './actions';
 
 type Props = {
-    functionClient: FunctionClientDAO
+    clientId: string
+    tags: string[]
 }
-export default function TagInputBox({ functionClient }: Props) {
+export default function TagInputBox({ clientId, tags }: Props) {
     const [loading, setLoading] = useState(false)
     const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
-    const [tags, setTags] = useState<Tag[]>(functionClient.tags.map(tag => ({id: tag, text: tag})));
+    const [tagsState, setTags] = useState<Tag[]>(tags.map(tag => ({id: tag, text: tag})));
 
     function onTagAdd(tag: string) {
         setLoading(true)
-        addTagToFunctionAction(functionClient.clientId, functionClient.functionId, tag)
+        addTagAction(clientId, tag)
         .then(updated => {
             if (updated) {
                 toast({title: "Etiqueta agregada"})
@@ -35,7 +36,7 @@ export default function TagInputBox({ functionClient }: Props) {
 
     function onTagRemove(tag: string) {
         setLoading(true)
-        removeTagFromFunctionAction(functionClient.clientId, functionClient.functionId, tag)
+        removeTagAction(clientId, tag)
         .then(updated => {
             if (updated) {
                 toast({title: "Etiqueta eliminada"})
@@ -52,16 +53,10 @@ export default function TagInputBox({ functionClient }: Props) {
     }
 
     return (
-        <div>
-            <div className="flex items-center gap-x-2 border-b pb-2 ">
-                <p className="font-medium">Etiquetas:</p>
-                { loading && <Loader className="animate-spin" /> }
-            </div>
-
-            <div className="mt-2 bg-background p-2 rounded-md">
+        <div className="h-32">
+            <div className="bg-background p-2 rounded-md">
                 <TagInput 
-                    loa
-                    tags={tags}
+                    tags={tagsState}
                     setTags={setTags}            
                     placeholder="Agregar etiqueta"
                     activeTagIndex={activeTagIndex}
@@ -76,7 +71,7 @@ export default function TagInputBox({ functionClient }: Props) {
                     onTagRemove={onTagRemove}
                 />                
             </div>
-
+            { loading && <Loader className="animate-spin ml-2" /> }
         </div>
     );
 };

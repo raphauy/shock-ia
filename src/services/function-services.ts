@@ -372,3 +372,22 @@ export async function removeTagFromFunction(clientId: string, functionId: string
 
   return updated
 }
+
+export async function getClientFunctions(clientId: string) {
+  const found = await prisma.clientFunction.findMany({
+    where: {
+      clientId,
+      function: {
+        repositories: {
+          some: {}
+        }
+      }
+    },
+    include: {
+      function: true,
+      client: true
+    }
+  })
+
+  return found
+}
