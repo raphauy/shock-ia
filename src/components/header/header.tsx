@@ -22,7 +22,7 @@ export default async function Header({ children }: Props) {
     }
 
     return (
-        <div className="flex items-center gap-2 pb-1 border-b border-shock-color/50">
+        <div className="flex items-center gap-2 pb-1 border-b border-shock-color/50 z-10 bg-background">
             <div>
                 <Logo />
             </div>

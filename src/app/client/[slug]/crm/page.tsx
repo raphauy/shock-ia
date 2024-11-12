@@ -50,8 +50,6 @@ export default async function CRMKanban({ params, searchParams }: Props) {
   from= from ? fromZonedTime(from, "America/Montevideo") : null
   to= to ? fromZonedTime(to, "America/Montevideo") : null
 
-  console.log("last: ", last)
-
   const client = await getClientBySlug(params.slug)
   if (!client) {
     notFound()
