@@ -110,9 +110,6 @@ export function AppSidebar() {
                 </SidebarContent>
                 <SidebarFooter>
                     <div>
-                        <Button variant="outline">
-                            <LogOut />
-                        </Button>
                     </div>
                 </SidebarFooter>
                 { !path.endsWith("/crm") && <SidebarRail className="[[data-side=left]_&]:cursor-pointer [[data-side=left][data-state=collapsed]_&]:cursor-pointer"/> } 

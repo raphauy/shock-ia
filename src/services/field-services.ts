@@ -208,10 +208,7 @@ export async function getDataTags(repositoryId: string, data: string | JsonValue
   })
 
   const tags: string[] = []
-  
-  // Convertir data a objeto JSON solo si es string
-  const jsonData = typeof data === 'string' ? JSON.parse(data) : data;
-
+  const jsonData = typeof data === 'string' ? JSON.parse(data) : data
   for (const field of fields) {
     if (field.etiquetar && jsonData[field.name]) {
       tags.push(jsonData[field.name])

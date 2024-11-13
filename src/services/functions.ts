@@ -705,7 +705,6 @@ export async function defaultFunction(clientId: string, name: string, args: any)
 
     const contactId= conversation.contactId
     if (tags && chatwootAccountId && contactId) {
-      console.log("data: ", data)
       const repoTags= await getDataTags(repo.id, data as string)
       const allTags= [...tags, ...repoTags]
       console.log("adding tags to contact, tags: ", allTags)
