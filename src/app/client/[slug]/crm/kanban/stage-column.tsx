@@ -13,13 +13,24 @@ import StageMenu from "./stage-menu";
 type Props = {
     stage: KanbanStageDAOWithContacts
     index: number
+    filteredTags: string[]
+    allTags: string[]
 }
-export default function StageColumn({ stage, index }: Props) {
+export default function StageColumn({ stage, index, allTags, filteredTags }: Props) {
   const [contacts, setContacts] = useState<ContactDAO[]>([])
 
   useEffect(() => {
     setContacts(stage.contacts)
   }, [stage.contacts])
+
+  useEffect(() => {
+    if (filteredTags.length === 0) {
+      setContacts(stage.contacts)
+      return
+    }
+    const filteredContacts = stage.contacts.filter((contact) => filteredTags.some((tag) => contact.tags.includes(tag)))
+    setContacts(filteredContacts)
+  }, [filteredTags, stage.contacts])
 
   return (
     <div>
@@ -41,7 +52,7 @@ export default function StageColumn({ stage, index }: Props) {
                   {(provided) => (
                     <ol className="space-y-3 h-full" ref={provided.innerRef} {...provided.droppableProps}>
                       {contacts.map((contact, index) => (
-                        <ContactCard key={contact.id} contact={contact} index={index} />
+                        <ContactCard key={contact.id} contact={contact} index={index} allTags={allTags} />
                       ))}
                       {provided.placeholder}
                     </ol>

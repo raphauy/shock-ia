@@ -73,11 +73,18 @@ export function DisplayContactDialog({ contact }: DisplayProps) {
           <Expand className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{contact.name}</DialogTitle>
-        </DialogHeader>
-        <p className="h-96 flex items-center justify-center">Aquí estará el detalle del contacto</p>
+      <DialogContent className="min-h-[80vh] min-w-[80vw]">
+        <div>
+          <DialogHeader>
+            <DialogTitle>{contact.name}</DialogTitle>
+            <DialogDescription>
+              Aquí estará el detalle del contacto
+            </DialogDescription>
+          </DialogHeader>
+          <div className="bg-green-100">
+            <p>Provisorio para poder etiquetar:</p>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   )

@@ -9,6 +9,8 @@ import { updateStageContactsAction } from '../contacts/contact-actions'
 import { updateKanbanStagesAction } from '../stages/stage-actions'
 import { StageDialog } from '../stages/stage-dialogs'
 import StageColumn from './stage-column'
+import TagSelector from '../contacts/tag-selector'
+import { Separator } from '@/components/ui/separator'
 
 function reorder<T>(list: T[], startIndex: number, endIndex: number) {
   const result = Array.from(list)
@@ -20,10 +22,12 @@ function reorder<T>(list: T[], startIndex: number, endIndex: number) {
 type Props = {
   clientId: string
   initialStages: KanbanStageDAOWithContacts[]
+  allTags: string[]
 }
 
-export function KanbanComponent({ clientId, initialStages }: Props) {
+export function KanbanComponent({ clientId, initialStages, allTags }: Props) {
   const [stages, setStages] = useState<KanbanStageDAOWithContacts[]>(initialStages)
+  const [filteredTags, setFilteredTags] = useState<string[]>([])
 
   useEffect(() => {
     setStages(initialStages)
@@ -111,20 +115,28 @@ export function KanbanComponent({ clientId, initialStages }: Props) {
     }
   }
 
+  function handleTagsChange(tags: string[]) {
+    setFilteredTags(tags)
+    return Promise.resolve(true)
+  }
+
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <Droppable droppableId="stages" type='list' direction='horizontal'>
-        {(provided) => (
-          <ol className="flex gap-x-3 h-full min-h-[600px]" ref={provided.innerRef} {...provided.droppableProps}>
-            {stages.map((stage, index) => (
-              <StageColumn key={stage.id} stage={stage} index={index} />
-            ))}
-            {provided.placeholder}
-            <StageDialog clientId={clientId} />
-            <div className='flex-shrink-0 w-1' />
-          </ol>
-        )}
-      </Droppable>
-    </DragDropContext>
+    <div className="space-y-2">
+      <TagSelector actualTags={filteredTags} allTags={allTags} onChange={handleTagsChange} placeholder='Filtrar etiquetas...' />
+      <DragDropContext onDragEnd={onDragEnd}>
+        <Droppable droppableId="stages" type='list' direction='horizontal'>
+          {(provided) => (
+            <ol className="flex gap-x-3 h-full min-h-[600px]" ref={provided.innerRef} {...provided.droppableProps}>
+              {stages.map((stage, index) => (
+                <StageColumn key={stage.id} stage={stage} index={index} allTags={allTags} filteredTags={filteredTags} />
+              ))}
+              {provided.placeholder}
+              <StageDialog clientId={clientId} />
+              <div className='flex-shrink-0 w-1' />
+            </ol>
+          )}
+        </Droppable>
+      </DragDropContext>
+    </div>
   )
 }

@@ -748,3 +748,25 @@ export async function removeTag(clientId: string, tag: string) {
 
   return updated
 }
+
+export async function getAllTags(clientId: string) {
+  const res= []
+  const client= await prisma.client.findUnique({
+    where: {
+      id: clientId
+    },
+    include: {
+      functions: true
+    }
+  })
+
+  if (!client) throw new Error('Client not found')
+
+  res.push(...client.tags)
+
+  if (client.functions) {
+    res.push(...client.functions.map((f) => f.tags).flat())
+  }
+
+  return res
+}

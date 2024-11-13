@@ -1,7 +1,8 @@
 "use server"
   
 import { revalidatePath } from "next/cache"
-import { ContactDAO, ContactFormValues, createContact, updateContact, getContactDAO, deleteContact, getContactsByStage, updateStageContacts } from "@/services/contact-services"
+import { ContactDAO, ContactFormValues, createContact, updateContact, getContactDAO, deleteContact, getContactsByStage, updateStageContacts, setTagsOfContact } from "@/services/contact-services"
+import { getAllTags } from "@/services/clientService"
 
 export async function getContactDAOAction(id: string): Promise<ContactDAO | null> {
     return getContactDAO(id)
@@ -35,6 +36,14 @@ export async function getContactsByStageAction(stageId: string) {
 export async function updateStageContactsAction(contacts: ContactDAO[]) {
     const updated= await updateStageContacts(contacts)
 
+    revalidatePath("/client/[slug]/crm", "page")
+
+    return updated
+}
+
+export async function setTagsOfContactAction(contactId: string, tags: string[]) {
+    const updated= await setTagsOfContact(contactId, tags)
+    
     revalidatePath("/client/[slug]/crm", "page")
 
     return updated

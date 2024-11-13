@@ -1,7 +1,8 @@
 "use client"
 
+import { Button } from "@/components/ui/button";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
-import { BookOpen, Bot, ChevronRightSquare, Kanban, LayoutDashboard, MessageCircle, MessagesSquare, Phone, RectangleEllipsis, Tag, User } from "lucide-react";
+import { BookOpen, Bot, ChevronRightSquare, Kanban, LayoutDashboard, LogOut, MessageCircle, MessagesSquare, Phone, RectangleEllipsis, Tag, User } from "lucide-react";
 import { useParams, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -108,9 +109,13 @@ export function AppSidebar() {
                     </SidebarGroup>
                 </SidebarContent>
                 <SidebarFooter>
-                    <div></div>
+                    <div>
+                        <Button variant="outline">
+                            <LogOut />
+                        </Button>
+                    </div>
                 </SidebarFooter>
-                <SidebarRail />
+                { !path.endsWith("/crm") && <SidebarRail className="[[data-side=left]_&]:cursor-pointer [[data-side=left][data-state=collapsed]_&]:cursor-pointer"/> } 
             </Sidebar>
         </div>
     )

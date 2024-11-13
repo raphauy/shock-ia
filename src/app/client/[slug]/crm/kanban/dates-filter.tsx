@@ -9,8 +9,12 @@ import { es } from 'date-fns/locale'
 import Link from "next/link"
 import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
+import TagSelector from "../contacts/tag-selector"
 
-export default function DatesFilter() {
+type Props = {
+  allTags: string[]
+}
+export default function DatesFilter({ allTags }: Props) {
   const params= useParams()
   const slug= params.slug
   const searchParams= useSearchParams()
@@ -56,13 +60,18 @@ export default function DatesFilter() {
     router.push(`/client/${slug}/crm?from=${from}&to=${to}${restOfTheParams}`);
   }
 
+  async function handleTagsChange(tags: string[]) {
+    console.log("handleTagsChange", tags);
+    return true
+  }
+
   const actualMonth= new Date().getMonth() + ""
   const actualMonthLabel= getMonthName(actualMonth)
 
   return (
     // <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background w-full mb-2">
     <header className="flex h-16 items-center gap-4 border-b bg-background w-full mb-2">
-    <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4">
         <Link href={`/client/${slug}/crm?last=HOY${restOfTheParams}`}>
           <Button variant={last === "HOY" ? "outline" : "ghost"} >Hoy</Button>
         </Link>
@@ -94,8 +103,8 @@ export default function DatesFilter() {
           </SelectContent>
         </Select>
       </div>
-      <div className="ml-auto flex items-center">
-        <p>Filtrar etiquetas aquí (ToDo)</p>
+      <div className="ml-auto flex items-center flex-1">
+        
       </div>
     </header>
   )

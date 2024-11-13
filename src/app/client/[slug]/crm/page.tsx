@@ -1,4 +1,4 @@
-import { getClientBySlug } from "@/services/clientService";
+import { getAllTags, getClientBySlug } from "@/services/clientService";
 import { getKanbanStagesDAO } from "@/services/stage-services";
 import { notFound } from "next/navigation";
 import { KanbanComponent } from "./kanban/kanban";
@@ -55,10 +55,11 @@ export default async function CRMKanban({ params, searchParams }: Props) {
     notFound()
   }
   const stages = await getKanbanStagesDAO(client.id, from, to)
+  const allTags = await getAllTags(client.id)
   return (
     <div>
-      <DatesFilter />
-      <KanbanComponent initialStages={stages} clientId={client.id} />
+      <DatesFilter allTags={allTags} />
+      <KanbanComponent initialStages={stages} clientId={client.id} allTags={allTags} />
     </div>
   )
 }

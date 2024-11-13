@@ -8,7 +8,7 @@ export type ContactDAO = {
 	name: string
 	phone: string | undefined | null
 	imageUrl: string | null
-	tags: String[]
+	tags: string[]
 	src: string
 	order: number
 	clientId: string
@@ -225,4 +225,17 @@ export async function getContactByPhone(phone: string, clientId: string) {
     }
   })
   return found
+}
+
+export async function getTagsOfContact(contactId: string) {
+  const contact= await getContactDAO(contactId)
+  return contact?.tags || []
+}
+
+export async function setTagsOfContact(contactId: string, tags: string[]) {
+  const updated= await prisma.contact.update({
+    where: { id: contactId },
+    data: { tags }
+  })
+  return updated
 }

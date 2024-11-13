@@ -9,12 +9,14 @@ import { Draggable } from "@hello-pangea/dnd";
 import { DisplayContactDialog } from "../contacts/contact-dialogs";
 import React from "react";
 import { toZonedTime } from "date-fns-tz";
+import ResponsiveModalSide from "../contacts/contact-details";
 
 type Props = {
   contact: ContactDAO
   index: number
+  allTags: string[]
 }
-export default function ContactCard({ contact, index }: Props) {
+export default function ContactCard({ contact, index, allTags }: Props) {
     return (
       <>
         <Draggable draggableId={contact.id} index={index}>
@@ -33,14 +35,15 @@ export default function ContactCard({ contact, index }: Props) {
                           <p className="text-sm text-gray-500">{contact.name === contact.phone ? "" : contact.phone}</p>
                         </div>
                       </div>
-                      <DisplayContactDialog contact={contact} />
+                      {/* <DisplayContactDialog contact={contact} /> */}
+                      <ResponsiveModalSide contact={contact} allTags={allTags} />
                     </div>
-                    <div className={cn("mt-3 flex flex-wrap justify-center gap-1", contact.tags.length === 0 && "hidden")}>
+                    <div className={cn("mt-3 flex flex-wrap gap-1")}>
+                      <Badge variant="outline" className="h-5">{formatWhatsAppStyle(contact.createdAt)}</Badge>
                       {contact.tags.map((tag, index) => (
-                        <Badge key={index} variant="secondaryWithBorder">{tag}</Badge>
+                        <Badge key={index} className="h-5">{tag}</Badge>
                       ))}
                     </div>
-                   <p className="mt-2 text-sm text-gray-500 text-right">{formatWhatsAppStyle(contact.createdAt)}</p>
                   </CardContent>
                 </Card>
               </div>
