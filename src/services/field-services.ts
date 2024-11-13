@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db"
 import { Parameters, RepositoryDAO, generateFunctionDefinition, getFullRepositoryDAO, updateFunctionDefinition } from "./repository-services"
 import { FieldType } from "@prisma/client"
 import { updateEventMetadata } from "./event-services"
+import { JsonValue } from "@prisma/client/runtime/library"
 
 export type FieldDAO = {
 	id: string
@@ -11,6 +12,7 @@ export type FieldDAO = {
 	description: string
 	required: boolean
   order: number
+  etiquetar: boolean
 	repositoryId: string | null | undefined
   eventId: string | null | undefined
 	createdAt: Date
@@ -22,6 +24,7 @@ export const repoFieldSchema = z.object({
 	type: z.nativeEnum(FieldType),
 	description: z.string().min(1, "description is required."),
 	required: z.boolean().default(false),
+  etiquetar: z.boolean().default(false),
 	repositoryId: z.string().optional(),
   eventId: z.string().optional(),
 })
@@ -195,4 +198,25 @@ export async function getFieldsDAOByEventId(eventId: string) {
     },
   })
   return found as FieldDAO[]
+}
+
+export async function getDataTags(repositoryId: string, data: string | JsonValue) {
+  const fields = await prisma.field.findMany({
+    where: {
+      repositoryId
+    }
+  })
+
+  const tags: string[] = []
+  
+  // Convertir data a objeto JSON solo si es string
+  const jsonData = typeof data === 'string' ? JSON.parse(data) : data;
+
+  for (const field of fields) {
+    if (field.etiquetar && jsonData[field.name]) {
+      tags.push(jsonData[field.name])
+    }
+  }
+  
+  return tags
 }

@@ -23,6 +23,8 @@ import { addLabelToConversation, toggleConversationStatus } from "./chatwoot";
 import { createExternalPayment } from "./cobros-wap";
 import { addTagsToContact, getContactDAO, setNewStage, updateContact } from "./contact-services";
 import { getStageByName, getStagesDAO } from "./stage-services";
+import { getDataTags } from "./field-services";
+import { JsonValue } from "@prisma/client/runtime/library";
 
 export type CompletionInitResponse = {
   assistantResponse: string | null
@@ -703,8 +705,11 @@ export async function defaultFunction(clientId: string, name: string, args: any)
 
     const contactId= conversation.contactId
     if (tags && chatwootAccountId && contactId) {
-      console.log("adding tags to contact, tags: ", tags)
-      await addTagsToContact(contactId, tags)
+      console.log("data: ", data)
+      const repoTags= await getDataTags(repo.id, data as string)
+      const allTags= [...tags, ...repoTags]
+      console.log("adding tags to contact, tags: ", allTags)
+      await addTagsToContact(contactId, allTags)
     } else {
       console.log("no tags to add to contact")
     }

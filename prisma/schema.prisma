@@ -357,6 +357,7 @@ model Field {
   description         String                             // gennext: show.column
   required            Boolean                            // gennext: show.column
   order               Int       @default(0)
+  etiquetar           Boolean    @default(false)
 
   repository          Repository? @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
   repositoryId        String?

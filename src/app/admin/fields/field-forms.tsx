@@ -30,6 +30,7 @@ export function FieldForm({ id, repoId, eventId, closeDialog }: Props) {
       type: "string",
       description: "",
       required: true,
+      etiquetar: false,
       repositoryId: repoId ?? undefined,
       eventId: eventId ?? undefined,
     },
@@ -60,6 +61,7 @@ export function FieldForm({ id, repoId, eventId, closeDialog }: Props) {
           form.setValue("type", data.type)
           form.setValue("description", data.description)
           form.setValue("required", data.required)
+          form.setValue("etiquetar", data.etiquetar)
         }
         Object.keys(form.getValues()).forEach((key: any) => {
           if (form.getValues(key) === null) {
@@ -146,6 +148,23 @@ export function FieldForm({ id, repoId, eventId, closeDialog }: Props) {
                   </FormControl>
                 </div>
                 <FormDescription>Si está marcado, el LLM debería insistir en que el usuario responda la información de este campo</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="etiquetar"
+            render={({ field }) => (
+              <FormItem>
+                <div className="flex items-center gap-2">
+                  <FormLabel className="mt-1">Etiquetar</FormLabel>
+                  <FormControl>
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                </div>
+                <FormDescription>Si está marcado, cuando se ejecuta esta FC, se agregará una etiqueta con el valor de este campo</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
