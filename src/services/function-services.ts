@@ -391,3 +391,12 @@ export async function getClientFunctions(clientId: string) {
 
   return found
 }
+
+export async function getTagsOfClientFunction(clientId: string, functionId: string) {
+  const found = await prisma.clientFunction.findUnique({
+    where: {
+      clientId_functionId: { clientId, functionId }
+    }
+  })
+  return found?.tags
+}

@@ -8,7 +8,7 @@ import { getValue, setValue } from "./config-services";
 import { getConversation, getConversationPhone, messageArrived } from "./conversationService";
 import { getDocumentDAO } from "./document-services";
 import { getEventDAO, updateSeatsAvailable } from "./event-services";
-import { functionHaveRepository, getFunctionClientDAO, getFunctionDAO } from "./function-services";
+import { functionHaveRepository, getFunctionClientDAO, getFunctionDAO, getTagsOfClientFunction } from "./function-services";
 import { NarvaezFormValues, createOrUpdateNarvaez } from "./narvaez-services";
 import { sendWapMessage } from "./osomService";
 import { createRepoData, repoDataFormValues } from "./repodata-services";
@@ -21,7 +21,7 @@ import moment from 'moment-timezone'
 import { EventType } from "@prisma/client";
 import { addLabelToConversation, toggleConversationStatus } from "./chatwoot";
 import { createExternalPayment } from "./cobros-wap";
-import { getContactDAO, setNewStage, updateContact } from "./contact-services";
+import { addTagsToContact, getContactDAO, setNewStage, updateContact } from "./contact-services";
 import { getStageByName, getStagesDAO } from "./stage-services";
 
 export type CompletionInitResponse = {
@@ -695,19 +695,18 @@ export async function defaultFunction(clientId: string, name: string, args: any)
       // await setLLMOff(conversation.id, true)
     }
 
-    const func= await getFunctionDAO(repo.functionId)
-    const tags= func?.tags
-    const funcIsTaggedAgente= tags?.some(tag => tag === "agente")
     const chatwootAccountId= conversation.client.whatsappInstances[0]?.chatwootAccountId 
       ? parseInt(conversation.client.whatsappInstances[0].chatwootAccountId) 
       : undefined;
-    const chatwootConversationId= conversation.chatwootConversationId;
-    if (funcIsTaggedAgente && chatwootAccountId && chatwootConversationId) {
-      await toggleConversationStatus(chatwootAccountId, chatwootConversationId, "open")
-      console.log("Conversation status updated to open")
-    }
-    if (tags && chatwootAccountId && chatwootConversationId) {
-      await addLabelToConversation(chatwootAccountId, chatwootConversationId, tags)
+
+    const tags= await getTagsOfClientFunction(clientId, repo.functionId)
+
+    const contactId= conversation.contactId
+    if (tags && chatwootAccountId && contactId) {
+      console.log("adding tags to contact, tags: ", tags)
+      await addTagsToContact(contactId, tags)
+    } else {
+      console.log("no tags to add to contact")
     }
   
     return repo.finalMessage    

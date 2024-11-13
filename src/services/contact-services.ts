@@ -239,3 +239,17 @@ export async function setTagsOfContact(contactId: string, tags: string[]) {
   })
   return updated
 }
+
+export async function addTagsToContact(contactId: string, tags: string[]) {
+  const contact= await getContactDAO(contactId)
+  const contactTags= contact?.tags || []
+  console.log("contactTags: ", contactTags)
+  // add tags if not already in contact tags
+  const newTags= tags.filter((tag) => !contactTags.includes(tag))
+  console.log("newTags: ", newTags)
+  const updated= await prisma.contact.update({
+    where: { id: contactId },
+    data: { tags: [...contactTags, ...newTags] }
+  })
+  return updated
+}
