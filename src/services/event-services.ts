@@ -102,6 +102,7 @@ export async function createEvent(clientId: string, name: string, type: EventTyp
     type: fieldType,
     description: fieldDescription,
     required: fieldRequired,
+    etiquetar: false,
     eventId: created.id
   })
   const updated= await updateEventMetadata(created.id)
