@@ -12,6 +12,7 @@ export type EventDAO = {
 	slug: string
   color: string
   tags: string[]
+  webHookUrl: string | null | undefined
 	minDuration: number | undefined
 	maxDuration: number | undefined
 	description: string | undefined

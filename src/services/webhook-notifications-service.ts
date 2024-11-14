@@ -3,6 +3,7 @@ import { format } from "date-fns";
 import { RepoDataDAO } from "./repodata-services";
 import { es } from "date-fns/locale";
 import axios from "axios";
+import { BookingDAO } from "./booking-services";
 
 type RepoDataEntryResponse = {
     id: string,
@@ -14,6 +15,7 @@ type RepoDataEntryResponse = {
     conversationId: string,
     date: string,
     data: String,
+    booking?: BookingDAO
 }
 
 type RepoDataWithClientName = RepoDataDAO & {
@@ -23,7 +25,11 @@ type RepoDataWithClientName = RepoDataDAO & {
     }
 }
 
-export async function sendWebhookNotification(webhookUrl: string, repoData: RepoDataWithClientName) {
+export type RepoDataWithClientNameAndBooking = RepoDataWithClientName & {
+    booking?: BookingDAO
+}
+
+export async function sendWebhookNotification(webhookUrl: string, repoData: RepoDataWithClientNameAndBooking) {
     const parsedData = JSON.parse(repoData.data as string);
 
     const jsonReplaced = Object.keys(parsedData).reduce((acc, key) => {
@@ -42,6 +48,11 @@ export async function sendWebhookNotification(webhookUrl: string, repoData: Repo
         conversationId: repoData.conversationId,
         date: format(repoData.createdAt, "yyyy-MM-dd HH:mm", { locale: es }),
         data: JSON.stringify(jsonReplaced),
+    }
+
+    // if there is a booking, add the booking data to the response
+    if (repoData.booking) {
+        data.booking = repoData.booking
     }
 
     const init= new Date().getTime()

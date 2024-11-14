@@ -132,6 +132,13 @@ export default async function EditEventPage({ params }: Props) {
                   update={setEventBooleanFieldAction}
                 />
 
+                <ShortTextForm
+                    label="Webhook"
+                    initialValue={event.webHookUrl || ""}
+                    id={event.id}
+                    fieldName="webHookUrl"
+                    update={setEventFieldAction}
+                />
 
 
 

@@ -16,7 +16,7 @@ import { getRepositoryDAOByFunctionName } from "./repository-services";
 import { getSectionOfDocument } from "./section-services";
 import { checkBookingAvailability, getSlots } from "./slots-service";
 import { SummitFormValues, createSummit } from "./summit-services";
-import { sendWebhookNotification } from "./webhook-notifications-service";
+import { RepoDataWithClientNameAndBooking, sendWebhookNotification } from "./webhook-notifications-service";
 import moment from 'moment-timezone'
 import { EventType } from "@prisma/client";
 import { addLabelToConversation, toggleConversationStatus } from "./chatwoot";
@@ -451,6 +451,27 @@ export async function reservarParaEvento(clientId: string, conversationId: strin
     await addLabelToConversation(chatwootAccountId, chatwootConversationId, tags)
   }
 
+  if (event.webHookUrl) {
+    const repoDataWithClientNameAndBooking: RepoDataWithClientNameAndBooking= {
+      id: created.id,
+      repoName: event.name,
+      phone: conversation.phone,
+      functionName: event.name,
+      data: metadata,
+      repositoryId: event.id,
+      clientId,
+      conversationId,
+      createdAt: created.createdAt,
+      updatedAt: created.updatedAt,
+      client: {
+        name: conversation.client.name,
+        slug: conversation.client.slug,
+      },
+      booking: created,
+    }
+    await sendWebhookNotification(event.webHookUrl, repoDataWithClientNameAndBooking)
+  }
+
   return "Reserva registrada."
 }
 
@@ -522,6 +543,27 @@ export async function reservarParaEventoDeUnicaVez(clientId: string, conversatio
   }
   if (tags && chatwootAccountId && chatwootConversationId) {
     await addLabelToConversation(chatwootAccountId, chatwootConversationId, tags)
+  }
+
+  if (event.webHookUrl) {
+    const repoDataWithClientNameAndBooking: RepoDataWithClientNameAndBooking= {
+      id: created.id,
+      repoName: event.name,
+      phone: conversation.phone,
+      functionName: event.name,
+      data: metadata,
+      repositoryId: event.id,
+      clientId,
+      conversationId,
+      createdAt: created.createdAt,
+      updatedAt: created.updatedAt,
+      client: {
+        name: conversation.client.name,
+        slug: conversation.client.slug,
+      },
+      booking: created,
+    }
+    await sendWebhookNotification(event.webHookUrl, repoDataWithClientNameAndBooking)
   }
 
   return "Reserva registrada."

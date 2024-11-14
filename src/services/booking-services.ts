@@ -13,16 +13,16 @@ export type BookingDAO = {
 	start: Date
 	end: Date
 	seats: number
-	price: number | undefined
+	price: number | undefined | null
 	status: BookingStatus
 	name: string
 	contact: string
-	data: string | undefined
+	data: string | undefined | null
 	createdAt: Date
 	updatedAt: Date
 	eventId: string
 	clientId: string
-	conversationId: string | undefined
+	conversationId: string | undefined | null
 }
 
 export const bookingSchema = z.object({
