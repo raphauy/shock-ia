@@ -13,12 +13,14 @@ export default function MenuCliente() {
     console.log(clientSlug)
 
     const [haveAgentes, setHaveAgentes]= useState(false)
+    const [haveEvents, setHaveEvents]= useState(false)
 
     useEffect(() => {
         if (clientSlug) {
             getDataClientBySlug(clientSlug)
             .then((client) => {
                 setHaveAgentes(client?.haveAgents || false)
+                setHaveEvents(client?.haveEvents || false)
             })
             .catch((error) => {
                 console.log(error)
@@ -26,12 +28,11 @@ export default function MenuCliente() {
         }
     }, [clientSlug])
 
-    if (!haveAgentes) return null
-
     return (
         <div className="flex flex-1 gap-6 pl-5 md:gap-5 ">
             <nav>
                 <ul className="flex items-center">
+                    {haveAgentes && (
                     <li className={`flex items-center border-b-shock-color hover:border-b-shock-color hover:border-b-2 h-11 whitespace-nowrap ${path === "/agentes" && "border-b-2"}`}>
                         <Link href={`/agentes`}>
                             <Button className="text-lg" variant="ghost">
@@ -39,6 +40,17 @@ export default function MenuCliente() {
                             </Button>
                         </Link>
                     </li>
+                    )}
+
+                    {haveEvents && (
+                        <li className={`flex items-center border-b-shock-color hover:border-b-shock-color hover:border-b-2 h-11 whitespace-nowrap ${path === "/events" && "border-b-2"}`}>
+                            <Link href={`/client/${clientSlug}/events`}>
+                                <Button className="text-lg" variant="ghost">
+                                    Reservas
+                                </Button>
+                            </Link>
+                        </li>
+                    )}
                 </ul>
             </nav>
         </div>
