@@ -365,8 +365,7 @@ export async function getContext(clientId: string, phone: string, userInput: str
 `
     contextString+= "***************************************************************************\n"
   } else {
-    console.log("contact: ", contact);
-    
+    console.log("no hay contacto o cliente tiene CRM")    
   }
 
   const res= {

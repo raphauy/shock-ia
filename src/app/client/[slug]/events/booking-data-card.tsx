@@ -16,8 +16,8 @@ export default function BookingDataCard({ jsonData }: Props) {
                     if (!value) return null;
                     return (
                         <div key={i} className="flex gap-2">
-                            <p className="text-muted-foreground w-44">{keyWithTildes}:</p>
-                            <p className="break-words font-bold">{value}</p>
+                            <p className="text-muted-foreground min-w-[176px]">{keyWithTildes}:</p>
+                            <p className="break-words font-bold min-w-[176px]">{value}</p>
                         </div>
                     );
                 })}
