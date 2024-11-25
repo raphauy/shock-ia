@@ -36,7 +36,7 @@ export default function StageColumn({ stage, index, allTags, filteredTags }: Pro
     <div>
       <Draggable draggableId={stage.id} index={index}>
         {(provided) => (
-          <li className="shrink-0 h-full w-72 select-none" ref={provided.innerRef} {...provided.draggableProps}>
+          <li className="shrink-0 h-full w-80 select-none" ref={provided.innerRef} {...provided.draggableProps}>
             <Card className="bg-muted h-full group" {...provided.dragHandleProps}>
               <CardHeader className="pb-2 px-3">
                 <div className="flex justify-between items-center">
