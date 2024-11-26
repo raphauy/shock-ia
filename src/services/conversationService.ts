@@ -71,8 +71,8 @@ export async function getConversationsOfClient(clientId: string) {
 // an active conversation is one that has a message in the last 10 minutes
 export async function getActiveConversation(phone: string, clientId: string) {
 
-  // 4 hours
-  let sessionTimeInMinutes= 240
+  // 24 hours
+  let sessionTimeInMinutes= 1440
     
   const found = await prisma.conversation.findFirst({
     where: {
