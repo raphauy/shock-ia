@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { ResponsiveModal, ResponsiveModalContent, ResponsiveModalDescription, ResponsiveModalHeader, ResponsiveModalTitle, ResponsiveModalTrigger } from '@/components/ui/responsive-modal';
 import { ContactDAO } from '@/services/contact-services';
-import { Expand, Loader } from 'lucide-react';
+import { Badge, Expand, Loader, PlusCircle } from 'lucide-react';
 import TagSelector from './tag-selector';
 import { setTagsOfContactAction } from './contact-actions';
 import { toast } from '@/components/ui/use-toast';
@@ -12,9 +12,11 @@ import { useState } from 'react';
 
 type Props = {
   contact: ContactDAO
+  initialTags: string[]
   allTags: string[]
+  tagChangeCount: () => void
 }
-export default function ContactDetails({ contact, allTags }: Props) {
+export default function TagSelectorDialog({ contact, initialTags, allTags, tagChangeCount }: Props) {
     const [loading, setLoading] = useState(false)
 
 
@@ -24,6 +26,7 @@ export default function ContactDetails({ contact, allTags }: Props) {
         if (result) {
             toast({title: 'Etiquetas actualizadas' })
             setLoading(false)
+            tagChangeCount()
             return true
         } else {
             toast({title: 'Error al actualizar las etiquetas', description: 'Intenta nuevamente'})
@@ -35,23 +38,17 @@ export default function ContactDetails({ contact, allTags }: Props) {
     return (
         <ResponsiveModal>
             <ResponsiveModalTrigger asChild>
-                <Button variant="outline"><Expand className="h-4 w-4" /></Button>
+                <PlusCircle className='cursor-pointer w-5 h-5'/>
             </ResponsiveModalTrigger>
-            <ResponsiveModalContent 
-                side="top" 
-                className='min-h-[80vh] min-w-[80vw]'
-            >
+            <ResponsiveModalContent side="top" className='min-h-[40vh] min-w-[60vw]'>
                 <div>
-
                     <ResponsiveModalHeader>
                         <ResponsiveModalTitle>{contact.name}</ResponsiveModalTitle>
-                        <ResponsiveModalDescription>Aquí estará el detalle del contacto</ResponsiveModalDescription>
                     </ResponsiveModalHeader>
                     <div className='mt-10'>
-                        <p>Provisorio para poder etiquetar:</p>
                         <Input type='text' className='opacity-0 h-0' />
                         <div className='flex items-center justify-between gap-2'>
-                            <TagSelector actualTags={contact.tags} allTags={allTags} onChange={onTagsChange} placeholder='Selecciona las etiquetas...' />
+                            <TagSelector actualTags={initialTags} allTags={allTags} onChange={onTagsChange} placeholder='Selecciona las etiquetas...' />
                             <div className='w-10'>
                                 {loading && <Loader className="animate-spin" />}
                             </div>

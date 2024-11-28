@@ -5,12 +5,13 @@ import { ContactDAO } from '@/services/contact-services'
 import { KanbanStageDAO, KanbanStageDAOWithContacts } from '@/services/stage-services'
 import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd'
 import { useEffect, useState } from 'react'
-import { updateStageContactsAction } from '../contacts/contact-actions'
+import { createMovedToStageEventAction, updateStageContactsAction } from '../contacts/contact-actions'
 import { updateKanbanStagesAction } from '../stages/stage-actions'
 import { StageDialog } from '../stages/stage-dialogs'
 import StageColumn from './stage-column'
 import TagSelector from '../contacts/tag-selector'
 import { Separator } from '@/components/ui/separator'
+import { ContactDetailsSheet } from '../contacts/contact-details-sheet'
 
 function reorder<T>(list: T[], startIndex: number, endIndex: number) {
   const result = Array.from(list)
@@ -28,10 +29,19 @@ type Props = {
 export function KanbanComponent({ clientId, initialStages, allTags }: Props) {
   const [stages, setStages] = useState<KanbanStageDAOWithContacts[]>(initialStages)
   const [filteredTags, setFilteredTags] = useState<string[]>([])
+  const [selectedContact, setSelectedContact] = useState<ContactDAO | null>(null)
 
   useEffect(() => {
     setStages(initialStages)
   }, [initialStages])
+
+  const handleContactClick = (contact: ContactDAO) => {
+    setSelectedContact(contact)
+  }
+
+  const handleCloseSheet = () => {
+    setSelectedContact(null)
+  }
 
   function updateKanbanStages(orderedStages: KanbanStageDAO[]) {
     updateKanbanStagesAction(clientId, orderedStages)
@@ -111,6 +121,7 @@ export function KanbanComponent({ clientId, initialStages, allTags }: Props) {
 
         setStages(newOrderedData)
         updateStageContacts(destinationList.contacts)
+        createMovedToStageEventAction(movedContact.id, destinationList.name)
       }
     }
   }
@@ -128,7 +139,7 @@ export function KanbanComponent({ clientId, initialStages, allTags }: Props) {
           {(provided) => (
             <ol className="flex gap-x-3 h-full min-h-[600px]" ref={provided.innerRef} {...provided.droppableProps}>
               {stages.map((stage, index) => (
-                <StageColumn key={stage.id} stage={stage} index={index} allTags={allTags} filteredTags={filteredTags} />
+                <StageColumn key={stage.id} stage={stage} index={index} allTags={allTags} filteredTags={filteredTags} onContactClick={handleContactClick} />
               ))}
               {provided.placeholder}
               <StageDialog clientId={clientId} />
@@ -137,6 +148,11 @@ export function KanbanComponent({ clientId, initialStages, allTags }: Props) {
           )}
         </Droppable>
       </DragDropContext>
+      <ContactDetailsSheet
+        contact={selectedContact}
+        isOpen={selectedContact !== null}
+        onClose={handleCloseSheet}
+      />
     </div>
   )
 }

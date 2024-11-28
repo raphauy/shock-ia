@@ -506,7 +506,7 @@ model Contact {
   fieldValues   FieldValue[]                               // gennext: skip.list
   stageHistory  StageHistory[]                           // gennext: skip.list
   conversations Conversation[]                         // gennext: skip.list
-  
+  contactEvents ContactEvent[]                         // gennext: skip.list
   createdAt     DateTime    @default(now())                 // gennext: skip.zod
   updatedAt     DateTime    @updatedAt                      // gennext: skip.zod
 
@@ -576,4 +576,24 @@ model StageHistory {
 
   createdAt     DateTime   @default(now())             // gennext: skip.zod
   updatedAt     DateTime   @updatedAt                  // gennext: skip.zod
+}
+
+enum ContactEventType {
+  CREATED
+  TAGGED
+  UNTAGGED
+  MOVED_TO_STAGE
+  EDITED
+}
+
+model ContactEvent {
+  id            String     @id @default(cuid())       
+  type          ContactEventType                       // gennext: show.column
+  info          String?                                // gennext: show.column
+  by            String?                                // gennext: show.column
+
+  contact       Contact    @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  contactId     String
+
+  createdAt     DateTime   @default(now())             // gennext: skip.zod
 }

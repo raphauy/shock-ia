@@ -23,6 +23,7 @@ const badgeVariants = cva(
         ended: "bg-orange-500 text-white rounded-2xl border-orange-800",
         archived: "bg-gray-500 text-white rounded-2xl border-gray-800",
         active: "bg-green-500 text-white rounded-2xl border-green-800",
+        stage: "bg-blue-500 text-white rounded-2xl border-blue-800 rounded-md justify-center",
       },
     },
     defaultVariants: {

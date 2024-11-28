@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
-import { BookOpen, Bot, ChevronRightSquare, Kanban, LayoutDashboard, LogOut, MessageCircle, MessagesSquare, Phone, RectangleEllipsis, Tag, User } from "lucide-react";
+import { BookOpen, Bot, ChevronRightSquare, DatabaseZap, Kanban, LayoutDashboard, LogOut, MessageCircle, MessagesSquare, Phone, RectangleEllipsis, Tag, User } from "lucide-react";
 import { useParams, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -18,7 +18,13 @@ const items = [
     title: "Contactos",
     url: `crm/contacts`,
     icon: User,
-    group: "contactos",
+    group: "data",
+  },
+  {
+    title: "Registros",
+    url: `crm/registros`,
+    icon: DatabaseZap,
+    group: "data",
   },
   {
     title: "Etiquetas",
@@ -45,6 +51,8 @@ export function AppSidebar() {
     useEffect(() => {
         if (path.endsWith("/crm")) {
             setOpen(false)
+        } else {
+            setOpen(true)
         }
     }, [path, setOpen])
 
@@ -77,7 +85,7 @@ export function AppSidebar() {
                         <SidebarGroupLabel>Contactos</SidebarGroupLabel>
                         <SidebarGroupContent>
                             <SidebarMenu>
-                                {items.filter((item) => item.group === "contactos").map((item) => (
+                                {items.filter((item) => item.group === "data").map((item) => (
                                     <SidebarMenuItem key={item.title}>
                                         <SidebarMenuButton asChild isActive={path.endsWith(item.url)}>
                                             <a href={`/client/${slug}/${item.url}`}>

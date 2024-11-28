@@ -74,6 +74,8 @@ export async function createInstanceBasic(instanceName: string): Promise<CreateI
         instanceName = "dev-" + instanceName
     }
 
+    console.log("baseURL", baseURL)
+
     try {
         const response = await axios.post<CreateInstanceResponse>(`${baseURL}/instance/create`, { instanceName }, {
             headers: {

@@ -131,6 +131,17 @@ export async function getFullRepoDatasDAO(slug: string) {
   })
   return found as RepoDataDAO[]
 }
+
+export async function getFullRepoDatasDAOByContactId(contactId: string) {
+  const found = await prisma.repoData.findMany({
+    where: {
+      conversation: {
+        contactId
+      }
+    }
+  })
+  return found as RepoDataDAO[]
+}
   
 export async function getFullRepoDataDAO(id: string) {
   const found = await prisma.repoData.findUnique({
@@ -171,3 +182,13 @@ export async function getRepoDataDAOByPhone(repositoryId: string, phone: string)
   return found
 }
 
+export async function getRepoDataCount(contactId: string) {
+  const count= await prisma.repoData.count({
+    where: {
+      conversation: {
+        contactId
+      }
+    }
+  })
+  return count
+}

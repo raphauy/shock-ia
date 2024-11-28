@@ -1,14 +1,12 @@
 'use client';
 
-import { Input } from '@/components/ui/input';
 import MultipleSelector, { Option } from '@/components/ui/multiple-selector';
-import { Loader } from 'lucide-react';
 import React, { useEffect } from 'react';
 
 type Props = {
   actualTags: string[]
   allTags: string[]
-  onChange: (tags: string[]) => Promise<boolean>
+  onChange: (tags: string[], ) => Promise<boolean>
   placeholder: string
 }
 export default function TagSelector({ actualTags, allTags, onChange, placeholder }: Props) {
@@ -23,8 +21,10 @@ export default function TagSelector({ actualTags, allTags, onChange, placeholder
 
 
   function updateContactTags(tags: Option[]) {
+    const isAdded = tags.length > contactTags.length
     setContactTags(tags)
     onChange(tags.map((tag) => tag.value))
+
   }
 
   return (

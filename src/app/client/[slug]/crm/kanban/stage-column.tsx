@@ -2,21 +2,22 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { ContactDAO } from "@/services/contact-services";
 import { KanbanStageDAOWithContacts } from "@/services/stage-services";
 import { Draggable, Droppable } from "@hello-pangea/dnd";
 import { CircleCheckIcon, CircleDashedIcon, CircleIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import ContactCard from "./contact-card";
 import StageMenu from "./stage-menu";
+import { ContactDAO } from "@/services/contact-services";
 
 type Props = {
     stage: KanbanStageDAOWithContacts
     index: number
     filteredTags: string[]
     allTags: string[]
+    onContactClick: (contact: ContactDAO) => void
 }
-export default function StageColumn({ stage, index, allTags, filteredTags }: Props) {
+export default function StageColumn({ stage, index, allTags, filteredTags, onContactClick }: Props) {
   const [contacts, setContacts] = useState<ContactDAO[]>([])
 
   useEffect(() => {
@@ -52,7 +53,7 @@ export default function StageColumn({ stage, index, allTags, filteredTags }: Pro
                   {(provided) => (
                     <ol className="space-y-3 h-full" ref={provided.innerRef} {...provided.droppableProps}>
                       {contacts.map((contact, index) => (
-                        <ContactCard key={contact.id} contact={contact} index={index} allTags={allTags} />
+                        <ContactCard key={contact.id} contact={contact} index={index} allTags={allTags} onContactClick={onContactClick} />
                       ))}
                       {provided.placeholder}
                     </ol>

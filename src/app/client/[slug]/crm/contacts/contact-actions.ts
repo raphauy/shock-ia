@@ -1,8 +1,12 @@
 "use server"
   
-import { revalidatePath } from "next/cache"
-import { ContactDAO, ContactFormValues, createContact, updateContact, getContactDAO, deleteContact, getContactsByStage, updateStageContacts, setTagsOfContact } from "@/services/contact-services"
+import { getCurrentUser } from "@/lib/auth"
 import { getAllTags } from "@/services/clientService"
+import { createContactEvent, getContactEventsDAO } from "@/services/contact-event-services"
+import { ContactDAO, ContactFormValues, createContact, deleteContact, getContactDAO, getContactsByStage, getStageByContactId, getTagsOfContact, setTagsOfContact, updateContact, updateStageContacts } from "@/services/contact-services"
+import { getRepoDataCount } from "@/services/repodata-services"
+import { ContactEventType } from "@prisma/client"
+import { revalidatePath } from "next/cache"
 
 export async function getContactDAOAction(id: string): Promise<ContactDAO | null> {
     return getContactDAO(id)
@@ -12,6 +16,12 @@ export async function createOrUpdateContactAction(id: string | null, data: Conta
     let updated= null
     if (id) {
         updated= await updateContact(id, data)
+        const user= await getCurrentUser()
+        const by= user?.name || user?.email || ""
+        if (user) {
+          await createContactEvent(ContactEventType.EDITED, undefined, by, id)
+        }
+      
     } else {
         updated= await createContact(data)
     }     
@@ -41,10 +51,41 @@ export async function updateStageContactsAction(contacts: ContactDAO[]) {
     return updated
 }
 
+export async function getTagsOfContactAction(contactId: string) {
+    return getTagsOfContact(contactId)
+}
+
 export async function setTagsOfContactAction(contactId: string, tags: string[]) {
-    const updated= await setTagsOfContact(contactId, tags)
+    const user= await getCurrentUser()
+    const byUser= user?.name || user?.email || undefined
+  
+    const updated= await setTagsOfContact(contactId, tags, byUser)
+
+    console.log("tags:", tags)
     
     revalidatePath("/client/[slug]/crm", "page")
 
     return updated
+}
+
+export async function getContactEventsAction(contactId: string) {
+    return getContactEventsDAO(contactId)
+}
+
+export async function getStageByContactIdAction(contactId: string): Promise<string> {
+    return getStageByContactId(contactId)
+}
+
+export async function getAllTagsAction(clientId: string): Promise<string[]> {
+    return getAllTags(clientId)
+}
+
+export async function createMovedToStageEventAction(contactId: string, stageName: string) {
+    const user= await getCurrentUser()
+    const byUser= user?.name || user?.email || undefined
+    return createContactEvent(ContactEventType.MOVED_TO_STAGE, stageName, byUser, contactId)
+}
+
+export async function getRepoDataCountAction(contactId: string) {
+    return getRepoDataCount(contactId)
 }

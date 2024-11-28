@@ -1,30 +1,29 @@
 import { checkDateTimeFormatForSlot, decodeAndCorrectText } from "@/lib/utils";
+import { EventType } from "@prisma/client";
 import { addMinutes, format, parse } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
+import moment from 'moment-timezone';
 import { revalidatePath } from "next/cache";
 import { BookingFormValues, cancelBooking, createBooking, getBookingDAO, getFutureBookingsDAOByContact, getFutureBookingsDAOByEventId } from "./booking-services";
 import { CarServiceFormValues, createCarService } from "./carservice-services";
+import { addLabelToConversation, toggleConversationStatus } from "./chatwoot";
+import { createExternalPayment } from "./cobros-wap";
 import { getValue, setValue } from "./config-services";
-import { getConversation, getConversationPhone, messageArrived } from "./conversationService";
+import { addTagsToContact, getContactDAO, setNewStage } from "./contact-services";
+import { getConversation, messageArrived } from "./conversationService";
 import { getDocumentDAO } from "./document-services";
-import { getEventDAO, updateSeatsAvailable } from "./event-services";
-import { functionHaveRepository, getFunctionClientDAO, getFunctionDAO, getTagsOfClientFunction } from "./function-services";
+import { getEventDAO } from "./event-services";
+import { getDataTags } from "./field-services";
+import { functionHaveRepository, getFunctionClientDAO, getTagsOfClientFunction } from "./function-services";
 import { NarvaezFormValues, createOrUpdateNarvaez } from "./narvaez-services";
 import { sendWapMessage } from "./osomService";
 import { createRepoData, repoDataFormValues } from "./repodata-services";
 import { getRepositoryDAOByFunctionName } from "./repository-services";
 import { getSectionOfDocument } from "./section-services";
 import { checkBookingAvailability, getSlots } from "./slots-service";
+import { getStageByName, getStagesDAO } from "./stage-services";
 import { SummitFormValues, createSummit } from "./summit-services";
 import { RepoDataWithClientNameAndBooking, sendWebhookNotification } from "./webhook-notifications-service";
-import moment from 'moment-timezone'
-import { EventType } from "@prisma/client";
-import { addLabelToConversation, toggleConversationStatus } from "./chatwoot";
-import { createExternalPayment } from "./cobros-wap";
-import { addTagsToContact, getContactDAO, setNewStage, updateContact } from "./contact-services";
-import { getStageByName, getStagesDAO } from "./stage-services";
-import { getDataTags } from "./field-services";
-import { JsonValue } from "@prisma/client/runtime/library";
 
 export type CompletionInitResponse = {
   assistantResponse: string | null
@@ -681,7 +680,7 @@ export async function cambiarEstadoDeContacto(clientId: string, contactId: strin
   }
   console.log("newStage: ", newStage)
 
-  const updated= await setNewStage(contactId, newStage.id)
+  const updated= await setNewStage(contactId, newStage.id, "IA-cambiarEstadoDeContacto")
   if (!updated) return "Error al cambiar el estado del contacto"
 
   return `Estado del contacto cambiado correctamente. Mensaje para el usuario: 'Un agente se pondrá en contacto contigo a la brevedad' y no le preguntes más nada.`
@@ -750,7 +749,11 @@ export async function defaultFunction(clientId: string, name: string, args: any)
       const repoTags= await getDataTags(repo.id, data as string)
       const allTags= [...tags, ...repoTags]
       console.log("adding tags to contact, tags: ", allTags)
-      await addTagsToContact(contactId, allTags)
+      await addTagsToContact(contactId, allTags, "FC-" + name)
+      // repoTags.forEach((tag) => {
+      //   createContactEvent(ContactEventType.TAGGED, tag, "IA-" + name, contactId)
+      // })
+    
     } else {
       console.log("no tags to add to contact")
     }
