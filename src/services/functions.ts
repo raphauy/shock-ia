@@ -24,6 +24,7 @@ import { checkBookingAvailability, getSlots } from "./slots-service";
 import { getStageByName, getStagesDAO } from "./stage-services";
 import { SummitFormValues, createSummit } from "./summit-services";
 import { RepoDataWithClientNameAndBooking, sendWebhookNotification } from "./webhook-notifications-service";
+import { setMoveToStageIdOfClientFunctionAction } from "@/app/admin/repositories/repository-actions";
 
 export type CompletionInitResponse = {
   assistantResponse: string | null
@@ -756,6 +757,12 @@ export async function defaultFunction(clientId: string, name: string, args: any)
     
     } else {
       console.log("no tags to add to contact")
+    }
+
+    const moveToStageId= functionClient?.moveToStageId
+    if (moveToStageId && chatwootAccountId && contactId) {
+      console.log("setting new stage to contact, by: FC-" + name)
+      await setNewStage(contactId, moveToStageId, "FC-" + name)
     }
   
     return repo.finalMessage    

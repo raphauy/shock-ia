@@ -221,6 +221,8 @@ model ClientFunction {
 
   tags           String[]                         // gennext: show.column
 
+  moveToStageId  String?
+
   client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
   clientId String
 

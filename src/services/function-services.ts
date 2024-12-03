@@ -20,6 +20,7 @@ export type FunctionClientDAO= {
   webHookUrl: string | null
   uiLabel: string
   tags: string[]
+  moveToStageId: string | null
 }
 type ClientDAO= {
   id: string
@@ -399,4 +400,20 @@ export async function getTagsOfClientFunction(clientId: string, functionId: stri
     }
   })
   return found?.tags
+}
+
+export async function setMoveToStageIdOfClientFunction(clientId: string, functionId: string, moveToStageId: string) {
+  const updated = await prisma.clientFunction.update({
+    where: { 
+      clientId_functionId: { 
+        clientId, 
+        functionId 
+      } 
+    },
+    data: { 
+      moveToStageId 
+    }
+  })
+
+  return updated
 }

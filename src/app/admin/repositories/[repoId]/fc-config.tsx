@@ -16,6 +16,8 @@ import RemoveClientButton from "./remove-client-button"
 import SwitchBox from "./switch-box"
 import { HookForm } from "./hook-form"
 import TagInputFunctionBox from "./tag-input-function"
+import SelectStage from "./select-stage"
+import { getStagesDAO } from "@/services/stage-services"
 
 type Props = {
   clientId?: string
@@ -37,6 +39,8 @@ export default async function FCConfig({ clientId, repoId, fullMode, haveCRM }: 
   const clientsIds= repository.function.clients.map((client) => client.clientId)
   const complementaryClients= await getComplementaryClients(clientsIds)
   const selectors: SelectorData[]= complementaryClients.map((client) => ({ id: client.id, name: client.name }))
+
+  const stages= clientId ? await getStagesDAO(clientId) : []
   
   const BASE_PATH= process.env.NEXTAUTH_URL!
 
@@ -146,7 +150,7 @@ export default async function FCConfig({ clientId, repoId, fullMode, haveCRM }: 
                         </div>
                         <div className="p-4 bg-muted border rounded-md mt-6">
                           <p className="font-medium border-b pb-2">Cambiar estado:</p>
-                          <p>Coming soon...</p>
+                          <SelectStage functionName={repository.functionName} functionClient={functionClient} stages={stages} />
                         </div>
                       </>
                     }

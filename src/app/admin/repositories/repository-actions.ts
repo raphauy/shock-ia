@@ -1,6 +1,6 @@
 "use server"
   
-import { addFunctionToClient, getFunctionDAO, removeFunctionFromClient } from "@/services/function-services"
+import { addFunctionToClient, getFunctionDAO, removeFunctionFromClient, setMoveToStageIdOfClientFunction } from "@/services/function-services"
 import { RepositoryDAO, createRepository, deleteRepository, getFullRepositoryDAO, setConversationLLMOff, setFinalMessage, setFunctionActive, setFunctionDescription, setFunctionName, setLLMOffMessage, setName, setNotifyExecution, setWebHookUrl } from "@/services/repository-services"
 import { revalidatePath } from "next/cache"
 
@@ -137,6 +137,16 @@ export async function removeFunctionFromClientAction(clientId: string, functionI
     if (!repoFunction) throw new Error("Función no encontrada")
 
     revalidatePath(`/admin/repositories/${repoId}`)
+
+    return true
+}
+
+export async function setMoveToStageIdOfClientFunctionAction(clientId: string, functionId: string, moveToStageId: string): Promise<boolean> {
+    const updated= await setMoveToStageIdOfClientFunction(clientId, functionId, moveToStageId)
+
+    if (!updated) return false
+
+    revalidatePath(`/admin/repositories`)
 
     return true
 }
