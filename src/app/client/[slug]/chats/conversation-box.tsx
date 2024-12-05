@@ -13,6 +13,7 @@ import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import { DeleteConversationDialog } from "./(delete-conversation)/delete-dialogs"
 import { DataConversation } from "./actions"
+import GPTData from "./gpt-data"
 
 interface Props {
   conversation: DataConversation
@@ -163,11 +164,11 @@ export default function ConversationBox({ conversation, promptTokensPrice, compl
                 <div></div>
               }
             </div>
-            {/* {
+            {
               message.gptData && isAdmin && (
                 <GPTData gptData={message.gptData} slug={conversation.clienteSlug} />
               )
-            }               */}
+            }
           </div>
         ))
       }

@@ -279,12 +279,12 @@ export default function SimulatorBox() {
                     )
                   }
                 </div>
-                {/* { 
+                { 
                 gptData && isAdmin && (
                   // @ts-ignore
                   <div className="mb-6"><GPTData gptData={message.gptData} slug={slug} /></div>
                 )
-                }               */}
+                }
             </div>
             
           )})
