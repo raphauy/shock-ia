@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
-const excludedFunctions= ["", "cancelarReserva", "obtenerDisponibilidad", "reservarParaEvento", "obtenerReservas", "reservarParaEventoDeUnicaVez"]
+const excludedFunctions= ["", "cancelarReserva", "reservarParaEvento", "obtenerReservas", "reservarParaEventoDeUnicaVez"]
 
 interface Props{
   title: string

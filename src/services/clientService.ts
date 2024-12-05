@@ -462,60 +462,61 @@ export async function setHaveEvents(clientId: string, haveEvents: boolean) {
 }
 
 async function addEventFunctionsToClient(clientId: string) {
-  // Event functions:
-  // obtenerDisponibilidad
-  // reservarParaEvento
-  // obtenerReservas
-  // cancelarReserva
-  // reservarParaEventoDeUnicaVez
+  const eventFunctions = [
+    "obtenerDisponibilidad",
+    "reservarParaEvento", 
+    "obtenerReservas",
+    "cancelarReserva",
+    "reservarParaEventoDeUnicaVez"
+  ];
 
-  const obtenerDisponibilidadId= await getFunctionIdByFunctionName("obtenerDisponibilidad")
-  if (!obtenerDisponibilidadId) throw new Error("Function not found")
-  let res= await addFunctionToClient(clientId, obtenerDisponibilidadId)
-  if (!res) throw new Error("Error adding function to client")
+  const results = await Promise.all(
+    eventFunctions.map(async (functionName) => {
+      try {
+        const functionId = await getFunctionIdByFunctionName(functionName);
+        if (!functionId) {
+          console.warn(`Función ${functionName} no encontrada`);
+          return false;
+        }
+        await addFunctionToClient(clientId, functionId);
+        return true;
+      } catch (error) {
+        console.error(`Error al agregar función ${functionName}:`, error);
+        return false;
+      }
+    })
+  );
 
-  const reservarParaEventoId= await getFunctionIdByFunctionName("reservarParaEvento")
-  if (!reservarParaEventoId) throw new Error("Function not found")
-  res= await addFunctionToClient(clientId, reservarParaEventoId)
-
-  const obtenerReservasId= await getFunctionIdByFunctionName("obtenerReservas")
-  if (!obtenerReservasId) throw new Error("Function not found")
-  res= await addFunctionToClient(clientId, obtenerReservasId)
-
-  const cancelarReservaId= await getFunctionIdByFunctionName("cancelarReserva")
-  if (!cancelarReservaId) throw new Error("Function not found")
-  res= await addFunctionToClient(clientId, cancelarReservaId)
-
-  const reservarParaEventoDeUnicaVezId= await getFunctionIdByFunctionName("reservarParaEventoDeUnicaVez")
-  if (!reservarParaEventoDeUnicaVezId) throw new Error("Function not found")
-  res= await addFunctionToClient(clientId, reservarParaEventoDeUnicaVezId)
-
-  return true
+  return results.some(result => result); // retorna true si al menos una función se agregó exitosamente
 }
 
 async function removeEventFunctionsFromClient(clientId: string) {
+  const eventFunctions = [
+    "obtenerDisponibilidad",
+    "reservarParaEvento", 
+    "obtenerReservas",
+    "cancelarReserva",
+    "reservarParaEventoDeUnicaVez"
+  ];
 
-  const obtenerDisponibilidadId= await getFunctionIdByFunctionName("obtenerDisponibilidad")
-  if (!obtenerDisponibilidadId) throw new Error("Function not found")
-  await removeFunctionFromClient(clientId, obtenerDisponibilidadId)
+  const results = await Promise.all(
+    eventFunctions.map(async (functionName) => {
+      try {
+        const functionId = await getFunctionIdByFunctionName(functionName);
+        if (!functionId) {
+          console.warn(`Función ${functionName} no encontrada`);
+          return false;
+        }
+        await removeFunctionFromClient(clientId, functionId);
+        return true;
+      } catch (error) {
+        console.error(`Error al remover función ${functionName}:`, error);
+        return false;
+      }
+    })
+  );
 
-  const reservarParaEventoId= await getFunctionIdByFunctionName("reservarParaEvento")
-  if (!reservarParaEventoId) throw new Error("Function not found")
-  await removeFunctionFromClient(clientId, reservarParaEventoId)
-
-  const obtenerReservasId= await getFunctionIdByFunctionName("obtenerReservas")
-  if (!obtenerReservasId) throw new Error("Function not found")
-  await removeFunctionFromClient(clientId, obtenerReservasId)
-
-  const cancelarReservaId= await getFunctionIdByFunctionName("cancelarReserva")
-  if (!cancelarReservaId) throw new Error("Function not found")
-  await removeFunctionFromClient(clientId, cancelarReservaId)
-
-  const reservarParaEventoDeUnicaVezId= await getFunctionIdByFunctionName("reservarParaEventoDeUnicaVez")
-  if (!reservarParaEventoDeUnicaVezId) throw new Error("Function not found")
-  await removeFunctionFromClient(clientId, reservarParaEventoDeUnicaVezId)
-
-  return true
+  return results.some(result => result); // retorna true si al menos una función se removió exitosamente
 }
 
 
