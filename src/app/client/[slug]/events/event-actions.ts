@@ -1,7 +1,7 @@
 "use server"
   
 import { getClientBySlug } from "@/services/clientService"
-import { EventDAO, createEvent, deleteEvent, getFullEventDAO, setAvailability, setEventDateTime, updateEventBooleanField, updateEventField, updateEventNumberField, setSeatsPerTimeSlot, setTagsOfEvent } from "@/services/event-services"
+import { EventDAO, createEvent, deleteEvent, getFullEventDAO, setAvailability, setEventDateTime, updateEventBooleanField, updateEventField, updateEventNumberField, setSeatsPerTimeSlot, setTagsOfEvent, setMoveToStageIdEvent } from "@/services/event-services"
 import { EventType } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 
@@ -87,6 +87,16 @@ export async function setTagsOfEventAction(id: string, tags: string[]): Promise<
     const ok= await setTagsOfEvent(id, tags)
 
     revalidatePath("/client/[slug]/events", 'page')
+
+    return true
+}
+
+export async function setMoveToStageIdEventAction(eventId: string, moveToStageId: string): Promise<boolean> {
+    const updated= await setMoveToStageIdEvent(eventId, moveToStageId)
+
+    if (!updated) return false
+
+    revalidatePath(`/client/[slug]/events`, 'page')
 
     return true
 }

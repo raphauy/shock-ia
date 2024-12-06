@@ -150,7 +150,7 @@ export default async function FCConfig({ clientId, repoId, fullMode, haveCRM }: 
                         </div>
                         <div className="p-4 bg-muted border rounded-md mt-6">
                           <p className="font-medium border-b pb-2">Cambiar estado:</p>
-                          <SelectStage functionName={repository.functionName} functionClient={functionClient} stages={stages} />
+                          <SelectStage functionClient={functionClient} stages={stages} />
                         </div>
                       </>
                     }

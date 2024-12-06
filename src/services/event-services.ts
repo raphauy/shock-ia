@@ -21,6 +21,7 @@ export type EventDAO = {
   seatsAvailable: number | undefined
 	price: number | undefined
 	isArchived: boolean
+  moveToStageId: string | undefined
   availability: string[]
   timezone: string
   type: EventType
@@ -363,4 +364,16 @@ export async function setTagsOfEvent(eventId: string, tags: string[]) {
       tags
     }
   })
+}
+
+export async function setMoveToStageIdEvent(eventId: string, moveToStageId: string) {
+  const updated = await prisma.event.update({
+    where: {
+      id: eventId
+    },
+    data: {
+      moveToStageId
+    }
+  })
+  return updated !== null
 }

@@ -9,11 +9,11 @@ import { CarServiceFormValues, createCarService } from "./carservice-services";
 import { addLabelToConversation, toggleConversationStatus } from "./chatwoot";
 import { createExternalPayment } from "./cobros-wap";
 import { getValue, setValue } from "./config-services";
-import { addTagsToContact, getContactDAO, setNewStage } from "./contact-services";
+import { addTagsToContact, getContactDAO, getTagsOfContact, setNewStage } from "./contact-services";
 import { getConversation, messageArrived } from "./conversationService";
 import { getDocumentDAO } from "./document-services";
-import { getEventDAO } from "./event-services";
-import { getDataTags } from "./field-services";
+import { EventDAO, getEventDAO } from "./event-services";
+import { getDataTags, getEventDataTags } from "./field-services";
 import { functionHaveRepository, getFunctionClientDAO, getTagsOfClientFunction } from "./function-services";
 import { NarvaezFormValues, createOrUpdateNarvaez } from "./narvaez-services";
 import { sendWapMessage } from "./osomService";
@@ -25,6 +25,7 @@ import { getStageByName, getStagesDAO } from "./stage-services";
 import { SummitFormValues, createSummit } from "./summit-services";
 import { RepoDataWithClientNameAndBooking, sendWebhookNotification } from "./webhook-notifications-service";
 import { setMoveToStageIdOfClientFunctionAction } from "@/app/admin/repositories/repository-actions";
+import { JsonValue } from "@prisma/client/runtime/library";
 
 export type CompletionInitResponse = {
   assistantResponse: string | null
@@ -437,19 +438,7 @@ export async function reservarParaEvento(clientId: string, conversationId: strin
   const created= await createBooking(data)
   if (!created) return "Error al reservar, pregunta al usuario si quiere que tu reintentes"
 
-  const tags= event.tags
-  const eventIsTaggedAgente= tags?.some(tag => tag === "agente")
-  const chatwootAccountId = conversation.client.whatsappInstances[0]?.chatwootAccountId 
-    ? parseInt(conversation.client.whatsappInstances[0].chatwootAccountId) 
-    : undefined;
-  const chatwootConversationId = conversation.chatwootConversationId;
-  if (eventIsTaggedAgente && chatwootAccountId && chatwootConversationId) {
-    await toggleConversationStatus(chatwootAccountId, chatwootConversationId, "open")
-    console.log("Conversation status updated to open")
-  }
-  if (tags && chatwootAccountId && chatwootConversationId) {
-    await addLabelToConversation(chatwootAccountId, chatwootConversationId, tags)
-  }
+  processTagsAndStage(event, conversation, metadataObj)
 
   if (event.webHookUrl) {
     const repoDataWithClientNameAndBooking: RepoDataWithClientNameAndBooking= {
@@ -473,6 +462,33 @@ export async function reservarParaEvento(clientId: string, conversationId: strin
   }
 
   return "Reserva registrada."
+}
+
+async function processTagsAndStage(event: EventDAO, conversation: any, metadataObj: JsonValue) {
+  const eventTags= event.tags
+  const chatwootAccountId = conversation.client.whatsappInstances[0]?.chatwootAccountId 
+    ? parseInt(conversation.client.whatsappInstances[0].chatwootAccountId) 
+    : undefined;
+  const chatwootConversationId = conversation.chatwootConversationId;
+
+  const contactId= conversation.contactId
+
+  if (eventTags && chatwootAccountId && contactId) {
+    const contactTags= await getTagsOfContact(contactId)
+    const eventDataTags= await getEventDataTags(event.id, metadataObj)
+    const allTags= [...contactTags, ...eventTags, ...eventDataTags]
+    console.log("adding tags to contact, tags: ", allTags)
+    await addTagsToContact(contactId, allTags, "EV-" + event.name)  
+  } else {
+    console.log("no event tags to add to contact")
+  }
+
+  const moveToStageId= event.moveToStageId
+  if (moveToStageId && chatwootAccountId && contactId) {
+    console.log("setting new stage to contact, by: EV-" + event.name)
+    await setNewStage(contactId, moveToStageId, "EV-" + event.name)
+  }
+
 }
 
 export async function reservarParaEventoDeUnicaVez(clientId: string, conversationId: string, eventId: string, metadata: string){
@@ -532,18 +548,12 @@ export async function reservarParaEventoDeUnicaVez(clientId: string, conversatio
   if (!created) return "Error al reservar, pregunta al usuario si quiere que tu reintentes"
 
   const tags= event.tags
-  const eventIsTaggedAgente= tags?.some(tag => tag === "agente")
   const chatwootAccountId = conversation.client.whatsappInstances[0]?.chatwootAccountId 
     ? parseInt(conversation.client.whatsappInstances[0].chatwootAccountId) 
     : undefined;
   const chatwootConversationId= conversation.chatwootConversationId
-  if (eventIsTaggedAgente && chatwootAccountId && chatwootConversationId) {
-    await toggleConversationStatus(chatwootAccountId, chatwootConversationId, "open")
-    console.log("Conversation status updated to open")
-  }
-  if (tags && chatwootAccountId && chatwootConversationId) {
-    await addLabelToConversation(chatwootAccountId, chatwootConversationId, tags)
-  }
+
+  processTagsAndStage(event, conversation, metadataObj)
 
   if (event.webHookUrl) {
     const repoDataWithClientNameAndBooking: RepoDataWithClientNameAndBooking= {

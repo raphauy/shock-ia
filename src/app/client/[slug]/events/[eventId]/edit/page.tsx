@@ -15,6 +15,8 @@ import FixedDateEdits from "./fixed-date-edits";
 import SingleSlotEdits from "./single-slot-edits";
 import { isAfter } from "date-fns";
 import { EventTaggerComponent } from "./event-tagger";
+import SelectEventStage from "./select-stage";
+import { getStagesDAO } from "@/services/stage-services";
 
 type Props= {
     params: {
@@ -25,6 +27,8 @@ type Props= {
 export default async function EditEventPage({ params }: Props) {
   const event= await getFullEventDAO(params.eventId)
   if (!event) return <div>Event not found</div>
+
+  const stages= await getStagesDAO(event.clientId)
 
   const isEnded= event.startDateTime && event.endDateTime && isAfter(new Date(), event.endDateTime)
 
@@ -68,10 +72,15 @@ export default async function EditEventPage({ params }: Props) {
                   <div className="flex items-center gap-x-2 mt-6">
                     <IconBadge icon={Tag} />
                     <h2 className="text-xl">
-                          Etiquetas
+                          Etiquetas y Estados
                       </h2>                      
                     </div>
                     <EventTaggerComponent event={event} />
+                    <div className="p-4 bg-muted border rounded-md mt-6">
+                      <p className="font-medium border-b pb-2">Cambiar estado:</p>
+                      <SelectEventStage event={event} stages={stages} />
+                    </div>
+
 
                   <div className="flex items-center gap-x-2 mt-6">
                     <IconBadge icon={Settings} />

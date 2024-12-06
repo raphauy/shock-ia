@@ -3,24 +3,25 @@
 import { FunctionClientDAO } from '@/services/function-services';
 import { StageDAO } from '@/services/stage-services';
 import { useEffect, useState } from 'react';
-import { setMoveToStageIdOfClientFunctionAction } from '../repository-actions';
 import { Select, SelectItem, SelectContent, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { EventDAO } from '@/services/event-services';
+import { setMoveToStageIdEventAction } from '../../event-actions';
 
 type Props = {
-    functionClient: FunctionClientDAO
+    event: EventDAO
     stages: StageDAO[]
 }
-export default function SelectStage({ functionClient, stages }: Props) {
+export default function SelectEventStage({ event, stages }: Props) {
     const [loading, setLoading] = useState(false)
-    const [selectedStageId, setSelectedStageId] = useState<string | null>(functionClient.moveToStageId || null)
+    const [selectedStageId, setSelectedStageId] = useState<string | null>(event.moveToStageId || null)
 
     useEffect(() => {
-        setSelectedStageId(functionClient.moveToStageId || null)
-    }, [functionClient])
+        setSelectedStageId(event.moveToStageId || null)
+    }, [event])
 
     function onSelectStage(stageId: string) {   
         setLoading(true)
-        setMoveToStageIdOfClientFunctionAction(functionClient.clientId, functionClient.functionId, stageId)
+        setMoveToStageIdEventAction(event.id, stageId)
         .then(updated => {
             if (updated) setSelectedStageId(stageId)
         })

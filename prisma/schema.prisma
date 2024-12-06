@@ -415,6 +415,8 @@ model Event {
   price             Float?                                      // gennext: show.column
   isArchived        Boolean   @default(false)                   // gennext: show.column
 
+  moveToStageId  String?
+
   availability      String[]  @default([])
   timezone          String    @default("America/Montevideo")
   type              EventType @default(SINGLE_SLOT)
