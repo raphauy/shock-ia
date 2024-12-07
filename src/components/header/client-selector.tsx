@@ -56,7 +56,7 @@ export function ClientSelector({ selectors }: Props) {
     }
   
     return (
-      <div className="w-full px-1 ">
+      <div className="w-full px-1 mt-1">
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <Button
