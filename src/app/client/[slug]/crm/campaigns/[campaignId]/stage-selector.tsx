@@ -44,7 +44,7 @@ export default function StageSelector({ baseUrl, allStages }: Props) {
             <Select value={stageId} onValueChange={updateStage} >
                 <SelectTrigger>
                     <SelectValue placeholder="Selecciona un estado" >
-                        {stageId ? allStages.find((s) => s.id === stageId)?.name : "Selecciona un estado"}
+                        {stageId ? allStages.find((s) => s.id === stageId)?.name : "Filtrar por estado"}
                     </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
