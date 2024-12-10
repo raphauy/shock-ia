@@ -132,8 +132,12 @@ export function KanbanComponent({ clientId, initialStages, allTags }: Props) {
   }
 
   return (
-    <div className="space-y-2">
-      <TagSelector actualTags={filteredTags} allTags={allTags} onChange={handleTagsChange} placeholder='Filtrar etiquetas...' />
+    <div>
+      <div className="flex items-center gap-2 max-w-[820px] w-full mb-4">
+        <p className="font-bold w-24">Etiquetas:</p>
+        <TagSelector actualTags={filteredTags} allTags={allTags} onChange={handleTagsChange} placeholder='Filtrar etiquetas...' />
+      </div>
+
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId="stages" type='list' direction='horizontal'>
           {(provided) => (
