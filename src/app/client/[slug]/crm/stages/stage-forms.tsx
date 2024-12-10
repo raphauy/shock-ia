@@ -51,7 +51,11 @@ export function StageForm({ id, clientId, closeDialog }: Props) {
     if (id) {
       getStageDAOAction(id).then((data) => {
         if (data) {
-          form.reset(data)
+          form.setValue("name", data.name)
+          form.setValue("description", data.description ?? "")
+          form.setValue("isFinal", data.isFinal)
+          form.setValue("isBotEnabled", data.isBotEnabled)
+          form.setValue("color", data.color ?? "")
         }
         Object.keys(form.getValues()).forEach((key: any) => {
           if (form.getValues(key) === null) {
