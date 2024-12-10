@@ -1,5 +1,6 @@
 "use client"
 
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { StageDAO } from "@/services/stage-services"
@@ -44,12 +45,12 @@ export default function StageSelector({ baseUrl, allStages }: Props) {
             <Select value={stageId} onValueChange={updateStage} >
                 <SelectTrigger>
                     <SelectValue placeholder="Selecciona un estado" >
-                        {stageId ? allStages.find((s) => s.id === stageId)?.name : "Filtrar por estado"}
+                        {stageId ? <Badge variant="stage">{allStages.find((s) => s.id === stageId)?.name}</Badge> : "Filtrar por estado"}
                     </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                     {allStages.map((stage) => (
-                        <SelectItem key={stage.id} value={stage.id}>{stage.name}</SelectItem>
+                        <SelectItem key={stage.id} value={stage.id}><Badge variant="stage">{stage.name}</Badge></SelectItem>
                     ))}
                 </SelectContent>
             </Select>        
