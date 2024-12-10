@@ -2,7 +2,7 @@ import { prisma } from "@/lib/db"
 import { ContactEventType } from "@prisma/client"
 import * as z from "zod"
 import { createContactEvent } from "./contact-event-services"
-import { createDefaultStages, getFirstStageOfClient } from "./stage-services"
+import { createDefaultStages, getFirstStageOfClient, StageDAO } from "./stage-services"
 
 export type ContactDAO = {
 	id: string
@@ -17,6 +17,10 @@ export type ContactDAO = {
 	stageId: string
 	createdAt: Date
 	updatedAt: Date
+}
+
+export type ContactDAOWithStage = ContactDAO & {
+	stage: StageDAO
 }
 
 export const contactSchema = z.object({
@@ -300,4 +304,27 @@ export async function getStageByContactId(contactId: string) {
   if (!contact) throw new Error("Contact not found")
 
   return contact.stage.name
+}
+
+export async function getFilteredContacts(clientId: string, from: Date | null, to: Date | null, tags: string[], stageId: string | undefined): Promise<ContactDAOWithStage[]> {
+  console.log("from: ", from)
+  console.log("to: ", to)
+  console.log("tags: ", tags)
+  const found = await prisma.contact.findMany({
+    where: {
+      clientId,
+      updatedAt: {
+        gte: from || undefined,
+        lte: to || undefined
+      },
+      tags: tags.length > 0 ? {
+        hasSome: tags
+      } : undefined,
+      stageId: stageId
+    },
+    include: {
+      stage: true,
+    }
+  })
+  return found
 }

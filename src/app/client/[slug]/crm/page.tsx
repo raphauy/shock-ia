@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { KanbanComponent } from "./kanban/kanban";
 import DatesFilter from "./kanban/dates-filter";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
+import { getDatesFromSearchParams } from "@/lib/utils";
 
 type Props = {
   params: {
@@ -17,38 +18,7 @@ type Props = {
 }
 export default async function CRMKanban({ params, searchParams }: Props) {
 
-  let from= null
-  let to= null
-  const last= searchParams.last
-  const today= new Date()
-  if (last === "HOY") {
-      from= new Date(today.getFullYear(), today.getMonth(), today.getDate())
-      to= new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1)
-  } else if (last === "7D") {
-      from= new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() - 7)
-      to= new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1)
-  } else if (last === "30D") {
-      from= new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() - 30)
-      to= new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1)
-  } else if (last === "LAST_MONTH") {
-      from= new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1)
-      console.log("from: ", from)
-      // the day should be the last day of the previous month
-      const firstDayOfCurrentMonth= new Date(new Date().getFullYear(), new Date().getMonth(), 1)
-      // substract one day to get the last day of the previous month
-      const lastDayOfPreviousMonth= new Date(firstDayOfCurrentMonth.getTime() - 24 * 60 * 60 * 1000)
-      to= new Date(new Date().getFullYear(), new Date().getMonth() - 1, lastDayOfPreviousMonth.getDate())
-      console.log("to: ", to)
-  } else if (last === "ALL") {
-      from= null
-      to= null
-  } else {
-      from= searchParams.from ? new Date(searchParams.from) : null
-      to= searchParams.to ? new Date(searchParams.to) : null
-  }
-
-  from= from ? fromZonedTime(from, "America/Montevideo") : null
-  to= to ? fromZonedTime(to, "America/Montevideo") : null
+  const { from, to }= getDatesFromSearchParams(searchParams)
 
   const client = await getClientBySlug(params.slug)
   if (!client) {
@@ -56,10 +26,14 @@ export default async function CRMKanban({ params, searchParams }: Props) {
   }
   const stages = await getKanbanStagesDAO(client.id, from, to)
   const allTags = await getAllTags(client.id)
+  const baseUrl= `/client/${params.slug}/crm`
   return (
     <div>
-      <DatesFilter allTags={allTags} />
+      <div className="border-b mb-2">
+        <DatesFilter allTags={allTags} baseUrl={baseUrl} />
+      </div>
       <KanbanComponent initialStages={stages} clientId={client.id} allTags={allTags} />
     </div>
   )
 }
+

@@ -10,13 +10,14 @@ import Link from "next/link"
 import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import TagSelector from "../contacts/tag-selector"
+import { DatePicker } from "@/components/date-picker"
+import { X } from "lucide-react"
 
 type Props = {
+  baseUrl: string
   allTags: string[]
 }
-export default function DatesFilter({ allTags }: Props) {
-  const params= useParams()
-  const slug= params.slug
+export default function DatesFilter({ baseUrl, allTags }: Props) {
   const searchParams= useSearchParams()
   const router= useRouter()
 
@@ -24,6 +25,8 @@ export default function DatesFilter({ allTags }: Props) {
   const [selectedMonthLabel, setSelectedMonthLabel] = useState("")
 
   const allParams = searchParams.toString()
+  const from= searchParams.get("from") ? parse(searchParams.get("from")!, 'yyyy-MM-dd', new Date()) : undefined
+  const to= searchParams.get("to") ? parse(searchParams.get("to")!, 'yyyy-MM-dd', new Date()) : undefined
   // Remove all instances of from, to, and last params along with the leading ampersand if necessary
   let newParams= allParams.replace(/([&]?)(from|to|last)=[^&]+/g, "")
   newParams= newParams.startsWith("&") ? newParams.slice(1) : newParams
@@ -57,37 +60,49 @@ export default function DatesFilter({ allTags }: Props) {
 
     setSelectedMonthLabel(monthLabel);
 
-    router.push(`/client/${slug}/crm?from=${from}&to=${to}${restOfTheParams}`);
+    router.push(`${baseUrl}?from=${from}&to=${to}${restOfTheParams}`);
   }
 
-  async function handleTagsChange(tags: string[]) {
-    console.log("handleTagsChange", tags);
-    return true
+  function setFrom(date: Date | undefined) {
+    if (!date) return
+    setSelectedMonthLabel("")
+    const from = format(date, 'yyyy-MM-dd')
+    const posibleTo= searchParams.get("to")
+    if (posibleTo) {
+      router.push(`${baseUrl}?from=${from}&to=${posibleTo}${restOfTheParams}`)
+    } else {
+      router.push(`${baseUrl}?from=${from}${restOfTheParams}`)
+    }
   }
 
-  const actualMonth= new Date().getMonth() + ""
-  const actualMonthLabel= getMonthName(actualMonth)
+  function setTo(date: Date | undefined) {
+    if (!date) return
+    setSelectedMonthLabel("")
+    const to = format(date, 'yyyy-MM-dd')
+    const posibleFrom= searchParams.get("from")
+    if (posibleFrom) {
+      router.push(`${baseUrl}?from=${posibleFrom}&to=${to}${restOfTheParams}`)
+    } else {
+      router.push(`${baseUrl}?to=${to}${restOfTheParams}`)
+    }
+  }
 
   return (
-    // <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background w-full mb-2">
-    <header className="flex h-16 items-center gap-4 border-b bg-background w-full mb-2">
+    <div className="flex h-16 items-center gap-4 bg-background w-full">
       <div className="flex items-center gap-4">
-        <Link href={`/client/${slug}/crm?last=HOY${restOfTheParams}`}>
+        <Link href={`${baseUrl}?last=HOY${restOfTheParams}`}>
           <Button variant={last === "HOY" ? "outline" : "ghost"} >Hoy</Button>
         </Link>
-        <Link href={`/client/${slug}/crm?last=7D${restOfTheParams}`}>
+        <Link href={`${baseUrl}?last=7D${restOfTheParams}`}>
           <Button variant={last === "7D" ? "outline" : "ghost"} >7D</Button>
         </Link>
-        <Link href={`/client/${slug}/crm?last=30D${restOfTheParams}`}>
+        <Link href={`${baseUrl}?last=30D${restOfTheParams}`}>
           <Button variant={last === "30D" ? "outline" : "ghost"} >30D</Button>
         </Link>
-        <Link href={`/client/${slug}/crm?last=ALL${restOfTheParams}`}>
+        <Link href={`${baseUrl}?last=ALL${restOfTheParams}`}>
           <Button variant={last === "ALL" ? "outline" : "ghost"} >Todo</Button>
         </Link>
         <Separator orientation="vertical" className="h-4" />
-        {/* <Link href={`/client/${slug}/crm?last=LAST_MONTH${restOfTheParams}`}>
-          <Button variant={last === "LAST_MONTH" ? "outline" : "ghost"} >{actualMonthLabel}</Button>
-        </Link> */}
         <Select onValueChange={handleSelection} value={selectedMonthLabel || ""}>
           <SelectTrigger className={cn(!selectedMonthLabel && "border-none", "focus:ring-0 focus:ring-offset-0")}>
             {selectedMonthLabel ? (
@@ -102,11 +117,14 @@ export default function DatesFilter({ allTags }: Props) {
             ))}
           </SelectContent>
         </Select>
+        <DatePicker label="Desde" date={from} setDate={setFrom} />
+        <DatePicker label="Hasta" date={to} setDate={setTo} />
+        {from || to || last ? <Button variant="outline" onClick={() => router.push(baseUrl)}><X /></Button> : null}
       </div>
       <div className="ml-auto flex items-center flex-1">
         
       </div>
-    </header>
+    </div>
   )
 }
 

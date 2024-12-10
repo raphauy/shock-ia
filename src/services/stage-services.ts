@@ -20,11 +20,11 @@ export type KanbanStageDAOWithContacts = KanbanStageDAO & {
 export type StageDAO = {
 	id: string
 	name: string
-	description: string | undefined
+	description: string | undefined | null
 	order: number
 	isFinal: boolean
 	isBotEnabled: boolean
-	color: string | undefined
+	color: string | undefined | null
 	clientId: string
 	createdAt: Date
 	updatedAt: Date
@@ -197,10 +197,10 @@ export async function getKanbanStagesDAO(clientId: string, from: Date | null, to
     include: {
       contacts: {
         where: {
-          createdAt: from && to ? {
-            gte: from,
-            lte: to
-          } : undefined
+          createdAt: {
+            gte: from || undefined,
+            lte: to || undefined
+          }
         },
         orderBy: [
           {

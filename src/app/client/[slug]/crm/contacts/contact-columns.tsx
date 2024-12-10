@@ -1,16 +1,16 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { ContactDAO } from "@/services/contact-services"
-import { ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown } from "lucide-react"
-import { ContactDialog, DeleteContactDialog } from "./contact-dialogs"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { ContactDAOWithStage } from "@/services/contact-services"
+import { ColumnDef } from "@tanstack/react-table"
+import { format } from "date-fns"
+import { ArrowUpDown } from "lucide-react"
 
   
 
-export const columns: ColumnDef<ContactDAO>[] = [
+export const columns: ColumnDef<ContactDAOWithStage>[] = [
   
   {
     accessorKey: "name",
@@ -49,6 +49,42 @@ export const columns: ColumnDef<ContactDAO>[] = [
   },
 
   {
+    accessorKey: "updatedAt",
+    header: ({ column }) => {
+        return (
+          <Button variant="ghost" className="pl-0 dark:text-white"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+            Actualizado
+            <ArrowUpDown className="w-4 h-4 ml-1" />
+          </Button>
+    )},
+    cell: ({ row }) => {
+      const data= row.original
+      return (
+        <p>{format(data.updatedAt, "yyyy/MM/dd")}</p>
+      )
+    }
+  },
+
+  {
+    accessorKey: "stage",
+    header: ({ column }) => {
+        return (
+          <Button variant="ghost" className="pl-0 dark:text-white"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+            Estado
+            <ArrowUpDown className="w-4 h-4 ml-1" />
+          </Button>
+    )},
+    cell: ({ row }) => {
+      const data= row.original
+      return (
+        <Badge variant="stage">{data.stage.name}</Badge>
+      )
+    }
+  },
+
+  {
     accessorKey: "tags",
     header: ({ column }) => {
         return (
@@ -74,52 +110,6 @@ export const columns: ColumnDef<ContactDAO>[] = [
     },
   },
 
-  {
-    accessorKey: "src",
-    header: ({ column }) => {
-        return (
-          <Button variant="ghost" className="pl-0 dark:text-white"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-            Fuente
-            <ArrowUpDown className="w-4 h-4 ml-1" />
-          </Button>
-    )},
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id))
-    },
-  },
-  // {
-  //   accessorKey: "role",
-  //   header: ({ column }) => {
-  //     return (
-  //       <Button variant="ghost" className="pl-0 dark:text-white"
-  //         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-  //         Rol
-  //         <ArrowUpDown className="w-4 h-4 ml-1" />
-  //       </Button>
-  //     )
-  //   },
-  //   filterFn: (row, id, value) => {
-  //     return value.includes(row.getValue(id))
-  //   },
-  // },
-  {
-    id: "actions",
-    cell: ({ row }) => {
-      const data= row.original
-
-      const deleteDescription= `Do you want to delete Contact ${data.id}?`
- 
-      return (
-        <div className="flex items-center justify-end gap-2">
-
-          <ContactDialog id={data.id} clientId={data.clientId} />
-          <DeleteContactDialog description={deleteDescription} id={data.id} />
-        </div>
-
-      )
-    },
-  },
 ]
 
 

@@ -9,9 +9,6 @@ import { X } from "lucide-react"
 import { ColumnDef, ColumnFiltersState, SortingState, VisibilityState, flexRender, getCoreRowModel, getFacetedRowModel, getFacetedUniqueValues, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table"
 import { DataTablePagination } from "@/components/data-table/data-table-pagination"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { DataTableFacetedFilter } from "@/components/data-table/data-table-faceted-filter"
-
-const fuentes = ["whatsapp", "widget-web"]
   
 interface DataTableToolbarProps<TData> {
   table: TanstackTable<TData>;
@@ -23,31 +20,24 @@ export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>)
   return (
     <div className="flex gap-1 dark:text-white items-center">
         
-          <Input className="max-w-xs" placeholder="filtrar por nombre..."
+          <Input className="max-w-xs" placeholder="type filter..."
+              value={(table.getColumn("type")?.getFilterValue() as string) ?? ""}
+              onChange={(event) => table.getColumn("type")?.setFilterValue(event.target.value)}                
+          />
+          
+      
+          <Input className="max-w-xs" placeholder="name filter..."
               value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
               onChange={(event) => table.getColumn("name")?.setFilterValue(event.target.value)}                
           />
           
-      
-          <Input className="max-w-xs" placeholder="filtrar por teléfono..."
-              value={(table.getColumn("phone")?.getFilterValue() as string) ?? ""}
-              onChange={(event) => table.getColumn("phone")?.setFilterValue(event.target.value)}                
-          />
-          
-      
-          <Input className="max-w-xs" placeholder="filtrar por etiquetas..."
-              value={(table.getColumn("tags")?.getFilterValue() as string) ?? ""}
-              onChange={(event) => table.getColumn("tags")?.setFilterValue(event.target.value)}                
-          />
-          
-      
-        {table.getColumn("src") && fuentes && (
+        {/* {table.getColumn("role") && roles && (
           <DataTableFacetedFilter
-            column={table.getColumn("src")}
-            title="Fuente"
-            options={fuentes}
+            column={table.getColumn("role")}
+            title="Rol"
+            options={roles}
           />
-        )}
+        )} */}
         {isFiltered && (
           <Button
             variant="ghost"
@@ -58,6 +48,9 @@ export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>)
             <X className="w-4 h-4 ml-2" />
           </Button>
         )}
+        <div className="flex-1 ">
+          <DataTableViewOptions table={table}/>
+        </div>
     </div>
   )
 }

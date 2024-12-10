@@ -236,6 +236,8 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
         const newOptions = selected.filter((s) => s.value !== option.value);
         setSelected(newOptions);
         onChange?.(newOptions);
+        setOpen(false)
+        inputRef.current?.blur()
       },
       [onChange, selected],
     );
@@ -370,6 +372,8 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
             const newOptions = [...selected, { value, label: value }];
             setSelected(newOptions);
             onChange?.(newOptions);
+            setOpen(false)
+            inputRef.current?.blur()
           }}
         >
           {`Create "${inputValue}"`}
@@ -524,6 +528,8 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
               onClick={() => {
                 setSelected(selected.filter((s) => s.fixed));
                 onChange?.(selected.filter((s) => s.fixed));
+                setOpen(false)
+                inputRef.current?.blur()
               }}
               className={cn(
                 'absolute right-0 h-6 w-6 p-0',
@@ -581,6 +587,8 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                                 const newOptions = [...selected, option];
                                 setSelected(newOptions);
                                 onChange?.(newOptions);
+                                setOpen(false)
+                                inputRef.current?.blur()
                               }}
                               className={cn(
                                 'cursor-pointer',

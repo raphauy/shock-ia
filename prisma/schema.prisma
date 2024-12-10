@@ -102,6 +102,7 @@ model Client {
   customFields          CustomField[]  // gennext: skip.list
   stages                Stage[]        // gennext: skip.list
   tags         String[]       // gennext: skip.list
+  campaigns             Campaign[]     // gennext: skip.list
 }
 
 model Document {
@@ -511,6 +512,7 @@ model Contact {
   stageHistory  StageHistory[]                           // gennext: skip.list
   conversations Conversation[]                         // gennext: skip.list
   contactEvents ContactEvent[]                         // gennext: skip.list
+  campaigns     CampaignContact[]                       // gennext: skip.list
   createdAt     DateTime    @default(now())                 // gennext: skip.zod
   updatedAt     DateTime    @updatedAt                      // gennext: skip.zod
 
@@ -600,4 +602,46 @@ model ContactEvent {
   contactId     String
 
   createdAt     DateTime   @default(now())             // gennext: skip.zod
+}
+
+enum CampaignType {
+  SIMPLE
+}
+
+enum CampaignStatus {
+  CREADA
+  EN_PROCESO
+  COMPLETADA
+  EN_PAUSA
+  CANCELADA
+}
+
+model Campaign {
+  id            String     @id @default(cuid())       
+  type          CampaignType                            // gennext: show.column
+  name          String                                  // gennext: show.column
+  status        CampaignStatus                          // gennext: show.column
+
+  message       String @default("Estimado {{nombre}}, le escribimos para...")
+
+  contacts      CampaignContact[]                       // gennext: skip.list
+
+  client        Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId      String
+
+  createdAt     DateTime   @default(now())             // gennext: skip.zod
+  updatedAt     DateTime   @updatedAt                  // gennext: skip.zod
+}
+
+model CampaignContact {
+  id            String     @id @default(cuid())
+
+  contact       Contact    @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  contactId     String
+
+  campaign      Campaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  campaignId    String
+
+  createdAt     DateTime   @default(now())             // gennext: skip.zod
+  updatedAt     DateTime   @updatedAt                  // gennext: skip.zod
 }

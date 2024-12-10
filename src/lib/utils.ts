@@ -3,7 +3,7 @@ import { type ClassValue, clsx } from "clsx";
 import { isThisWeek } from "date-fns";
 import { isToday, isYesterday } from "date-fns";
 import { parseISO } from "date-fns";
-import { format, format as formatTZ, toDate, toZonedTime } from "date-fns-tz";
+import { format, format as formatTZ, fromZonedTime, toDate, toZonedTime } from "date-fns-tz";
 import { es } from "date-fns/locale";
 import he from 'he';
 import { twMerge } from "tailwind-merge";
@@ -283,4 +283,41 @@ export function formatWhatsAppStyle(date: Date | string): string {
   } else {
     return format(parsedDate, 'dd/MM/yyyy');
   }
+}
+
+export function getDatesFromSearchParams(searchParams: { from: string, to: string, last: string }) {
+  let from= null
+  let to= null
+  const last= searchParams.last
+  const today= new Date()
+  if (last === "HOY") {
+      from= new Date(today.getFullYear(), today.getMonth(), today.getDate())
+      to= new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1)
+  } else if (last === "7D") {
+      from= new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() - 7)
+      to= new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1)
+  } else if (last === "30D") {
+      from= new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() - 30)
+      to= new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1)
+  } else if (last === "LAST_MONTH") {
+      from= new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1)
+      console.log("from: ", from)
+      // the day should be the last day of the previous month
+      const firstDayOfCurrentMonth= new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+      // substract one day to get the last day of the previous month
+      const lastDayOfPreviousMonth= new Date(firstDayOfCurrentMonth.getTime() - 24 * 60 * 60 * 1000)
+      to= new Date(new Date().getFullYear(), new Date().getMonth() - 1, lastDayOfPreviousMonth.getDate())
+      console.log("to: ", to)
+  } else if (last === "ALL") {
+      from= null
+      to= null
+  } else {
+      from= searchParams.from ? new Date(searchParams.from) : null
+      to= searchParams.to ? new Date(searchParams.to) : null
+  }
+
+  from= from ? fromZonedTime(from, "America/Montevideo") : null
+  to= to ? fromZonedTime(to, "America/Montevideo") : null
+
+  return { from, to }
 }
