@@ -24,6 +24,10 @@ const badgeVariants = cva(
         archived: "bg-gray-500 text-white rounded-2xl border-gray-800",
         active: "bg-green-500 text-white rounded-2xl border-green-800",
         stage: "bg-blue-500 text-white rounded-2xl border-blue-800 rounded-md justify-center",
+        statusEnviado: "bg-green-500 text-white rounded-2xl border-green-800 rounded-md justify-center",
+        statusError: "bg-red-500 text-white rounded-2xl border-red-800 rounded-md justify-center",
+        statusPendiente: "bg-yellow-500 text-white rounded-2xl border-yellow-800 rounded-md justify-center",
+        statusProgramado: "bg-orange-500 text-white rounded-2xl border-orange-800 rounded-md justify-center",
       },
     },
     defaultVariants: {

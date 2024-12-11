@@ -633,15 +633,31 @@ model Campaign {
   updatedAt     DateTime   @updatedAt                  // gennext: skip.zod
 }
 
+enum CampaignContactStatus {
+  PENDIENTE
+  PROGRAMADO
+  ENVIADO
+  ERROR
+  CANCELADO
+}
+
 model CampaignContact {
-  id            String     @id @default(cuid())
+  id              String     @id @default(cuid())
+  status          CampaignContactStatus @default(PENDIENTE)
 
-  contact       Contact    @relation(fields: [contactId], references: [id], onDelete: Cascade)
-  contactId     String
+  conversationId  String?
+  sentAt          DateTime?
 
-  campaign      Campaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  campaignId    String
+  scheduleId      String?
+  scheduledAt     DateTime?
+  scheduledTo     DateTime?
 
-  createdAt     DateTime   @default(now())             // gennext: skip.zod
-  updatedAt     DateTime   @updatedAt                  // gennext: skip.zod
+  contact         Contact    @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  contactId       String
+
+  campaign        Campaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  campaignId      String
+
+  createdAt       DateTime   @default(now())             // gennext: skip.zod
+  updatedAt       DateTime   @updatedAt                  // gennext: skip.zod
 }

@@ -1,19 +1,23 @@
-import { notFound } from "next/navigation"
-import { getCampaignDAOAction, setMessageToCampaignAction } from "../campaign-actions"
-import { CampaignDAO } from "@/services/campaign-services"
-import { cn, getDatesFromSearchParams } from "@/lib/utils"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { CampaignStatus } from "@prisma/client"
 import { DescriptionForm } from "@/components/description-form"
-import { getFilteredContacts } from "@/services/contact-services"
-import { DataTable } from "../../contacts/contact-table"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import DatesFilter from "../../kanban/dates-filter"
+import { cn, getDatesFromSearchParams } from "@/lib/utils"
+import { CampaignDAO, getCampaignDAO } from "@/services/campaign-services"
 import { getAllTags } from "@/services/clientService"
-import TagSelector from "./tag-selector"
-import { columns } from "../../contacts/contact-columns"
+import { ContactDAOWithStage, getFilteredContacts } from "@/services/contact-services"
+import { getStagesDAO, StageDAO } from "@/services/stage-services"
+import { CampaignStatus } from "@prisma/client"
+import { notFound } from "next/navigation"
+import { columns as simpleColumns } from "../../contacts/contact-columns"
+import { DataTable } from "../../contacts/contact-table"
+import DatesFilter from "../../kanban/dates-filter"
+import { setMessageToCampaignAction } from "../campaign-actions"
+import { columns } from "./contact-columns"
+import RemoveAllContactsButton from "./remove-all-contacts"
+import SetContactsButton from "./set-contacts-button"
 import StageSelector from "./stage-selector"
-import { getStagesDAO } from "@/services/stage-services"
+import TagSelector from "./tag-selector"
+import ProcessCampaignButton from "./process-campaign-button"
 
 type Props= {
   params: {
@@ -30,7 +34,7 @@ type Props= {
 }
 
 export default async function CampaignPage({ params, searchParams }: Props) {
-  const campaign: CampaignDAO | null = await getCampaignDAOAction(params.campaignId)
+  const campaign: CampaignDAO | null = await getCampaignDAO(params.campaignId)
   if (!campaign) return notFound()
 
   // dates
@@ -51,6 +55,9 @@ export default async function CampaignPage({ params, searchParams }: Props) {
 
   const baseUrl= `/client/${params.slug}/crm/campaigns/${params.campaignId}`
 
+  const contactsReady= campaign.status === CampaignStatus.CREADA && campaign.contacts.length > 0
+  const campaignCompleted= campaign.status === CampaignStatus.COMPLETADA
+
   return (
     <div className="p-4">
       <Card>
@@ -68,17 +75,40 @@ export default async function CampaignPage({ params, searchParams }: Props) {
                 campaign.status === CampaignStatus.EN_PAUSA && "text-red-500",
                 campaign.status === CampaignStatus.CANCELADA && "text-gray-500")}>{campaign.status}</p>
             </div>
-            <div>
-              <span className="font-semibold">Contactos:</span> {campaign.contacts.length === 0 ? "Aún no hay contactos seleccionados para esta campaña" : campaign.contacts.length + " contactos"}
-            </div>
-            <div>
-              <span className="font-semibold">ID:</span> {campaign.id}
+            <div className="flex items-center gap-2">
+              <div>
+                <span className="font-semibold">Contactos:</span> {campaign.contacts.length === 0 ? "Aún no hay contactos seleccionados para esta campaña" : campaign.contacts.length + " contactos"}
+              </div>
+              { contactsReady && <RemoveAllContactsButton campaignId={campaign.id} />}
             </div>
           </div>
         </CardContent>
       </Card>
       <DescriptionForm id={campaign.id} label="Mensaje al usuario" initialValue={campaign.message ?? ""} update={setMessageToCampaignAction} />
+
       <Separator className="mt-10 mb-4"/>
+
+      { !contactsReady && !campaignCompleted && showFilters(campaign.id, baseUrl, allTags, allStages, contacts, tags)}
+
+      {
+        (contactsReady || campaignCompleted) && (
+          <div className="space-y-4">
+            <DataTable columns={columns} data={campaign.contacts} subject="Contacto"/>
+            <div className="border border-dashed rounded-md p-4 flex justify-center items-center h-40">
+              {!campaignCompleted && <ProcessCampaignButton campaignId={campaign.id} />}
+            </div>
+          </div>
+        )
+      }
+
+
+    </div>
+  )
+}
+
+function showFilters(campaignId: string, baseUrl: string, allTags: string[], allStages: StageDAO[], contacts: ContactDAOWithStage[], tags: string[]) {
+  return (
+    <div>
       <div className="space-y-4">
         <p className="text-lg font-bold">Filtrar Contactos:</p>
         <div className="flex items-center gap-2">
@@ -93,7 +123,17 @@ export default async function CampaignPage({ params, searchParams }: Props) {
           <p className="font-bold w-24">Etiquetas:</p>
           <TagSelector actualTags={tags} allTags={allTags} baseUrl={baseUrl} />
         </div>
-        <DataTable columns={columns} data={contacts} subject="Contacto"/>
+        <DataTable columns={simpleColumns} data={contacts} subject="Contacto"/>
+      </div>
+
+      <div className="my-4 w-full border border-dashed rounded-md p-4 flex justify-center items-center h-40">
+        {
+          contacts.length > 0 ? (
+            <SetContactsButton campaignId={campaignId} contactsIds={contacts.map((c) => c.id)} />
+          ) : (
+            <p>No hay contactos seleccionados para esta campaña</p>
+          )
+        }
       </div>
 
     </div>

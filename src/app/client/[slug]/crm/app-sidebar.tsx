@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
-import { BookOpen, Bot, ChevronRightSquare, DatabaseZap, Kanban, LayoutDashboard, LogOut, MessageCircle, MessagesSquare, Phone, RectangleEllipsis, Tag, User } from "lucide-react";
+import { BookOpen, Bot, ChevronRightSquare, DatabaseZap, Kanban, LayoutDashboard, LogOut, Megaphone, MessageCircle, MessagesSquare, Phone, RectangleEllipsis, Tag, User } from "lucide-react";
 import { useParams, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -41,7 +41,7 @@ const items = [
   {
     title: "Campañas",
     url: `crm/campaigns`,
-    icon: MessageCircle,
+    icon: Megaphone,
     group: "campaigns",
   }
 ]
@@ -59,10 +59,10 @@ const groups = [
     id: "configuracion",
     label: "Configuración"
   },
-  // {
-  //   id: "campaigns",
-  //   label: "Campañas"
-  // }
+  {
+    id: "campaigns",
+    label: "Campañas"
+  }
 ];
 
 export function AppSidebar() {
