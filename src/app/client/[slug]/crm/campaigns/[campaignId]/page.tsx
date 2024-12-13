@@ -71,8 +71,8 @@ export default async function CampaignPage({ params, searchParams }: Props) {
             <div className="flex items-center gap-2">
               <span className="font-semibold">Estado:</span> <p className={cn("font-bold", 
                 campaign.status === CampaignStatus.CREADA && "text-yellow-500",
-                campaign.status === CampaignStatus.EN_PROCESO && "text-green-500",
-                campaign.status === CampaignStatus.COMPLETADA && "text-blue-500",
+                campaign.status === CampaignStatus.EN_PROCESO && "text-blue-500",
+                campaign.status === CampaignStatus.COMPLETADA && "text-green-500",
                 campaign.status === CampaignStatus.EN_PAUSA && "text-red-500",
                 campaign.status === CampaignStatus.CANCELADA && "text-gray-500")}>{campaign.status}</p>
             </div>
@@ -104,8 +104,8 @@ export default async function CampaignPage({ params, searchParams }: Props) {
             <p className="text-lg font-bold">Envíos para esta campaña:</p>
             <DataTable columns={columns} data={campaign.contacts} subject="Contacto"/>
             <div className="border border-dashed rounded-md p-4 h-40 space-y-2 flex flex-col justify-center items-center">
-              { campaign.status === CampaignStatus.EN_PROCESO && <p className="text-green-500">Esta campaña está en proceso</p> }
-              { campaign.status === CampaignStatus.COMPLETADA && <p className="text-blue-500">Esta campaña ya está completada</p> }
+              { campaign.status === CampaignStatus.EN_PROCESO && <p className="text-blue-500">Esta campaña está en proceso</p> }
+              { campaign.status === CampaignStatus.COMPLETADA && <p className="text-green-500">Esta campaña ya está completada</p> }
               { campaign.status !== CampaignStatus.COMPLETADA && campaign.status !== CampaignStatus.EN_PROCESO && 
                 <ProcessCampaignButton campaignId={campaign.id} />
               }

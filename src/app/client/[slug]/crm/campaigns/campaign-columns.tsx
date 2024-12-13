@@ -57,8 +57,8 @@ export const columns: ColumnDef<CampaignDAO>[] = [
       const data= row.original
       return (
         <p className={cn("font-bold", data.status === CampaignStatus.CREADA && "text-yellow-500",
-          data.status === CampaignStatus.EN_PROCESO && "text-green-500",
-          data.status === CampaignStatus.COMPLETADA && "text-blue-500",
+          data.status === CampaignStatus.EN_PROCESO && "text-blue-500",
+          data.status === CampaignStatus.COMPLETADA && "text-green-500",
           data.status === CampaignStatus.EN_PAUSA && "text-red-500",
           data.status === CampaignStatus.CANCELADA && "text-gray-500")}>
           {data.status}
