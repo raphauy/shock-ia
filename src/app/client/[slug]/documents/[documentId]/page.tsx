@@ -2,9 +2,6 @@ import { getDocumentDAO } from "@/services/document-services";
 import { redirect } from "next/navigation";
 import { DocumentDialog } from "../document-dialogs";
 import NovelOnClient from "./editor-on-client";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import LinkBox from "./link-box";
 
 type Props = {
     params: {

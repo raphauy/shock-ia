@@ -232,6 +232,19 @@ export async function processCampaignContact(campaignContactId: string) {
 
   if (!updated) throw new Error("Error al procesar el contacto")
 
+  // check if all contacts are sent and update campaign status to COMPLETADA
+  const contactsRemaining= await prisma.campaignContact.count({
+    where: {
+      campaignId: campaign.id,
+      status: {
+        in: [CampaignContactStatus.PENDIENTE, CampaignContactStatus.PROGRAMADO]
+      }
+    }
+  })
+  if (contactsRemaining === 0) {
+    await setCampaignStatus(campaign.id, CampaignStatus.COMPLETADA)
+  }
+
   return updated
 }
 
@@ -310,9 +323,9 @@ export async function processCampaign(campaignId: string) {
     actualDelay += delayIncrement
   }
 
-  // update campaign status to COMPLETADA
-  await setCampaignStatus(campaignId, CampaignStatus.COMPLETADA)
-  console.log("Campaign status updated to COMPLETADA")
+  // update campaign status to EN_PROCESO
+  await setCampaignStatus(campaignId, CampaignStatus.EN_PROCESO)
+  console.log("Campaign status updated to EN_PROCESO")
 
   return true
 }
