@@ -9,6 +9,8 @@ import { ColumnDef } from "@tanstack/react-table"
 import { format } from "date-fns"
 import { ArrowUpDown } from "lucide-react"
 import { ProcessCampaignContactButton } from "./process-campaign-contact-button"
+import Link from "next/link"
+import { ConversationLink } from "./conversation-link"
 
   
 
@@ -39,6 +41,7 @@ export const columns: ColumnDef<CampaignContactDAO>[] = [
                 "statusPendiente"}>{data.status}
             </Badge>
             {data.status === CampaignContactStatus.PENDIENTE && <ProcessCampaignContactButton campaignContactId={data.id} />}
+            {data.status === CampaignContactStatus.ENVIADO && data.conversationId && <ConversationLink conversationId={data.conversationId} />}
           </div>
           <p className="text-xs text-gray-500 mt-1">
           {data.status === CampaignContactStatus.PROGRAMADO && data.scheduledTo ? format(data.scheduledTo, "yyyy/MM/dd HH:mm:ss") : ""}

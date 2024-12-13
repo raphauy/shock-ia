@@ -16,6 +16,7 @@ export type CampaignContactDAO = {
 	contact: ContactDAOWithStage
 	campaignId: string
 	status: CampaignContactStatus
+  conversationId: string | null | undefined
   scheduleId: string | null | undefined
   sentAt: Date | null | undefined
 	scheduledAt: Date | null | undefined
