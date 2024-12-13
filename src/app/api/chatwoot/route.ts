@@ -56,8 +56,9 @@ export async function POST(request: Request) {
             return NextResponse.json({ data: "ACK" }, { status: 200 })
         }
 
-        if ((inboxName === "cantinabarreiro" || inboxName === "dev-cantinabarreiro") && (senderPhone !== "+59892265737" && senderPhone !== "+59899565515" && senderPhone !== "+59894197353")) {
-            console.log("phone is not allowed for this account")
+        //if ((inboxName === "cantinabarreiro" || inboxName === "dev-cantinabarreiro") && (senderPhone !== "+59892265737" && senderPhone !== "+59899565515" && senderPhone !== "+59894197353")) {
+        if ((inboxName === "cantinabarreiro" || inboxName === "dev-cantinabarreiro") && (senderPhone !== "+59892265737")) {
+                console.log("phone is not allowed for this account")
             return NextResponse.json({ data: "ACK" }, { status: 200 })
         }
 

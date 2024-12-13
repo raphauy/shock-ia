@@ -13,6 +13,6 @@ export function ConversationLink({ conversationId }: Props) {
     const slug= params.slug as string
 
     return (
-        <Link href={`/client/${slug}/chats?id=${conversationId}`}><MessageCircle className="w-4 h-4" /></Link>
+        <Link href={`/client/${slug}/chats?id=${conversationId}`} target="_blank" prefetch={false}><MessageCircle className="w-4 h-4" /></Link>
     )
 }
