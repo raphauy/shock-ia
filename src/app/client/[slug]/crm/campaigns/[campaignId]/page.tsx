@@ -55,9 +55,6 @@ export default async function CampaignPage({ params, searchParams }: Props) {
 
   const baseUrl= `/client/${params.slug}/crm/campaigns/${params.campaignId}`
 
-  const contactsReady= (campaign.status === CampaignStatus.CREADA || campaign.status === CampaignStatus.EN_PROCESO) && campaign.contacts.length > 0
-  const campaignCompleted= campaign.status === CampaignStatus.COMPLETADA
-
   return (
     <div className="p-4">
       <Card>
@@ -79,7 +76,7 @@ export default async function CampaignPage({ params, searchParams }: Props) {
               <div>
                 <span className="font-semibold">Contactos:</span> {campaign.contacts.length === 0 ? "Aún no hay contactos seleccionados para esta campaña" : campaign.contacts.length + " contactos"}
               </div>
-              { contactsReady && <RemoveAllContactsButton campaignId={campaign.id} />}
+              { campaign.status === CampaignStatus.CREADA && campaign.contacts.length > 0 && <RemoveAllContactsButton campaignId={campaign.id} />}
             </div>
           </div>
         </CardContent>
@@ -88,14 +85,14 @@ export default async function CampaignPage({ params, searchParams }: Props) {
 
       <Separator className="mt-10 mb-4"/>
 
-      { !contactsReady && !campaignCompleted && showFilters(campaign.id, baseUrl, allTags, allStages, contacts, tags)}
+      { campaign.status === CampaignStatus.CREADA && showFilters(campaign.id, baseUrl, allTags, allStages, contacts, tags)}
 
       {
-        (contactsReady || campaignCompleted) && (
+        (campaign.status === CampaignStatus.COMPLETADA || campaign.status === CampaignStatus.EN_PROCESO) && (
           <div className="space-y-4">
             <DataTable columns={columns} data={campaign.contacts} subject="Contacto"/>
             <div className="border border-dashed rounded-md p-4 flex justify-center items-center h-40">
-              {!campaignCompleted && <ProcessCampaignButton campaignId={campaign.id} />}
+              { campaign.status !== CampaignStatus.COMPLETADA && <ProcessCampaignButton campaignId={campaign.id} />}
             </div>
           </div>
         )
