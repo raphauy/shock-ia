@@ -87,7 +87,7 @@ export default async function CampaignPage({ params, searchParams }: Props) {
 
       <Separator className="mt-10 mb-4"/>
 
-      { !contactsReady && showFilters(campaign.id, baseUrl, allTags, allStages, contacts, tags)}
+      { !contactsReady && campaign.status !== CampaignStatus.EN_PROCESO && campaign.status !== CampaignStatus.COMPLETADA && showFilters(campaign.id, baseUrl, allTags, allStages, contacts, tags)}
 
       {
         (campaign.status === CampaignStatus.COMPLETADA || campaign.status === CampaignStatus.EN_PROCESO || contactsReady) && (
