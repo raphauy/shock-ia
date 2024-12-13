@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import { Loader, MessageSquare } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { setWhatsappInboxIdAction } from "./actions";
 
 
@@ -15,6 +15,10 @@ type ChatwootButtonProps = {
 export default function InboxButton({ clientId, initialWhatsappInboxId }: ChatwootButtonProps) {
     const [loadingSetWhatsappInboxId, setLoadingSetWhatsappInboxId] = useState(false);
     const [whatsappInboxId, setWhatsappInboxId] = useState(initialWhatsappInboxId);
+
+    useEffect(() => {
+        setWhatsappInboxId(initialWhatsappInboxId)
+    }, [initialWhatsappInboxId])
 
     function handleSetWhatsappInboxId() {
       if (!whatsappInboxId) {

@@ -200,7 +200,7 @@ export async function processCampaignContact(campaignContactId: string) {
   console.log("chatwootAccountId: ", chatwootAccountId)
 
   let conversation= await getLastConversationByContactId(contact.id, campaign.clientId)
-  if (!conversation || conversation.contactId !== contact.id) {
+  if (!conversation) {
     const whatsappInstance= await getWhatsappInstance(campaign.clientId)
     if (!whatsappInstance) throw new Error("Whatsapp instance not found")
     if (!whatsappInstance.whatsappInboxId) throw new Error("Whatsapp inbox not found")
