@@ -28,7 +28,7 @@ export default async function WhatsappTab({ client, basePath }: Props) {
         return <div>No instance found</div>
       } else {
         return (
-          <ConnectionDetails instance={wrcInstance} clientId={client.id} chatwootAccountId={client.whatsappInstance?.chatwootAccountId}/>
+          <ConnectionDetails instance={wrcInstance} clientId={client.id} chatwootAccountId={client.whatsappInstance?.chatwootAccountId} whatsappInboxId={client.whatsappInstance?.whatsappInboxId}/>
         )
       }
     }  

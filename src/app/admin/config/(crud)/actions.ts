@@ -1,6 +1,6 @@
 "use server"
 
-import { setHaveAgents, setHaveCRM, setHaveEvents, setTokensPrice } from "@/services/clientService"
+import { setHaveAgents, setHaveCRM, setHaveEvents, setTokensPrice, setWapSendFrequency } from "@/services/clientService"
 import { addTagToFunction, removeTagFromFunction } from "@/services/function-services"
 import { revalidatePath } from "next/cache"
 
@@ -51,4 +51,16 @@ export async function removeTagFromFunctionAction(clientId: string, functionId: 
     revalidatePath(`/admin/config`)
 
     return updated
+}
+
+export async function setWapSendFrequencyAction(clientId: string, notUsed: string, wapSendFrequency: number): Promise<boolean> {
+    const client= await setWapSendFrequency(clientId, wapSendFrequency)
+
+    if (!client) {
+        return false
+    }
+
+    revalidatePath(`/admin/config`)
+
+    return true    
 }

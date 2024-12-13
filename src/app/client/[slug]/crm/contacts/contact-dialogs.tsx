@@ -6,6 +6,7 @@ import { Expand, Pencil, PlusCircle, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { ContactForm, DeleteContactForm } from "./contact-forms";
 import { ContactDAO } from "@/services/contact-services";
+import { usePathname } from "next/navigation";
 
   
 type Props= {
@@ -42,6 +43,10 @@ type DeleteProps= {
 
 export function DeleteContactDialog({ id, description }: DeleteProps) {
   const [open, setOpen] = useState(false)
+  const pathname= usePathname()
+  const isCampaignPage= pathname.includes("campaigns")
+
+  if (isCampaignPage) return null
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

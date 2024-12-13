@@ -616,6 +616,26 @@ export async function setChatwootData(clientId: string, chatwootAccountId: strin
   return updatedInstance
 }
 
+export async function setWhatsappInboxId(clientId: string, whatsappInboxId: string) {
+  const whatsappInstance = await prisma.whatsappInstance.findFirst({
+    where: {
+      clientId
+    }
+  })
+  if (!whatsappInstance) {
+    throw new Error('Whatsapp instance not found')
+  }
+  const updatedInstance = await prisma.whatsappInstance.update({
+    where: {
+      id: whatsappInstance.id
+    },
+    data: {
+      whatsappInboxId
+    }
+  })
+  return updatedInstance
+}
+
 export async function getClientIdsWithChatwootData() {
   const clients = await prisma.whatsappInstance.findMany({
     where: {
@@ -770,4 +790,38 @@ export async function getAllTags(clientId: string) {
   }
 
   return res
+}
+
+export async function getClientName(clientId: string) {
+  const client= await prisma.client.findUnique({
+    where: {
+      id: clientId
+    }
+  })
+  return client?.name || ''
+}
+
+export async function setWapSendFrequency(clientId: string, wapSendFrequency: number) {
+  const client= await prisma.client.update({
+    where: {
+      id: clientId
+    },
+    data: {
+      wapSendFrequency
+    }
+  })
+  return client
+}
+
+export async function getClientOfCampaign(campaignId: string) {
+  const client= await prisma.client.findFirst({
+    where: {
+      campaigns: {
+        some: {
+          id: campaignId
+        }
+      }
+    }
+  })
+  return client
 }

@@ -307,9 +307,6 @@ export async function getStageByContactId(contactId: string) {
 }
 
 export async function getFilteredContacts(clientId: string, from: Date | null, to: Date | null, tags: string[], stageId: string | undefined): Promise<ContactDAOWithStage[]> {
-  console.log("from: ", from)
-  console.log("to: ", to)
-  console.log("tags: ", tags)
   const found = await prisma.contact.findMany({
     where: {
       clientId,

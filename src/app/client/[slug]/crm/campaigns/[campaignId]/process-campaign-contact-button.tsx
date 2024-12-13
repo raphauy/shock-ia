@@ -16,8 +16,12 @@ export function ProcessCampaignContactButton({ campaignContactId }: Props) {
     function handleClick() {
         setLoading(true)
         processCampaignContactAction(campaignContactId)
-        .then(() => {
-            toast({ title: "Mensaje enviado correctamente" })
+        .then((res) => {
+            if (res) {
+                toast({ title: "Mensaje enviado correctamente" })
+            } else {
+                toast({ title: "Error al enviar el mensaje", variant: "destructive" })
+            }
         })
         .catch((error) => {
             toast({

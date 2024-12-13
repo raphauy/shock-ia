@@ -107,6 +107,8 @@ export default async function CampaignPage({ params, searchParams }: Props) {
 }
 
 function showFilters(campaignId: string, baseUrl: string, allTags: string[], allStages: StageDAO[], contacts: ContactDAOWithStage[], tags: string[]) {
+  const contactsWithValidWhatsapp= contacts.filter((c) => isValidWhatsappContact(c))
+  const contactsDiscarded= contacts.length - contactsWithValidWhatsapp.length
   return (
     <div>
       <div className="space-y-4">
@@ -123,13 +125,16 @@ function showFilters(campaignId: string, baseUrl: string, allTags: string[], all
           <p className="font-bold w-24">Etiquetas:</p>
           <TagSelector actualTags={tags} allTags={allTags} baseUrl={baseUrl} />
         </div>
-        <DataTable columns={simpleColumns} data={contacts} subject="Contacto"/>
+        <DataTable columns={simpleColumns} data={contactsWithValidWhatsapp} subject="Contacto"/>
+        {
+          contactsDiscarded > 0 && <p className="text-red-500">* Se descartaron {contactsDiscarded} contactos que no tienen whatsapp</p>
+        }
       </div>
 
       <div className="my-4 w-full border border-dashed rounded-md p-4 flex justify-center items-center h-40">
         {
           contacts.length > 0 ? (
-            <SetContactsButton campaignId={campaignId} contactsIds={contacts.map((c) => c.id)} />
+            <SetContactsButton campaignId={campaignId} contactsIds={contactsWithValidWhatsapp.map((c) => c.id)} />
           ) : (
             <p>No hay contactos seleccionados para esta campaña</p>
           )
@@ -138,4 +143,12 @@ function showFilters(campaignId: string, baseUrl: string, allTags: string[], all
 
     </div>
   )
+}
+
+function isValidWhatsappContact(contact: ContactDAOWithStage) {
+  // Verifica que tenga chatwootId y que el teléfono comience con + seguido solo de dígitos
+  return contact.chatwootId && 
+         contact.phone && 
+         contact.phone.startsWith("+") && 
+         contact.phone.slice(1).match(/^\d+$/)
 }

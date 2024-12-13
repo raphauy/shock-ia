@@ -1,12 +1,11 @@
 import { IconBadge } from "@/components/icon-badge";
-import { Calendar, PersonStanding } from "lucide-react";
-import AvailabilitySelector from "../availability-selector";
+import { SelectNumberForm } from "@/components/select-number-form";
+import { cn } from "@/lib/utils";
 import { EventDAO } from "@/services/event-services";
 import { EventType } from "@prisma/client";
-import { SelectNumberForm } from "@/components/select-number-form";
+import { Calendar } from "lucide-react";
 import { seEventNumberFieldAction } from "../../event-actions";
-import { NumberForm } from "@/components/number-form";
-import { cn } from "@/lib/utils";
+import AvailabilitySelector from "../availability-selector";
 
 type Props = {
     event: EventDAO;

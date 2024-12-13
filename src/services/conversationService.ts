@@ -727,3 +727,42 @@ export async function saveFunction(phone: string, completion: string, clientId: 
 }
 
 
+export async function getLastConversationByPhone(phone: string, clientId: string) {
+  const found = await prisma.conversation.findFirst({
+    where: {
+      phone,
+      clientId,
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  })
+
+  return found
+}
+
+export async function getLastConversationByContactId(contactId: string, clientId: string) {
+  const found= await prisma.conversation.findFirst({
+    where: {
+      contactId,
+      clientId
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  })
+  return found
+}
+
+export async function createConversation(phone: string | null, clientId: string, contactId: string, chatwootConversationId: number) {
+  const created= await prisma.conversation.create({
+    data: {
+      phone: phone || "",
+      clientId,
+      contactId,
+      chatwootConversationId: chatwootConversationId
+    }
+  })
+
+  return created
+}

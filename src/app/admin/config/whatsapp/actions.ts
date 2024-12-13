@@ -1,6 +1,6 @@
 "use server"
 
-import { deleteWhatsappInstance, getClient, getClientBySlug, getWhatsappInstance, setChatwootData, setInboxProvider, setWhatsappInstance } from "@/services/clientService"
+import { deleteWhatsappInstance, getClient, getClientBySlug, getWhatsappInstance, setChatwootData, setInboxProvider, setWhatsappInboxId, setWhatsappInstance } from "@/services/clientService"
 import { connectInstance, connectionState, createInstanceBasic, deleteInstance, logoutInstance, restartInstance, enableChatwoot, disableChatwoot } from "@/services/wrc-sdk"
 import { ChatwootParams, WhatsappInstanceDAO } from "@/services/wrc-sdk-types"
 import { InboxProvider } from "@prisma/client"
@@ -17,6 +17,7 @@ export async function createInstanceAction(instanceName: string) {
         name: response.instance.instanceName,
         externalId: response.instance.instanceId,
         number: null,
+        whatsappInboxId: null,
         chatwootUrl: null,
         chatwootAccountId: null,
         chatwootAccessToken: null,
@@ -104,6 +105,12 @@ export async function disableChatwootAction(instanceName: string) {
 
 export async function setInboxProvidersAction(clientId: string, inboxProvider: InboxProvider) {
     const client = await setInboxProvider(clientId, inboxProvider)
+    revalidatePath('/admin/config')
+    return client
+}
+
+export async function setWhatsappInboxIdAction(clientId: string, whatsappInboxId: string) {
+    const client = await setWhatsappInboxId(clientId, whatsappInboxId)
     revalidatePath('/admin/config')
     return client
 }

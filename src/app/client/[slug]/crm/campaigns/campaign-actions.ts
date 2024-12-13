@@ -1,7 +1,8 @@
 "use server"
   
 import { revalidatePath } from "next/cache"
-import { CampaignDAO, CampaignFormValues, createCampaign, updateCampaign, getCampaignDAO, deleteCampaign, setMessageToCampaign, addContactsToCampaign, removeAllContactsFromCampaign, processCampaignContact, processCampaign } from "@/services/campaign-services"
+import { CampaignDAO, CampaignFormValues, createCampaign, updateCampaign, getCampaignDAO, deleteCampaign, setMessageToCampaign, addContactsToCampaign, removeAllContactsFromCampaign, processCampaignContact, processCampaign, setCampaignContactStatus } from "@/services/campaign-services"
+import { CampaignContactStatus } from "@prisma/client"
 
 
 export async function getCampaignDAOAction(id: string): Promise<CampaignDAO | null> {
@@ -54,11 +55,20 @@ export async function removeAllContactsFromCampaignAction(campaignId: string) {
 }
 
 export async function processCampaignContactAction(campaignContactId: string) {
-    const processed= await processCampaignContact(campaignContactId)
+    try {
+        const processed= await processCampaignContact(campaignContactId)
 
-    revalidatePath("/client/[slug]/crm", "page")
+        revalidatePath("/client/[slug]/crm", "page")
 
-    return processed !== null
+        return processed !== null
+    } catch (error) {
+        console.error("Error al procesar el contacto: ")
+        if (error instanceof Error) {
+            console.error("Error: ", error.message)
+        }
+        await setCampaignContactStatus(campaignContactId, CampaignContactStatus.ERROR)
+        return false
+    }
 }
 
 export async function processCampaignAction(campaignId: string) {

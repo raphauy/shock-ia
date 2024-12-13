@@ -12,14 +12,16 @@ import { QRCodeSVG } from 'qrcode.react';
 import { useEffect, useState } from "react";
 import { connectInstanceAction, deleteInstanceAction, getConnectionStatusAction, logoutInstanceAction, restartInstanceAction } from "./actions";
 import ChatwootButton from "./chatwoot-button";
+import InboxButton from "./inbox-button";
 
 interface ConnectionDetailsProps {
   clientId: string
   instance: WRCInstance
   chatwootAccountId: string | null | undefined
+  whatsappInboxId: string | null | undefined
 }
   
-export function ConnectionDetails({ clientId, instance, chatwootAccountId }: ConnectionDetailsProps) {
+export function ConnectionDetails({ clientId, instance, chatwootAccountId, whatsappInboxId }: ConnectionDetailsProps) {
 
   const [loadingConnect, setLoadingConnect] = useState(false)
   const [loadingLogout, setLoadingLogout] = useState(false)
@@ -200,7 +202,10 @@ export function ConnectionDetails({ clientId, instance, chatwootAccountId }: Con
             !chatwootAccountId ? (
               <ChatwootButton clientId={clientId} instanceName={instance.name} />
             ) : (
-              <div className="text-center font-bold">Chatwoot asociado a la cuenta {chatwootAccountId}</div>
+              <div className="space-y-4">
+                <div className="text-center font-bold">Chatwoot asociado a la cuenta {chatwootAccountId}</div>
+                <InboxButton clientId={clientId} initialWhatsappInboxId={whatsappInboxId || ''} />
+              </div>
             )
           }
         </div>

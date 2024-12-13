@@ -269,3 +269,75 @@ export async function toggleConversationStatus(accountId: number, conversationId
     console.log("Conversation status updated to:", status)
 }
 
+export async function createContact(accountId: number, inboxId: number, phoneNumber: string, name?: string) {
+    const chatwootUrl = process.env.CHATWOOT_URL!
+    const chatwootToken = process.env.CHATWOOT_ACCESS_TOKEN!
+
+    console.log("chatwootUrl:", chatwootUrl)
+    console.log("chatwootToken:", chatwootToken)
+
+    // identifier is the phone number without the + and concatenated with @us.whatsapp.net
+    const identifier = phoneNumber.replace(/\+/g, '').replace(/\s/g, '') + '@us.whatsapp.net'
+
+    try {
+        const client = await getChatwootClient(chatwootToken)
+
+        const contact = await client.contacts.create({
+            accountId: accountId,
+            data: {
+                inbox_id: inboxId,
+                identifier: identifier,
+                phone_number: phoneNumber,
+                name: name || phoneNumber,
+            }
+        })
+
+        // @ts-ignore
+        const id= contact.payload.contact.id
+        console.log("Contact created with id:", id)
+        return id
+    } catch (error) {
+        console.error("Error creating contact:", error)
+        return null
+    }
+}
+
+export async function createChatwootConversation(accountId: number, inboxId: string, chatwootContactId: string) {
+    const chatwootUrl = process.env.CHATWOOT_URL!
+    const chatwootToken = process.env.CHATWOOT_AGENT_BOT_ACCESS_TOKEN!
+    
+    console.log("chatwootUrl:", chatwootUrl)
+    console.log("chatwootToken:", chatwootToken)
+    
+    if (!chatwootUrl || !chatwootToken) {
+        console.error("CHATWOOT_URL or CHATWOOT_AGENT_BOT_ACCESS_TOKEN is not set")
+        return
+    }
+
+    const client = new ChatwootClient({
+        config: {
+            basePath: chatwootUrl,
+            with_credentials: true,
+            credentials: "include",
+            token: chatwootToken
+        }
+    })
+
+    try {
+        const response = await client.conversations.create({
+            accountId,
+            data: {
+                inbox_id: inboxId,
+                status: "pending",                
+                contact_id: chatwootContactId
+            }
+        })
+
+        console.log("Conversation created with id:", response.id)
+        return response.id
+    } catch (error) {
+        console.error("Error creating conversation:", error)
+        throw error
+    }
+}
+

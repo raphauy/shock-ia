@@ -73,6 +73,7 @@ export async function getDataClientWithModel(slug: string, modelName?: string): 
       haveEvents: client.haveEvents,
       haveAgents: client.haveAgents,
       haveCRM: client.haveCRM,
+      wapSendFrequency: client.wapSendFrequency,
       inboxProvider: client.inboxProvider
   }
   return data

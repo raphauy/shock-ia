@@ -11,24 +11,21 @@ interface Props {
     clientId: string
     haveEvents: boolean
     haveAgents: boolean
-    haveCRM: boolean
     inboxProvider: InboxProvider
 }
 
-export default function PropsEdit({ clientId, haveEvents: initialHaveEvents, haveAgents: initialHaveAgents, haveCRM: initialHaveCRM, inboxProvider }: Props) {
+export default function PropsEdit({ clientId, haveEvents: initialHaveEvents, haveAgents: initialHaveAgents, inboxProvider }: Props) {
 
     const [loadingEvents, setLoadingEvents] = useState(false)
     const [loadingAgents, setLoadingAgents] = useState(false)
     const [loadingCRM, setLoadingCRM] = useState(false)
     const [haveEvents, setHaveEvents] = useState(initialHaveEvents)
     const [haveAgents, setHaveAgents] = useState(initialHaveAgents)
-    const [haveCRM, setHaveCRM] = useState(initialHaveCRM)
 
     useEffect(() => {
         setHaveEvents(initialHaveEvents)
         setHaveAgents(initialHaveAgents)
-        setHaveCRM(initialHaveCRM)
-    }, [initialHaveEvents, initialHaveAgents, initialHaveCRM])
+    }, [initialHaveEvents, initialHaveAgents])
 
     function handleHaveEventsChange(haveEvents: boolean) {
         setLoadingEvents(true)
@@ -74,28 +71,9 @@ export default function PropsEdit({ clientId, haveEvents: initialHaveEvents, hav
         })
     }
 
-    function handleHaveCRMChange(haveCRM: boolean) {
-        setLoadingCRM(true)
-        setHaveCRMAction(clientId, haveCRM)
-        .then((res) => {
-            if (res) {
-                setHaveCRM(haveCRM)
-            }
-        })
-        .catch(() => {
-            toast({
-                title: "Error",
-                description: "Ha ocurrido un error al actualizar la configuración del cliente"
-            })
-        })
-        .finally(() => {
-            setLoadingCRM(false)
-        })
-    }
-
     return (
         <div className="w-full p-4 border rounded-lg space-y-4">
-            <p className="text-lg font-bold mb-4">Configuración del cliente:</p>
+            <p className="text-lg font-bold mb-4">Configuración general:</p>
             <div className="flex items-center gap-4">                
                 {
                     loadingEvents ? <Loader className="w-4 h-4 mr-2 animate-spin" /> :
@@ -109,20 +87,6 @@ export default function PropsEdit({ clientId, haveEvents: initialHaveEvents, hav
                     <Switch checked={haveAgents} onCheckedChange={handleHaveAgentsChange} disabled={inboxProvider !== InboxProvider.CHATWOOT} />
                 }
                 <p className="">Agentes (perfil cliente)</p>
-                {
-                    inboxProvider !== InboxProvider.CHATWOOT && (
-                        <p className="text-sm text-gray-500">
-                            Disponible para clientes con el proveedor CHATWOOT.
-                        </p>
-                    )
-                }
-            </div>
-            <div className="flex items-center gap-4">                
-                {
-                    loadingCRM ? <Loader className="w-4 h-4 mr-2 animate-spin" /> :
-                    <Switch checked={haveCRM} onCheckedChange={handleHaveCRMChange} disabled={inboxProvider !== InboxProvider.CHATWOOT} />
-                }
-                <p className="">CRM</p>
                 {
                     inboxProvider !== InboxProvider.CHATWOOT && (
                         <p className="text-sm text-gray-500">

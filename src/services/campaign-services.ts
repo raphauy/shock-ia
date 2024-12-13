@@ -1,9 +1,12 @@
 import { prisma } from "@/lib/db"
 import { CampaignContactStatus, CampaignStatus, CampaignType } from "@prisma/client"
-import * as z from "zod"
-import { ContactDAOWithStage, getContactDAO } from "./contact-services"
 import { Client } from "@upstash/qstash"
 import { format } from "date-fns"
+import * as z from "zod"
+import { createChatwootConversation, sendTextToConversation } from "./chatwoot"
+import { getChatwootAccountId, getClient, getClientName, getClientOfCampaign, getWhatsappInstance } from "./clientService"
+import { ContactDAOWithStage } from "./contact-services"
+import { createConversation, getLastConversationByContactId, messageArrived } from "./conversationService"
 
 const baseUrl= process.env.NEXTAUTH_URL === "http://localhost:3000" ? "https://local.rctracker.dev" : process.env.NEXTAUTH_URL
 const client = new Client({ token: process.env.QSTASH_TOKEN! })
@@ -165,25 +168,70 @@ export async function processCampaignContact(campaignContactId: string) {
   if (campaignContact.status !== CampaignContactStatus.PROGRAMADO && campaignContact.status !== CampaignContactStatus.PENDIENTE) throw new Error("Contacto no está en estado PROGRAMADO o PENDIENTE")
 
   const contact = campaignContact.contact
-  const message = campaignContact.campaign.message
+  const messageTemplate = campaignContact.campaign.message
+  const name= contact.name || "usuario"
+  const message= messageTemplate.replace("{{nombre}}", name)
   const campaign = campaignContact.campaign
 
   console.log("contact: ", contact)
+  console.log("phone: ", contact.phone)
   console.log("message: ", message)
-  console.log("campaign: ", campaign)
+
+  const phone= contact.phone
+//  const phoneRegex= /^\+?[0-9]+$/
+//  if (!phone || !phoneRegex.test(phone)) throw new Error("Contacto no tiene teléfono válido")
+
+  console.log("phone: ", phone)
+  const chatwootAccountId= await getChatwootAccountId(campaign.clientId)
+  if (!chatwootAccountId) throw new Error("Chatwoot account not found")
+  console.log("chatwootAccountId: ", chatwootAccountId)
+
+  let conversation= await getLastConversationByContactId(contact.id, campaign.clientId)
+  if (!conversation || conversation.contactId !== contact.id) {
+    const whatsappInstance= await getWhatsappInstance(campaign.clientId)
+    if (!whatsappInstance) throw new Error("Whatsapp instance not found")
+    if (!whatsappInstance.whatsappInboxId) throw new Error("Whatsapp inbox not found")
+    if (!contact.chatwootId) throw new Error("Chatwoot contact not found")
+    const chatwootConversationId= await createChatwootConversation(Number(chatwootAccountId), whatsappInstance.whatsappInboxId, contact.chatwootId)
+    if (!chatwootConversationId) throw new Error("Chatwoot conversation not found")
+    conversation= await createConversation(phone, campaign.clientId, contact.id, chatwootConversationId)
+  }
+
+  if (!conversation) throw new Error("Conversation not found")
+
+  const assistantMessage= "Información del sistema: A través de una campaña el usuario recibió el siguiente mensaje:\n\n" + message
+  await messageArrived(conversation.phone, assistantMessage, conversation.clientId, "assistant", "", undefined, undefined, conversation.chatwootConversationId || undefined, Number(contact.chatwootId))
+    
+  const chatwootConversationId= conversation.chatwootConversationId
+  if (!chatwootConversationId) throw new Error("Chatwoot conversation not found")
+
+  await sendTextToConversation(Number(chatwootAccountId), chatwootConversationId, message)
 
   const updated = await prisma.campaignContact.update({
     where: {
       id: campaignContactId
     },
     data: {
+      conversationId: conversation.id,
       status: CampaignContactStatus.ENVIADO,
-      sentAt: new Date()
+      sentAt: new Date(),
     }
   })
 
   if (!updated) throw new Error("Error al procesar el contacto")
 
+  return updated
+}
+
+export async function setCampaignContactStatus(campaignContactId: string, status: CampaignContactStatus) {
+  const updated = await prisma.campaignContact.update({
+    where: {
+      id: campaignContactId
+    },
+    data: {
+      status
+    }
+  })
   return updated
 }
 
@@ -199,7 +247,12 @@ export async function processCampaign(campaignId: string) {
     },
     take: MAX_CONTACTS_TO_PROCESS,
     select: {
-      id: true
+      id: true,
+      campaign: {
+        select: {
+          clientId: true
+        }
+      }
     }
   })
 
@@ -219,7 +272,12 @@ export async function processCampaign(campaignId: string) {
 
   console.log(`Procesando ${campaignContacts.length} contactos...`)
 
-  const delayIncrement = 30
+  const client= await getClientOfCampaign(campaignId)
+  if (!client) throw new Error("Client not found")
+
+  const delayIncrement = client.wapSendFrequency
+  console.log("delayIncrement: ", delayIncrement)
+
   let actualDelay = delayIncrement
 
   for (const campaignContact of campaignContacts) {
@@ -232,7 +290,7 @@ export async function processCampaign(campaignId: string) {
     const notBefore= Math.floor(notBeforeDate.getTime() / 1000)    
     console.log("notBefore: ", notBefore)
 
-    const scheduleId= await scheduleCampaignContact(campaignContact.id, notBefore)
+    const scheduleId= await scheduleCampaignContact(campaignContact.id, notBefore, client.name)
     await prisma.campaignContact.update({
       where: {
         id: campaignContact.id
@@ -252,13 +310,15 @@ export async function processCampaign(campaignId: string) {
   return true
 }
 
-async function scheduleCampaignContact(campaignContactId: string, notBefore: number) {
+async function scheduleCampaignContact(campaignContactId: string, notBefore: number, clientName: string) {
   const result= await client.publishJSON({
     url: `${baseUrl}/api/process-campaign-message`,
     body: {
-      campaignContactId
+      campaignContactId,
+      clientName
     },
-    notBefore
+    notBefore,
+    retries: 0
   })
   console.log("Upstash result: ", result)
   

@@ -84,6 +84,7 @@ model Client {
   haveEvents            Boolean   @default(false)
   haveAgents            Boolean   @default(false)
   haveCRM               Boolean   @default(false)
+  wapSendFrequency      Int       @default(30)
 
   functions             ClientFunction[]
 
@@ -482,6 +483,8 @@ model WhatsappInstance {
   chatwootAccountId   String?
   chatwootUrl         String?
   chatwootAccessToken String?
+
+  whatsappInboxId     String?
 
   client              Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
   clientId            String

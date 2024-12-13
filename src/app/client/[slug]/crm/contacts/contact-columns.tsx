@@ -7,6 +7,7 @@ import { ContactDAOWithStage } from "@/services/contact-services"
 import { ColumnDef } from "@tanstack/react-table"
 import { format } from "date-fns"
 import { ArrowUpDown } from "lucide-react"
+import { DeleteContactDialog } from "./contact-dialogs"
 
   
 
@@ -107,6 +108,19 @@ export const columns: ColumnDef<ContactDAOWithStage>[] = [
     filterFn: (row, id, value) => {
       const tags= row.original.tags.join(",")
       return tags.includes(value)
+    },
+  },
+
+  {
+    id: "actions",
+    cell: ({ row }) => {
+      const data= row.original
+      const deleteDescription= `Seguro que quieres eliminar el contacto ${data.name}? Ten en cuenta que esto eliminará todas las conversaciones asociadas a este contacto y la información del contacto que haya en las campañas.`
+      return (
+        <div className="flex items-center justify-end gap-2">
+          <DeleteContactDialog description={deleteDescription} id={data.id} />
+        </div>
+      )
     },
   },
 
