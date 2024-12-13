@@ -262,7 +262,7 @@ export async function setCampaignContactStatus(campaignContactId: string, status
 
 export async function processCampaign(campaignId: string) {
   
-  const MAX_CONTACTS_TO_PROCESS = 1
+  const MAX_CONTACTS_TO_PROCESS = 1000
 
   // get MAX_CONTACTS_TO_PROCESS contacts ids with status PENDIENTE
   const campaignContacts = await prisma.campaignContact.findMany({
