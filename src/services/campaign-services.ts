@@ -113,6 +113,18 @@ export async function updateCampaign(id: string, data: CampaignFormValues) {
   return updated
 }
 
+export async function setCampaignStatus(campaignId: string, status: CampaignStatus) {
+  const updated = await prisma.campaign.update({
+    where: {
+      id: campaignId
+    },
+    data: {
+      status
+    }
+  })
+  return updated
+}
+
 export async function deleteCampaign(id: string) {
   const deleted = await prisma.campaign.delete({
     where: {
@@ -259,14 +271,7 @@ export async function processCampaign(campaignId: string) {
   if (campaignContacts.length === 0) {
     console.log("No hay contactos pendientes para procesar")
     // update campaign status to COMPLETADA
-    await prisma.campaign.update({
-      where: {
-        id: campaignId
-      },
-      data: {
-        status: CampaignStatus.COMPLETADA
-      }
-    })
+    await setCampaignStatus(campaignId, CampaignStatus.COMPLETADA)
     return true
   }
 
@@ -305,7 +310,9 @@ export async function processCampaign(campaignId: string) {
     actualDelay += delayIncrement
   }
 
-  console.log("Fin de iteración")
+  // update campaign status to COMPLETADA
+  await setCampaignStatus(campaignId, CampaignStatus.COMPLETADA)
+  console.log("Campaign status updated to COMPLETADA")
 
   return true
 }
