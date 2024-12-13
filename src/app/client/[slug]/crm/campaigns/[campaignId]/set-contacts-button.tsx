@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
-import { Loader } from "lucide-react";
+import { ArrowRight, Loader } from "lucide-react";
 import { useState } from "react";
 import { addContactsToCampaignAction } from "../campaign-actions";
 
@@ -35,7 +35,7 @@ export default function SetContactsButton({ campaignId, contactsIds }: Props) {
 
     return (
         <Button onClick={handleClick} disabled={loading} className="w-full gap-2">
-            Seleccionar estos {contactsIds.length} contactos para esta campaña
+            Revisar campaña ({contactsIds.length} contactos) <ArrowRight className="w-4 h-4" />
             {loading && <Loader className="w-4 h-4 animate-spin" />}
         </Button>
     )

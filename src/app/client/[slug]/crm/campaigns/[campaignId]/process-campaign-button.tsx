@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
-import { Loader } from "lucide-react";
+import { Loader, Play } from "lucide-react";
 import { useState } from "react";
 import { processCampaignAction } from "../campaign-actions";
 
@@ -29,7 +29,7 @@ export default function ProcessCampaignButton({ campaignId }: Props) {
 
     return (
         <Button onClick={handleClick} disabled={loading} className="w-full gap-2">
-            Iniciar campaña
+            Iniciar campaña <Play className="w-4 h-4" />
             {loading && <Loader className="w-4 h-4 animate-spin" />}
         </Button>
     )

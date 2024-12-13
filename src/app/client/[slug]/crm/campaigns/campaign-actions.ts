@@ -1,8 +1,8 @@
 "use server"
   
-import { revalidatePath } from "next/cache"
-import { CampaignDAO, CampaignFormValues, createCampaign, updateCampaign, getCampaignDAO, deleteCampaign, setMessageToCampaign, addContactsToCampaign, removeAllContactsFromCampaign, processCampaignContact, processCampaign, setCampaignContactStatus } from "@/services/campaign-services"
+import { addContactsToCampaign, addTagToCampaign, CampaignDAO, CampaignFormValues, createCampaign, deleteCampaign, getCampaignDAO, processCampaign, processCampaignContact, removeAllContactsFromCampaign, removeTagFromCampaign, setCampaignContactStatus, setMessageToCampaign, updateCampaign } from "@/services/campaign-services"
 import { CampaignContactStatus } from "@prisma/client"
+import { revalidatePath } from "next/cache"
 
 
 export async function getCampaignDAOAction(id: string): Promise<CampaignDAO | null> {
@@ -77,4 +77,20 @@ export async function processCampaignAction(campaignId: string) {
     revalidatePath("/client/[slug]/crm", "page")
 
     return processed !== null
+}
+
+export async function addTagToCampaignAction(campaignId: string, tag: string) {
+    const updated= await addTagToCampaign(campaignId, tag)
+
+    revalidatePath("/client/[slug]/crm", "page")
+
+    return updated !== null
+}
+
+export async function removeTagFromCampaignAction(campaignId: string, tag: string) {
+    const updated= await removeTagFromCampaign(campaignId, tag)
+
+    revalidatePath("/client/[slug]/crm", "page")
+
+    return updated !== null
 }

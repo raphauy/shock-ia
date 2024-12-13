@@ -18,6 +18,8 @@ import SetContactsButton from "./set-contacts-button"
 import StageSelector from "./stage-selector"
 import TagSelector from "./tag-selector"
 import ProcessCampaignButton from "./process-campaign-button"
+import TagInput from "./tag-input"
+import { Badge } from "@/components/ui/badge"
 
 type Props= {
   params: {
@@ -77,24 +79,33 @@ export default async function CampaignPage({ params, searchParams }: Props) {
             <div className="flex items-center gap-2">
               <div>
                 <span className="font-semibold">Contactos:</span> {campaign.contacts.length === 0 ? "Aún no hay contactos seleccionados para esta campaña" : campaign.contacts.length + " contactos"}
-              </div>
-              { contactsReady && <RemoveAllContactsButton campaignId={campaign.id} />}
+              </div>              
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-semibold">Etiquetas:</span>
+              { campaign.tags.map(tag => <Badge key={tag}>{tag}</Badge>)}
+            </div>
+            <div className="">
+              <span className="font-semibold">Mensaje:</span>
+              <p>{campaign.message}</p>
             </div>
           </div>
         </CardContent>
       </Card>
-      <DescriptionForm id={campaign.id} label="Mensaje al usuario" initialValue={campaign.message ?? ""} update={setMessageToCampaignAction} />
 
-      <Separator className="mt-10 mb-4"/>
-
-      { !contactsReady && campaign.status !== CampaignStatus.EN_PROCESO && campaign.status !== CampaignStatus.COMPLETADA && showFilters(campaign.id, baseUrl, allTags, allStages, contacts, tags)}
+      { 
+        !contactsReady && campaign.status !== CampaignStatus.EN_PROCESO && campaign.status !== CampaignStatus.COMPLETADA && 
+        showFilters(campaign, baseUrl, allTags, allStages, contacts, tags)
+      }
 
       {
         (campaign.status === CampaignStatus.COMPLETADA || campaign.status === CampaignStatus.EN_PROCESO || contactsReady) && (
-          <div className="space-y-4">
+          <div className="space-y-4 mt-10">
+            <p className="text-lg font-bold">Envíos para esta campaña:</p>
             <DataTable columns={columns} data={campaign.contacts} subject="Contacto"/>
-            <div className="border border-dashed rounded-md p-4 flex justify-center items-center h-40">
+            <div className="border border-dashed rounded-md p-4 h-40 space-y-2 flex flex-col justify-center items-center">
               { campaign.status !== CampaignStatus.COMPLETADA && <ProcessCampaignButton campaignId={campaign.id} />}
+              { contactsReady && <RemoveAllContactsButton campaignId={campaign.id} />}
             </div>
           </div>
         )
@@ -105,11 +116,15 @@ export default async function CampaignPage({ params, searchParams }: Props) {
   )
 }
 
-function showFilters(campaignId: string, baseUrl: string, allTags: string[], allStages: StageDAO[], contacts: ContactDAOWithStage[], tags: string[]) {
+function showFilters(campaign: CampaignDAO, baseUrl: string, allTags: string[], allStages: StageDAO[], contacts: ContactDAOWithStage[], tags: string[]) {
   const contactsWithValidWhatsapp= contacts.filter((c) => isValidWhatsappContact(c))
   const contactsDiscarded= contacts.length - contactsWithValidWhatsapp.length
   return (
-    <div>
+    <div className="space-y-4">
+      <DescriptionForm id={campaign.id} label="Mensaje al usuario" initialValue={campaign.message ?? ""} update={setMessageToCampaignAction} />
+
+      <TagInput campaignId={campaign.id} initialTags={campaign.tags} />
+
       <div className="space-y-4">
         <p className="text-lg font-bold">Filtrar Contactos:</p>
         <div className="flex items-center gap-2">
@@ -133,7 +148,7 @@ function showFilters(campaignId: string, baseUrl: string, allTags: string[], all
       <div className="my-4 w-full border border-dashed rounded-md p-4 flex justify-center items-center h-40">
         {
           contacts.length > 0 ? (
-            <SetContactsButton campaignId={campaignId} contactsIds={contactsWithValidWhatsapp.map((c) => c.id)} />
+            <SetContactsButton campaignId={campaign.id} contactsIds={contactsWithValidWhatsapp.map((c) => c.id)} />
           ) : (
             <p>No hay contactos seleccionados para esta campaña</p>
           )

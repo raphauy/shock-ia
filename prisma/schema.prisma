@@ -624,6 +624,7 @@ model Campaign {
   type          CampaignType                            // gennext: show.column
   name          String                                  // gennext: show.column
   status        CampaignStatus                          // gennext: show.column
+  tags          String[]
 
   message       String @default("Estimado {{nombre}}, le escribimos para...")
 

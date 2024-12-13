@@ -5,7 +5,7 @@ import { format } from "date-fns"
 import * as z from "zod"
 import { createChatwootConversation, sendTextToConversation } from "./chatwoot"
 import { getChatwootAccountId, getClient, getClientName, getClientOfCampaign, getWhatsappInstance } from "./clientService"
-import { ContactDAOWithStage } from "./contact-services"
+import { addTagsToContact, ContactDAOWithStage } from "./contact-services"
 import { createConversation, getLastConversationByContactId, messageArrived } from "./conversationService"
 
 const baseUrl= process.env.NEXTAUTH_URL === "http://localhost:3000" ? "https://local.rctracker.dev" : process.env.NEXTAUTH_URL
@@ -30,6 +30,7 @@ export type CampaignDAO = {
 	type: CampaignType
 	name: string
 	status: CampaignStatus
+  tags: string[]
 	message: string
 	clientId: string
 	contacts: CampaignContactDAO[]
@@ -237,6 +238,11 @@ export async function processCampaignContact(campaignContactId: string) {
 
   if (!updated) throw new Error("Error al procesar el contacto")
 
+  const tags= campaign.tags
+  if (tags.length > 0) {
+    const by= "camp-" + campaign.name
+    await addTagsToContact(contact.id, tags, by)
+  }
   // check if all contacts are sent and update campaign status to COMPLETADA
   const contactsRemaining= await prisma.campaignContact.count({
     where: {
@@ -348,4 +354,33 @@ async function scheduleCampaignContact(campaignContactId: string, notBefore: num
   console.log("Upstash result: ", result)
   
   return result.messageId
+}
+
+export async function addTagToCampaign(campaignId: string, tag: string) {
+  const updated = await prisma.campaign.update({
+    where: { 
+      id: campaignId 
+    },
+    data: {
+      tags: {
+        push: tag
+      }
+    }
+  })
+  return updated
+}
+
+export async function removeTagFromCampaign(campaignId: string, tag: string) {
+  const campaign= await getCampaignDAO(campaignId)
+  if (!campaign) throw new Error("Campaign not found")
+  
+  const updated= await prisma.campaign.update({
+    where: { 
+      id: campaignId 
+    },
+    data: { 
+      tags: campaign.tags.filter(t => t !== tag) 
+    }
+  })
+  return updated
 }
