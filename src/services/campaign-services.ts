@@ -218,7 +218,11 @@ export async function processCampaignContact(campaignContactId: string) {
   const chatwootConversationId= conversation.chatwootConversationId
   if (!chatwootConversationId) throw new Error("Chatwoot conversation not found")
 
-  await sendTextToConversation(Number(chatwootAccountId), chatwootConversationId, message)
+  if (phone !== "+59899565515") {
+    await sendTextToConversation(Number(chatwootAccountId), chatwootConversationId, message)
+  }
+
+  //await sendTextToConversation(Number(chatwootAccountId), chatwootConversationId, message)
 
   const updated = await prisma.campaignContact.update({
     where: {
