@@ -55,7 +55,7 @@ export default async function CampaignPage({ params, searchParams }: Props) {
 
   const baseUrl= `/client/${params.slug}/crm/campaigns/${params.campaignId}`
 
-  const contactsReady= campaign.status === CampaignStatus.CREADA && campaign.contacts.length > 0
+  const contactsReady= (campaign.status === CampaignStatus.CREADA || campaign.status === CampaignStatus.EN_PROCESO) && campaign.contacts.length > 0
   const campaignCompleted= campaign.status === CampaignStatus.COMPLETADA
 
   return (
