@@ -104,7 +104,11 @@ export default async function CampaignPage({ params, searchParams }: Props) {
             <p className="text-lg font-bold">Envíos para esta campaña:</p>
             <DataTable columns={columns} data={campaign.contacts} subject="Contacto"/>
             <div className="border border-dashed rounded-md p-4 h-40 space-y-2 flex flex-col justify-center items-center">
-              { campaign.status !== CampaignStatus.COMPLETADA && <ProcessCampaignButton campaignId={campaign.id} />}
+              { campaign.status === CampaignStatus.EN_PROCESO && <p className="text-green-500">Esta campaña está en proceso</p> }
+              { campaign.status === CampaignStatus.COMPLETADA && <p className="text-blue-500">Esta campaña ya está completada</p> }
+              { campaign.status !== CampaignStatus.COMPLETADA && campaign.status !== CampaignStatus.EN_PROCESO && 
+                <ProcessCampaignButton campaignId={campaign.id} />
+              }
               { contactsReady && <RemoveAllContactsButton campaignId={campaign.id} />}
             </div>
           </div>
