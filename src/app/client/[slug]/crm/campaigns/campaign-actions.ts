@@ -1,6 +1,6 @@
 "use server"
   
-import { addContactsToCampaign, addTagToCampaign, CampaignDAO, CampaignFormValues, createCampaign, deleteCampaign, getCampaignDAO, processCampaign, processCampaignContact, removeAllContactsFromCampaign, removeTagFromCampaign, setCampaignContactStatus, setMessageToCampaign, updateCampaign } from "@/services/campaign-services"
+import { addContactsToCampaign, addTagToCampaign, CampaignDAO, CampaignFormValues, cancelCampaign, createCampaign, deleteCampaign, deleteScheduledCampaignContact, getCampaignDAO, processCampaign, processCampaignContact, removeAllContactsFromCampaign, removeTagFromCampaign, setCampaignContactStatus, setMessageToCampaign, updateCampaign } from "@/services/campaign-services"
 import { CampaignContactStatus } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 
@@ -93,4 +93,20 @@ export async function removeTagFromCampaignAction(campaignId: string, tag: strin
     revalidatePath("/client/[slug]/crm", "page")
 
     return updated !== null
+}
+
+export async function deleteScheduledCampaignContactAction(campaignContactId: string) {
+    const cancelled= await deleteScheduledCampaignContact(campaignContactId)
+
+    revalidatePath("/client/[slug]/crm", "page")
+
+    return cancelled !== null
+}
+
+export async function cancelCampaignAction(campaignId: string) {
+    const cancelled= await cancelCampaign(campaignId)
+
+    revalidatePath("/client/[slug]/crm", "page")
+
+    return cancelled !== null
 }

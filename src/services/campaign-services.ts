@@ -178,8 +178,13 @@ export async function processCampaignContact(campaignContactId: string) {
     }
   })
   if (!campaignContact) throw new Error("Contacto no encontrado")
-  if (campaignContact.status === CampaignContactStatus.ENVIADO) return campaignContact
-  if (campaignContact.status !== CampaignContactStatus.PROGRAMADO && campaignContact.status !== CampaignContactStatus.PENDIENTE) throw new Error("Contacto no está en estado PROGRAMADO o PENDIENTE")
+  if (campaignContact.status === CampaignContactStatus.ENVIADO || campaignContact.status === CampaignContactStatus.CANCELADO) {
+    await checkAndUpdateCampaignStatus(campaignContact.campaignId)
+    return campaignContact
+  }
+  if (campaignContact.status !== CampaignContactStatus.PROGRAMADO && campaignContact.status !== CampaignContactStatus.PENDIENTE) {
+    throw new Error("Contacto no está en estado PROGRAMADO o PENDIENTE")
+  }
 
   const contact = campaignContact.contact
   const messageTemplate = campaignContact.campaign.message
@@ -219,11 +224,7 @@ export async function processCampaignContact(campaignContactId: string) {
   const chatwootConversationId= conversation.chatwootConversationId
   if (!chatwootConversationId) throw new Error("Chatwoot conversation not found")
 
-  if (phone !== "+59899565515") {
-    await sendTextToConversation(Number(chatwootAccountId), chatwootConversationId, message)
-  }
-
-  //await sendTextToConversation(Number(chatwootAccountId), chatwootConversationId, message)
+  await sendTextToConversation(Number(chatwootAccountId), chatwootConversationId, message)
 
   const updated = await prisma.campaignContact.update({
     where: {
@@ -243,20 +244,31 @@ export async function processCampaignContact(campaignContactId: string) {
     const by= "camp-" + campaign.name
     await addTagsToContact(contact.id, tags, by)
   }
+
+  await checkAndUpdateCampaignStatus(campaign.id)
+
+  return updated
+}
+
+async function checkAndUpdateCampaignStatus(campaignId: string) {
   // check if all contacts are sent and update campaign status to COMPLETADA
   const contactsRemaining= await prisma.campaignContact.count({
     where: {
-      campaignId: campaign.id,
+      campaignId,
       status: {
         in: [CampaignContactStatus.PENDIENTE, CampaignContactStatus.PROGRAMADO]
       }
     }
   })
   if (contactsRemaining === 0) {
-    await setCampaignStatus(campaign.id, CampaignStatus.COMPLETADA)
+    const campaign= await getCampaignDAO(campaignId)
+    if (campaign.status === CampaignStatus.EN_PROCESO) {
+      await setCampaignStatus(campaignId, CampaignStatus.COMPLETADA)
+    } else {
+      console.log(`Campaign status is ${campaign.status}, skipping update`)
+    }
   }
-
-  return updated
+  
 }
 
 export async function setCampaignContactStatus(campaignContactId: string, status: CampaignContactStatus) {
@@ -383,4 +395,46 @@ export async function removeTagFromCampaign(campaignId: string, tag: string) {
     }
   })
   return updated
+}
+
+export async function deleteScheduledCampaignContact(campaignContactId: string) {
+  const campaignContact= await prisma.campaignContact.findUnique({
+    where: {
+      id: campaignContactId
+    }
+  })
+  if (!campaignContact) throw new Error("Campaign contact not found")
+  const scheduleId= campaignContact.scheduleId
+  if (!scheduleId) throw new Error("Schedule not found")
+  // check status of schedule
+  if (campaignContact.status !== CampaignContactStatus.PROGRAMADO && campaignContact.status !== CampaignContactStatus.PENDIENTE) {
+    console.log(`Contact in status ${campaignContact.status}, skipping delete`)
+    return
+  }
+
+  console.log("Deleting schedule: ", scheduleId)
+
+  await client.schedules.delete(scheduleId)
+
+  await prisma.campaignContact.update({
+    where: {
+      id: campaignContactId
+    },
+    data: {
+      status: CampaignContactStatus.CANCELADO
+    }
+  })
+}
+
+export async function cancelCampaign(campaignId: string) {
+  const campaignContacts= await prisma.campaignContact.findMany({
+    where: {
+      campaignId
+    }
+  })
+  for (const campaignContact of campaignContacts) {
+    await deleteScheduledCampaignContact(campaignContact.id)
+  }
+
+  await setCampaignStatus(campaignId, CampaignStatus.CANCELADA)
 }

@@ -8,9 +8,9 @@ import { CampaignContactStatus } from "@prisma/client"
 import { ColumnDef } from "@tanstack/react-table"
 import { format } from "date-fns"
 import { ArrowUpDown } from "lucide-react"
-import { ProcessCampaignContactButton } from "./process-campaign-contact-button"
-import Link from "next/link"
+import { DeleteScheduledCampaignContactButton } from "./delete-schedule-button"
 import { ConversationLink } from "./conversation-link"
+import { ProcessCampaignContactButton } from "./process-campaign-contact-button"
 
   
 
@@ -42,6 +42,7 @@ export const columns: ColumnDef<CampaignContactDAO>[] = [
             </Badge>
             {data.status === CampaignContactStatus.PENDIENTE && <ProcessCampaignContactButton campaignContactId={data.id} />}
             {data.status === CampaignContactStatus.ENVIADO && data.conversationId && <ConversationLink conversationId={data.conversationId} />}
+            {/* {data.status === CampaignContactStatus.PROGRAMADO && <DeleteScheduledCampaignContactButton campaignContactId={data.id} />} */}
           </div>
           <p className="text-xs text-gray-500 mt-1">
           {data.status === CampaignContactStatus.PROGRAMADO && data.scheduledTo ? format(data.scheduledTo, "yyyy/MM/dd HH:mm:ss") : ""}
