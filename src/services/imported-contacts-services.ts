@@ -2,6 +2,7 @@ import * as z from "zod"
 import { prisma } from "@/lib/db"
 import { Client, ImportedContact, ImportedContactStatus, ImportedContactType, WhatsappInstance } from "@prisma/client"
 import { createContact } from "./chatwoot"
+import { checkValidPhone } from "@/lib/utils"
 
 export type ImportedContactDAO = {
 	id: string
@@ -120,7 +121,7 @@ export async function processPendingImportedContacts() {
   for (const contact of pendingContacts) {
     const client= contact.client
     const phone= contact.phone.startsWith("+") ? contact.phone : `+${contact.phone}`
-    const isPhoneValid= await checkPhoneValid(phone)
+    const isPhoneValid= await checkValidPhone(phone)
     if (!isPhoneValid) {
       console.log(`Número inválido: ${phone} de ${client.name}`)
       await updateError(contact.id, "Número inválido")
@@ -201,12 +202,6 @@ export async function getPendingImportedContactsDAO(maxContacts: number) {
     take: maxContacts
   })
   return found
-}
-
-export async function checkPhoneValid(phone: string) {
-  // Nueva expresión regular
-  const expReg = /^(\+)?(598|549|1|56|55|52)?[0-9]{9,13}$/
-  return expReg.test(phone)
 }
 
 export async function getImportedContactByChatwootId(chatwootContactId: string) {
