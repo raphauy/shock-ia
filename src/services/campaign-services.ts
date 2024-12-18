@@ -5,7 +5,7 @@ import { format } from "date-fns"
 import * as z from "zod"
 import { createChatwootConversation, sendTextToConversation } from "./chatwoot"
 import { getChatwootAccountId, getClient, getClientName, getClientOfCampaign, getWhatsappInstance } from "./clientService"
-import { addTagsToContact, ContactDAOWithStage } from "./contact-services"
+import { addTagsToContact, ContactDAOWithStage, setNewStage } from "./contact-services"
 import { createConversation, getLastConversationByContactId, messageArrived } from "./conversationService"
 
 const baseUrl= process.env.NEXTAUTH_URL === "http://localhost:3000" ? "https://local.rctracker.dev" : process.env.NEXTAUTH_URL
@@ -31,6 +31,7 @@ export type CampaignDAO = {
 	name: string
 	status: CampaignStatus
   tags: string[]
+  moveToStageId: string | null | undefined
 	message: string
 	clientId: string
 	contacts: CampaignContactDAO[]
@@ -245,6 +246,18 @@ export async function processCampaignContact(campaignContactId: string) {
     await addTagsToContact(contact.id, tags, by)
   }
 
+  // const moveToStageId= event.moveToStageId
+  // if (moveToStageId && chatwootAccountId && contactId) {
+  //   console.log("setting new stage to contact, by: EV-" + event.name)
+  //   await setNewStage(contactId, moveToStageId, "EV-" + event.name)
+  // }
+
+  const moveToStageId= campaign.moveToStageId
+  if (moveToStageId) {
+    console.log("setting new stage to contact, by: CAMP-" + campaign.name)
+    await setNewStage(contact.id, moveToStageId, "CAMP-" + campaign.name)
+  }
+
   await checkAndUpdateCampaignStatus(campaign.id)
 
   return updated
@@ -437,4 +450,16 @@ export async function cancelCampaign(campaignId: string) {
   }
 
   await setCampaignStatus(campaignId, CampaignStatus.CANCELADA)
+}
+
+export async function setMoveToStageIdOfCampaign(campaignId: string, moveToStageId: string | null) {
+  const updated= await prisma.campaign.update({
+    where: {
+      id: campaignId
+    },
+    data: {
+      moveToStageId
+    }
+  })
+  return updated
 }

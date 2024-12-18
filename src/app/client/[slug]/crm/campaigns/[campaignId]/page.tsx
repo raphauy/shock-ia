@@ -1,6 +1,6 @@
 import { DescriptionForm } from "@/components/description-form"
+import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
 import { cn, getDatesFromSearchParams } from "@/lib/utils"
 import { CampaignDAO, getCampaignDAO } from "@/services/campaign-services"
 import { getAllTags } from "@/services/clientService"
@@ -13,14 +13,14 @@ import { DataTable } from "../../contacts/contact-table"
 import DatesFilter from "../../kanban/dates-filter"
 import { setMessageToCampaignAction } from "../campaign-actions"
 import { columns } from "./contact-columns"
+import ProcessCampaignButton from "./process-campaign-button"
 import RemoveAllContactsButton from "./remove-all-contacts"
+import SelectStage from "./select-stage"
 import SetContactsButton from "./set-contacts-button"
 import StageSelector from "./stage-selector"
-import TagSelector from "./tag-selector"
-import ProcessCampaignButton from "./process-campaign-button"
 import TagInput from "./tag-input"
-import { Badge } from "@/components/ui/badge"
-import CancelCampaignButton from "./cancel-campaign-button"
+import TagSelector from "./tag-selector"
+import { Separator } from "@/components/ui/separator"
 
 type Props= {
   params: {
@@ -86,6 +86,10 @@ export default async function CampaignPage({ params, searchParams }: Props) {
               <span className="font-semibold">Etiquetas:</span>
               { campaign.tags.map(tag => <Badge key={tag}>{tag}</Badge>)}
             </div>
+            <div className="flex items-center gap-2">
+              <span className="font-semibold">Mover a estado:</span>
+              <p>{campaign.moveToStageId ? allStages.find(s => s.id === campaign.moveToStageId)?.name : ""}</p>
+            </div>
             <div className="">
               <span className="font-semibold">Mensaje:</span>
               <p>{campaign.message}</p>
@@ -133,6 +137,12 @@ function showFilters(campaign: CampaignDAO, baseUrl: string, allTags: string[], 
       <DescriptionForm id={campaign.id} label="Mensaje al usuario" initialValue={campaign.message ?? ""} update={setMessageToCampaignAction} />
 
       <TagInput campaignId={campaign.id} initialTags={campaign.tags} />
+
+      <p className="font-bold">Mover a estado:</p>
+      <SelectStage campaign={campaign} stages={allStages} />
+      <p className="text-sm text-muted-foreground">Se moverán los contactos de esta campaña a este estado cuando se procesen.</p>
+
+      <Separator className="my-4" />
 
       <div className="space-y-4">
         <p className="text-lg font-bold">Filtrar Contactos:</p>

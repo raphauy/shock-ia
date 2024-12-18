@@ -1,6 +1,6 @@
 "use server"
   
-import { addContactsToCampaign, addTagToCampaign, CampaignDAO, CampaignFormValues, cancelCampaign, createCampaign, deleteCampaign, deleteScheduledCampaignContact, getCampaignDAO, processCampaign, processCampaignContact, removeAllContactsFromCampaign, removeTagFromCampaign, setCampaignContactStatus, setMessageToCampaign, updateCampaign } from "@/services/campaign-services"
+import { addContactsToCampaign, addTagToCampaign, CampaignDAO, CampaignFormValues, cancelCampaign, createCampaign, deleteCampaign, deleteScheduledCampaignContact, getCampaignDAO, processCampaign, processCampaignContact, removeAllContactsFromCampaign, removeTagFromCampaign, setCampaignContactStatus, setMessageToCampaign, setMoveToStageIdOfCampaign, updateCampaign } from "@/services/campaign-services"
 import { CampaignContactStatus } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 
@@ -109,4 +109,16 @@ export async function cancelCampaignAction(campaignId: string) {
     revalidatePath("/client/[slug]/crm", "page")
 
     return cancelled !== null
+}
+
+export async function setMoveToStageIdOfCampaignAction(campaignId: string, moveToStageId: string | null): Promise<boolean> {
+    console.log("setMoveToStageIdOfCampaignAction", campaignId, moveToStageId)
+    const updated= await setMoveToStageIdOfCampaign(campaignId, moveToStageId)
+    console.log("updated", updated)
+
+    if (!updated) return false
+
+    revalidatePath("/client/[slug]/crm", "page")
+
+    return true
 }
