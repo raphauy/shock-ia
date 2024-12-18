@@ -2,7 +2,8 @@ import { prisma } from "@/lib/db"
 import { ContactEventType } from "@prisma/client"
 import * as z from "zod"
 import { createContactEvent } from "./contact-event-services"
-import { createDefaultStages, getFirstStageOfClient, StageDAO } from "./stage-services"
+import { createDefaultStages, getFirstStageOfClient, getStageByName, StageDAO } from "./stage-services"
+import { getImportedContactByChatwootId } from "./imported-contacts-services"
 
 export type ContactDAO = {
 	id: string
@@ -73,8 +74,18 @@ export async function createContact(data: ContactFormValues) {
 
   console.log("createContact: ", data)
 
-
   let firstStage= await getFirstStageOfClient(data.clientId)
+  let tags: string[]= []
+  const importedContact= await getImportedContactByChatwootId(data.chatwootId || "")
+  if (importedContact) {
+    const stageName= importedContact.stageName
+    const stage= await getStageByName(data.clientId, stageName || "")
+    if (stage) {
+      firstStage= stage
+    }
+    tags= importedContact.tags || []
+  }
+  
   if (!firstStage){
     console.log('No first stage found, creating default stages')
     await createDefaultStages(data.clientId)
@@ -89,7 +100,8 @@ export async function createContact(data: ContactFormValues) {
     data: {
       ...data,
       stageId: firstStage.id,
-      order: minOrder - 1
+      order: minOrder - 1,
+      tags
     },
     include: {
 			stage: true,
@@ -97,6 +109,19 @@ export async function createContact(data: ContactFormValues) {
   })
   if (!created) throw new Error('Error creating contact')
   await createContactEvent(ContactEventType.CREATED, undefined, undefined, created.id)
+
+  if (importedContact) {
+    const stageName= importedContact.stageName
+    const stage= await getStageByName(data.clientId, stageName || "")
+    if (stage) {
+      await createContactEvent(ContactEventType.MOVED_TO_STAGE, stage.name, "Import-"+importedContact.type, created.id)
+    }
+    if (tags.length > 0) {
+      for (const tag of tags) {
+        await createContactEvent(ContactEventType.TAGGED, tag, "Import-"+importedContact.type, created.id)
+      }
+    }
+  }
 
   return created
 }
@@ -321,6 +346,9 @@ export async function getFilteredContacts(clientId: string, from: Date | null, t
     },
     include: {
       stage: true,
+    },
+    orderBy: {
+      id: "desc"
     }
   })
   return found

@@ -18,6 +18,7 @@ import WhatsappTab from "./whatsapp/whatsapp-tab"
 import FCTab from "./fc-tab"
 import { getReposOfClient } from "@/services/repository-services"
 import CRMPropsEdit from "./crm-edit-box"
+import ContactsHook from "./contacts-hook"
 
 type Props = {
     searchParams: {
@@ -76,6 +77,10 @@ export default async function ConfigPage({ searchParams }: Props) {
                         <CopyHook name="Car Service Entry" path={`${BASE_PATH}/api/${client.id}/car-service`} clientId={client.id} />
                     }
                     <RegistrosHook basePath={BASE_PATH} />
+                    {
+                        client.haveCRM &&
+                        <ContactsHook basePath={BASE_PATH} />
+                    }
                 </TabsContent>
                 <TabsContent value="whatsapp">
                     <div className="w-fit mx-auto mb-4">

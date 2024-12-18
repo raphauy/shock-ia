@@ -54,7 +54,7 @@ export const columns: ColumnDef<CampaignContactDAO>[] = [
   },
 
   {
-    accessorKey: "contact.name",
+    accessorKey: "name",
     header: ({ column }) => {
         return (
           <Button variant="ghost" className="pl-0 dark:text-white"
@@ -77,7 +77,12 @@ export const columns: ColumnDef<CampaignContactDAO>[] = [
           </div>
         </div>
       )
-    }
+    },
+    filterFn: (row, id, value) => {
+      const name = row.original.contact.name ?? ""
+      const phone = row.original.contact.phone ?? ""
+      return name.toLowerCase().includes(value.toLowerCase()) || phone.toLowerCase().includes(value.toLowerCase())
+    },
   },
 
   {

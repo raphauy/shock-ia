@@ -1,5 +1,6 @@
 "use server"
 
+import { getInboxId } from "@/services/chatwoot"
 import { deleteWhatsappInstance, getClient, getClientBySlug, getWhatsappInstance, setChatwootData, setInboxProvider, setWhatsappInboxId, setWhatsappInstance } from "@/services/clientService"
 import { connectInstance, connectionState, createInstanceBasic, deleteInstance, logoutInstance, restartInstance, enableChatwoot, disableChatwoot } from "@/services/wrc-sdk"
 import { ChatwootParams, WhatsappInstanceDAO } from "@/services/wrc-sdk-types"
@@ -78,8 +79,8 @@ export async function enableChatwootAction(clientId: string, instanceName: strin
         url,
         signMsg: true,
         reopenConversation: false,
-        conversationPending: true,
-        nameInbox: instanceName,
+        conversationPending: true,        
+        nameInbox: "whatsapp",
         importContacts: false,        
         importMessages: false,
         daysLimitImportMessages: 7,
@@ -91,7 +92,9 @@ export async function enableChatwootAction(clientId: string, instanceName: strin
 
     await enableChatwoot(instanceName, params)
 
-    const chatwootUpdated= await setChatwootData(clientId, chatwootAccountId, token, url)
+    const whatsappInboxId = await getInboxId(Number(chatwootAccountId), "whatsapp")
+
+    const chatwootUpdated= await setChatwootData(clientId, chatwootAccountId, token, url, String(whatsappInboxId))
 
     revalidatePath('/admin/config')
 

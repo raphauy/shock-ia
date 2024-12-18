@@ -1,33 +1,46 @@
 "use client"
 
-import { DataTableFacetedFilter } from "@/components/data-table/data-table-faceted-filter"
-import { DataTablePagination } from "@/components/data-table/data-table-pagination"
+import * as React from "react"
+import { Table as TanstackTable } from "@tanstack/react-table"
+import { DataTableViewOptions } from "@/components/data-table/data-table-view-options"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { ColumnDef, ColumnFiltersState, SortingState, Table as TanstackTable, VisibilityState, flexRender, getCoreRowModel, getFacetedRowModel, getFacetedUniqueValues, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table"
 import { X } from "lucide-react"
-import * as React from "react"
-
-const fuentes = ["whatsapp", "widget-web"]
+import { ColumnDef, ColumnFiltersState, SortingState, VisibilityState, flexRender, getCoreRowModel, getFacetedRowModel, getFacetedUniqueValues, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table"
+import { DataTablePagination } from "@/components/data-table/data-table-pagination"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { DataTableFacetedFilter } from "@/components/data-table/data-table-faceted-filter"
+import { ImportedContactStatus } from "@prisma/client"
   
 interface DataTableToolbarProps<TData> {
   table: TanstackTable<TData>;
-  fieldToFilter: string;
 }
 
-export function DataTableToolbar<TData>({ table, fieldToFilter }: DataTableToolbarProps<TData>) {
+export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0
 
   return (
-    <div className="flex gap-1 dark:text-white items-center justify-end">
+    <div className="flex gap-1 dark:text-white items-center">
         
-          <Input className="max-w-xs" placeholder="buscar contacto en este filtro..."
-              value={(table.getColumn(fieldToFilter)?.getFilterValue() as string) ?? ""}
-              onChange={(event) => table.getColumn(fieldToFilter)?.setFilterValue(event.target.value)}                
+          <Input className="max-w-xs" placeholder="name filter..."
+              value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+              onChange={(event) => table.getColumn("name")?.setFilterValue(event.target.value)}                
           />
           
       
+          <Input className="max-w-xs" placeholder="phone filter..."
+              value={(table.getColumn("phone")?.getFilterValue() as string) ?? ""}
+              onChange={(event) => table.getColumn("phone")?.setFilterValue(event.target.value)}                
+          />
+          
+      
+        {table.getColumn("status") && (
+          <DataTableFacetedFilter
+            column={table.getColumn("status")}
+            title="Status"
+            options={Object.values(ImportedContactStatus)}
+          />
+        )}
         {isFiltered && (
           <Button
             variant="ghost"
@@ -47,7 +60,6 @@ interface DataTableProps<TData, TValue> {
   data: TData[]
   columnsOff?: string[]
   subject: string
-  fieldToFilter: string
 }
 
 export function DataTable<TData, TValue>({
@@ -55,7 +67,6 @@ export function DataTable<TData, TValue>({
   data,
   columnsOff,
   subject,
-  fieldToFilter,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({})
   const [columnVisibility, setColumnVisibility] =
@@ -95,7 +106,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="w-full space-y-4 dark:text-white">
-      <DataTableToolbar table={table} fieldToFilter={fieldToFilter}/>
+      <DataTableToolbar table={table}/>
       <div className="border rounded-md">
         <Table>
           <TableHeader>

@@ -591,7 +591,7 @@ export async function getWhatsappInstance(clientId: string) {
   return client.whatsappInstances[0]
 }
 
-export async function setChatwootData(clientId: string, chatwootAccountId: string, chatwootAccessToken: string, chatwootUrl: string) {
+export async function setChatwootData(clientId: string, chatwootAccountId: string, chatwootAccessToken: string, chatwootUrl: string, whatsappInboxId: string) {
   const whatsappInstance = await prisma.whatsappInstance.findFirst({
     where: {
       clientId
@@ -609,7 +609,8 @@ export async function setChatwootData(clientId: string, chatwootAccountId: strin
     data: {
       chatwootAccountId,
       chatwootAccessToken,
-      chatwootUrl
+      chatwootUrl,
+      whatsappInboxId
     }
   })
 

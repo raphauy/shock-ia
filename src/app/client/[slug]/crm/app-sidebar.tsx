@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
-import { BookOpen, Bot, ChevronRightSquare, DatabaseZap, Kanban, LayoutDashboard, LogOut, Megaphone, MessageCircle, MessagesSquare, Phone, RectangleEllipsis, Tag, User } from "lucide-react";
+import { BookOpen, Bot, ChevronRightSquare, DatabaseZap, Kanban, LayoutDashboard, LogOut, Megaphone, MessageCircle, MessagesSquare, Phone, RectangleEllipsis, Tag, User, Users } from "lucide-react";
 import { useParams, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -18,6 +18,12 @@ const items = [
     title: "Contactos",
     url: `crm/contacts?last=30D`,
     icon: User,
+    group: "data",
+  },
+  {
+    title: "Importación",
+    url: `crm/imported-contacts`,
+    icon: Users,
     group: "data",
   },
   {

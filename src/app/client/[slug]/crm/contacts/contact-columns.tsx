@@ -34,7 +34,12 @@ export const columns: ColumnDef<ContactDAOWithStage>[] = [
           {data.name}
         </div>
       )
-    }
+    },
+    filterFn: (row, id, value) => {
+      const name = row.original.name ?? ""
+      const phone = row.original.phone ?? ""
+      return name.toLowerCase().includes(value.toLowerCase()) || phone.toLowerCase().includes(value.toLowerCase())
+    },
   },
 
   {

@@ -60,7 +60,7 @@ export default async function CampaignPage({ params, searchParams }: Props) {
           <p className="font-bold w-24">Etiquetas:</p>
           <TagSelector actualTags={tags} allTags={allTags} baseUrl={baseUrl} />
         </div>
-        <DataTable columns={columns} data={contacts} subject="Contacto"/>
+        <DataTable columns={columns} data={contacts} subject="Contacto" fieldToFilter="name"/>
       </div>
 
     </div>

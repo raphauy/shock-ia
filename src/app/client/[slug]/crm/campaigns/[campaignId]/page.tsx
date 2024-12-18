@@ -103,7 +103,7 @@ export default async function CampaignPage({ params, searchParams }: Props) {
         (campaign.status === CampaignStatus.COMPLETADA || campaign.status === CampaignStatus.EN_PROCESO || campaign.status === CampaignStatus.CANCELADA || contactsReady) && (
           <div className="space-y-4 mt-10">
             <p className="text-lg font-bold">Envíos para esta campaña:</p>
-            <DataTable columns={columns} data={campaign.contacts} subject="Contacto"/>
+            <DataTable columns={columns} data={campaign.contacts} subject="Contacto" fieldToFilter="name"/>
             <div className="border border-dashed rounded-md p-4 h-40 space-y-2 flex flex-col justify-center items-center">
               { campaign.status === CampaignStatus.EN_PROCESO && <p className="text-blue-500">Esta campaña está en proceso</p> }
               {/* { campaign.status === CampaignStatus.EN_PROCESO && <CancelCampaignButton campaignId={campaign.id} /> } */}
@@ -148,7 +148,7 @@ function showFilters(campaign: CampaignDAO, baseUrl: string, allTags: string[], 
           <p className="font-bold w-24">Etiquetas:</p>
           <TagSelector actualTags={tags} allTags={allTags} baseUrl={baseUrl} />
         </div>
-        <DataTable columns={simpleColumns} data={contactsWithValidWhatsapp} subject="Contacto"/>
+        <DataTable columns={simpleColumns} data={contactsWithValidWhatsapp} subject="Contacto" fieldToFilter="name"/>
         {
           contactsDiscarded > 0 && <p className="text-red-500">* Se descartaron {contactsDiscarded} contactos que no tienen whatsapp</p>
         }

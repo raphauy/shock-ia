@@ -104,6 +104,8 @@ model Client {
   stages                Stage[]        // gennext: skip.list
   tags         String[]       // gennext: skip.list
   campaigns             Campaign[]     // gennext: skip.list
+
+  importedContacts      ImportedContact[]
 }
 
 model Document {
@@ -664,4 +666,37 @@ model CampaignContact {
 
   createdAt       DateTime   @default(now())             // gennext: skip.zod
   updatedAt       DateTime   @updatedAt                  // gennext: skip.zod
+}
+
+enum ImportedContactStatus {
+  PENDIENTE
+  PROCESADO
+  ERROR
+}
+
+enum ImportedContactType {
+  API
+  CSV
+  MANUAL
+}
+
+model ImportedContact {
+  id                 String      @id @default(cuid())
+  name               String                                      // gennext: show.column
+  phone              String                                      // gennext: show.column
+  tags               String[]                                    // gennext: show.column
+  stageName          String?                                     // gennext: show.column
+
+  chatwootContactId  String?
+
+  status             ImportedContactStatus @default(PENDIENTE) // gennext: show.column
+  error              String?                                   // gennext: show.column
+
+  type               ImportedContactType @default(MANUAL)
+
+  client             Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId           String
+
+  createdAt          DateTime   @default(now())                 // gennext: skip.zod
+  updatedAt          DateTime   @updatedAt                      // gennext: skip.zod
 }

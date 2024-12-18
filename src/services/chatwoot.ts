@@ -224,8 +224,6 @@ async function getChatwootClient(token: string | undefined) {
     }
     const chatwootUrl = process.env.CHATWOOT_URL!
     
-    console.log("chatwootUrl:", chatwootUrl)
-    console.log("chatwootToken:", token)
     if (!chatwootUrl || !token) {
         console.error("CHATWOOT_URL or CHATWOOT_ACCESS_TOKEN is not set")
         throw new Error("CHATWOOT_URL or CHATWOOT_ACCESS_TOKEN is not set")
@@ -269,12 +267,13 @@ export async function toggleConversationStatus(accountId: number, conversationId
     console.log("Conversation status updated to:", status)
 }
 
-export async function createContact(accountId: number, inboxId: number, phoneNumber: string, name?: string) {
-    const chatwootUrl = process.env.CHATWOOT_URL!
-    const chatwootToken = process.env.CHATWOOT_ACCESS_TOKEN!
+type CreateResponse= {
+    id: string | null
+    error: string | null
+}
 
-    console.log("chatwootUrl:", chatwootUrl)
-    console.log("chatwootToken:", chatwootToken)
+export async function createContact(accountId: number, inboxId: number, phoneNumber: string, name?: string): Promise<CreateResponse> {
+    const chatwootToken = process.env.CHATWOOT_ACCESS_TOKEN!
 
     // identifier is the phone number without the + and concatenated with @us.whatsapp.net
     const identifier = phoneNumber.replace(/\+/g, '').replace(/\s/g, '') + '@us.whatsapp.net'
@@ -293,12 +292,17 @@ export async function createContact(accountId: number, inboxId: number, phoneNum
         })
 
         // @ts-ignore
-        const id= contact.payload.contact.id
-        console.log("Contact created with id:", id)
-        return id
+        const id: string= contact.payload.contact.id as string
+        return { id, error: null }
     } catch (error) {
-        console.error("Error creating contact:", error)
-        return null
+        const errorStatus= (error as any).status
+        console.error("error.status: ", errorStatus)
+        if (errorStatus === 422) {
+            return { id: null, error: "Número ya existe" }
+        }
+        const message= error instanceof Error ? error.message : "Error al crear contacto"
+        console.error("Error creating contact:", message)
+        return { id: null, error: message }
     }
 }
 
@@ -341,3 +345,21 @@ export async function createChatwootConversation(accountId: number, inboxId: str
     }
 }
 
+export async function getInboxId(accountId: number, inboxName: string) {
+    const chatwootUrl = process.env.CHATWOOT_URL!
+    const chatwootToken = process.env.CHATWOOT_ACCESS_TOKEN!
+
+    const client = await getChatwootClient(chatwootToken)
+
+    const response = await client.inboxes.list({ accountId: accountId })
+    // @ts-ignore
+    const inboxes = response.payload
+
+    const inbox = inboxes.find((inbox: any) => inbox.name === inboxName)
+    if (!inbox) {
+        console.error("Inbox not found")
+        return null
+    }
+
+    return inbox.id
+}

@@ -77,7 +77,7 @@ export async function createInstanceBasic(instanceName: string): Promise<CreateI
     console.log("baseURL", baseURL)
 
     try {
-        const response = await axios.post<CreateInstanceResponse>(`${baseURL}/instance/create`, { instanceName }, {
+        const response = await axios.post<CreateInstanceResponse>(`${baseURL}/instance/create`, { instanceName, groupsIgnore: true }, {
             headers: {
                 'apiKey': `${apiKey}`,
             },
@@ -214,6 +214,7 @@ export async function enableChatwoot(instanceName: string, params: ChatwootParam
                 'Content-Type': 'application/json',
             },
         })
+        console.log("response.data", response.data)
 
         if (response.status === 200) {
             return true

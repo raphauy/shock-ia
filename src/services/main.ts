@@ -1,15 +1,15 @@
 
 import { config } from "dotenv"
 import { createExternalPayment } from "./cobros-wap"
-import { createContact, createChatwootConversation } from "./chatwoot"
+import { createContact, createChatwootConversation, getInboxId } from "./chatwoot"
 config()
 
 async function main() {
 
     console.log("main init")
 
-    const accountId = 2
-    const inboxId = 40
+    const accountId = 13
+    const inboxId = 46
     const phoneNumber = "+59892265737"
     const name = "Tinta"
 
@@ -20,7 +20,8 @@ async function main() {
     // const contactId = "11854"
     // const conversationId = await createChatwootConversation(accountId, String(inboxId), contactId)
     // console.log("conversationId:", conversationId)
+
 }
   
-//main()
+main()
 
