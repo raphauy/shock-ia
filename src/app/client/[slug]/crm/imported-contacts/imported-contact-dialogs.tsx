@@ -11,7 +11,7 @@ type Props= {
   id?: string
 }
 
-const addTrigger= <Button><PlusCircle size={22} className="mr-2"/>Crear contacto manual</Button>
+const addTrigger= <Button className="w-52"><PlusCircle size={22} className="mr-2"/>Crear contacto manual</Button>
 const updateTrigger= <Pencil size={30} className="pr-2 hover:cursor-pointer"/>
 
 export function ImportedContactDialog({ clientId, id }: Props) {

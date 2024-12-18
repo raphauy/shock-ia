@@ -115,7 +115,7 @@ Carlos Rodríguez,59899123456,Pendiente,nuevo;interesado`
       <DialogTrigger asChild>
         <Button onClick={() => setOpen(true)} className="w-52">
           <File className="w-4 h-4 mr-2" />
-          Importar CSV
+          Importar archivo CSV
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[800px]">
