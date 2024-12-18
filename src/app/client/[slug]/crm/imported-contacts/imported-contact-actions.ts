@@ -1,7 +1,7 @@
 "use server"
   
+import { ImportedContactDAO, ImportedContactFormValues, createImportedContact, deleteImportedContact, fireProcessPendingContactsAPI, getImportedContactDAO, updateImportedContact } from "@/services/imported-contacts-services"
 import { revalidatePath } from "next/cache"
-import { ImportedContactDAO, ImportedContactFormValues, createImportedContact, updateImportedContact, getImportedContactDAO, deleteImportedContact } from "@/services/imported-contacts-services"
 
 export async function getImportedContactDAOAction(id: string): Promise<ImportedContactDAO | null> {
     return getImportedContactDAO(id)
@@ -13,7 +13,12 @@ export async function createOrUpdateImportedContactAction(id: string | null, dat
         updated= await updateImportedContact(id, data)
     } else {
         updated= await createImportedContact(data)
-    }     
+    }
+
+    fireProcessPendingContactsAPI()
+
+    // sleep 2 seconds
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     revalidatePath("/crm/importedContacts")
 

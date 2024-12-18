@@ -1,4 +1,4 @@
-import { createImportedContact, ImportedContactFormValues } from "@/services/imported-contacts-services";
+import { createImportedContact, fireProcessPendingContactsAPI, ImportedContactFormValues } from "@/services/imported-contacts-services";
 import { waitUntil } from "@vercel/functions";
 import { NextResponse } from "next/server";
 
@@ -45,12 +45,7 @@ export async function POST(request: Request, { params }: { params: { clientId: s
 
         // fetch the API to process the contacts which is {NEXTAUTH_URL}/api/process-pending-contacts
         // is a POST request with Bearer token: API_TOKEN
-        waitUntil(fetch(`${process.env.NEXTAUTH_URL}/api/process-pending-contacts`, {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${process.env.API_TOKEN}`
-            }
-        }))
+        waitUntil(fireProcessPendingContactsAPI())
 
 
         return NextResponse.json( { "data": "ACK" }, { status: 200 })

@@ -217,3 +217,12 @@ export async function getImportedContactByChatwootId(chatwootContactId: string) 
   })
   return found
 }
+
+export function fireProcessPendingContactsAPI(): Promise<Response> {
+  return fetch(`${process.env.NEXTAUTH_URL}/api/process-pending-contacts`, {
+    method: "POST",
+    headers: {
+        "Authorization": `Bearer ${process.env.API_TOKEN}`
+    }
+  })
+}
