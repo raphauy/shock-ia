@@ -246,12 +246,6 @@ export async function processCampaignContact(campaignContactId: string) {
     await addTagsToContact(contact.id, tags, by)
   }
 
-  // const moveToStageId= event.moveToStageId
-  // if (moveToStageId && chatwootAccountId && contactId) {
-  //   console.log("setting new stage to contact, by: EV-" + event.name)
-  //   await setNewStage(contactId, moveToStageId, "EV-" + event.name)
-  // }
-
   const moveToStageId= campaign.moveToStageId
   if (moveToStageId) {
     console.log("setting new stage to contact, by: CAMP-" + campaign.name)
