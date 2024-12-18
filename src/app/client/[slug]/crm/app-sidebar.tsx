@@ -79,11 +79,11 @@ export function AppSidebar() {
 
     const { open, setOpen } = useSidebar()
 
-    useEffect(() => {
-        if (open && path.endsWith("/crm")) {
-            setOpen(false)
-        }
-    }, [open, path, setOpen])
+    // useEffect(() => {
+    //     if (open && path.endsWith("/crm")) {
+    //         setOpen(false)
+    //     }
+    // }, [open, path, setOpen])
 
   
     return (

@@ -53,7 +53,7 @@ export async function getCampaignsDAO(clientId: string) {
       clientId
     },
     orderBy: {
-      id: 'asc'
+      id: 'desc'
     },
     include: {
       contacts: {

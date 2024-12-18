@@ -8,7 +8,7 @@ import { format } from "date-fns"
 import { DeleteCampaignDialog, CampaignDialog } from "./campaign-dialogs"
 import Link from "next/link"
 import { CampaignLink } from "./campaign-link"
-import { cn } from "@/lib/utils"
+import { cn, formatWhatsAppStyle } from "@/lib/utils"
 import { CampaignStatus } from "@prisma/client"
 
 
@@ -63,6 +63,25 @@ export const columns: ColumnDef<CampaignDAO>[] = [
           data.status === CampaignStatus.CANCELADA && "text-gray-500")}>
           {data.status}
         </p>
+      )
+    }
+  },
+
+  {
+    accessorKey: "createdAt",
+    header: ({ column }) => {
+      return (
+        <Button variant="ghost" className="pl-0 dark:text-white"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+          Fecha
+          <ArrowUpDown className="w-4 h-4 ml-1" />
+        </Button>
+      )
+    },
+    cell: ({ row }) => {
+      const data= row.original
+      return (
+        <p>{formatWhatsAppStyle(data.createdAt)}</p>
       )
     }
   },
