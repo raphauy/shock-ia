@@ -112,7 +112,7 @@ export async function getFullImportedContactDAO(id: string) {
 
 export async function processPendingImportedContacts() {
   const timeStartInMillis= Date.now()
-  const maxContacts= 15
+  const maxContacts= 300
   console.log(`Max contactos a procesar: ${maxContacts}`)
   const pendingContacts= await getPendingImportedContactsDAO(maxContacts)
   const totalToProcess= pendingContacts.length
@@ -151,7 +151,7 @@ async function processValidPhone(importedContactId: string, phone: string, name:
     if (contactCreated.id) {
       console.log(`Contacto creado en Chatwoot: ${contactCreated.id}`)
       await prisma.importedContact.update({
-        where: { id: importedContactId },
+        where: { id: importedContactId, status: ImportedContactStatus.PENDIENTE },
         data: {
           status: ImportedContactStatus.PROCESADO,
           chatwootContactId: String(contactCreated.id)
@@ -170,7 +170,7 @@ async function processValidPhone(importedContactId: string, phone: string, name:
 
 async function updateError(id: string, error: string) {
   await prisma.importedContact.update({
-    where: { id },
+    where: { id, status: ImportedContactStatus.PENDIENTE },
     data: {
       status: ImportedContactStatus.ERROR,
       error: error
