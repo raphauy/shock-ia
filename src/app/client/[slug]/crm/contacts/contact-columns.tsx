@@ -103,7 +103,7 @@ export const columns: ColumnDef<ContactDAOWithStage>[] = [
     cell: ({ row }) => {
       const data= row.original
       return (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           {data.tags.map((tag, index) => (
             <Badge key={index}>{tag}</Badge>
           ))}
