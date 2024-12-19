@@ -31,7 +31,7 @@ export default async function CRMKanban({ params, searchParams }: Props) {
   const allTags = await getAllTags(client.id)
   const baseUrl= `/client/${params.slug}/crm`
   return (
-    <div className="">
+    <div className="ml-1">
       <div className="flex items-center gap-2">
         <p className="font-bold w-20">Fecha:</p>
         <DatesFilter baseUrl={baseUrl} allTags={allTags} />

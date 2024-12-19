@@ -1,13 +1,10 @@
-import React from "react";
 import { getDataClientBySlug, getDataClientOfUser } from "@/app/admin/clients/(crud)/actions";
-import { getCurrentUser } from "@/lib/auth";
-import { redirect } from "next/navigation";
-import SideBar from "./side-bar";
-import { getClientsOfFunctionByName, getClientsWithSomeFunctionWithRepository } from "@/services/function-services";
-import { getFullModelDAO, getFullModelsDAO } from "@/services/model-services";
-import { ModelSelector, SelectorData } from "@/components/header/model-selector";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import CRMSideBar from "./crm-side-bar";
+import { getCurrentUser } from "@/lib/auth";
+import { getClientsOfFunctionByName, getClientsWithSomeFunctionWithRepository } from "@/services/function-services";
+import { redirect } from "next/navigation";
+import React from "react";
+import SideBar from "./side-bar";
 
 type Props= {
   children: React.ReactNode

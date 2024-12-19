@@ -3,11 +3,13 @@ import { AppSidebar } from "./app-sidebar"
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-      <SidebarProvider className="w-full min-h-full">
+    <div className="relative flex w-full">
+      <SidebarProvider>
         <AppSidebar />
-        <div className="h-full w-full">
+        <main className="flex-1 ml-1">
           {children}
-        </div>
+        </main>
       </SidebarProvider>
+    </div>
   )
 }

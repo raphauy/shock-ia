@@ -88,8 +88,8 @@ export function AppSidebar() {
   
     return (
         <div>
-            <Sidebar className="pt-[50px] z-0 h-full" collapsible="icon">
-                <SidebarContent>
+            <Sidebar className="relative z-0 h-full" collapsible="icon">
+                <SidebarContent className="h-full min-h-[calc(100vh-100px)]">
                     {groups.map((group) => (
                         <SidebarGroup key={group.id}>
                             <div className="flex items-center justify-between">
