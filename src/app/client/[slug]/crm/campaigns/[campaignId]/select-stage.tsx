@@ -12,10 +12,10 @@ type Props = {
 }
 export default function SelectStage({ campaign, stages }: Props) {
     const [loading, setLoading] = useState(false)
-    const [selectedStageId, setSelectedStageId] = useState<string | undefined>(campaign.moveToStageId || undefined)
+    const [selectedStageId, setSelectedStageId] = useState<string | undefined>(campaign.moveToStageId || "none")
 
     useEffect(() => {
-        setSelectedStageId(campaign.moveToStageId || undefined)
+        setSelectedStageId(campaign.moveToStageId || "none")
     }, [campaign])
 
     function onSelectStage(stageId: string | undefined) {   
