@@ -98,6 +98,41 @@ export async function getActiveConversation(phone: string, clientId: string) {
   return found;
 }
 
+export async function getActiveConversationByChatwootContactId(chatwootContactId: number, clientId: string) {
+  // 24 hours
+  let sessionTimeInMinutes= 1440
+    
+  const found = await prisma.conversation.findFirst({
+    where: {
+      contact: {
+        chatwootId: String(chatwootContactId)
+      },
+      clientId,        
+      closed: false,
+      messages: {
+        some: {
+          createdAt: {
+            gte: new Date(Date.now() - sessionTimeInMinutes * 60 * 1000)
+          }
+        }
+      }
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+    include: {
+      client: true,
+      contact: {
+        include: {
+          stage: true
+        }
+      }
+    }
+  })
+
+  return found;
+}
+
 export async function getActiveMessages(phone: string, clientId: string) {
 
   const activeConversation= await getActiveConversation(phone, clientId)
@@ -180,7 +215,14 @@ export async function messageArrived(phone: string, text: string, clientId: stri
 
   if (!clientId) throw new Error("clientId is required")
 
-  const activeConversation= await getActiveConversation(phone, clientId)
+  let activeConversation= null
+
+  if (chatwootContactId) {
+    activeConversation= await getActiveConversationByChatwootContactId(chatwootContactId, clientId)
+  } else {
+    activeConversation= await getActiveConversation(phone, clientId)
+  }
+
   if (activeConversation) {
     const message= await createMessage(activeConversation.id, role, text, gptData, promptTokens, completionTokens)
     return message    
