@@ -1,13 +1,11 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { ColumnDef } from "@tanstack/react-table"
-import { format } from "date-fns"
-import { es } from "date-fns/locale"
-import { ArrowUpDown } from "lucide-react"
-import { DataConversation, DataConversationShort } from "./actions"
-import Link from "next/link"
 import { getFormat } from "@/lib/utils"
+import { ColumnDef } from "@tanstack/react-table"
+import { ArrowUpDown } from "lucide-react"
+import Link from "next/link"
+import { DataConversationShort } from "./actions"
 
 export const columns: ColumnDef<DataConversationShort>[] = [
   {

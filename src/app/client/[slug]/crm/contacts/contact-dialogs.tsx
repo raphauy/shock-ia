@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Expand, Pencil, PlusCircle, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { ContactForm, DeleteContactForm } from "./contact-forms";
+import { BulkDeleteContactForm, ContactForm, DeleteContactForm } from "./contact-forms";
 import { ContactDAO } from "@/services/contact-services";
 import { usePathname } from "next/navigation";
 
@@ -90,6 +90,32 @@ export function DisplayContactDialog({ contact }: DisplayProps) {
             <p>Provisorio para poder etiquetar:</p>
           </div>
         </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+type BulkDeleteProps= {
+  ids: string[]
+}
+
+export function BulkDeleteContactDialog({ ids }: BulkDeleteProps) {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="destructive">
+          <Trash2 className="h-4 w-4" />
+          <p className="ml-2">{`Eliminar ${ids.length} contactos`}</p>
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Eliminar contactos</DialogTitle>
+          <DialogDescription>¿Estás seguro de que deseas eliminar estos contactos?</DialogDescription>
+        </DialogHeader>
+        <BulkDeleteContactForm ids={ids} closeDialog={() => setOpen(false)} />
       </DialogContent>
     </Dialog>
   )

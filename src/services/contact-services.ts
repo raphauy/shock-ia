@@ -4,6 +4,8 @@ import * as z from "zod"
 import { createContactEvent } from "./contact-event-services"
 import { createDefaultStages, getFirstStageOfClient, getStageByName, StageDAO } from "./stage-services"
 import { getImportedContactByChatwootId } from "./imported-contacts-services"
+import { deleteContactInChatwoot } from "./chatwoot"
+import { getChatwootAccountId } from "./clientService"
 
 export type ContactDAO = {
 	id: string
@@ -153,6 +155,14 @@ export async function updateContact(id: string, data: ContactFormValues) {
 }
 
 export async function deleteContact(id: string) {
+  const contact = await getContactDAO(id)
+  if (!contact) throw new Error("Contact not found")
+
+  const chatwootAccountId = await getChatwootAccountId(contact.clientId)
+  if (!chatwootAccountId) throw new Error("Chatwoot account not found")
+    
+  await deleteContactInChatwoot(Number(chatwootAccountId), Number(contact.chatwootId))
+
   const deleted = await prisma.contact.delete({
     where: {
       id

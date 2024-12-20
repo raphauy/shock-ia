@@ -39,6 +39,13 @@ export async function deleteContactAction(id: string): Promise<ContactDAO | null
     return deleted as ContactDAO
 }
 
+export async function deleteContactBulkAction(ids: string[]) {
+    for (const id of ids) {
+        await deleteContact(id)
+    }
+    revalidatePath("/client/[slug]/crm", "page")
+}
+
 export async function getContactsByStageAction(stageId: string) {
     return getContactsByStage(stageId)
 }

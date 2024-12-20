@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { toast } from "@/components/ui/use-toast"
 import { useEffect, useState } from "react"
-import { deleteContactAction, createOrUpdateContactAction, getContactDAOAction } from "./contact-actions"
+import { deleteContactAction, createOrUpdateContactAction, getContactDAOAction, deleteContactBulkAction } from "./contact-actions"
 import { contactSchema, ContactFormValues } from '@/services/contact-services'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -164,12 +164,46 @@ export function DeleteContactForm({ id, closeDialog }: DeleteProps) {
   
   return (
     <div>
-      <Button onClick={() => closeDialog && closeDialog()} type="button" variant={"secondary"} className="w-32">Cancel</Button>
+      <Button onClick={() => closeDialog && closeDialog()} type="button" variant={"secondary"} className="w-32">Cancelar</Button>
       <Button onClick={handleDelete} variant="destructive" className="w-32 ml-2 gap-1">
         { loading && <Loader className="h-4 w-4 animate-spin" /> }
-        Delete  
+        Eliminar  
       </Button>
     </div>
   )
 }
 
+type BulkDeleteProps= {
+  ids: string[]
+  closeDialog: () => void
+}
+
+export function BulkDeleteContactForm({ ids, closeDialog }: BulkDeleteProps) {
+  const [loading, setLoading] = useState(false)
+
+  async function handleDelete() {
+    if (!ids) return
+    setLoading(true)
+    deleteContactBulkAction(ids)
+    .then(() => {
+      toast({title: "Contactos eliminados" })
+    })
+    .catch((error: any) => {
+      toast({title: "Error", description: error.message, variant: "destructive"})
+    })
+    .finally(() => {
+      setLoading(false)
+      closeDialog && closeDialog()
+    })
+  }
+  
+  return (
+    <div>
+      <Button onClick={() => closeDialog && closeDialog()} type="button" variant={"secondary"} className="w-32">Cancelar</Button>
+      <Button onClick={handleDelete} variant="destructive" className="ml-2 gap-1">
+        { loading && <Loader className="h-4 w-4 animate-spin" /> }
+        { `Eliminar ${ids.length} contactos` }
+      </Button>
+    </div>
+  )
+}

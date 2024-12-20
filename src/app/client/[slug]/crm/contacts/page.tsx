@@ -8,6 +8,7 @@ import { columns } from "./contact-columns"
 import { DataTable } from "./contact-table"
 import StageSelector from "../campaigns/[campaignId]/stage-selector"
 import { getStagesDAO } from "@/services/stage-services"
+import { BulkDeleteContactDialog } from "./contact-dialogs"
 
 type Props= {
   params: {
@@ -61,6 +62,10 @@ export default async function CampaignPage({ params, searchParams }: Props) {
           <TagSelector actualTags={tags} allTags={allTags} baseUrl={baseUrl} />
         </div>
         <DataTable columns={columns} data={contacts} subject="Contacto" fieldToFilter="name"/>
+      </div>
+
+      <div className="flex justify-end mt-4">
+        <BulkDeleteContactDialog ids={contacts.map(contact => contact.id)} />
       </div>
 
     </div>

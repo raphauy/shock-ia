@@ -363,3 +363,10 @@ export async function getInboxId(accountId: number, inboxName: string) {
 
     return inbox.id
 }
+
+export async function deleteContactInChatwoot(accountId: number, contactId: number) {
+    const chatwootToken = process.env.CHATWOOT_ACCESS_TOKEN!
+    const client = await getChatwootClient(chatwootToken)
+    await client.contacts.delete({ accountId: accountId, id: contactId })
+    console.log("Contact deleted in chatwoot: ", contactId)
+}
