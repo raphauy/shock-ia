@@ -761,3 +761,15 @@ export async function createConversation(phone: string | null, clientId: string,
 
   return created
 }
+
+export async function removeContactIdFromAllConversations(contactId: string, clientId: string) {
+  await prisma.conversation.updateMany({
+    where: {
+      contactId,
+      clientId
+    },
+    data: {
+      contactId: null
+    }
+  })
+}

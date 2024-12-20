@@ -6,6 +6,7 @@ import { createDefaultStages, getFirstStageOfClient, getStageByName, StageDAO } 
 import { getImportedContactByChatwootId } from "./imported-contacts-services"
 import { deleteContactInChatwoot } from "./chatwoot"
 import { getChatwootAccountId } from "./clientService"
+import { removeContactIdFromAllConversations } from "./conversationService"
 
 export type ContactDAO = {
 	id: string
@@ -160,8 +161,10 @@ export async function deleteContact(id: string) {
 
   const chatwootAccountId = await getChatwootAccountId(contact.clientId)
   if (!chatwootAccountId) throw new Error("Chatwoot account not found")
-    
+
   await deleteContactInChatwoot(Number(chatwootAccountId), Number(contact.chatwootId))
+
+  await removeContactIdFromAllConversations(contact.id, contact.clientId)
 
   const deleted = await prisma.contact.delete({
     where: {
