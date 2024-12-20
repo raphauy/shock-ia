@@ -1,11 +1,7 @@
-import { getDataClientBySlug } from "@/app/admin/clients/(crud)/actions"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { CountData, getClientBySlug, getCountData } from "@/services/clientService"
-import { getUsersOfClient } from "@/services/userService"
-import { BookOpen, HomeIcon, MessageCircle, User } from "lucide-react"
+import { CountData } from "@/services/clientService"
+import { BookOpen, MessageCircle, User } from "lucide-react"
 import Link from "next/link"
-import { getDataConversations, getTotalMessages } from "./chats/actions"
 
 interface Props{
   countData: CountData

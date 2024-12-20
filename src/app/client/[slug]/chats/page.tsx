@@ -1,14 +1,14 @@
 "use client"
 
 import { DataClient, getDataClientBySlug } from "@/app/admin/clients/(crud)/actions"
+import { toast } from "@/components/ui/use-toast"
 import { Loader } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
-import { DataConversation, DataConversationShort, getDataConversationAction, getDataConversations, getDataConversationsShort, getLastDataConversationAction } from "./actions"
+import { DataConversation, DataConversationShort, getDataConversationAction, getDataConversationsShort, getLastDataConversationAction } from "./actions"
 import { columns } from "./columns"
 import ConversationBox from "./conversation-box"
 import { DataTable } from "./data-table"
-import { toast } from "@/components/ui/use-toast"
 
 interface Props {
   params: {

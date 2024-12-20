@@ -34,27 +34,6 @@ export default async function getConversations() {
 }
 
 // if clientId = "ALL" then return all conversations
-export async function getConversationsOfClient(clientId: string) {
-  const where= clientId === "ALL" ? {} : {
-    clientId
-  }
-
-  const found = await prisma.conversation.findMany({
-    where,
-    orderBy: {
-      createdAt: 'desc',
-    },
-    include: {
-      client: true,
-      messages: true
-    },
-    take: 100
-  })
-
-  return found;
-}
-
-// if clientId = "ALL" then return all conversations
 export async function getConversationsShortOfClient(clientId: string) {
   const where= clientId === "ALL" ? {} : {
     clientId

@@ -1,7 +1,7 @@
 "use server"
 
 import { getFormat } from "@/lib/utils"
-import { deleteConversation, getConversation, getConversationsOfClient, getConversationsShortOfClient, getLastConversation } from "@/services/conversationService"
+import { deleteConversation, getConversation, getConversationsShortOfClient, getLastConversation } from "@/services/conversationService"
 import { Client, Conversation, Message } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 
@@ -90,31 +90,11 @@ function getData(conversation: Conversation & { messages: Message[], client: Cli
 }
 
 
-export async function getDataConversations(clientId: string) {
-    const conversations= await getConversationsOfClient(clientId)
-
-    const data: DataConversation[]= conversations.map(conversation => getData(conversation))
-    
-    return data    
-}
-
 export async function getDataConversationsShort(clientId: string) {
     const conversationsShort= await getConversationsShortOfClient(clientId)
 
     return conversationsShort as DataConversationShort[]
 }
-
-export async function getTotalMessages(clientId: string) {
-    const conversations= await getConversationsOfClient(clientId)
-
-    let total= 0
-    conversations.forEach(conversation => {
-        total+= conversation.messages.length
-    })
-    return total
-    
-}
-
 
 export async function eliminate(conversationId: string): Promise<Conversation | null> {    
     const deleted= await deleteConversation(conversationId)
@@ -123,7 +103,3 @@ export async function eliminate(conversationId: string): Promise<Conversation | 
 
     return deleted
 }
-
-// export async function getSummitIdByConversationIdAction(conversationId: string): Promise<string | undefined> {
-//     return getSummitIdByConversationId(conversationId)
-// }
