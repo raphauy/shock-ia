@@ -7,6 +7,7 @@ import { createContactEvent } from "./contact-event-services"
 import { getImportedContactByChatwootId } from "./imported-contacts-services"
 import { createDefaultStages, getFirstStageOfClient, getStageByName, StageDAO } from "./stage-services"
 import { removeContactFromAllConversations } from "./conversationService"
+import { ApiError } from "@figuro/chatwoot-sdk"
 
 export type ContactDAO = {
 	id: string
@@ -162,7 +163,21 @@ export async function deleteContact(id: string) {
   const chatwootAccountId = await getChatwootAccountId(contact.clientId)
   if (!chatwootAccountId) throw new Error("Chatwoot account not found")
 
-  await deleteContactInChatwoot(Number(chatwootAccountId), Number(contact.chatwootId))
+  const chatwootContactId= contact.chatwootId
+  if (chatwootContactId && !isNaN(Number(chatwootContactId))) {
+    console.log("deleting contact in chatwoot: ", chatwootContactId)
+    // catch  Internal error: ApiError: Contact not found
+    try {
+      await deleteContactInChatwoot(Number(chatwootAccountId), Number(chatwootContactId))
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 404) {
+        console.log("Contact not found in chatwoot, skipping deletion")
+      } else {
+        console.error("Error deleting contact in chatwoot: ", error)
+        throw error
+      }
+    }
+  }
 
   await removeContactFromAllConversations(contact.id, contact.clientId)
 
