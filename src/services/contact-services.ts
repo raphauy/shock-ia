@@ -1,12 +1,12 @@
 import { prisma } from "@/lib/db"
 import { ContactEventType } from "@prisma/client"
 import * as z from "zod"
-import { createContactEvent } from "./contact-event-services"
-import { createDefaultStages, getFirstStageOfClient, getStageByName, StageDAO } from "./stage-services"
-import { getImportedContactByChatwootId } from "./imported-contacts-services"
 import { deleteContactInChatwoot } from "./chatwoot"
 import { getChatwootAccountId } from "./clientService"
-import { removeContactIdFromAllConversations } from "./conversationService"
+import { createContactEvent } from "./contact-event-services"
+import { getImportedContactByChatwootId } from "./imported-contacts-services"
+import { createDefaultStages, getFirstStageOfClient, getStageByName, StageDAO } from "./stage-services"
+import { removeContactFromAllConversations } from "./conversationService"
 
 export type ContactDAO = {
 	id: string
@@ -164,7 +164,7 @@ export async function deleteContact(id: string) {
 
   await deleteContactInChatwoot(Number(chatwootAccountId), Number(contact.chatwootId))
 
-  await removeContactIdFromAllConversations(contact.id, contact.clientId)
+  await removeContactFromAllConversations(contact.id, contact.clientId)
 
   const deleted = await prisma.contact.delete({
     where: {
