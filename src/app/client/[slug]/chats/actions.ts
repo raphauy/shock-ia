@@ -1,7 +1,7 @@
 "use server"
 
 import { getFormat } from "@/lib/utils"
-import { deleteConversation, getConversation, getConversationsOfClient, getLastConversation } from "@/services/conversationService"
+import { deleteConversation, getConversation, getConversationsOfClient, getConversationsShortOfClient, getLastConversation } from "@/services/conversationService"
 import { Client, Conversation, Message } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 
@@ -31,7 +31,17 @@ export type DataConversation = {
     zona?: string
     presupuesto?: string
 }
-      
+ 
+export type DataConversationShort = {
+    id: string
+    createdAt: Date
+    updatedAt: Date
+    phone: string
+    client: {
+        name: string
+        slug: string
+    }
+}
 
 export async function getDataConversationAction(conversationId: string): Promise<DataConversation | null>{
     const conversation= await getConversation(conversationId)
@@ -86,6 +96,12 @@ export async function getDataConversations(clientId: string) {
     const data: DataConversation[]= conversations.map(conversation => getData(conversation))
     
     return data    
+}
+
+export async function getDataConversationsShort(clientId: string) {
+    const conversationsShort= await getConversationsShortOfClient(clientId)
+
+    return conversationsShort as DataConversationShort[]
 }
 
 export async function getTotalMessages(clientId: string) {

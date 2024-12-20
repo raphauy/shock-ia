@@ -4,7 +4,7 @@ import { DataClient, getDataClientBySlug } from "@/app/admin/clients/(crud)/acti
 import { Loader } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
-import { DataConversation, getDataConversationAction, getDataConversations, getLastDataConversationAction } from "./actions"
+import { DataConversation, DataConversationShort, getDataConversationAction, getDataConversations, getDataConversationsShort, getLastDataConversationAction } from "./actions"
 import { columns } from "./columns"
 import ConversationBox from "./conversation-box"
 import { DataTable } from "./data-table"
@@ -28,7 +28,7 @@ export default function ChatPage({ searchParams: { id }, params: { slug } }: Pro
 
   const [conversation, setConversation] = useState<DataConversation>()
   const [client, setClient] = useState<DataClient>()
-  const [dataConversations, setDataConversations] = useState<DataConversation[]>([])
+  const [dataConversations, setDataConversations] = useState<DataConversationShort[]>([])
 
   console.log("slug: ", slug)
 
@@ -65,7 +65,7 @@ export default function ChatPage({ searchParams: { id }, params: { slug } }: Pro
     .then(client => {
       if (client) {
         setClient(client)
-        getDataConversations(client.id)
+        getDataConversationsShort(client.id)
         .then(data => {
           if (data) setDataConversations(data)
           if (data.length === 0) {

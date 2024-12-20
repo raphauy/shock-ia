@@ -51,20 +51,36 @@ export async function getConversationsOfClient(clientId: string) {
     take: 100
   })
 
-  // const found = await prisma.conversation.findMany({
-  //   where: {
-  //     clientId
-  //   },
-  //   orderBy: {
-  //     createdAt: 'desc',
-  //   },
-  //   include: {
-  //     client: true,
-  //     messages: true
-  //   }
-  // })
-
   return found;
+}
+
+// if clientId = "ALL" then return all conversations
+export async function getConversationsShortOfClient(clientId: string) {
+  const where= clientId === "ALL" ? {} : {
+    clientId
+  }
+
+  const found = await prisma.conversation.findMany({
+    where,
+    orderBy: {
+      createdAt: 'desc',
+    },
+    select: {
+      id: true,
+      createdAt: true,
+      updatedAt: true,
+      phone: true,
+      client: {
+        select: {
+          name: true,
+          slug: true
+        }
+      }
+    },
+    take: 500
+  })
+
+  return found
 }
 
 

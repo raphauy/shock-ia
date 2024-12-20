@@ -5,12 +5,13 @@ import { ColumnDef } from "@tanstack/react-table"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { ArrowUpDown } from "lucide-react"
-import { DataConversation } from "./actions"
+import { DataConversation, DataConversationShort } from "./actions"
 import Link from "next/link"
+import { getFormat } from "@/lib/utils"
 
-export const columns: ColumnDef<DataConversation>[] = [
+export const columns: ColumnDef<DataConversationShort>[] = [
   {
-    accessorKey: "fecha",
+    accessorKey: "createdAt",
     header: ({ column }) => {
       return (
         <Button variant="ghost" className="pl-0 dark:text-white"
@@ -20,9 +21,17 @@ export const columns: ColumnDef<DataConversation>[] = [
         </Button>
       )
     },
+    cell: ({ row }) => {
+      const data= row.original
+      return (
+        <div className="flex items-center justify-start flex-1">
+          {getFormat(data.createdAt)}
+        </div>
+      )
+    }
   },
   {
-    accessorKey: "celular",
+    accessorKey: "phone",
     header: ({ column }) => {
         return (
           <Button variant="ghost" className="pl-0 dark:text-white"
@@ -37,9 +46,9 @@ export const columns: ColumnDef<DataConversation>[] = [
  
       return (
         <div className="flex items-center justify-start flex-1">
-          <Link href={`/client/${data.clienteSlug}/chats?id=${data.id}`} prefetch={false}>
+          <Link href={`/client/${data.client.slug}/chats?id=${data.id}`} prefetch={false}>
               <Button variant="link" className="pl-0 dark:text-white">
-                {data.celular.slice(0, 12)}
+                {data.phone.slice(0, 12)}
               </Button>
           </Link>
         </div>
