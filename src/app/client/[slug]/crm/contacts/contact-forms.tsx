@@ -35,7 +35,7 @@ export function ContactForm({ id, clientId, closeDialog }: Props) {
     setLoading(true)
     try {
       await createOrUpdateContactAction(id ? id : null, data)
-      toast({ title: id ? "Contact updated" : "Contact created" })
+      toast({ title: id ? "Contacto actualizado" : "Contacto creado" })
       closeDialog()
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" })
@@ -151,7 +151,7 @@ export function DeleteContactForm({ id, closeDialog }: DeleteProps) {
     setLoading(true)
     deleteContactAction(id)
     .then(() => {
-      toast({title: "Contact deleted" })
+      toast({title: "Contacto eliminado" })
     })
     .catch((error) => {
       toast({title: "Error", description: error.message, variant: "destructive"})

@@ -309,7 +309,6 @@ export async function createContact(accountId: number, inboxId: number, phoneNum
 export async function createChatwootConversation(accountId: number, inboxId: string, chatwootContactId: string) {
     const chatwootUrl = process.env.CHATWOOT_URL!
     const chatwootToken = process.env.CHATWOOT_AGENT_BOT_ACCESS_TOKEN!
-    
     console.log("chatwootUrl:", chatwootUrl)
     console.log("chatwootToken:", chatwootToken)
     
