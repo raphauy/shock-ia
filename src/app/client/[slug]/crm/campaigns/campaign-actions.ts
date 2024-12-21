@@ -1,6 +1,6 @@
 "use server"
   
-import { addContactsToCampaign, addTagToCampaign, CampaignDAO, CampaignFormValues, cancelCampaign, createCampaign, deleteCampaign, deleteScheduledCampaignContact, getCampaignDAO, processCampaign, processCampaignContact, removeAllContactsFromCampaign, removeTagFromCampaign, setCampaignContactStatus, setMessageToCampaign, setMoveToStageIdOfCampaign, updateCampaign } from "@/services/campaign-services"
+import { addContactsToCampaign, addTagToCampaign, CampaignDAO, CampaignFormValues, cancelCampaign, createCampaign, deleteCampaign, deleteScheduledCampaignContact, getCampaignDAO, getRemainingCount, processCampaign, processCampaignContact, removeAllContactsFromCampaign, removeTagFromCampaign, setCampaignContactStatus, setMessageToCampaign, setMoveToStageIdOfCampaign, updateCampaign } from "@/services/campaign-services"
 import { CampaignContactStatus } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 
@@ -121,4 +121,10 @@ export async function setMoveToStageIdOfCampaignAction(campaignId: string, moveT
     revalidatePath("/client/[slug]/crm", "page")
 
     return true
+}
+
+export async function getRemainingCountAction(campaignId: string): Promise<number> {
+    const remainingCount= await getRemainingCount(campaignId)
+
+    return remainingCount
 }

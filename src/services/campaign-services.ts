@@ -457,3 +457,13 @@ export async function setMoveToStageIdOfCampaign(campaignId: string, moveToStage
   })
   return updated
 }
+
+export async function getRemainingCount(campaignId: string) {
+  const remainingCount= await prisma.campaignContact.count({
+    where: {
+      campaignId,
+      status: CampaignContactStatus.PROGRAMADO
+    }
+  })
+  return remainingCount
+}

@@ -21,6 +21,7 @@ import StageSelector from "./stage-selector"
 import TagInput from "./tag-input"
 import TagSelector from "./tag-selector"
 import { Separator } from "@/components/ui/separator"
+import CancelCampaignButton from "./cancel-campaign-button"
 
 type Props= {
   params: {
@@ -110,7 +111,7 @@ export default async function CampaignPage({ params, searchParams }: Props) {
             <DataTable columns={columns} data={campaign.contacts} subject="Contacto" fieldToFilter="name"/>
             <div className="border border-dashed rounded-md p-4 h-40 space-y-2 flex flex-col justify-center items-center">
               { campaign.status === CampaignStatus.EN_PROCESO && <p className="text-blue-500">Esta campaña está en proceso</p> }
-              {/* { campaign.status === CampaignStatus.EN_PROCESO && <CancelCampaignButton campaignId={campaign.id} /> } */}
+              { campaign.status === CampaignStatus.EN_PROCESO && <CancelCampaignButton campaignId={campaign.id} /> }
               { campaign.status === CampaignStatus.COMPLETADA && <p className="text-green-500">Esta campaña ya está completada</p> }
               { campaign.status === CampaignStatus.CANCELADA && <p className="text-gray-500">Esta campaña fue cancelada</p> }
               { campaign.status !== CampaignStatus.COMPLETADA && 
