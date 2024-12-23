@@ -119,9 +119,16 @@ export async function processPendingImportedContacts() {
   const totalToProcess= pendingContacts.length
   console.log(`Procesando ${totalToProcess} contactos pendientes...`)
   for (const contact of pendingContacts) {
-    const client= contact.client
-    const phone= contact.phone.startsWith("+") ? contact.phone : `+${contact.phone}`
-    const isPhoneValid= await checkValidPhone(phone)
+    const client = contact.client
+    // Limpiamos TODOS los caracteres no numéricos excepto el +
+    const cleanPhone = contact.phone
+        .replace(/[^\d+]/g, '')  // Elimina todo excepto dígitos y +
+        .replace(/^\++/, '+')    // Reemplaza múltiples + al inicio con uno solo
+        .trim()
+    console.log(`cleanPhone después de limpieza: ${cleanPhone}`)
+    const phone = cleanPhone.startsWith("+") ? cleanPhone : `+${cleanPhone}`
+    console.log(`Teléfono procesado final: ${phone}`)
+    const isPhoneValid = await checkValidPhone(phone)
     if (!isPhoneValid) {
       console.log(`Número inválido: ${phone} de ${client.name}`)
       await updateError(contact.id, "Número inválido")
