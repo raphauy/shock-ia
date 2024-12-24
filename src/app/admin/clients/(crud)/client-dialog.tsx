@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
-const excludedFunctions= ["", "cancelarReserva", "reservarParaEvento", "obtenerReservas", "reservarParaEventoDeUnicaVez"]
+const dontTouchFunctions= ["obtenerDisponibilidad", "cancelarReserva", "reservarParaEvento", "obtenerReservas", "reservarParaEventoDeUnicaVez"]
 
 interface Props{
   title: string
@@ -88,9 +88,7 @@ export function ClientFunctionsBox({ clientId, closeDialog }: ClientFunctionBoxP
     getFunctionsOfClientAction(clientId)
     .then((data) => {
         if(!data) return null
-        // filter and exclude event functions
-        const eventFunctions= data.filter((f) => !excludedFunctions.includes(f.name))
-        setFunctions(eventFunctions)
+        setFunctions(data)
     })
     .catch((error) => {
         console.error(error)
@@ -99,9 +97,7 @@ export function ClientFunctionsBox({ clientId, closeDialog }: ClientFunctionBoxP
     getComplementaryFunctionsOfClientAction(clientId)
     .then((data) => {
         if(!data) return null
-        // filter and exclude event functions
-        const eventFunctions= data.filter((f) => !excludedFunctions.includes(f.name))
-        setComplementary(eventFunctions)
+        setComplementary(data)
     })
     .catch((error) => {
         console.error(error)
@@ -174,7 +170,7 @@ export function ClientFunctionsBox({ clientId, closeDialog }: ClientFunctionBoxP
                       return (
                           <div key={item.id} className="flex items-center justify-between gap-2 mb-1 mr-5">
                               <p className="text-green-500 whitespace-nowrap">{item.name}</p>
-                              <Button variant="secondary" className="h-7" onClick={() => complementaryOut(item.id)} disabled={haveRepository || item.name === "obtenerDisponibilidad"}>
+                              <Button variant="secondary" className="h-7" onClick={() => complementaryOut(item.id)} disabled={haveRepository || dontTouchFunctions.includes(item.name)}>
                                 <ChevronsRight />
                               </Button>
                           </div>
@@ -192,7 +188,7 @@ export function ClientFunctionsBox({ clientId, closeDialog }: ClientFunctionBoxP
                     complementary.map((item) => {
                       return (
                           <div key={item.id} className="flex items-center gap-2 mb-1">
-                              <Button variant="secondary" className="h-7 x-7" onClick={() => complementaryIn(item.id)} disabled={item.name === "obtenerDisponibilidad"}>
+                              <Button variant="secondary" className="h-7 x-7" onClick={() => complementaryIn(item.id)} disabled={dontTouchFunctions.includes(item.name)}>
                                   <ChevronsLeft />
                               </Button>
                               <p className="whitespace-nowrap">{item.name}</p>
