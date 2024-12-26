@@ -1,9 +1,9 @@
 import { ModelSelector, SelectorData } from "@/components/header/model-selector";
 import { getFullModelDAOByName, getFullModelsDAO } from "@/services/model-services";
-import SimulatorBox from "./simulator-box";
 import { getClientBySlug } from "@/services/clientService";
 import { redirect } from "next/navigation";
-import SimulatorNoStreamingBox from "./simulator-no-stremaing-box";
+import SimulatorNoStreamingBox from "../../simulator/simulator-no-stremaing-box";
+import SimulatorBox from "../../simulator/simulator-box";
 
 type Props = {
     params: {
@@ -13,7 +13,7 @@ type Props = {
         model: string
     }
 }
-export default async function SimulatorPage({ params, searchParams }: Props) {
+export default async function CRMSimulatorPage({ params, searchParams }: Props) {
     const slug= params.slug as string
     const modelName= searchParams.model
     console.log("modelName", modelName)
@@ -29,7 +29,7 @@ export default async function SimulatorPage({ params, searchParams }: Props) {
             const model= client.model
             if (model) {
                 console.log("redirecting")
-                redirect(`/client/${slug}/simulator?model=${model.name}`)
+                redirect(`/client/${slug}/crm/simulator?model=${model.name}`)
             } else {
                 console.log("redirecting to home")
                 redirect(`/client/${slug}`)

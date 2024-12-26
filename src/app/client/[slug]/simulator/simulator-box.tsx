@@ -29,7 +29,14 @@ export default function SimulatorBox() {
   const model= searchParams.get("model")
 
   const pathname= usePathname()
-  const redirectUri= pathname.includes("events") ? `/client/${slug}/events/id/simulator?r=${new Date().getMilliseconds()}` : `/client/${slug}/simulator?r=${new Date().getMilliseconds()}`
+  //const redirectUri= pathname.includes("events") ? `/client/${slug}/events/id/simulator?r=${new Date().getMilliseconds()}` : `/client/${slug}/simulator?r=${new Date().getMilliseconds()}`
+  const milis= new Date().getMilliseconds()
+  let redirectUri= `/client/${slug}/simulator?r=${milis}`
+  if (pathname.includes("crm")) {
+    redirectUri= `/client/${slug}/crm/simulator?r=${milis}`
+  } else if (pathname.includes("events")) {
+    redirectUri= `/client/${slug}/events/id/simulator?r=${milis}`
+  }
 
   const formRef = useRef<HTMLFormElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);

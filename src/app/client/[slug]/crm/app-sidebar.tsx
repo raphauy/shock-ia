@@ -15,6 +15,12 @@ const items = [
     group: "kanban",
   },
   {
+    title: "Simulador",
+    url: `crm/simulator`,
+    icon: Bot,
+    group: "kanban",
+  },
+  {
     title: "Contactos",
     url: `crm/contacts?last=30D`,
     icon: User,

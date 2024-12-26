@@ -96,7 +96,17 @@ export async function createContact(data: ContactFormValues) {
     firstStage= await getFirstStageOfClient(data.clientId)
   }
 
-  if (!firstStage) throw new Error('No first stage found')    
+  if (!firstStage) throw new Error('No se encontró el stage inicial. Verifica que existan stages para este cliente')    
+
+  // Verificar que el stage pertenezca al cliente correcto
+  const stageExists = await prisma.stage.findFirst({
+    where: {
+      id: firstStage.id,
+      clientId: data.clientId
+    }
+  })
+  
+  if (!stageExists) throw new Error('El stage no existe')
 
   const minOrder = await getMinOrderOfStage(firstStage.id)
 
@@ -240,6 +250,20 @@ export async function getContactsByStage(stageId: string) {
 
 export async function updateStageContacts(contacts: ContactDAO[]) {
   try {
+    // Verificar que todos los stages existan y pertenezcan al cliente correcto
+    for (const contact of contacts) {
+      const stage = await prisma.stage.findFirst({
+        where: {
+          id: contact.stageId,
+          clientId: contact.clientId
+        }
+      })
+      
+      if (!stage) {
+        throw new Error(`El stage ${contact.stageId} no existe o no pertenece al cliente del contacto ${contact.id}`)
+      }
+    }
+
     const transaction= contacts.map((contact) => 
       prisma.contact.update({
         where: { 
@@ -263,6 +287,23 @@ export async function updateStageContacts(contacts: ContactDAO[]) {
 }
 
 export async function setNewStage(contactId: string, stageId: string, by: string | undefined) {
+  // Verificar que el contacto y stage existan y pertenezcan al mismo cliente
+  const contact = await prisma.contact.findUnique({
+    where: { id: contactId },
+    include: { client: true }
+  })
+  
+  if (!contact) throw new Error("Contacto no encontrado")
+
+  const stage = await prisma.stage.findFirst({
+    where: {
+      id: stageId,
+      clientId: contact.clientId
+    }
+  })
+
+  if (!stage) throw new Error("El stage no existe o no pertenece al cliente del contacto")
+
   // get the first order and then substract one
   const firstOrder= await getMinOrderOfStage(stageId)
   const order= firstOrder - 1
