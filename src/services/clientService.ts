@@ -187,92 +187,105 @@ export type CountData = {
 }
 
 export async function getCountData(clientId: string): Promise<CountData> {
-  const client= await getClient(clientId)
-  if (!client) throw new Error('Client not found')
+  const startTime = performance.now();
 
-  const documents= await prisma.document.count({
-    where: {
-      clientId
-    }
-  })
-
-  const conversations= await prisma.conversation.count({
-    where: {
-      clientId
-    },
-  })
-
-  const messages= await prisma.message.count({
-    where: {
-      conversation: {
-        clientId
+  const results = await prisma.$transaction([
+    // Obtener cliente con conteos de documentos, conversaciones y usuarios
+    prisma.client.findUniqueOrThrow({
+      where: { id: clientId },
+      select: {
+        name: true,
+        slug: true,
+        _count: {
+          select: {
+            documents: true,
+            conversations: true,
+            users: true,
+          }
+        }
       }
-    }
-  })
+    }),
+    // Obtener conteo de mensajes
+    prisma.$queryRaw`
+      SELECT COUNT(m.id) as message_count
+      FROM "Message" m
+      JOIN "Conversation" c ON c.id = m."conversationId"
+      WHERE c."clientId" = ${clientId}
+    `
+  ]);
 
-  const users= await prisma.user.count({
-    where: {
-      clientId
-    }
-  })
-
-  return {
+  const [client, messageCountResult] = results;
+  const messageCount = (messageCountResult as Array<{ message_count: number }>)[0];
+  
+  const data = {
     clientName: client.name,
     clientSlug: client.slug,
-    documents,
-    conversations,
-    messages,
-    users
-  }
+    documents: client._count.documents,
+    conversations: client._count.conversations,
+    messages: Number(messageCount.message_count),
+    users: client._count.users
+  };
+
+  const endTime = performance.now();
+  const executionTime = endTime - startTime;
+  console.log(`getCountData ejecutado en ${executionTime.toFixed(2)}ms`);
+
+  return data;
 }
 
 export async function getCountDataOfAllClients(): Promise<CountData[]> {
-  const clients= await prisma.client.findMany(
-    {
+  const startTime = performance.now();
+
+  const results = await prisma.$transaction([
+    // Obtener clientes con conteos de documentos, conversaciones y usuarios
+    prisma.client.findMany({
       orderBy: {
         createdAt: 'desc'
-      }
-    }
-  )
-
-  const data= await Promise.all(clients.map(async client => {
-    const documents= await prisma.document.count({
-      where: {
-        clientId: client.id
-      }
-    })
-  
-    const conversations= await prisma.conversation.count({
-      where: {
-        clientId: client.id
       },
-    })
-  
-    const messages= await prisma.message.count({
-      where: {
-        conversation: {
-          clientId: client.id
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        _count: {
+          select: {
+            documents: true,
+            conversations: true,
+            users: true,
+          }
         }
       }
-    })
+    }),
+    // Obtener conteo de mensajes agrupados por clientId
+    prisma.$queryRaw`
+      SELECT c."clientId", COUNT(m.id) as message_count
+      FROM "Message" m
+      JOIN "Conversation" c ON c.id = m."conversationId"
+      GROUP BY c."clientId"
+    `
+  ]);
+
+  const [clientsWithCounts, messagesCounts] = results;
   
-    const users= await prisma.user.count({
-      where: {
-        clientId: client.id
-      }
-    })
+  // Crear mapa de clientId -> conteo de mensajes
+  const messageCountMap = new Map(
+    (messagesCounts as { clientId: string, message_count: number }[])
+      .map(mc => [mc.clientId, Number(mc.message_count)])
+  );
 
-    return {
-      clientName: client.name,
-      clientSlug: client.slug,
-      documents,
-      conversations,
-      messages,
-      users
-    }
-  }))
+  const data = clientsWithCounts.map(client => ({
+    clientName: client.name,
+    clientSlug: client.slug,
+    documents: client._count.documents,
+    conversations: client._count.conversations,
+    messages: messageCountMap.get(client.id) || 0,
+    users: client._count.users
+  }));
 
-  return data
+  const endTime = performance.now();
+  const executionTime = endTime - startTime;
+  console.log(`getCountDataOfAllClients ejecutado en ${executionTime.toFixed(2)}ms`);
+
+  return data;
 }
 
 // export async function getFunctionsOfClient(clientId: string) {
