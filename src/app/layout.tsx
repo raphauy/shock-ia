@@ -27,7 +27,7 @@ export const metadata: Metadata = {
         alt: "ShockIA",
       },
     ],
-},
+  },
   metadataBase: new URL("https://shock.uy"),
 }
 

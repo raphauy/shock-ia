@@ -7,9 +7,8 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { File, Download, Upload, Loader } from 'lucide-react'
 import { checkValidPhone } from '@/lib/utils'
-import { useParams } from 'next/navigation'
-import { saveCSVContactsAction } from './imported-contact-actions'
 import { toast } from '@/hooks/use-toast'
+import { saveCSVContactsAction } from './imported-contact-actions'
 
 export type ContactCSV = {
   nombre: string
@@ -18,7 +17,7 @@ export type ContactCSV = {
   etiquetas?: string
 }
 
-type Props= {
+type Props = {
   clientId: string
 }
 
@@ -31,13 +30,23 @@ export function CSVImporter({ clientId }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const processCSV = async (csv: string) => {
-    const lines = csv.split('\n')
-    const headers = lines[0].toLowerCase().split(',')
+    const normalizedCSV = csv.replace(/\r\n/g, '\n').replace(/\r/g, '\n')
+    const lines = normalizedCSV.split('\n').filter(line => line.trim() !== '')
+
+    const headers = lines[0]
+      .toLowerCase()
+      .split(',')
+      .map(header => header.trim().replace(/\r|\n/g, ''))
+
     const parsedContacts: ContactCSV[] = []
     let isValidData = true
 
     for (let i = 1; i < lines.length; i++) {
-      const currentLine = lines[i].split(',')
+      const currentLine = lines[i]
+        .split(',')
+        .map(value => value.trim())
+        .filter(value => value !== '')
+
       if (currentLine.length === headers.length) {
         const contact: ContactCSV = {
           nombre: currentLine[headers.indexOf('nombre')],
@@ -74,19 +83,18 @@ export function CSVImporter({ clientId }: Props) {
   const handleImport = async () => {
     setLoading(true)
     saveCSVContactsAction(clientId, contacts)
-    .then(() => {
+      .then(() => {
         toast({ title: "Contactos guardados para procesar" })
-        // remove all contacts
         setContacts([])
         setIsValid(false)
         setOpen(false)
-    })
+      })
       .catch((error) => {
         toast({ title: "Error al importar contactos", description: error.message, variant: "destructive" })
-    })
-    .finally(() => {
+      })
+      .finally(() => {
         setLoading(false)
-    })
+      })
   }
 
   const downloadSampleCSV = () => {
@@ -123,25 +131,25 @@ Carlos Rodríguez,59899123456,Pendiente,nuevo;interesado`
           <DialogTitle>Importar Contactos CSV</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-            <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".csv"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                />
-                <Button onClick={triggerFileInput} variant="outline">
-                    <Upload className="w-4 h-4 mr-2" />
-                    {fileName ? `Archivo: ${fileName}` : 'Seleccionar CSV'}
-                </Button>
-                </div>
-                <Button onClick={downloadSampleCSV} variant="outline">
-                <Download className="w-4 h-4 mr-2" />
-                Descargar ejemplo
-                </Button>
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".csv"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
+              <Button onClick={triggerFileInput} variant="outline">
+                <Upload className="w-4 h-4 mr-2" />
+                {fileName ? `Archivo: ${fileName}` : 'Seleccionar CSV'}
+              </Button>
             </div>
+            <Button onClick={downloadSampleCSV} variant="outline">
+              <Download className="w-4 h-4 mr-2" />
+              Descargar ejemplo
+            </Button>
+          </div>
           {contacts.length > 0 && (
             <>
               <div>Total de registros: {contacts.length}</div>
@@ -181,4 +189,3 @@ Carlos Rodríguez,59899123456,Pendiente,nuevo;interesado`
     </Dialog>
   )
 }
-
