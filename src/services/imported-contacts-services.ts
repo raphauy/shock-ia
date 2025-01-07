@@ -1,8 +1,9 @@
 import * as z from "zod"
 import { prisma } from "@/lib/db"
 import { Client, ImportedContact, ImportedContactStatus, ImportedContactType, WhatsappInstance } from "@prisma/client"
-import { createContact } from "./chatwoot"
 import { checkValidPhone } from "@/lib/utils"
+import { ContactFormValues, createContact } from "./contact-services"
+import { createContact as createChatwootContact } from "./chatwoot"
 
 export type ImportedContactDAO = {
 	id: string
@@ -139,7 +140,18 @@ export async function processPendingImportedContacts() {
         console.log(`No se encontró configuración de Whatsapp para ${client.name}`)
         await updateError(contact.id, "No se encontró configuración de Whatsapp")
       } else {
-        await processValidPhone(contact.id, phone, contact.name, whatsappInstance)
+        const chatwootId= await processValidPhone(contact.id, phone, contact.name, whatsappInstance)
+        if (chatwootId) {
+          console.log(`ChatwootId: ${chatwootId}`)
+          const contactValues: ContactFormValues= {
+            chatwootId,
+            name: contact.name,
+            phone,
+            src: contact.type,
+            clientId: contact.clientId
+          }
+          await createContact(contactValues)
+        }
       }
     }
   }
@@ -155,16 +167,21 @@ export async function processPendingImportedContacts() {
 async function processValidPhone(importedContactId: string, phone: string, name: string, whatsappInstance: WhatsappInstance) {
 
   try {
-    const contactCreated= await createContact(Number(whatsappInstance.chatwootAccountId), Number(whatsappInstance.whatsappInboxId), phone, name)
-    if (contactCreated.id) {
-      console.log(`Contacto creado en Chatwoot: ${contactCreated.id}`)
+    const contactCreated= await createChatwootContact(Number(whatsappInstance.chatwootAccountId), Number(whatsappInstance.whatsappInboxId), phone, name)
+    const chatwootContactId= String(contactCreated.id)
+    if (chatwootContactId) {
+      console.log(`Contacto creado en Chatwoot: ${chatwootContactId}`)
       await prisma.importedContact.update({
-        where: { id: importedContactId, status: ImportedContactStatus.PENDIENTE },
+        where: { 
+          id: importedContactId, 
+          status: ImportedContactStatus.PENDIENTE 
+        },
         data: {
           status: ImportedContactStatus.PROCESADO,
-          chatwootContactId: String(contactCreated.id)
+          chatwootContactId
         }
       })
+      return chatwootContactId
     } else {
       console.log(`Error al crear contacto: ${contactCreated.error}`)
       await updateError(importedContactId, contactCreated.error || "Error al crear contacto")

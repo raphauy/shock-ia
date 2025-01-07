@@ -42,17 +42,23 @@ export function CSVImporter({ clientId }: Props) {
     let isValidData = true
 
     for (let i = 1; i < lines.length; i++) {
-      const currentLine = lines[i]
-        .split(',')
-        .map(value => value.trim())
-        .filter(value => value !== '')
+      const currentLine = lines[i].split(',').map(value => value.trim())
 
-      if (currentLine.length === headers.length) {
+      // Obtenemos los índices de las columnas
+      const phoneIndex = headers.indexOf('telefono') !== -1 
+        ? headers.indexOf('telefono') 
+        : headers.indexOf('teléfono')
+      const nameIndex = headers.indexOf('nombre')
+      const statusIndex = headers.indexOf('estado')
+      const tagsIndex = headers.indexOf('etiquetas')
+
+      // Verificamos que al menos exista el teléfono
+      if (currentLine[phoneIndex]) {
         const contact: ContactCSV = {
-          nombre: currentLine[headers.indexOf('nombre')],
-          telefono: currentLine[headers.indexOf('telefono') !== -1 ? headers.indexOf('telefono') : headers.indexOf('teléfono')],
-          estado: currentLine[headers.indexOf('estado')],
-          etiquetas: currentLine[headers.indexOf('etiquetas')]
+          nombre: currentLine[nameIndex] || '',
+          telefono: currentLine[phoneIndex],
+          estado: statusIndex >= 0 ? currentLine[statusIndex] : undefined,
+          etiquetas: tagsIndex >= 0 ? currentLine[tagsIndex] : undefined
         }
 
         if (!await checkValidPhone(contact.telefono)) {
@@ -100,8 +106,8 @@ export function CSVImporter({ clientId }: Props) {
   const downloadSampleCSV = () => {
     const sampleData = `nombre,teléfono,estado,etiquetas
 Juan Pérez,+1234567890,Nuevo,cliente;vip
-María García,+5491234567890,Inactivo,prospecto
-Carlos Rodríguez,59899123456,Pendiente,nuevo;interesado`
+María García,+5491234567890,,
+Carlos Rodríguez,59899123456,Pendiente,`
 
     const blob = new Blob([sampleData], { type: 'text/csv' })
     const url = window.URL.createObjectURL(blob)
