@@ -141,17 +141,17 @@ export async function processPendingImportedContacts() {
         await updateError(contact.id, "No se encontró configuración de Whatsapp")
       } else {
         const chatwootId= await processValidPhone(contact.id, phone, contact.name, whatsappInstance)
-        if (chatwootId) {
-          console.log(`ChatwootId: ${chatwootId}`)
-          const contactValues: ContactFormValues= {
-            chatwootId,
-            name: contact.name,
-            phone,
-            src: contact.type,
-            clientId: contact.clientId
-          }
-          await createContact(contactValues)
-        }
+        // if (chatwootId) {
+        //   console.log(`ChatwootId: ${chatwootId}`)
+        //   const contactValues: ContactFormValues= {
+        //     chatwootId,
+        //     name: contact.name,
+        //     phone,
+        //     src: contact.type,
+        //     clientId: contact.clientId
+        //   }
+        //   await createContact(contactValues)
+        // }
       }
     }
   }
