@@ -1,6 +1,6 @@
 "use client"
 
-import { getDataClientBySlug } from "@/app/admin/clients/(crud)/actions";
+import { clientHaveCRMAction, getDataClientBySlug } from "@/app/admin/clients/(crud)/actions";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -10,10 +10,10 @@ export default function MenuCliente() {
     const path= usePathname()
     const params= useParams()
     const clientSlug= params.slug as string
-    console.log(clientSlug)
 
     const [haveAgentes, setHaveAgentes]= useState(false)
     const [haveEvents, setHaveEvents]= useState(false)
+    const [haveCRM, setHaveCRM]= useState(false)
 
     useEffect(() => {
         if (clientSlug) {
@@ -25,7 +25,18 @@ export default function MenuCliente() {
             .catch((error) => {
                 console.log(error)
             })
-        }
+            clientHaveCRMAction(clientSlug)        
+            .then((haveCRM) => {
+                if (haveCRM) {
+                    setHaveCRM(true)
+                } else {
+                    setHaveCRM(false)
+                }
+            })
+            .catch((error) => {
+                console.log(error)
+            })
+            }
     }, [clientSlug])
 
     return (
@@ -51,6 +62,13 @@ export default function MenuCliente() {
                             </Link>
                         </li>
                     )}
+
+                    {
+                        haveCRM &&
+                        <li className={`flex items-center border-b-shock-color hover:border-b-shock-color hover:border-b-2 h-11 ${path.includes("crm") && "border-b-2"}`}>
+                            <Link href={`/client/${clientSlug}/crm`}><Button className="text-lg" variant="ghost">CRM</Button></Link>
+                        </li>
+                    }
                 </ul>
             </nav>
         </div>
