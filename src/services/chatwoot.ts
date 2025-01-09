@@ -7,7 +7,6 @@ export async function sendTextToConversation(accountId: number, conversationId: 
     const chatwootUrl= process.env.CHATWOOT_URL!
     const chatwootToken= process.env.CHATWOOT_AGENT_BOT_ACCESS_TOKEN!
     console.log("chatwootUrl:", chatwootUrl)
-    console.log("chatwootToken:", chatwootToken)
     if (!chatwootUrl || !chatwootToken) {
         console.error("CHATWOOT_URL or CHATWOOT_AGENT_BOT_ACCESS_TOKEN is not set")
         return

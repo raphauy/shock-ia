@@ -6,7 +6,7 @@ import moment from 'moment-timezone';
 import { revalidatePath } from "next/cache";
 import { BookingFormValues, cancelBooking, createBooking, getBookingDAO, getFutureBookingsDAOByContact, getFutureBookingsDAOByEventId } from "./booking-services";
 import { CarServiceFormValues, createCarService } from "./carservice-services";
-import { addLabelToConversation, toggleConversationStatus } from "./chatwoot";
+import { addLabelToConversation, sendTextToConversation, toggleConversationStatus } from "./chatwoot";
 import { createExternalPayment } from "./cobros-wap";
 import { getValue, setValue } from "./config-services";
 import { addTagsToContact, getContactDAO, getTagsOfContact, setNewStage } from "./contact-services";
@@ -199,23 +199,36 @@ export async function reservarSummit(clientId: string, conversationId: string, n
   }
   console.log("SUMMIT_Respuesta: ", SUMMIT_Respuesta)      
 
-  let SUMMIT_Celulares= await getValue("SUMMIT_Celulares")
-  if (!SUMMIT_Celulares) {
-    console.log("SUMMIT_Celulares not found")    
-  } else {
-    console.log("SUMMIT_Celulares: ", SUMMIT_Celulares)      
-    const celulares= SUMMIT_Celulares.split(",")
-    for (const phone of celulares) {
-      console.log("enviar mensaje a: ", phone)
+  const SUMMIT_Conversation_Ids= await getValue("SUMMIT_Conversation_Ids")
+  const SUMMIT_Chatwoot_Account_Id= await getValue("SUMMIT_Chatwoot_Account_Id")
+  if (!SUMMIT_Chatwoot_Account_Id) {
+    console.log("SUMMIT_Chatwoot_Account_Id not found")    
+  }
+  if (!SUMMIT_Conversation_Ids) {
+    console.log("SUMMIT_Conversation_Ids not found")    
+  } 
+  
+  if (SUMMIT_Conversation_Ids && SUMMIT_Chatwoot_Account_Id) {
+    console.log("SUMMIT_Conversation_Ids: ", SUMMIT_Conversation_Ids)      
+    const ids= SUMMIT_Conversation_Ids.split(",")
+    for (const id of ids) {
       if (resumenConversacion) {
         const textoMensaje= getTextoMensajeSummit(data)
         console.log("textoMensaje:")
         console.log(textoMensaje)
         
-        await sendWapMessage(phone, textoMensaje, false, clientId)
+        //await sendWapMessage(phone, textoMensaje, false, clientId)
+        console.log("Sending text vía CHATWOOT")
+        const chatwootAccountId= parseInt(SUMMIT_Chatwoot_Account_Id)
+        const chatwootConversationId= parseInt(id)
+        console.log("sending text to conversation id: ", chatwootConversationId, "with account id: ", chatwootAccountId)
+        
+        await sendTextToConversation(chatwootAccountId, chatwootConversationId, textoMensaje)
+    
       } else console.log("resumenConversacion not found")
     }
   }
+
 
   return SUMMIT_Respuesta
 }
