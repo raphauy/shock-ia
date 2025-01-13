@@ -229,6 +229,19 @@ export async function reservarSummit(clientId: string, conversationId: string, n
     }
   }
 
+  if (SUMMIT_Chatwoot_Account_Id) {
+    const conversation= await getConversation(conversationId)
+    if (!conversation)
+      console.log(`No se encontró la conversación con id ${conversationId}`)
+    const contactId= conversation?.contactId
+    if (contactId) {
+      const moveToStageId= "cm5mqav930001cte8dk8prdq7"
+      console.log("setting new stage to contact, by: FC-ReservarSummit")
+      await setNewStage(contactId, moveToStageId, "FC-ReservarSummit")
+    }
+
+  }
+
 
   return SUMMIT_Respuesta
 }
