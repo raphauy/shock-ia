@@ -77,7 +77,7 @@ export async function enableChatwootAction(clientId: string, instanceName: strin
         accountId: chatwootAccountId,
         token,
         url,
-        signMsg: true,
+        signMsg: false,
         reopenConversation: false,
         conversationPending: true,        
         nameInbox: "whatsapp",
