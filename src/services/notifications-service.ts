@@ -112,7 +112,7 @@ export async function sendWhatsappNotifications(notifyPhones: string[], repoData
 ${name ? `\n**Nombre:** ${name}` : ""}
 **Teléfono:** ${phone}
 **Fecha:** ${date}
-----------------------
+---------------------------------
 **Datos:**
 `
     for (const key in jsonReplaced) {
