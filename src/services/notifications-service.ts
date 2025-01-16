@@ -104,13 +104,12 @@ export async function sendWhatsappNotifications(notifyPhones: string[], repoData
     const date= formatInTimeZone(repoData.createdAt, timezone, "yyyy-MM-dd HH:mm", { locale: es })
 
     // an special field is name, if it is not present, use the client name
-    const name= jsonReplaced.nombre || "Usuario"
+    const name= jsonReplaced.nombre || undefined
 
     // create a text message to send to the users, use de FC name and the data
     let textMessage= `
 **${functionName}**
-
-**Nombre:** ${name}
+${name ? `\n**Nombre:** ${name}` : ""}
 **Teléfono:** ${phone}
 **Fecha:** ${date}
 ----------------------
