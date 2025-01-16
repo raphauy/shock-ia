@@ -1,7 +1,8 @@
 "use server"
   
+import { checkValidPhone } from "@/lib/utils"
 import { getClientBySlug } from "@/services/clientService"
-import { EventDAO, createEvent, deleteEvent, getFullEventDAO, setAvailability, setEventDateTime, updateEventBooleanField, updateEventField, updateEventNumberField, setSeatsPerTimeSlot, setTagsOfEvent, setMoveToStageIdEvent } from "@/services/event-services"
+import { EventDAO, createEvent, deleteEvent, getFullEventDAO, setAvailability, setEventDateTime, updateEventBooleanField, updateEventField, updateEventNumberField, setSeatsPerTimeSlot, setTagsOfEvent, setMoveToStageIdEvent, setEventNotifyPhones } from "@/services/event-services"
 import { EventType } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 
@@ -97,6 +98,29 @@ export async function setMoveToStageIdEventAction(eventId: string, moveToStageId
     if (!updated) return false
 
     revalidatePath(`/client/[slug]/events`, 'page')
+
+    return true
+}
+
+export async function setEventNotifyPhonesAction(id: string, notifyPhones: string): Promise<boolean> {
+    const notifyPhonesArray= notifyPhones.split(",").map(phone => phone.trim())
+    // if a phone do not have a +, add it
+    for (let i = 0; i < notifyPhonesArray.length; i++) {
+        if (!notifyPhonesArray[i].startsWith("+")) {
+            notifyPhonesArray[i]= "+" + notifyPhonesArray[i]
+        }
+    }
+    // check if all phones are valid
+    for (const phone of notifyPhonesArray) {
+        console.log("checking phone: ", phone)
+        if (!checkValidPhone(phone))
+            throw new Error("Teléfono inválido: " + phone)
+    }
+    const updated= await setEventNotifyPhones(id, notifyPhonesArray)
+
+    if (!updated) return false
+
+    revalidatePath("/client/[slug]/events", 'page')
 
     return true
 }

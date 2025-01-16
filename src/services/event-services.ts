@@ -13,6 +13,7 @@ export type EventDAO = {
   color: string
   tags: string[]
   webHookUrl: string | null | undefined
+  notifyPhones: string[] | undefined
 	minDuration: number | undefined
 	maxDuration: number | undefined
 	description: string | undefined
@@ -373,6 +374,18 @@ export async function setMoveToStageIdEvent(eventId: string, moveToStageId: stri
     },
     data: {
       moveToStageId
+    }
+  })
+  return updated !== null
+}
+
+export async function setEventNotifyPhones(id: string, notifyPhones: string[]) {
+  const updated = await prisma.event.update({
+    where: {
+      id
+    },
+    data: {
+      notifyPhones
     }
   })
   return updated !== null

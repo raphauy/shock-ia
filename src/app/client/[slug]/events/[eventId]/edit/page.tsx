@@ -2,21 +2,22 @@ import { BooleanForm } from "@/components/boolean-form";
 import { ColorForm } from "@/components/color-form";
 import { IconBadge } from "@/components/icon-badge";
 import { LongTextForm } from "@/components/long-text-form";
+import { PhonesForm } from "@/components/phones-form";
 import { SelectTimezoneForm } from "@/components/select-timezone";
 import { ShortTextForm } from "@/components/short-text-form";
 import { Badge } from "@/components/ui/badge";
 import { cn, getEventTypeLabel } from "@/lib/utils";
-import { getEventDAO, getFullEventDAO } from "@/services/event-services";
-import { EventType } from "@prisma/client";
-import { Archive, Globe, LayoutDashboard, ListChecks, ListCollapse, Palette, Settings, Tag } from "lucide-react";
-import { setEventBooleanFieldAction, setEventFieldAction } from "../../event-actions";
-import EventFieldsBox from "./event-fields-box";
-import FixedDateEdits from "./fixed-date-edits";
-import SingleSlotEdits from "./single-slot-edits";
-import { isAfter } from "date-fns";
-import { EventTaggerComponent } from "./event-tagger";
-import SelectEventStage from "./select-stage";
+import { getFullEventDAO } from "@/services/event-services";
 import { getStagesDAO } from "@/services/stage-services";
+import { EventType } from "@prisma/client";
+import { isAfter } from "date-fns";
+import { Archive, Globe, LayoutDashboard, ListChecks, ListCollapse, Palette, Settings, Tag } from "lucide-react";
+import { setEventBooleanFieldAction, setEventFieldAction, setEventNotifyPhonesAction } from "../../event-actions";
+import EventFieldsBox from "./event-fields-box";
+import { EventTaggerComponent } from "./event-tagger";
+import FixedDateEdits from "./fixed-date-edits";
+import SelectEventStage from "./select-stage";
+import SingleSlotEdits from "./single-slot-edits";
 
 type Props= {
     params: {
@@ -147,6 +148,13 @@ export default async function EditEventPage({ params }: Props) {
                     id={event.id}
                     fieldName="webHookUrl"
                     update={setEventFieldAction}
+                />
+
+                <PhonesForm
+                  eventId={event.id}
+                  label="Teléfonos a notificaciones cuando se realiza una reserva"
+                  initialValue={event.notifyPhones?.join(",") || ""}
+                  update={setEventNotifyPhonesAction}
                 />
 
 

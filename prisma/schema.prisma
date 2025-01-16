@@ -411,6 +411,7 @@ model Event {
   color             String                                      // gennext: show.column
   tags              String[]                                    // gennext: show.column
   webHookUrl        String?                                     // gennext: show.column
+  notifyPhones      String[]                                    // gennext: show.column
 
   description       String?
   address           String?                                     // gennext: show.column
