@@ -7,7 +7,7 @@ import { Separator } from "@/components/ui/separator"
 import { getComplementaryClients } from "@/services/clientService"
 import { getFullRepositoryDAO } from "@/services/repository-services"
 import { Briefcase, Database, Sparkles, Tag } from "lucide-react"
-import { setConversationLLMOffAction, setFinalMessageAction, setFunctionDescriptionAction, setFunctionNameAction, setLLMOffMessageAction, setNameAction, setWebHookUrlAction } from "../repository-actions"
+import { setConversationLLMOffAction, setFinalMessageAction, setFunctionDescriptionAction, setFunctionNameAction, setLLMOffMessageAction, setNameAction, setNotifyPhonesAction, setWebHookUrlAction } from "../repository-actions"
 import { DeleteRepositoryDialog } from "../repository-dialogs"
 import { ClientSelector, SelectorData } from "./client-selector"
 import FieldsBox from "./fields-box"
@@ -18,6 +18,7 @@ import { HookForm } from "./hook-form"
 import TagInputFunctionBox from "./tag-input-function"
 import SelectStage from "./select-stage"
 import { getStagesDAO } from "@/services/stage-services"
+import { ClientFunctionTextForm } from "@/components/client-function-text-form"
 
 type Props = {
   clientId?: string
@@ -86,6 +87,7 @@ export default async function FCConfig({ clientId, repoId, fullMode, haveCRM }: 
                         id={repository.id}
                         update={setFinalMessageAction}
                     />
+
                     { fullMode && (
                       <>
                         <Separator className="my-7" />
@@ -144,6 +146,15 @@ export default async function FCConfig({ clientId, repoId, fullMode, haveCRM }: 
                           <h2 className="text-xl">
                               Configuración de CRM
                           </h2>
+                        </div>
+                        <div className="mt-6">
+                          <ClientFunctionTextForm 
+                            clientId={functionClient.clientId} 
+                            functionId={functionClient.functionId} 
+                            label="Teléfonos a notificar cuando se ejecute la FC" 
+                            initialValue={functionClient.notifyPhones.join(",")} 
+                            update={setNotifyPhonesAction}
+                          />
                         </div>
                         <div className="p-4 bg-muted border rounded-md mt-6">
                           <TagInputFunctionBox functionName={repository.functionName} functionClient={functionClient} tagsUI={false} />

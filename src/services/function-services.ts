@@ -5,20 +5,13 @@ import { Client } from "@prisma/client"
 import { RepositoryDAO } from "./repository-services"
 import { getClient } from "./clientService"
 
-// export type FunctionDAO = {
-// 	id: string
-// 	name: string
-// 	description: string | null
-// 	definition: string | null
-// 	createdAt: Date
-// 	updatedAt: Date
-// }
 export type FunctionClientDAO= {
   functionId: string
   clientId: string
   client: ClientDAO
   webHookUrl: string | null
   uiLabel: string
+  notifyPhones: string[]
   tags: string[]
   moveToStageId: string | null
 }
@@ -415,5 +408,19 @@ export async function setMoveToStageIdOfClientFunction(clientId: string, functio
     }
   })
 
+  return updated
+}
+
+export async function setNotifyPhones(clientId: string, functionId: string, notifyPhones: string[]) {
+  const updated = await prisma.clientFunction.update({
+    where: { 
+      clientId_functionId: { 
+        clientId, functionId 
+      } 
+    },
+    data: { 
+      notifyPhones 
+    }
+  })
   return updated
 }

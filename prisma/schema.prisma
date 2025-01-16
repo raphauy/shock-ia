@@ -222,9 +222,9 @@ model Function {
 model ClientFunction {
   webHookUrl     String?      @db.Text            // gennext: show.column
   uiLabel        String       @default("Información") // gennext: show.column
+  notifyPhones   String[]     @default([])         // gennext: show.column
 
   tags           String[]                         // gennext: show.column
-
   moveToStageId  String?
 
   client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)

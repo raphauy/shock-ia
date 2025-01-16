@@ -1,6 +1,7 @@
 "use server"
   
-import { addFunctionToClient, getFunctionDAO, removeFunctionFromClient, setMoveToStageIdOfClientFunction } from "@/services/function-services"
+import { checkValidPhone } from "@/lib/utils"
+import { addFunctionToClient, getFunctionDAO, removeFunctionFromClient, setMoveToStageIdOfClientFunction, setNotifyPhones } from "@/services/function-services"
 import { RepositoryDAO, createRepository, deleteRepository, getFullRepositoryDAO, setConversationLLMOff, setFinalMessage, setFunctionActive, setFunctionDescription, setFunctionName, setLLMOffMessage, setName, setNotifyExecution, setWebHookUrl } from "@/services/repository-services"
 import { revalidatePath } from "next/cache"
 
@@ -143,6 +144,29 @@ export async function removeFunctionFromClientAction(clientId: string, functionI
 
 export async function setMoveToStageIdOfClientFunctionAction(clientId: string, functionId: string, moveToStageId: string): Promise<boolean> {
     const updated= await setMoveToStageIdOfClientFunction(clientId, functionId, moveToStageId)
+
+    if (!updated) return false
+
+    revalidatePath(`/admin/repositories`)
+
+    return true
+}
+
+export async function setNotifyPhonesAction(clientId: string, functionId: string, notifyPhones: string): Promise<boolean> {
+    const notifyPhonesArray= notifyPhones.split(",").map(phone => phone.trim())
+    // if a phone do not have a +, add it
+    for (let i = 0; i < notifyPhonesArray.length; i++) {
+        if (!notifyPhonesArray[i].startsWith("+")) {
+            notifyPhonesArray[i]= "+" + notifyPhonesArray[i]
+        }
+    }
+    // check if all phones are valid
+    for (const phone of notifyPhonesArray) {
+        console.log("checking phone: ", phone)
+        if (!checkValidPhone(phone))
+            throw new Error("Teléfono inválido: " + phone)
+    }
+    const updated= await setNotifyPhones(clientId, functionId, notifyPhonesArray)
 
     if (!updated) return false
 

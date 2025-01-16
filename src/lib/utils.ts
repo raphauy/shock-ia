@@ -322,8 +322,8 @@ export function getDatesFromSearchParams(searchParams: { from: string, to: strin
   return { from, to }
 }
 
-export async function checkValidPhone(phone: string) {
-  const expReg = /^(\+)?(598|54|1|56|57|55|52)?[0-9]{7,13}$/
+export function checkValidPhone(phone: string) {
+  const expReg = /^(\+)?[1-9]{1,3}[0-9]{7,13}$/
   return expReg.test(phone)
 }
 

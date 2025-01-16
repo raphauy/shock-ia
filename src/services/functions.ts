@@ -23,7 +23,7 @@ import { getSectionOfDocument } from "./section-services";
 import { checkBookingAvailability, getSlots } from "./slots-service";
 import { getStageByName, getStagesDAO } from "./stage-services";
 import { SummitFormValues, createSummit } from "./summit-services";
-import { RepoDataWithClientNameAndBooking, sendWebhookNotification } from "./webhook-notifications-service";
+import { RepoDataWithClientNameAndBooking, sendWebhookNotification, sendWhatsappNotifications } from "./notifications-service";
 import { setMoveToStageIdOfClientFunctionAction } from "@/app/admin/repositories/repository-actions";
 import { JsonValue } from "@prisma/client/runtime/library";
 
@@ -762,11 +762,20 @@ export async function defaultFunction(clientId: string, name: string, args: any)
     revalidatePath(`/client/${conversation.client.slug}/registros`)
 
     const functionClient= await getFunctionClientDAO(repo.functionId, conversation.client.id)
-    if (functionClient && functionClient.webHookUrl) {
-      try {
-        await sendWebhookNotification(functionClient.webHookUrl, created)
-      } catch (error) {
-        console.log("Error al enviar notificación a webhook")
+    if (functionClient) {
+      if (functionClient.webHookUrl) {
+        try {
+          await sendWebhookNotification(functionClient.webHookUrl, created)
+        } catch (error) {
+          console.log("Error al enviar notificación a webhook")
+        }
+      }
+      if (functionClient.notifyPhones) {
+        try {
+          await sendWhatsappNotifications(functionClient.notifyPhones, created)
+        } catch (error) {
+          console.log("Error al enviar notificación a whatsapp")
+        }
       }
     }
     if (repo.conversationLLMOff) {

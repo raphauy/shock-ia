@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db"
 import { Client, ImportedContact, ImportedContactStatus, ImportedContactType, WhatsappInstance } from "@prisma/client"
 import { checkValidPhone } from "@/lib/utils"
 import { ContactFormValues, createContact } from "./contact-services"
-import { createContact as createChatwootContact } from "./chatwoot"
+import { createContactInChatwoot as createChatwootContact } from "./chatwoot"
 
 export type ImportedContactDAO = {
 	id: string
@@ -129,7 +129,7 @@ export async function processPendingImportedContacts() {
     console.log(`cleanPhone después de limpieza: ${cleanPhone}`)
     const phone = cleanPhone.startsWith("+") ? cleanPhone : `+${cleanPhone}`
     console.log(`Teléfono procesado final: ${phone}`)
-    const isPhoneValid = await checkValidPhone(phone)
+    const isPhoneValid = checkValidPhone(phone)
     if (!isPhoneValid) {
       console.log(`Número inválido: ${phone} de ${client.name}`)
       await updateError(contact.id, "Número inválido")

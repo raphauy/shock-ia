@@ -271,7 +271,7 @@ type CreateResponse= {
     error: string | null
 }
 
-export async function createContact(accountId: number, inboxId: number, phoneNumber: string, name?: string): Promise<CreateResponse> {
+export async function createContactInChatwoot(accountId: number, inboxId: number, phoneNumber: string, name?: string): Promise<CreateResponse> {
     const chatwootToken = process.env.CHATWOOT_ACCESS_TOKEN!
 
     // identifier is the phone number without the + and concatenated with @us.whatsapp.net

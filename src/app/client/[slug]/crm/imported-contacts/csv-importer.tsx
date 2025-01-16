@@ -61,7 +61,7 @@ export function CSVImporter({ clientId }: Props) {
           etiquetas: tagsIndex >= 0 ? currentLine[tagsIndex] : undefined
         }
 
-        if (!await checkValidPhone(contact.telefono)) {
+        if (!checkValidPhone(contact.telefono)) {
           isValidData = false
           console.error(`Número de teléfono inválido: ${contact.telefono}`)
         }

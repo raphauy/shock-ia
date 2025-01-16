@@ -1,12 +1,12 @@
 import { prisma } from "@/lib/db"
 import { ContactEventType } from "@prisma/client"
 import * as z from "zod"
-import { deleteContactInChatwoot } from "./chatwoot"
-import { getChatwootAccountId } from "./clientService"
+import { createChatwootConversation, createContactInChatwoot, deleteContactInChatwoot } from "./chatwoot"
+import { getChatwootAccountId, getClient, getWhatsappInstance } from "./clientService"
 import { createContactEvent } from "./contact-event-services"
 import { getImportedContactByChatwootId } from "./imported-contacts-services"
 import { createDefaultStages, getFirstStageOfClient, getStageByName, StageDAO } from "./stage-services"
-import { removeContactFromAllConversations } from "./conversationService"
+import { createConversation, getLastConversationByContactId, removeContactFromAllConversations } from "./conversationService"
 import { ApiError } from "@figuro/chatwoot-sdk"
 
 export type ContactDAO = {
@@ -421,4 +421,46 @@ export async function getFilteredContacts(clientId: string, from: Date | null, t
     }
   })
   return found
+}
+
+// esta función se encarga de buscar un contacto por el número de teléfono y el cliente
+// si existe el contacto, debe buscar la última conversación del contacto en la base de datos y devolver el chatwootConversationId
+// si no encuentra un contacto, lo crea tanto en Chatwoot como en la base de datos, además debe crear una conversación en Chatwoot y una conversación en la base de datos
+export async function getLastChatwootConversationIdByPhoneNumber(phone: string, clientId: string) {
+  const contact= await getContactByPhone(phone, clientId)
+  if (!contact) {
+    const whatsappInstance= await getWhatsappInstance(clientId)
+    if (!whatsappInstance) throw new Error("Whatsapp instance not found")
+    if (!whatsappInstance.whatsappInboxId) throw new Error("Whatsapp inbox not found")
+    const name= "Destinatario FC"
+    // create contact in chatwoot
+    const chatwootContact= await createContactInChatwoot(Number(whatsappInstance.chatwootAccountId), Number(whatsappInstance.whatsappInboxId), phone, name)
+    if (!chatwootContact.id) throw new Error("Error al crear el contacto en Chatwoot")
+    // create contact in database
+    const contactValues: ContactFormValues= {
+      chatwootId: String(chatwootContact.id),
+      name,
+      phone,
+      src: "destinatario FC",
+      clientId
+    }
+    const createdContact= await createContact(contactValues)
+    if (!createdContact) throw new Error("Error al crear el contacto en la base de datos")
+
+    // create conversation in chatwoot
+    const chatwootConversationId= await createChatwootConversation(Number(whatsappInstance.chatwootAccountId), whatsappInstance.whatsappInboxId, chatwootContact.id)
+    if (!chatwootConversationId) throw new Error("Error al crear la conversación en Chatwoot")
+
+    // create conversation in database
+    const createdConversation= await createConversation(createdContact.phone, clientId, createdContact.id, chatwootConversationId)
+    if (!createdConversation) throw new Error("Error al crear la conversación en la base de datos")
+
+    return chatwootConversationId
+  } else {
+    // get the last conversation of the contact
+    const lastConversation= await getLastConversationByContactId(contact.id, clientId)
+    if (!lastConversation) throw new Error("Error al obtener la última conversación del contacto")
+
+    return lastConversation.chatwootConversationId
+  }
 }

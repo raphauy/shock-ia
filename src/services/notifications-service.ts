@@ -4,6 +4,10 @@ import { RepoDataDAO } from "./repodata-services";
 import { es } from "date-fns/locale";
 import axios from "axios";
 import { BookingDAO } from "./booking-services";
+import { getLastChatwootConversationIdByPhoneNumber } from "./contact-services";
+import { sendTextToConversation } from "./chatwoot";
+import { getChatwootAccountId } from "./clientService";
+import { formatInTimeZone } from "date-fns-tz";
 
 type RepoDataEntryResponse = {
     id: string,
@@ -29,7 +33,7 @@ export type RepoDataWithClientNameAndBooking = RepoDataWithClientName & {
     booking?: BookingDAO
 }
 
-export async function sendWebhookNotification(webhookUrl: string, repoData: RepoDataWithClientNameAndBooking) {
+export function getProcessedRepoData(repoData: RepoDataWithClientNameAndBooking): Record<string, any> {
     const parsedData = JSON.parse(repoData.data as string);
 
     const jsonReplaced = Object.keys(parsedData).reduce((acc, key) => {
@@ -37,6 +41,11 @@ export async function sendWebhookNotification(webhookUrl: string, repoData: Repo
       return acc;
     }, {} as Record<string, any>);
 
+    return jsonReplaced
+}
+
+export async function sendWebhookNotification(webhookUrl: string, repoData: RepoDataWithClientNameAndBooking) {
+    const jsonReplaced = getProcessedRepoData(repoData)
 
     const data: RepoDataEntryResponse = {
         id: repoData.id,
@@ -81,6 +90,55 @@ export async function sendWebhookNotification(webhookUrl: string, repoData: Repo
             } else {
                 console.error('Failed to send webhook notification:', error)
             }
+        }
+    }
+}
+
+export async function sendWhatsappNotifications(notifyPhones: string[], repoData: RepoDataWithClientNameAndBooking) {
+    const jsonReplaced = getProcessedRepoData(repoData)
+    console.log("jsonReplaced", jsonReplaced)
+
+    const phone= repoData.phone
+    const functionName= repoData.functionName
+    const timezone= "America/Montevideo"
+    const date= formatInTimeZone(repoData.createdAt, timezone, "yyyy-MM-dd HH:mm", { locale: es })
+
+    // an special field is name, if it is not present, use the client name
+    const name= jsonReplaced.nombre || "Usuario"
+
+    // create a text message to send to the users, use de FC name and the data
+    let textMessage= `
+**${functionName}**
+
+**Nombre:** ${name}
+**Teléfono:** ${phone}
+**Fecha:** ${date}
+----------------------
+**Datos:**
+`
+    for (const key in jsonReplaced) {
+        if (key !== "nombre") {
+            textMessage+= `    -**${key}:** ${jsonReplaced[key]}
+`
+        }
+    }
+
+    console.log("message to send:")
+    console.log(textMessage)
+
+    const chatwootAccountId= await getChatwootAccountId(repoData.clientId)
+    if (!chatwootAccountId) throw new Error("Chatwoot account not found for client " + repoData.clientId)
+
+    // iterate over the notifyPhones array and send the message to each phone
+    for (const destinationPhone of notifyPhones) {
+        const chatwootConversationId= await getLastChatwootConversationIdByPhoneNumber(destinationPhone, repoData.clientId)
+        if (!chatwootConversationId) {
+            // log and continue
+            console.log(`Chatwoot conversation not found for phone ${destinationPhone}`)
+            continue
+        } else {
+            await sendTextToConversation(Number(chatwootAccountId), chatwootConversationId, textMessage)
+            console.log(`Message sent to ${destinationPhone}`)
         }
     }
 }

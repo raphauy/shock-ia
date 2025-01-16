@@ -1,7 +1,7 @@
 
 import { config } from "dotenv"
 import { createExternalPayment } from "./cobros-wap"
-import { createContact, createChatwootConversation, getInboxId, deleteContactInChatwoot } from "./chatwoot"
+import { createContactInChatwoot, createChatwootConversation, getInboxId, deleteContactInChatwoot } from "./chatwoot"
 config()
 
 async function main() {
