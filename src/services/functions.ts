@@ -594,25 +594,39 @@ export async function reservarParaEventoDeUnicaVez(clientId: string, conversatio
 
   processTagsAndStage(event, conversation, metadataObj)
 
+  const repoDataWithClientNameAndBooking: RepoDataWithClientNameAndBooking= {
+    id: created.id,
+    repoName: event.name,
+    phone: conversation.phone,
+    functionName: event.name,
+    data: metadata,
+    repositoryId: event.id,
+    clientId,
+    conversationId,
+    createdAt: created.createdAt,
+    updatedAt: created.updatedAt,
+    client: {
+      name: conversation.client.name,
+      slug: conversation.client.slug,
+    },
+    booking: created,
+  }
+
   if (event.webHookUrl) {
-    const repoDataWithClientNameAndBooking: RepoDataWithClientNameAndBooking= {
-      id: created.id,
-      repoName: event.name,
-      phone: conversation.phone,
-      functionName: event.name,
-      data: metadata,
-      repositoryId: event.id,
-      clientId,
-      conversationId,
-      createdAt: created.createdAt,
-      updatedAt: created.updatedAt,
-      client: {
-        name: conversation.client.name,
-        slug: conversation.client.slug,
-      },
-      booking: created,
+    try {
+      await sendWebhookNotification(event.webHookUrl, repoDataWithClientNameAndBooking)
+    } catch (error) {
+      console.log("Error al enviar notificación a webhook")
     }
-    await sendWebhookNotification(event.webHookUrl, repoDataWithClientNameAndBooking)
+  }
+
+  const notifyPhones= event.notifyPhones
+  if (notifyPhones) {
+    try {
+      await sendWhatsappNotifications(notifyPhones, repoDataWithClientNameAndBooking)
+    } catch (error) {
+      console.log("Error al enviar notificación a whatsapp")
+    }
   }
 
   return "Reserva registrada."

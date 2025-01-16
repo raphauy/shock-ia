@@ -100,4 +100,3 @@ export async function deleteConfig(id: string) {
   })
   return deleted
 }
-    
