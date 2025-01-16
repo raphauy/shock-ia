@@ -94,7 +94,7 @@ export async function sendWebhookNotification(webhookUrl: string, repoData: Repo
     }
 }
 
-export async function sendWhatsappNotifications(notifyPhones: string[], repoData: RepoDataWithClientNameAndBooking) {
+export async function sendFCNotifications(notifyPhones: string[], repoData: RepoDataWithClientNameAndBooking) {
     const jsonReplaced = getProcessedRepoData(repoData)
     console.log("jsonReplaced", jsonReplaced)
 
@@ -117,7 +117,71 @@ ${name ? `\n**Nombre:** ${name}` : ""}
 `
     for (const key in jsonReplaced) {
         if (key !== "nombre") {
-            textMessage+= `    -**${key}:** ${jsonReplaced[key]}
+            textMessage+= `    **-${key}:** ${jsonReplaced[key]}
+`
+        }
+    }
+
+    console.log("message to send:")
+    console.log(textMessage)
+
+    const chatwootAccountId= await getChatwootAccountId(repoData.clientId)
+    if (!chatwootAccountId) throw new Error("Chatwoot account not found for client " + repoData.clientId)
+
+    // iterate over the notifyPhones array and send the message to each phone
+    for (const destinationPhone of notifyPhones) {
+        const chatwootConversationId= await getLastChatwootConversationIdByPhoneNumber(destinationPhone, repoData.clientId)
+        if (!chatwootConversationId) {
+            // log and continue
+            console.log(`Chatwoot conversation not found for phone ${destinationPhone}`)
+            continue
+        } else {
+            await sendTextToConversation(Number(chatwootAccountId), chatwootConversationId, textMessage)
+            console.log(`Message sent to ${destinationPhone}`)
+        }
+    }
+}
+
+
+export async function sendEventNotifications(notifyPhones: string[], repoData: RepoDataWithClientNameAndBooking) {
+    const jsonReplaced = getProcessedRepoData(repoData)
+    console.log("jsonReplaced", jsonReplaced)
+
+    const phone= repoData.phone
+    const functionName= repoData.functionName
+    const timezone= "America/Montevideo"
+    const date= formatInTimeZone(repoData.createdAt, timezone, "yyyy-MM-dd HH:mm", { locale: es })
+
+    // an special field is name, if it is not present, use the client name
+    const name= jsonReplaced.nombre || undefined
+
+    const booking= repoData.booking
+    if (!booking) throw new Error("Booking not found")
+
+    const bookingStart= format(booking.start, "yyyy-MM-dd HH:mm", { locale: es })
+    const bookingEnd= format(booking.end, "yyyy-MM-dd HH:mm", { locale: es })
+    const seats= booking.seats
+    const price= booking.price
+    const status= booking.status
+
+    // create a text message to send to the users, use de FC name and the data
+    let textMessage= `
+**Reserva para ${functionName}**
+---------------------------------
+${name ? `**Nombre:** ${name}` : ""}
+**Teléfono:** ${phone}
+**Fecha:** ${date}
+---------------------------------
+**Reserva:**
+    - **Fecha:** ${bookingStart} - ${bookingEnd}
+    - **Cupos:** ${seats}
+    - **Estado:** ${status}
+---------------------------------
+**Datos:**
+`
+    for (const key in jsonReplaced) {
+        if (key !== "nombre") {
+            textMessage+= `    **-${key}:** ${jsonReplaced[key]}
 `
         }
     }

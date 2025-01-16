@@ -23,7 +23,7 @@ import { getSectionOfDocument } from "./section-services";
 import { checkBookingAvailability, getSlots } from "./slots-service";
 import { getStageByName, getStagesDAO } from "./stage-services";
 import { SummitFormValues, createSummit } from "./summit-services";
-import { RepoDataWithClientNameAndBooking, sendWebhookNotification, sendWhatsappNotifications } from "./notifications-service";
+import { RepoDataWithClientNameAndBooking, sendWebhookNotification, sendFCNotifications, sendEventNotifications } from "./notifications-service";
 import { setMoveToStageIdOfClientFunctionAction } from "@/app/admin/repositories/repository-actions";
 import { JsonValue } from "@prisma/client/runtime/library";
 
@@ -494,7 +494,7 @@ export async function reservarParaEvento(clientId: string, conversationId: strin
   const notifyPhones= event.notifyPhones
   if (notifyPhones) {
     try {
-      await sendWhatsappNotifications(notifyPhones, repoDataWithClientNameAndBooking)
+      await sendEventNotifications(notifyPhones, repoDataWithClientNameAndBooking)
     } catch (error) {
       console.log("Error al enviar notificación a whatsapp")
     }
@@ -623,7 +623,7 @@ export async function reservarParaEventoDeUnicaVez(clientId: string, conversatio
   const notifyPhones= event.notifyPhones
   if (notifyPhones) {
     try {
-      await sendWhatsappNotifications(notifyPhones, repoDataWithClientNameAndBooking)
+      await sendEventNotifications(notifyPhones, repoDataWithClientNameAndBooking)
     } catch (error) {
       console.log("Error al enviar notificación a whatsapp")
     }
@@ -799,7 +799,7 @@ export async function defaultFunction(clientId: string, name: string, args: any)
       }
       if (functionClient.notifyPhones) {
         try {
-          await sendWhatsappNotifications(functionClient.notifyPhones, created)
+          await sendFCNotifications(functionClient.notifyPhones, created)
         } catch (error) {
           console.log("Error al enviar notificación a whatsapp")
         }

@@ -436,23 +436,46 @@ export async function getLastChatwootConversationIdByPhoneNumber(phone: string, 
     // create contact in chatwoot
     const chatwootContact= await createContactInChatwoot(Number(whatsappInstance.chatwootAccountId), Number(whatsappInstance.whatsappInboxId), phone, name)
     if (!chatwootContact.id) throw new Error("Error al crear el contacto en Chatwoot")
-    // create contact in database
-    const contactValues: ContactFormValues= {
-      chatwootId: String(chatwootContact.id),
-      name,
-      phone,
-      src: "destinatario FC",
-      clientId
+
+    // Verificar si ya existe un contacto con este chatwootId
+    const existingContact = await prisma.contact.findFirst({
+      where: {
+        chatwootId: String(chatwootContact.id),
+        clientId
+      }
+    })
+
+    let dbContact
+    if (existingContact) {
+      // Si existe, actualizamos el teléfono si es necesario
+      if (existingContact.phone !== phone) {
+        dbContact = await prisma.contact.update({
+          where: { id: existingContact.id },
+          data: { phone }
+        })
+      } else {
+        dbContact = existingContact
+      }
+    } else {
+      // Si no existe, creamos uno nuevo
+      const contactValues: ContactFormValues= {
+        chatwootId: String(chatwootContact.id),
+        name,
+        phone,
+        src: "destinatario FC",
+        clientId
+      }
+      dbContact = await createContact(contactValues)
     }
-    const createdContact= await createContact(contactValues)
-    if (!createdContact) throw new Error("Error al crear el contacto en la base de datos")
+
+    if (!dbContact) throw new Error("Error al gestionar el contacto en la base de datos")
 
     // create conversation in chatwoot
     const chatwootConversationId= await createChatwootConversation(Number(whatsappInstance.chatwootAccountId), whatsappInstance.whatsappInboxId, chatwootContact.id)
     if (!chatwootConversationId) throw new Error("Error al crear la conversación en Chatwoot")
 
     // create conversation in database
-    const createdConversation= await createConversation(createdContact.phone, clientId, createdContact.id, chatwootConversationId)
+    const createdConversation= await createConversation(dbContact.phone, clientId, dbContact.id, chatwootConversationId)
     if (!createdConversation) throw new Error("Error al crear la conversación en la base de datos")
 
     return chatwootConversationId
