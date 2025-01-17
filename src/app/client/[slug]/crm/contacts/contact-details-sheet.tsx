@@ -9,7 +9,7 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { ContactDAO } from "@/services/contact-services"
 import { ContactEventDAO } from '@/services/contact-event-services'
-import { ContactEventType } from '@prisma/client'
+import { ContactEventType, FieldType } from '@prisma/client'
 import { getAllTagsAction, getContactEventsAction, getRepoDataCountAction, getStageByContactIdAction, getTagsOfContactAction } from './contact-actions'
 import { cn, formatWhatsAppStyle } from '@/lib/utils'
 import { Separator } from '@/components/ui/separator'
@@ -19,6 +19,11 @@ import TagSelector from './tag-selector'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
+import { CustomFieldDAO } from '@/services/customfield-services'
+import { FieldValueDAO } from '@/services/fieldvalue-services'
+import { getClientCustomFieldsAction } from '../custom-fields/customfield-actions'
+import { getFieldValuesByContactIdAction } from '../fieldvalues/fieldvalue-actions'
+import { FieldValueDialog } from '../fieldvalues/fieldvalue-dialogs'
 
 type ContactDetailsSheetProps = {
   contact: ContactDAO | null
@@ -30,9 +35,11 @@ export function ContactDetailsSheet({ contact, isOpen, onClose }: ContactDetails
   const [events, setEvents] = useState<ContactEventDAO[]>([])
   const [stage, setStage] = useState<string | null>(null)
   const [allTags, setAllTags] = useState<string[]>(["pepe"])
-  const [tagChangeCount, setTagChangeCount] = useState(0)
+  const [changeCount, setChangeCount] = useState(0)
   const [contactTags, setContactTags] = useState<string[]>([])
   const [repoDataCount, setRepoDataCount] = useState(0)
+  const [customFields, setCustomFields] = useState<CustomFieldDAO[]>([])
+  const [fieldValues, setFieldValues] = useState<FieldValueDAO[]>([])
 
   const params= useParams()
   const slug= params.slug as string
@@ -64,16 +71,36 @@ export function ContactDetailsSheet({ contact, isOpen, onClose }: ContactDetails
       .then(respTags => {
         setContactTags(respTags)
       })
+      getClientCustomFieldsAction(contact.clientId)
+      .then(respCustomFields => {
+        setCustomFields(respCustomFields)
+      })
+      getFieldValuesByContactIdAction(contact.id)
+      .then(respFieldValues => {
+        setFieldValues(respFieldValues)
+      })
     }
-  }, [tagChangeCount, contact])
+  }, [changeCount, contact])
 
   if (!contact) return null  
 
   const createdEvent = events.find(e => e.type === ContactEventType.CREATED)
   const otherEvents = events.filter(e => e.type !== ContactEventType.CREATED)
 
+  function handleOnClose() {
+    // reset all values
+    setEvents([])
+    setStage(null)
+    setAllTags([])
+    setContactTags([])
+    setRepoDataCount(0)
+    setCustomFields([])
+    setFieldValues([])
+    onClose()
+  }
+
   return (
-    <Sheet open={isOpen} onOpenChange={onClose}>
+    <Sheet open={isOpen} onOpenChange={handleOnClose}>
         
       <SheetContent className="sm:max-w-[500px] md:max-w-[600px] lg:max-w-[700px] w-full">
         <SheetHeader>
@@ -101,11 +128,35 @@ export function ContactDetailsSheet({ contact, isOpen, onClose }: ContactDetails
                   {contactTags.map((tag) => (
                       <Badge key={tag} className="h-5">{tag}</Badge>
                   ))}
-                  <TagSelectorDialog contact={contact} initialTags={contactTags} allTags={allTags} tagChangeCount={() => setTagChangeCount(tagChangeCount + 1)} />
+                  <TagSelectorDialog contact={contact} initialTags={contactTags} allTags={allTags} tagChangeCount={() => setChangeCount(changeCount + 1)} />
                 </div>
                 <p className="text-sm text-muted-foreground mb-6">
                     {formatWhatsAppStyle(contact.updatedAt)}
                 </p>
+            </div>
+
+            <div className={cn("flex flex-col gap-2 border-t pt-4", fieldValues.length === 0 && "hidden")}>
+              {customFields.map((field) => {
+                const fieldValue = fieldValues.find(fv => fv.customFieldId === field.id)
+                return (
+                  <div key={field.id} className="flex items-center">
+                    <span className="font-semibold w-24">{field.name}:</span>
+                    <div className="flex items-center gap-2 flex-1">
+                      {fieldValue ? 
+                        <>
+                          <p className="flex-1">{fieldValue.customField.type === FieldType.boolean ? fieldValue.value === "true" ? "SI" : "NO" : fieldValue.value}</p>
+                          <FieldValueDialog id={fieldValue.id} contactId={contact.id} customFieldId={field.id} customFieldName={field.name} customFieldType={field.type} update={() => setChangeCount(changeCount + 1)} />
+                        </>
+                        : 
+                        <>
+                          <p className="flex-1"/>
+                          <FieldValueDialog contactId={contact.id} customFieldId={field.id} customFieldName={field.name} customFieldType={field.type} update={() => setChangeCount(changeCount + 1)} />
+                        </>
+                      }
+                    </div>
+                  </div>
+                )
+              })}
             </div>
 
             <div className={cn("flex justify-end", repoDataCount === 0 && "hidden")}>
@@ -196,6 +247,8 @@ function getEventDescription(event: ContactEventDAO): string {
         return `Movido a estado: ${event.info}`
       case ContactEventType.EDITED:
         return 'Contacto editado'
+      case ContactEventType.CUSTOM_FIELD_VALUE_UPDATED:
+        return `Campo actualizado - ${event.info}`
       default:
         return 'Evento desconocido'
     }

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Loader, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getRemainingCountAction } from "../campaign-actions";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import { cancelCampaignAction } from "../campaign-actions";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 

@@ -529,7 +529,7 @@ model CustomField {
   id          String     @id @default(cuid())            
   name        String                                      // gennext: show.column
   description String?                                     // gennext: show.column
-  type        String                                      // gennext: show.column
+  type        FieldType                                      // gennext: show.column
   order       Int                                         // gennext: show.column
 
   client      Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
@@ -596,6 +596,7 @@ enum ContactEventType {
   UNTAGGED
   MOVED_TO_STAGE
   EDITED
+  CUSTOM_FIELD_VALUE_UPDATED
 }
 
 model ContactEvent {

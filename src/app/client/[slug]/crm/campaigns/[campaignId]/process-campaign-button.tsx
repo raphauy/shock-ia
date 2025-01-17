@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import { Loader, Play } from "lucide-react";
 import { useState } from "react";
 import { processCampaignAction } from "../campaign-actions";

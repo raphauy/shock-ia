@@ -7,7 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { File, Download, Upload, Loader } from 'lucide-react'
 import { checkValidPhone } from '@/lib/utils'
-import { toast } from '@/hooks/use-toast'
+import { toast } from "@/components/ui/use-toast"
 import { saveCSVContactsAction } from './imported-contact-actions'
 
 export type ContactCSV = {

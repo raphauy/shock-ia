@@ -857,3 +857,20 @@ export async function getLastClientId() {
   })
   return client?.id || null
 }
+
+export async function getClientAndCustomFieldsBySlug(slug: string) {
+  const client= await prisma.client.findUnique({
+    where: {
+      slug
+    },
+    include: {
+      customFields: {
+        orderBy: {
+          order: 'asc'
+        }
+      }
+    }
+  })
+  return client
+}
+

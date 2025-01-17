@@ -1,8 +1,28 @@
+import { getClientAndCustomFieldsBySlug } from "@/services/clientService"
+import CustomFieldsBox from "./custom-fields-box"
+import { CustomFieldDialog } from "./customfield-dialogs"
 
-export default function CustomFieldsPage() {
+type Props = {
+  params: {
+    slug: string
+  }
+}
+export default async function CustomFieldsPage({ params }: Props) {
+  const client= await getClientAndCustomFieldsBySlug(params.slug)
+  if (!client) {
+    return <div>Cliente no encontrado</div>
+  }
   return (
-    <div className="flex flex-col items-center justify-center mt-10">
-      <p className="text-2xl font-bold">En desarrollo</p>
+    <div className="flex flex-col items-center justify-center mt-10 w-full space-y-4">
+      <div className="flex justify-between w-full max-w-3xl mb-10">
+        <p className="text-2xl font-bold">Campos personalizados</p>
+        <CustomFieldDialog clientId={client.id} />
+      </div>
+
+
+      <div className="w-full max-w-3xl">
+        <CustomFieldsBox clientId={client.id} initialFields={client.customFields} />
+      </div>
     </div>
   )
 }
