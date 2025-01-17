@@ -135,7 +135,7 @@ export function ContactDetailsSheet({ contact, isOpen, onClose }: ContactDetails
                 </p>
             </div>
 
-            <div className={cn("flex flex-col gap-2 border-t pt-4", fieldValues.length === 0 && "hidden")}>
+            <div className={cn("flex flex-col gap-2 border-t pt-4", customFields.length === 0 && "hidden")}>
               {customFields.map((field) => {
                 const fieldValue = fieldValues.find(fv => fv.customFieldId === field.id)
                 return (
