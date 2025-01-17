@@ -50,9 +50,15 @@ export default function MenuAdmin() {
 
 
     return (
-        <div className="flex-1 hidden gap-6 pl-5 lg:flex md:gap-5">
+        <div className="flex-1 hidden gap-6 pl-5 md:flex md:gap-5">
             <nav>
                 <ul className="flex items-center">
+                    { slug && (
+                        <li className={`flex items-center border-b-shock-color hover:border-b-shock-color hover:border-b-2 h-11 ${path === `/client/${slug}` && "border-b-2"}`}>
+                            <Link href={`/client/${slug}`}><Button className="text-lg" variant="ghost">Inicio</Button></Link>
+                        </li>
+                    )}
+
                     <li className={`flex items-center border-b-shock-color hover:border-b-shock-color hover:border-b-2 h-11 ${path.includes("admin") && "border-b-2"}`}>
                         <Link href={`/admin?slug=${slug}`}><Button className="text-lg" variant="ghost">Admin</Button></Link>
                     </li>

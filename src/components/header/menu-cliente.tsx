@@ -43,6 +43,7 @@ export default function MenuCliente() {
         <div className="flex flex-1 gap-6 pl-5 md:gap-5 ">
             <nav>
                 <ul className="flex items-center">
+
                     {haveAgentes && (
                     <li className={`flex items-center border-b-shock-color hover:border-b-shock-color hover:border-b-2 h-11 whitespace-nowrap ${path === "/agentes" && "border-b-2"}`}>
                         <Link href={`/agentes`}>
