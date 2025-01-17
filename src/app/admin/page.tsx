@@ -1,16 +1,23 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getCurrentUser } from "@/lib/auth";
-import { getClientsCount, getLastClient } from "@/services/clientService";
+import { getClientBySlug, getClientIdBySlug, getClientsCount, getLastClient, getLastClientId } from "@/services/clientService";
 import { getDocumentsCount } from "@/services/document-services";
 import getUsers from "@/services/userService";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { BookOpen, Briefcase, Settings, User } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
-export default async function AdminPage() {
+type Props= {
+  searchParams: {
+    slug: string
+  }
+}
 
+export default async function AdminPage({searchParams}: Props) {
+  const slug= searchParams.slug
   const users= await getUsers()
   const clientsCount= await getClientsCount()
   const documentsCount= await getDocumentsCount()
@@ -18,7 +25,18 @@ export default async function AdminPage() {
   const user= await getCurrentUser()
   console.log(format(new Date(), "MM-dd HH:mm:ss", {locale: es}), user?.name, "(admin page)")    
 
-  const firstClient= await getLastClient()
+  let targetClientId= null
+  if (slug) {
+    targetClientId= await getClientIdBySlug(slug)
+  }
+
+  if (targetClientId) {
+    redirect(`/admin/config?clientId=${targetClientId}`)
+  } else {    
+    targetClientId= await getLastClientId()
+  }
+
+
 
   return (
     <div className="flex flex-col">
@@ -77,7 +95,7 @@ export default async function AdminPage() {
           </Link>
         </div>
       </div>
-      <Link href={`/admin/config?clientId=${firstClient?.id}`} className="mt-10 text-center">
+      <Link href={`/admin/config?clientId=${targetClientId}`} className="mt-10 text-center">
         <Button variant="link" className="space-x-2"><Settings /><p>Configuración</p></Button>
       </Link>
 

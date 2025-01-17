@@ -839,3 +839,21 @@ export async function getClientOfCampaign(campaignId: string) {
   })
   return client
 }
+
+export async function getClientIdBySlug(slug: string) {
+  const client= await prisma.client.findUnique({
+    where: {
+      slug
+    }
+  })
+  return client?.id || null
+}
+
+export async function getLastClientId() {
+  const client= await prisma.client.findFirst({
+    orderBy: {
+      createdAt: 'desc'
+    }
+  })
+  return client?.id || null
+}
