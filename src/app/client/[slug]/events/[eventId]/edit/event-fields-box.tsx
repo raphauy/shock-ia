@@ -3,18 +3,20 @@
 import { Button } from "@/components/ui/button"
 import { toast } from "@/components/ui/use-toast"
 import { Reorder } from "framer-motion"
-import { Asterisk, Grip, Loader, X } from "lucide-react"
+import { Asterisk, Grip, Link, Loader, X } from "lucide-react"
 import { useEffect, useState } from "react"
 import { FieldDAO } from "@/services/field-services"
 import { Badge } from "@/components/ui/badge"
 import { deleteFieldAction, updateEventFieldOrderAction } from "@/app/admin/fields/field-actions"
 import { FieldDialog } from "@/app/admin/fields/field-dialogs"
+import { CustomFieldDAO } from "@/services/customfield-services"
 
 type Props= {
     initialFields: FieldDAO[]
     eventId: string
+    customFields: CustomFieldDAO[]
 }
-export default function EventFieldsBox({ initialFields, eventId }: Props) {
+export default function EventFieldsBox({ initialFields, eventId, customFields }: Props) {
 
     const [fields, setFields] = useState(initialFields)
     const [loading, setLoading] = useState(false)
@@ -53,7 +55,7 @@ export default function EventFieldsBox({ initialFields, eventId }: Props) {
     return (
         <Reorder.Group values={fields} onReorder={(newOrder) => handleNewOrder(newOrder)} className="">
             <div className="flex justify-end">
-                <FieldDialog eventId={eventId}/>
+                <FieldDialog eventId={eventId} customFields={customFields}/>
             </div>
         {
             fields.map((field, index) => {
@@ -65,10 +67,16 @@ export default function EventFieldsBox({ initialFields, eventId }: Props) {
                             { field.required && <Asterisk className="w-5 h-5 text-green-500" /> }
                         </div>
                         <div className="flex items-center">
+                            { field.linkedCustomFieldId && 
+                                <Badge variant="archived" className="mr-2 gap-2">
+                                    <Link className="w-3 h-3" />
+                                    {customFields.find((customField) => customField.id === field.linkedCustomFieldId)?.name}
+                                </Badge> 
+                            }
                             <Badge className="mr-3">
                                 {field.type}
                             </Badge>
-                            <FieldDialog repoId={field.repositoryId} id={field.id} />
+                            <FieldDialog repoId={field.repositoryId} id={field.id} customFields={customFields}/>
                             {
                                 loading && deletingId === field.id ? <Loader className="h-5 w-5 animate-spin" />
                                 : 

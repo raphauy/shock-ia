@@ -88,3 +88,18 @@ export async function getFieldValuesByContactId(contactId: string) {
   return found as FieldValueDAO[]
 }
 
+export async function createOrUpdateFieldValue(data: FieldValueFormValues) {
+  const found= await prisma.fieldValue.findFirst({
+    where: {
+      contactId: data.contactId,
+      customFieldId: data.customFieldId
+    }
+  })
+  let updated= null as FieldValueDAO | null
+  if (found) {
+    updated= await updateFieldValue(found.id, data)
+  } else {
+    updated= await createFieldValue(data)
+  }
+  return updated
+}

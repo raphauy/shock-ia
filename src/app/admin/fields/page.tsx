@@ -1,7 +1,6 @@
 import { getFullFieldsDAO } from "@/services/field-services"
-import { FieldDialog } from "./field-dialogs"
-import { DataTable } from "./field-table"
 import { columns } from "./field-columns"
+import { DataTable } from "./field-table"
 
 export default async function FieldPage() {
   

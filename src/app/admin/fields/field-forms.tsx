@@ -14,29 +14,63 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { FieldType } from "@prisma/client"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
+import { CustomFieldDAO } from "@/services/customfield-services"
 
 type Props= {
   id?: string
   repoId?: string | null | undefined
   eventId?: string | null | undefined
+  customFields: CustomFieldDAO[]
   closeDialog: () => void
 }
 
-export function FieldForm({ id, repoId, eventId, closeDialog }: Props) {
+export function FieldForm({ id, repoId, eventId, customFields, closeDialog }: Props) {
   const form = useForm<FieldFormValues>({
     resolver: zodResolver(repoFieldSchema),
-    defaultValues: {
-      name: "",
-      type: "string",
-      description: "",
-      required: true,
-      etiquetar: false,
-      repositoryId: repoId ?? undefined,
-      eventId: eventId ?? undefined,
+    defaultValues: async () => {
+      if (id) {
+        const data = await getFieldDAOAction(id)
+        if (data) {
+          return {
+            repositoryId: data.repositoryId ?? undefined,
+            eventId: data.eventId ?? undefined,
+            linkedCustomFieldId: data.linkedCustomFieldId ?? undefined,
+            name: data.name,
+            type: data.type,
+            description: data.description,
+            required: data.required,
+            etiquetar: data.etiquetar
+          }
+        }
+      }
+      return {
+        name: "",
+        type: "string",
+        description: "",
+        required: true,
+        etiquetar: false,
+        repositoryId: repoId ?? undefined,
+        eventId: eventId ?? undefined,
+        linkedCustomFieldId: undefined,
+      }
     },
     mode: "onChange",
   })
   const [loading, setLoading] = useState(false)
+
+  const [filteredCustomFields, setFilteredCustomFields] = useState<CustomFieldDAO[]>(customFields)
+
+  const watchedType = form.watch("type")
+  console.log(watchedType)
+
+  useEffect(() => {
+    const selectedType = watchedType
+    if (!selectedType) {
+      setFilteredCustomFields(customFields)
+    } else {
+      setFilteredCustomFields(customFields.filter(field => field.type === selectedType))
+    }
+  }, [watchedType, customFields])
 
   const onSubmit = async (data: FieldFormValues) => {
     setLoading(true)
@@ -55,19 +89,18 @@ export function FieldForm({ id, repoId, eventId, closeDialog }: Props) {
     if (id) {
       getFieldDAOAction(id).then((data) => {
         if (data) {
-          form.setValue("repositoryId", data.repositoryId ?? undefined)
-          form.setValue("eventId", data.eventId ?? undefined)
-          form.setValue("name", data.name)
-          form.setValue("type", data.type)
-          form.setValue("description", data.description)
-          form.setValue("required", data.required)
-          form.setValue("etiquetar", data.etiquetar)
+          console.log("linkedCustomFieldId: ", data.linkedCustomFieldId);
+          form.reset({
+            repositoryId: data.repositoryId ?? undefined,
+            eventId: data.eventId ?? undefined,
+            linkedCustomFieldId: data.linkedCustomFieldId ?? undefined,
+            name: data.name,
+            type: data.type,
+            description: data.description,
+            required: data.required,
+            etiquetar: data.etiquetar
+          })
         }
-        Object.keys(form.getValues()).forEach((key: any) => {
-          if (form.getValues(key) === null) {
-            form.setValue(key, "")
-          }
-        })
       })
     }
   }, [form, id])
@@ -100,8 +133,7 @@ export function FieldForm({ id, repoId, eventId, closeDialog }: Props) {
               <FormItem>
                 <FormLabel>Tipo</FormLabel>
                 <FormControl>
-                  <Select onValueChange={(value) => field.onChange(value)} value={field.value}
-                  >
+                  <Select onValueChange={(value) => field.onChange(value)} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecciona un Tipo" />
@@ -168,6 +200,35 @@ export function FieldForm({ id, repoId, eventId, closeDialog }: Props) {
                 <FormMessage />
               </FormItem>
             )}
+          />
+
+          <FormField
+            control={form.control}
+            name="linkedCustomFieldId"
+            render={({ field }) => {
+              return (
+                <FormItem>
+                  <FormLabel>Linkear campo personalizado</FormLabel>
+                  <FormControl>
+                    <Select 
+                      onValueChange={field.onChange}
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger disabled={customFields.length === 0}>
+                          <SelectValue placeholder="Selecciona un Campo" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {filteredCustomFields.map((customField) => (
+                          <SelectItem key={customField.id} value={customField.id}>{customField.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                </FormItem>
+              );
+            }}
           />
           
 

@@ -67,7 +67,7 @@ export const columns: ColumnDef<FieldDAO>[] = [
       return (
         <div className="flex items-center justify-end gap-2">
 
-          <FieldDialog id={data.id} repoId={data.repositoryId} eventId={data.eventId} />
+          <FieldDialog id={data.id} repoId={data.repositoryId} eventId={data.eventId} customFields={[]} />
           <DeleteFieldDialog description={deleteDescription} id={data.id} />
         </div>
 

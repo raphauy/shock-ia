@@ -107,8 +107,7 @@ export function CustomFieldForm({ id, clientId, closeDialog }: Props) {
               <FormItem>
                 <FormLabel>Tipo</FormLabel>
                 <FormControl>
-                  <Select onValueChange={(value) => field.onChange(value)} value={field.value}
-                  >
+                  <Select onValueChange={(value) => field.onChange(value)} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecciona un Tipo" />

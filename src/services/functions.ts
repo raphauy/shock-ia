@@ -1,5 +1,5 @@
 import { checkDateTimeFormatForSlot, decodeAndCorrectText } from "@/lib/utils";
-import { EventType } from "@prisma/client";
+import { ContactEventType, EventType } from "@prisma/client";
 import { addMinutes, format, parse } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import moment from 'moment-timezone';
@@ -13,7 +13,7 @@ import { addTagsToContact, getContactDAO, getTagsOfContact, setNewStage } from "
 import { getConversation, messageArrived } from "./conversationService";
 import { getDocumentDAO } from "./document-services";
 import { EventDAO, getEventDAO } from "./event-services";
-import { getDataTags, getEventDataTags } from "./field-services";
+import { getDataTags, getEventDataTags, getFieldsDAOByEventId, getFieldsDAOByRepositoryId } from "./field-services";
 import { functionHaveRepository, getFunctionClientDAO, getTagsOfClientFunction } from "./function-services";
 import { NarvaezFormValues, createOrUpdateNarvaez } from "./narvaez-services";
 import { sendWapMessage } from "./osomService";
@@ -26,6 +26,8 @@ import { SummitFormValues, createSummit } from "./summit-services";
 import { RepoDataWithClientNameAndBooking, sendWebhookNotification, sendFCNotifications, sendEventNotifications } from "./notifications-service";
 import { setMoveToStageIdOfClientFunctionAction } from "@/app/admin/repositories/repository-actions";
 import { JsonValue } from "@prisma/client/runtime/library";
+import { createOrUpdateFieldValue } from "./fieldvalue-services";
+import { createContactEvent } from "./contact-event-services";
 
 export type CompletionInitResponse = {
   assistantResponse: string | null
@@ -500,6 +502,23 @@ export async function reservarParaEvento(clientId: string, conversationId: strin
     }
   }
 
+  const contactId= conversation.contactId
+  if (contactId) {
+    const fields= await getFieldsDAOByEventId(eventId)
+    for (const field of fields) {
+      const value= metadataObj[field.name]
+      const linkedCustomFieldId= field.linkedCustomFieldId
+      if (value && linkedCustomFieldId) {
+        await createOrUpdateFieldValue({
+          contactId,
+          customFieldId: linkedCustomFieldId,
+          value: String(value)
+        })
+        await createContactEvent(ContactEventType.CUSTOM_FIELD_VALUE_UPDATED, field.name + ": " + value, "EV-" + event.name, contactId)
+      }
+    }
+  }
+
   return "Reserva registrada."
 }
 
@@ -628,6 +647,24 @@ export async function reservarParaEventoDeUnicaVez(clientId: string, conversatio
       console.log("Error al enviar notificación a whatsapp")
     }
   }
+
+  const contactId= conversation.contactId
+  if (contactId) {
+    const fields= await getFieldsDAOByEventId(eventId)
+    for (const field of fields) {
+      const value= metadataObj[field.name]
+      const linkedCustomFieldId= field.linkedCustomFieldId
+      if (value && linkedCustomFieldId) {
+        await createOrUpdateFieldValue({
+          contactId,
+          customFieldId: linkedCustomFieldId,
+          value: String(value)
+        })
+        await createContactEvent(ContactEventType.CUSTOM_FIELD_VALUE_UPDATED, field.name + ": " + value, "EV-" + event.name, contactId)
+      }
+    }
+  }
+
 
   return "Reserva registrada."
 }
@@ -836,13 +873,27 @@ export async function defaultFunction(clientId: string, name: string, args: any)
       console.log("setting new stage to contact, by: FC-" + name)
       await setNewStage(contactId, moveToStageId, "FC-" + name)
     }
-  
+
+    if (contactId) {
+      const fields= await getFieldsDAOByRepositoryId(repo.id)
+      for (const field of fields) {
+        const value= data[field.name]
+        if (value && field.linkedCustomFieldId) {
+          await createOrUpdateFieldValue({
+            contactId,
+            customFieldId: field.linkedCustomFieldId,
+            value: String(value)
+          })
+          await createContactEvent(ContactEventType.CUSTOM_FIELD_VALUE_UPDATED, field.name + ": " + value, "FC-" + name, contactId)
+        }
+      }
+    }
+
     return repo.finalMessage    
   } catch (error) {
     console.log(error)
     return "Hubo un error al procesar esta solicitud"        
   }
-
 }
 
 export async function processFunctionCall(clientId: string, name: string, args: any) {

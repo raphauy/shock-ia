@@ -139,8 +139,8 @@ export function ContactDetailsSheet({ contact, isOpen, onClose }: ContactDetails
               {customFields.map((field) => {
                 const fieldValue = fieldValues.find(fv => fv.customFieldId === field.id)
                 return (
-                  <div key={field.id} className="flex items-center">
-                    <span className="font-semibold w-24">{field.name}:</span>
+                  <div key={field.id} className="flex items-center gap-2">
+                    <span className="font-semibold min-w-[96px]">{field.name}:</span>
                     <div className="flex items-center gap-2 flex-1">
                       {fieldValue ? 
                         <>

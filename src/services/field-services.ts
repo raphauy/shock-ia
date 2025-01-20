@@ -15,6 +15,7 @@ export type FieldDAO = {
   etiquetar: boolean
 	repositoryId: string | null | undefined
   eventId: string | null | undefined
+  linkedCustomFieldId: string | null | undefined
 	createdAt: Date
 	updatedAt: Date
 }
@@ -27,6 +28,7 @@ export const repoFieldSchema = z.object({
   etiquetar: z.boolean().default(false),
 	repositoryId: z.string().optional(),
   eventId: z.string().optional(),
+  linkedCustomFieldId: z.string().optional(),
 })
 
 export type FieldFormValues = z.infer<typeof repoFieldSchema>

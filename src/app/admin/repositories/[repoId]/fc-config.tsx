@@ -19,6 +19,7 @@ import TagInputFunctionBox from "./tag-input-function"
 import SelectStage from "./select-stage"
 import { getStagesDAO } from "@/services/stage-services"
 import { ClientFunctionTextForm } from "@/components/client-function-text-form"
+import { getClientCustomFields } from "@/services/customfield-services"
 
 type Props = {
   clientId?: string
@@ -44,6 +45,8 @@ export default async function FCConfig({ clientId, repoId, fullMode, haveCRM }: 
   const stages= clientId ? await getStagesDAO(clientId) : []
   
   const BASE_PATH= process.env.NEXTAUTH_URL!
+
+  const clientCustomFields= clientId ? await getClientCustomFields(clientId) : []
 
   return (
     <>
@@ -119,7 +122,7 @@ export default async function FCConfig({ clientId, repoId, fullMode, haveCRM }: 
                     </div>
 
                     <div className="mt-6 border bg-slate-100 rounded-md p-2 dark:bg-black">
-                      <FieldsBox initialFields={repository.fields} repoId={repository.id} fullMode={fullMode} />
+                      <FieldsBox initialFields={repository.fields} repoId={repository.id} fullMode={fullMode} customFields={clientCustomFields} />
                     </div>
 
                     <Separator className="my-7" />

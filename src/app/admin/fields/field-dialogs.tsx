@@ -7,17 +7,19 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { toast } from "@/components/ui/use-toast";
 import { FieldForm, DeleteFieldForm } from "./field-forms"
 import { getFieldDAOAction } from "./field-actions"
+import { CustomFieldDAO } from "@/services/customfield-services";
 
 type Props= {
   id?: string
   repoId?: string | null | undefined
   eventId?: string | null | undefined
+  customFields: CustomFieldDAO[]
 }
 
 const addTrigger= <Button variant="outline"><PlusCircle size={22} className="mr-2"/>Crear campo</Button>
 const updateTrigger= <Pencil size={30} className="pr-2 hover:cursor-pointer"/>
 
-export function FieldDialog({ id, repoId, eventId }: Props) {
+export function FieldDialog({ id, repoId, eventId, customFields }: Props) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -29,8 +31,13 @@ export function FieldDialog({ id, repoId, eventId }: Props) {
         <DialogHeader>
           <DialogTitle>{id ? 'Actualizar' : 'Crear'} campo
           </DialogTitle>
+          <DialogDescription>
+            <span className="sr-only">
+              {id ? "Actualiza el campo" : "Crea un nuevo campo"}
+            </span>
+          </DialogDescription>
         </DialogHeader>
-        <FieldForm closeDialog={() => setOpen(false)} id={id} repoId={repoId} eventId={eventId} />
+        <FieldForm closeDialog={() => setOpen(false)} id={id} repoId={repoId} eventId={eventId} customFields={customFields} />
       </DialogContent>
     </Dialog>
   )

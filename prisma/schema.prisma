@@ -371,6 +371,9 @@ model Field {
   event               Event? @relation(fields: [eventId], references: [id], onDelete: Cascade)
   eventId             String?
 
+  linkedCustomField   CustomField? @relation(fields: [linkedCustomFieldId], references: [id], onDelete: SetNull)
+  linkedCustomFieldId String?
+
   createdAt           DateTime     @default(now())       // gennext: skip.zod
   updatedAt           DateTime     @updatedAt            // gennext: skip.zod
 }
@@ -537,6 +540,8 @@ model CustomField {
   clientId      String
 
   fieldValues   FieldValue[]                               // gennext: skip.list
+
+  linkedFields     Field[]
   
   createdAt     DateTime   @default(now())                 // gennext: skip.zod
   updatedAt     DateTime   @updatedAt                      // gennext: skip.zod

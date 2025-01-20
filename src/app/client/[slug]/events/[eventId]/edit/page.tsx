@@ -18,6 +18,7 @@ import { EventTaggerComponent } from "./event-tagger";
 import FixedDateEdits from "./fixed-date-edits";
 import SelectEventStage from "./select-stage";
 import SingleSlotEdits from "./single-slot-edits";
+import { getClientCustomFields } from "@/services/customfield-services";
 
 type Props= {
     params: {
@@ -32,6 +33,8 @@ export default async function EditEventPage({ params }: Props) {
   const stages= await getStagesDAO(event.clientId)
 
   const isEnded= event.startDateTime && event.endDateTime && isAfter(new Date(), event.endDateTime)
+
+  const clientCustomFields= await getClientCustomFields(event.clientId)
 
   return (
     <div className=" mt-4 border rounded-lg w-full">
@@ -129,7 +132,7 @@ export default async function EditEventPage({ params }: Props) {
                 </div>
 
                 <div className="mt-6 border bg-slate-100 rounded-md p-2 dark:bg-black">
-                  <EventFieldsBox initialFields={event.fields} eventId={event.id} />
+                  <EventFieldsBox initialFields={event.fields} eventId={event.id} customFields={clientCustomFields} />
                 </div>
 
                 <BooleanForm

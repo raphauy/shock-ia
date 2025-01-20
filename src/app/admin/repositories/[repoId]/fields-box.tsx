@@ -3,19 +3,21 @@
 import { Button } from "@/components/ui/button"
 import { toast } from "@/components/ui/use-toast"
 import { Reorder } from "framer-motion"
-import { Asterisk, Grip, Loader, X } from "lucide-react"
+import { Asterisk, Grip, Link, Loader, X } from "lucide-react"
 import { useEffect, useState } from "react"
 import { FieldDAO } from "@/services/field-services"
 import { deleteFieldAction, updateRepoFieldOrderAction } from "../../fields/field-actions"
 import { FieldDialog } from "../../fields/field-dialogs"
 import { Badge } from "@/components/ui/badge"
+import { CustomFieldDAO } from "@/services/customfield-services"
 
 type Props= {
     initialFields: FieldDAO[]
     repoId: string
     fullMode: boolean
+    customFields: CustomFieldDAO[]
 }
-export default function FieldsBox({ initialFields, repoId, fullMode }: Props) {
+export default function FieldsBox({ initialFields, repoId, fullMode, customFields }: Props) {
 
     const [fields, setFields] = useState(initialFields)
     const [loading, setLoading] = useState(false)
@@ -54,7 +56,7 @@ export default function FieldsBox({ initialFields, repoId, fullMode }: Props) {
     return (
         <Reorder.Group values={fields} onReorder={(newOrder) => handleNewOrder(newOrder)} className="">
             <div className="flex justify-end">
-                { fullMode && <FieldDialog repoId={repoId} /> }
+                { fullMode && <FieldDialog repoId={repoId} customFields={customFields} /> }
             </div>
         {
             fields.map((field, index) => {
@@ -66,10 +68,16 @@ export default function FieldsBox({ initialFields, repoId, fullMode }: Props) {
                             { field.required && <Asterisk className="w-5 h-5 text-green-500" /> }
                         </div>
                         <div className="flex items-center">
+                            { field.linkedCustomFieldId && 
+                                <Badge variant="archived" className="mr-2 gap-2">
+                                    <Link className="w-3 h-3" />
+                                    {customFields.find((customField) => customField.id === field.linkedCustomFieldId)?.name}
+                                </Badge> 
+                            }
                             <Badge className="mr-3">
                                 {field.type}
                             </Badge>
-                            <FieldDialog repoId={field.repositoryId} id={field.id} />
+                            <FieldDialog repoId={field.repositoryId} id={field.id} customFields={customFields} />
                             {/* <DeleteCotizationNoteDialog id={note.id} description={`seguro que quieres eliminar la nota ${note.text}?`} /> */}
                             {
                                 loading && deletingId === field.id ? <Loader className="h-5 w-5 animate-spin" />
