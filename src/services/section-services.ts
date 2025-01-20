@@ -366,9 +366,9 @@ export async function getContext(clientId: string, phone: string, userInput: str
     } else {
       contextString+= "No hay eventos de tipo Única vez disponibles para reservar.\n"
     }
+    
+    contextString+= "</Eventos>\n"
   }
-
-  contextString+= "</Eventos>\n"
 
   const res= {
     contextString,
