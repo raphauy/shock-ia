@@ -85,10 +85,10 @@ export async function POST(request: Request) {
             const contact= await getContactByPhone(senderPhone, clientId)
             if (contact && contact.stage?.isBotEnabled) {
                 await sendTextToConversation(parseInt(accountId), conversationId, "Por el momento no podemos procesar mensajes que no sean de texto.")
-                return NextResponse.json({ data: "ACK" }, { status: 200 })
             } else {
                 console.log("contact not found or bot is not enabled")
             }
+            return NextResponse.json({ data: "ACK" }, { status: 200 })
         }
 
         let phone= json.sender.phone_number
