@@ -54,12 +54,15 @@ export default function CustomFieldsBox({ initialFields, clientId }: Props) {
         {
             fields.map((field, index) => {
                 return (
-                    <Reorder.Item key={field.id} value={field} className="rounded-lg border mt-2 flex w-full border-b hover:bg-muted p-3 min-h-[100px]">
-                        <div className="flex cursor-pointer w-full py-2">
+                    <Reorder.Item key={field.id} value={field} className="rounded-lg border mt-2 flex w-full border-b hover:bg-muted py-5 px-2 min-h-[150px]">
+                        <div className="flex cursor-pointer w-full">
                             <Grip className="w-6 h-6 text-gray-500" />
-                            <div className="flex flex-col w-full">
-                                <p className="whitespace-pre-line ml-2 font-bold">{field.name}</p>
-                                <p className="whitespace-pre-line ml-2 text-sm text-muted-foreground">{field.description}</p>
+                            <div className="flex flex-col justify-between w-full h-full">
+                                <div>
+                                    <p className="whitespace-pre-line ml-2 font-bold">{field.name}</p>
+                                    <p className="whitespace-pre-line ml-2 text-sm text-muted-foreground">{field.description}</p>
+                                </div>
+                                {field.showInContext && <Badge variant="secondaryWithBorder" className="w-fit">Contexto</Badge>}
                             </div>                            
                         </div>
                         <div className="flex flex-col justify-between self-stretch items-center gap-2">

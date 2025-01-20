@@ -8,6 +8,7 @@ export type CustomFieldDAO = {
 	description: string | null | undefined
 	type: FieldType
 	order: number
+  showInContext: boolean
 	clientId: string
 	createdAt: Date
 	updatedAt: Date
@@ -16,6 +17,7 @@ export type CustomFieldDAO = {
 export const CustomFieldSchema = z.object({
 	name: z.string().min(1, "name is required."),
 	description: z.string().optional(),
+  showInContext: z.boolean(),
 	type: z.nativeEnum(FieldType),
 	clientId: z.string().min(1, "clientId is required."),
 })

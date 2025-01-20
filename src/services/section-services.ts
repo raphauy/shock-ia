@@ -11,6 +11,8 @@ import { toZonedTime } from "date-fns-tz";
 import { getActiveEventsDAOByClientId } from "./event-services";
 import { EventType } from "@prisma/client";
 import { getContactByPhone } from "./contact-services";
+import { getClientCustomFields, getCustomFieldsDAO } from "./customfield-services";
+import { getFieldValuesByContactId } from "./fieldvalue-services";
 
 export type SectionDAO = {
 	id: string
@@ -217,115 +219,126 @@ export async function getContext(clientId: string, phone: string, userInput: str
   const functioins= await getFunctionsOfClient(clientId)
   const functionsNames= functioins.map((f) => f.name)
 
-  let contextString= "Hablas correctamente el español, incluyendo el uso adecuado de tildes y eñes.\nPor favor, utiliza solo caracteres compatibles con UTF-8 y adecuados para el idioma español. Ten especial cuidado para no incluir este caracter: �\n"
-  let sectionsIds: string[] = []
+  const timezone = "America/Montevideo";
+  const now = new Date();
+  const zonedDate = toZonedTime(now, timezone);
+  const hoy = format(zonedDate, "EEEE, dd/MM/yyyy HH:mm:ss", {
+    locale: es,
+  });
+
+  let contextString= "\n"
+  contextString+= "<Contexto técnico>\n"
+  contextString+= "Hablas correctamente el español, incluyendo el uso adecuado de tildes y eñes.\nPor favor, utiliza solo caracteres compatibles con UTF-8\n"
+  contextString+= `Hoy es ${hoy} en Montevideo\n`
+
 
   const conversation= await getActiveConversation(phone, clientId)
   let contact= conversation?.contact
   let clientHaveCRM= false
   if (conversation) {
     clientHaveCRM= conversation.client.haveCRM
-    contextString+= "\nconversationId para invocar funciones: " + conversation.id + "\n"
+    contextString+= "conversationId para invocar funciones: " + conversation.id + "\n"
   } else {
     console.log("No hay conversación activa");
     contact= await getContactByPhone(phone, clientId)
     clientHaveCRM= await getClientHaveCRM(clientId)
   }
+  contextString+= "</Contexto técnico>\n"
 
-  if (functionsNames.includes("getDateOfNow")) {
-    contextString+= "\n**** Fecha y hora en Montevideo****\n"
-    const timezone = "America/Montevideo";
-    const now = new Date();
-    const zonedDate = toZonedTime(now, timezone);
-    const hoy = format(zonedDate, "EEEE, dd/MM/yyyy HH:mm:ss", {
-      locale: es,
-    });
-    contextString+= `Hoy es ${hoy}.\n`
+
+
+  if (contact && clientHaveCRM) {
+    contextString+= "\n"
+    contextString+= "En la siguiente sección se encuentra información del Contacto asociado al usuario de esta conversación.\n"
+    contextString+= "<Información del Contacto>\n"
+    contextString+= `contactId: ${contact.id}\n`
+    contextString+= `Nombre: ${contact.name}\n`
+    contextString+= `Teléfono: ${contact.phone}\n`
+    //contextString+= `Etiquetas: ${contact.tags}\n`
+    //contextString+= `Estado CRM: ${contact.stage?.name}\n`
+
+    const customFields= await getClientCustomFields(clientId)
+    const customFieldsValues= await getFieldValuesByContactId(contact.id)
+    const customFieldsToShow= customFields.filter(field => field.showInContext)
+    customFieldsToShow.map((field) => {
+      const value= customFieldsValues.find(fieldValue => fieldValue.customFieldId === field.id)?.value
+      if (value) {
+        contextString+= `${field.name}: ${value}\n`
+      }
+    })
+    contextString+= "</Información del Contacto>\n"
+  } else {
+    console.log("no hay contacto o cliente tiene CRM")    
   }
+
 
   if (functionsNames.includes("getDocument")) {
     const documents= await getDocumentsDAOByClient(clientId)
-    contextString+= "\n**** Documentos ****\n"
-    contextString+= "Documentos que pueden ser relevantes para elaborar una respuesta:\n"
+    contextString+= "En la siguiente sección se encuentran documentos que pueden ser relevantes para elaborar una respuesta.\n"
+    contextString+= "<Documentos>\n"
     documents.map((doc) => {
       contextString += `{
   docId: "${doc.id}",
   docName: "${doc.name}",
   docDescription: "${doc.description}",
   docURL: "${doc.url}",
-  sectionsCount: ${doc.sectionsCount}
 },
 `
     })
+    contextString+= "</Documentos>\n"
 
-//    const similarity= await similaritySearch(clientId, userInput, 3)
-    const similarity: SimilaritySearchResult[] = []
-
-    if (similarity.length > 0) {
-      contextString+= "\n**** Sections ****\n"
-      contextString+= "Sections que pueden ser relevantes para elaborar una respuesta:\n"
-      similarity.map((item) => {
-        contextString += `{
-    docId: "${item.docId}",
-    docTitle: "${item.name}",
-    SectionSecuence: ${item.secuence},
-    Text: "${item.text}",
-    SemanticDistance: ${item.distance}
-  },
-
-  `
-      })
-      contextString+= "Puedes utilizar directamente la información de alguna de estas secciones para elaborar una respuesta.\n"
-    }
-
-    contextString+= "Puedes utilizar la función getDocument para obtener toda la información de un documento y la función getSection para obtener la información de una sección.\n"
-    contextString+= "Hay documentos con más de una Section. Si obtienes una Section con secuence 1 por ejemplo y no está la información para la respuesta, solicita la siguiente Section, utiliza función getSection con la secuence 2.\n"
-
-    sectionsIds = similarity.map((item) => item.id)
   }
 
   // info de eventos y disponibilidad si tiene la función obtenerDisponibilidad
 
   if (functionsNames.includes("obtenerDisponibilidad")) {
     const askInSequenceText= `Para este evento, los campos de la metadata se deben preguntar en secuencia. Esperar la respuesta de cada campo antes de preguntar el siguiente campo.\n`
-    const events= await getActiveEventsDAOByClientId(clientId, EventType.SINGLE_SLOT)
-    const availableEvents= events.filter(event => event.availability.length > 0)
-    console.log("availableEvents: ", availableEvents.map((event) => event.name))
+    const repetitiveEvents= await getActiveEventsDAOByClientId(clientId, EventType.SINGLE_SLOT)
+    const availableRepetitiveEvents= repetitiveEvents.filter(event => event.availability.length > 0)
+    console.log("availableRepetitiveEvents: ", availableRepetitiveEvents.map((event) => event.name))
 
-    contextString+= "\n**** Eventos disponibles, no son reservas, son eventos disponibles para reservar ****\n"
-    contextString+= "Eventos de tipo duración fija que pueden ser relevantes para elaborar una respuesta:\n"
-    availableEvents.map((event) => {
-    contextString += `{
-    eventId: "${event.id}",
-    eventName: "${event.name}",
-    eventDescription: "${event.description}",
-    eventAddress: "${event.address}",
-    timezone: "${event.timezone}",
-    duration: ${event.minDuration},
-    metadata: ${event.metadata}
-}
-`
+    contextString+= "<Eventos>\n"
 
-    if (event.askInSequence) {
-      contextString+= askInSequenceText
+    if (availableRepetitiveEvents.length > 0) {
+
+      contextString+= "En la siguiente sección se encuentran eventos repetitivos disponibles para reservar.\n" 
+      contextString+= "Estos tienen disponibilidad para reservar en diferentes slots de tiempo.\n" 
+      contextString+= "Se debe utilizar la función obtenerDisponibilidad para obtener la disponibilidad de un evento en una determinada fecha.\n"
+      contextString+= "<Eventos Repetitivos>\n"
+      availableRepetitiveEvents.map((event) => {
+      contextString += `{
+      eventId: "${event.id}",
+      eventName: "${event.name}",
+      eventDescription: "${event.description}",
+      eventAddress: "${event.address}",
+      timezone: "${event.timezone}",
+      duration: ${event.minDuration},
+      metadata: ${event.metadata}\n`
+
+      // eventSeatsPerTimeSlot: ${event.seatsPerTimeSlot}
+
+      if (event.askInSequence) {
+        contextString+= askInSequenceText
+      }
+
+      const hoy = format(toZonedTime(new Date(), event.timezone), "EEEE, PPP HH:mm:ss", {
+        locale: es,
+      })
+      contextString+= `Ahora es ${hoy} en el timezone del evento (${event.timezone})\n`
+      contextString+= `}\n`  
+      })
+      contextString+= "</Eventos Repetitivos>\n"
+    } else {
+      contextString+= "No hay eventos repetitivos disponibles para reservar.\n"
     }
-
-    const hoy = format(toZonedTime(new Date(), event.timezone), "EEEE, PPP HH:mm:ss", {
-      locale: es,
-    })
-    contextString+= `Ahora es ${hoy} en el timezone del evento (${event.timezone})\n`
-    contextString+= `---------------\n\n`
-
-// eventSeatsPerTimeSlot: ${event.seatsPerTimeSlot}
-    })
 
     const allFixedDateEvents= await getActiveEventsDAOByClientId(clientId, EventType.FIXED_DATE)
     const fixedDateEvents= allFixedDateEvents.filter(event => event.startDateTime && event.endDateTime)
 
-    if (fixedDateEvents.length === 0) {
-      contextString+= "No hay eventos de tipo única vez (fecha fija) disponibles para reservar en este momento.\n"
-    } else {
-      contextString+= "Eventos de tipo única vez (fecha fija) que pueden ser relevantes para elaborar una respuesta:\n"
+    if (fixedDateEvents.length > 0) {
+      contextString+= "En la siguiente sección se encuentran eventos de tipo única vez (fecha fija) que pueden ser relevantes para elaborar una respuesta.\n"
+      contextString+= "Estos eventos tienen la disponibilidad (cupos) entre los datos del evento. No se debe utilizar la función obtenerDisponibilidad ya que la fecha del evento es fija.\n"
+      contextString+= "<Eventos de tipo Única vez>\n"
       fixedDateEvents.map((event) => {
       contextString += `{
   eventId: "${event.id}",
@@ -337,9 +350,8 @@ export async function getContext(clientId: string, phone: string, userInput: str
   seatsTotal: ${event.seatsPerTimeSlot},
   startDateTime: "${format(toZonedTime(event.startDateTime!, event.timezone), "dd/MM/yyyy HH:mm")}",
   endDateTime: "${format(toZonedTime(event.endDateTime!, event.timezone), "dd/MM/yyyy HH:mm")}",
-  metadata: ${event.metadata}
-}
-`
+  metadata: ${event.metadata}\n`
+
       if (event.askInSequence) {
         contextString+= askInSequenceText
       }
@@ -348,29 +360,17 @@ export async function getContext(clientId: string, phone: string, userInput: str
       })
   
       contextString+= `Ahora es ${hoy} en el timezone del evento (${event.timezone})\n`
-      contextString+= `---------------\n\n`
-  
+      contextString+= `}\n`  
       })        
+      contextString+= "</Eventos de tipo Única vez>\n"
+    } else {
+      contextString+= "No hay eventos de tipo Única vez disponibles para reservar.\n"
     }
-  }
-
-  if (contact && clientHaveCRM) {
-    contextString+= "\n**** Información del Contacto asociado al usuario de esta conversación ****\n"
-    contextString+= `{
-    contactId: "${contact.id}",
-    contactName: "${contact.name}",
-    contactPhone: "${contact.phone}",
-    contactStage: "${contact.stage?.name}"
-}
-`
-    contextString+= "***************************************************************************\n"
-  } else {
-    console.log("no hay contacto o cliente tiene CRM")    
   }
 
   const res= {
     contextString,
-    sectionsIds
+    sectionsIds: []
   }
 
   return res

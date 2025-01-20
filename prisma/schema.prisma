@@ -526,19 +526,20 @@ model Contact {
 }
 
 model CustomField {
-  id          String     @id @default(cuid())            
-  name        String                                      // gennext: show.column
-  description String?                                     // gennext: show.column
-  type        FieldType                                      // gennext: show.column
-  order       Int                                         // gennext: show.column
+  id            String     @id @default(cuid())            
+  name          String                                      // gennext: show.column
+  description   String?                                     // gennext: show.column
+  type          FieldType                                   // gennext: show.column
+  order         Int                                         // gennext: show.column
+  showInContext Boolean @default(true)                     // gennext: show.column
 
-  client      Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  clientId    String
+  client        Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId      String
 
-  fieldValues FieldValue[]                               // gennext: skip.list
+  fieldValues   FieldValue[]                               // gennext: skip.list
   
-  createdAt   DateTime   @default(now())                 // gennext: skip.zod
-  updatedAt   DateTime   @updatedAt                      // gennext: skip.zod
+  createdAt     DateTime   @default(now())                 // gennext: skip.zod
+  updatedAt     DateTime   @updatedAt                      // gennext: skip.zod
 }
 
 model Stage {

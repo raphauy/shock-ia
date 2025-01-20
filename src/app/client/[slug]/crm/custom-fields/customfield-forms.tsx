@@ -8,11 +8,13 @@ import { deleteCustomFieldAction, createOrUpdateCustomFieldAction, getCustomFiel
 import { CustomFieldSchema, CustomFieldFormValues } from '@/services/customfield-services'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form"
 import { Loader } from "lucide-react"
 import { Select, SelectItem, SelectContent, SelectValue, SelectTrigger } from "@/components/ui/select"
 import { FieldType } from "@prisma/client"
 import { Badge } from "@/components/ui/badge"
+import { Switch } from "@/components/ui/switch"
+import { Textarea } from "@/components/ui/textarea"
 
 
 
@@ -30,6 +32,7 @@ export function CustomFieldForm({ id, clientId, closeDialog }: Props) {
       name: "",
       description: "",
       type: FieldType.string,
+      showInContext: true,
       clientId: clientId
     },
     mode: "onChange",
@@ -58,6 +61,7 @@ export function CustomFieldForm({ id, clientId, closeDialog }: Props) {
             name: data.name,
             description: data.description || undefined,
             type: data.type,
+            showInContext: data.showInContext,
             clientId: data.clientId
           }
           form.reset(formData)
@@ -75,9 +79,9 @@ export function CustomFieldForm({ id, clientId, closeDialog }: Props) {
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Name</FormLabel>
+                <FormLabel>Nombre</FormLabel>
                 <FormControl>
-                  <Input placeholder="CustomField's name" {...field} />
+                  <Input placeholder="Nombre del campo personalizado" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -88,9 +92,9 @@ export function CustomFieldForm({ id, clientId, closeDialog }: Props) {
             name="description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Description</FormLabel>
+                <FormLabel>Descripción</FormLabel>
                 <FormControl>
-                  <Input placeholder="CustomField's description" {...field} />
+                  <Textarea rows={3} placeholder="Descripción del campo personalizado" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -121,7 +125,30 @@ export function CustomFieldForm({ id, clientId, closeDialog }: Props) {
               </FormItem>
             )}
           />
-
+          <FormField
+            control={form.control}
+            name="showInContext"
+            render={({ field }) => (
+              <FormItem className="flex flex-col rounded-lg border px-4 py-3">
+                <div className="flex items-baseline justify-between">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base">
+                      Mostrar en contexto?
+                    </FormLabel>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </div>
+                <FormDescription>
+                  Si está marcado este campo, se adjuntará al contexto de cada conversación, la información de este campo, siempre y cuando el contacto tenga algún valor en este campo.
+                </FormDescription>
+              </FormItem>
+            )}
+          />
 
           <div className="flex justify-end">
             <Button onClick={() => closeDialog()} type="button" variant={"secondary"} className="w-32">Cancel</Button>
