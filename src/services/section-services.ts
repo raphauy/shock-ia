@@ -368,6 +368,8 @@ export async function getContext(clientId: string, phone: string, userInput: str
     }
   }
 
+  contextString+= "</Eventos>\n"
+
   const res= {
     contextString,
     sectionsIds: []
