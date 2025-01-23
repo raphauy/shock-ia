@@ -13,26 +13,11 @@ import { ContactDAO } from "@/services/contact-services";
 type Props = {
     stage: KanbanStageDAOWithContacts
     index: number
-    filteredTags: string[]
     allTags: string[]
     onContactClick: (contact: ContactDAO) => void
 }
-export default function StageColumn({ stage, index, allTags, filteredTags, onContactClick }: Props) {
-  const [contacts, setContacts] = useState<ContactDAO[]>([])
 
-  useEffect(() => {
-    setContacts(stage.contacts)
-  }, [stage.contacts])
-
-  useEffect(() => {
-    if (filteredTags.length === 0) {
-      setContacts(stage.contacts)
-      return
-    }
-    const filteredContacts = stage.contacts.filter((contact) => filteredTags.some((tag) => contact.tags.includes(tag)))
-    setContacts(filteredContacts)
-  }, [filteredTags, stage.contacts])
-
+export default function StageColumn({ stage, index, allTags, onContactClick }: Props) {
   return (
     <div>
       <Draggable draggableId={stage.id} index={index}>
@@ -41,7 +26,7 @@ export default function StageColumn({ stage, index, allTags, filteredTags, onCon
             <Card className="bg-muted h-full group" {...provided.dragHandleProps}>
               <CardHeader className="pb-2 px-3">
                 <div className="flex justify-between items-center">
-                  <CardTitle className="flex items-center gap-1 text-lg font-medium" >{getSatusIcon(stage)} {stage.name} &nbsp; {contacts.length}</CardTitle>
+                  <CardTitle className="flex items-center gap-1 text-lg font-medium" >{getSatusIcon(stage)} {stage.name} &nbsp; {stage.contacts.length}</CardTitle>
                   <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <StageMenu stageId={stage.id} stageName={stage.name} />
                   </div>
@@ -52,7 +37,7 @@ export default function StageColumn({ stage, index, allTags, filteredTags, onCon
                 <Droppable droppableId={stage.id} type="contact">
                   {(provided) => (
                     <ol className="space-y-3 h-full" ref={provided.innerRef} {...provided.droppableProps}>
-                      {contacts.map((contact, index) => (
+                      {stage.contacts.map((contact, index) => (
                         <ContactCard key={contact.id} contact={contact} index={index} allTags={allTags} onContactClick={onContactClick} />
                       ))}
                       {provided.placeholder}
@@ -66,7 +51,6 @@ export default function StageColumn({ stage, index, allTags, filteredTags, onCon
       </Draggable>
     </div>
   )
-    
 }
 
 function getSatusIcon(stage: KanbanStageDAOWithContacts) {
