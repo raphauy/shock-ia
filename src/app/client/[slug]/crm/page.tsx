@@ -27,7 +27,6 @@ export default async function CRMKanban({ params, searchParams }: Props) {
     notFound()
   }
   const stages = await getKanbanStagesDAO(client.id, from, to)
-  const allStages= await getStagesDAO(client.id)
   const allTags = await getAllTags(client.id)
   const baseUrl= `/client/${params.slug}/crm`
   return (

@@ -4,7 +4,7 @@ import { toast } from '@/components/ui/use-toast'
 import { ContactDAO } from '@/services/contact-services'
 import { KanbanStageDAO, KanbanStageDAOWithContacts } from '@/services/stage-services'
 import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd'
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState } from 'react'
 import { createMovedToStageEventAction, updateStageContactsAction } from '../contacts/contact-actions'
 import { updateKanbanStagesAction } from '../stages/stage-actions'
 import { StageDialog } from '../stages/stage-dialogs'
@@ -12,7 +12,6 @@ import StageColumn from './stage-column'
 import TagSelector from '../contacts/tag-selector'
 import { Separator } from '@/components/ui/separator'
 import { ContactDetailsSheet } from '../contacts/contact-details-sheet'
-import { Input } from '@/components/ui/input'
 
 function reorder<T>(list: T[], startIndex: number, endIndex: number) {
   const result = Array.from(list)
@@ -30,20 +29,8 @@ type Props = {
 export function KanbanComponent({ clientId, initialStages, allTags }: Props) {
   const [stages, setStages] = useState<KanbanStageDAOWithContacts[]>(initialStages)
   const [filteredTags, setFilteredTags] = useState<string[]>([])
-  const [filteredPhone, setFilteredPhone] = useState<string | null>(null)
+  const [phoneFilter, setPhoneFilter] = useState<string>("")
   const [selectedContact, setSelectedContact] = useState<ContactDAO | null>(null)
-
-  // Aplicar filtros a los stages
-  const filteredStages = useMemo(() => {
-    return stages.map(stage => ({
-      ...stage,
-      contacts: stage.contacts.filter(contact => {
-        const matchesTags = filteredTags.length === 0 || filteredTags.some(tag => contact.tags.includes(tag))
-        const matchesPhone = !filteredPhone || contact.phone?.includes(filteredPhone)
-        return matchesTags && matchesPhone
-      })
-    }))
-  }, [stages, filteredTags, filteredPhone])
 
   useEffect(() => {
     setStages(initialStages)
@@ -145,33 +132,38 @@ export function KanbanComponent({ clientId, initialStages, allTags }: Props) {
     return Promise.resolve(true)
   }
 
-  function handlePhoneChange(phone: string) {
-    setFilteredPhone(phone)
-    return Promise.resolve(true)
-  }
-
   return (
     <div>
-      <div className="flex items-center gap-2 max-w-[820px] w-full mb-4">
-        <p className="font-bold w-24">Etiquetas:</p>
-        <TagSelector actualTags={filteredTags} allTags={allTags} onChange={handleTagsChange} placeholder='Filtrar etiquetas...' />
-      </div>
-      <div className="flex items-center gap-2 max-w-[820px] w-full mb-4">
-        <p className="font-bold w-24">Teléfono:</p>
-        <Input type="search" value={filteredPhone || ''} onChange={(e: React.ChangeEvent<HTMLInputElement>) => handlePhoneChange(e.target.value)} placeholder='Buscar teléfono...' />
+      <div className="flex flex-col gap-4 max-w-[820px] w-full mb-4">
+        <div className="flex items-center gap-2">
+          <p className="font-bold w-24">Etiquetas:</p>
+          <TagSelector actualTags={filteredTags} allTags={allTags} onChange={handleTagsChange} placeholder='Filtrar etiquetas...' />
+        </div>
+        <div className="flex items-center gap-2">
+          <p className="font-bold w-24">Teléfono:</p>
+          <input
+            type="search"
+            value={phoneFilter}
+            onChange={(e) => setPhoneFilter(e.target.value)}
+            placeholder="Filtrar por teléfono..."
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          />
+        </div>
       </div>
 
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId="stages" type='list' direction='horizontal'>
           {(provided) => (
             <ol className="flex gap-x-3 h-full min-h-[600px]" ref={provided.innerRef} {...provided.droppableProps}>
-              {filteredStages.map((stage, index) => (
+              {stages.map((stage, index) => (
                 <StageColumn 
                   key={stage.id} 
                   stage={stage} 
                   index={index} 
-                  allTags={allTags}
-                  onContactClick={handleContactClick}
+                  allTags={allTags} 
+                  filteredTags={filteredTags}
+                  phoneFilter={phoneFilter}
+                  onContactClick={handleContactClick} 
                 />
               ))}
               {provided.placeholder}

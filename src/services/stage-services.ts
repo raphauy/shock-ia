@@ -203,9 +203,9 @@ export async function getKanbanStagesDAO(clientId: string, from: Date | null, to
           }
         },
         orderBy: [
-          {
-            createdAt: 'desc',
-          },
+          // {
+          //   createdAt: 'desc',
+          // },
           {
             order: 'asc',
           },
