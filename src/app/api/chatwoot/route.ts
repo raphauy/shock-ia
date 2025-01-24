@@ -4,7 +4,7 @@ import { getContactByPhone } from "@/services/contact-services";
 import { MessageDelayResponse, onMessageReceived, processDelayedMessage } from "@/services/messageDelayService";
 import { waitUntil } from "@vercel/functions";
 import { NextResponse } from "next/server";
-
+import OpenAI from "openai";
 
 export const maxDuration = 299
 
@@ -19,7 +19,7 @@ export async function POST(request: Request) {
         const accountId= json.account.id
         const conversationId= json.conversation.id
         const contentType= json.content_type
-        const content= json.content
+        let content= json.content
         const messageType= json.message_type
         const inboxName= json.inbox.name
         const conversationStatus= json.conversation.status
@@ -79,16 +79,24 @@ export async function POST(request: Request) {
             return NextResponse.json({ message: "inboxProvider for " + client?.name + " is not CHATWOOT" }, { status: 200 })
         }
 
-
         if (contentType !== "text" || !content) {
-            console.log("error: ", "contentType is not text or content is empty")
-            const contact= await getContactByPhone(senderPhone, clientId)
-            if (contact && contact.stage?.isBotEnabled) {
-                await sendTextToConversation(parseInt(accountId), conversationId, "Por el momento no podemos procesar mensajes que no sean de texto.")
+            const audioUrl= json.attachments[0].data_url
+            console.log("audioUrl:", audioUrl)
+            if (audioUrl) {
+                const transcription= await transcribeAudio(audioUrl)
+                console.log("transcription:", transcription)
+                content= transcription
             } else {
-                console.log("contact not found or bot is not enabled")
+    
+                console.log("error: ", "contentType is not text or content is empty")            
+                const contact= await getContactByPhone(senderPhone, clientId)
+                if (contact && contact.stage?.isBotEnabled) {
+                    await sendTextToConversation(parseInt(accountId), conversationId, "Por el momento no podemos procesar mensajes que no sean de texto.")
+                } else {
+                    console.log("contact not found or bot is not enabled")
+                }
+                return NextResponse.json({ data: "ACK" }, { status: 200 })
             }
-            return NextResponse.json({ data: "ACK" }, { status: 200 })
         }
 
         let phone= json.sender.phone_number
@@ -133,4 +141,23 @@ export async function GET(request: Request, { params }: { params: { clientId: st
 function processConnectionUpdate(json: any) {
     console.log("processing connection update")
     console.log("json: ", json)
+}
+
+async function transcribeAudio(audioUrl: string): Promise<string> {
+    console.log("transcribing audio")
+    console.log("audioUrl: ", audioUrl)
+    const client = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY_FOR_EMBEDDINGS,
+    })
+    
+    const response = await fetch(audioUrl);
+    const arrayBuffer = await response.arrayBuffer();
+    const file = new File([arrayBuffer], 'audio.oga', { type: 'audio/ogg' });
+
+    const transcription = await client.audio.transcriptions.create({
+        model: "whisper-1",
+        file: file,
+        language: "es"
+    })
+    return transcription.text
 }

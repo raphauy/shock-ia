@@ -275,6 +275,7 @@ export async function getContext(clientId: string, phone: string, userInput: str
   if (functionsNames.includes("getDocument")) {
     const documents= await getDocumentsDAOByClient(clientId)
     contextString+= "En la siguiente sección se encuentran documentos que pueden ser relevantes para elaborar una respuesta.\n"
+    contextString+= "Si te preguntan algo que puede estar en alguno de los documentos debes obtener la información para elaborar la respuesta.\n"
     contextString+= "<Documentos>\n"
     documents.map((doc) => {
       contextString += `{
