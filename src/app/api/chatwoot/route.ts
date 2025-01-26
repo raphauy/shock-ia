@@ -1,6 +1,7 @@
 import { sendTextToConversation } from "@/services/chatwoot";
 import { getClient, getClientIdByChatwootAccountId } from "@/services/clientService";
 import { getContactByPhone } from "@/services/contact-services";
+import { setLastMessageWasAudio } from "@/services/conversationService";
 import { MessageDelayResponse, onMessageReceived, processDelayedMessage } from "@/services/messageDelayService";
 import { waitUntil } from "@vercel/functions";
 import { NextResponse } from "next/server";
@@ -79,12 +80,15 @@ export async function POST(request: Request) {
             return NextResponse.json({ message: "inboxProvider for " + client?.name + " is not CHATWOOT" }, { status: 200 })
         }
 
+        let lastMessageWasAudio= false
+
         if (contentType !== "text" || !content) {
             const audioUrl= json.attachments[0].data_url
             console.log("audioUrl:", audioUrl)
             if (audioUrl) {
                 const transcription= await transcribeAudio(audioUrl)
                 console.log("transcription:", transcription)
+                lastMessageWasAudio= true
                 content= transcription
             } else {
     
@@ -105,6 +109,13 @@ export async function POST(request: Request) {
         }
 
         const delayResponse: MessageDelayResponse= await onMessageReceived(phone, content, clientId, "user", "", undefined, undefined, conversationId, senderId)
+        const dbConversationId= delayResponse.message?.conversationId
+        if (dbConversationId) {
+            console.log("setting lastMessageWasAudio to ", lastMessageWasAudio)
+            await setLastMessageWasAudio(dbConversationId, lastMessageWasAudio)
+        } else {
+            console.log("dbConversationId not found")
+        }
         
         if (delayResponse.wasCreated ) {
             if (delayResponse.message) {
@@ -161,3 +172,4 @@ async function transcribeAudio(audioUrl: string): Promise<string> {
     })
     return transcription.text
 }
+

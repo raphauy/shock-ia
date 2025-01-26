@@ -1,7 +1,7 @@
 "use client"
 
 import { Switch } from "@/components/ui/switch"
-import { setHaveAgentsAction, setHaveCRMAction, setHaveEventsAction } from "./(crud)/actions"
+import { setHaveAgentsAction, setHaveAudioResponseAction, setHaveCRMAction, setHaveEventsAction } from "./(crud)/actions"
 import { use, useEffect, useState } from "react"
 import { Loader } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
@@ -11,21 +11,23 @@ interface Props {
     clientId: string
     haveEvents: boolean
     haveAgents: boolean
+    haveAudioResponse: boolean
     inboxProvider: InboxProvider
 }
 
-export default function PropsEdit({ clientId, haveEvents: initialHaveEvents, haveAgents: initialHaveAgents, inboxProvider }: Props) {
+export default function PropsEdit({ clientId, haveEvents: initialHaveEvents, haveAgents: initialHaveAgents, haveAudioResponse: initialHaveAudioResponse, inboxProvider }: Props) {
 
     const [loadingEvents, setLoadingEvents] = useState(false)
     const [loadingAgents, setLoadingAgents] = useState(false)
-    const [loadingCRM, setLoadingCRM] = useState(false)
+    const [loadingAudioResponse, setLoadingAudioResponse] = useState(false)
     const [haveEvents, setHaveEvents] = useState(initialHaveEvents)
     const [haveAgents, setHaveAgents] = useState(initialHaveAgents)
-
+    const [haveAudioResponse, setHaveAudioResponse] = useState(initialHaveAudioResponse)
     useEffect(() => {
         setHaveEvents(initialHaveEvents)
         setHaveAgents(initialHaveAgents)
-    }, [initialHaveEvents, initialHaveAgents])
+        setHaveAudioResponse(initialHaveAudioResponse)
+    }, [initialHaveEvents, initialHaveAgents, initialHaveAudioResponse])
 
     function handleHaveEventsChange(haveEvents: boolean) {
         setLoadingEvents(true)
@@ -71,6 +73,26 @@ export default function PropsEdit({ clientId, haveEvents: initialHaveEvents, hav
         })
     }
 
+    function handleHaveAudioResponseChange(haveAudioResponse: boolean) {
+        setLoadingAudioResponse(true)
+        setHaveAudioResponseAction(clientId, haveAudioResponse)
+        .then((res) => {
+            if (res) {
+                setHaveAudioResponse(haveAudioResponse)
+                toast({ title: "Configuración actualizada", description: "La configuración del cliente ha sido actualizada correctamente" })
+            }
+        })
+        .catch(() => {
+            toast({
+                title: "Error",
+                description: "Ha ocurrido un error al actualizar la configuración del cliente"
+            })
+        })
+        .finally(() => {
+            setLoadingAudioResponse(false)
+        })
+    }
+
     return (
         <div className="w-full p-4 border rounded-lg space-y-4">
             <p className="text-lg font-bold mb-4">Configuración general:</p>
@@ -89,8 +111,22 @@ export default function PropsEdit({ clientId, haveEvents: initialHaveEvents, hav
                 <p className="">Agentes (perfil cliente)</p>
                 {
                     inboxProvider !== InboxProvider.CHATWOOT && (
-                        <p className="text-sm text-gray-500">
-                            Disponible para clientes con el proveedor CHATWOOT.
+                        <p className="text-sm italic">
+                            - Disponible para clientes con el proveedor CHATWOOT.
+                        </p>
+                    )
+                }
+            </div>
+            <div className="flex items-center gap-4">                
+                {
+                    loadingAudioResponse ? <Loader className="w-4 h-4 mr-2 animate-spin" /> :
+                    <Switch checked={haveAudioResponse} onCheckedChange={handleHaveAudioResponseChange} disabled={inboxProvider !== InboxProvider.CHATWOOT} />
+                }
+                <p className="">Responder audio con audio</p>
+                {
+                    inboxProvider !== InboxProvider.CHATWOOT && (
+                        <p className="text-sm italic">
+                            - Disponible para clientes con el proveedor CHATWOOT.
                         </p>
                     )
                 }

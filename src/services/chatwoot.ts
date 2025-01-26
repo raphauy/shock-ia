@@ -30,11 +30,46 @@ export async function sendTextToConversation(accountId: number, conversationId: 
     })
 }
 
+export async function sendAudioToConversation(accountId: number, conversationId: number, audioBase64: string) {
+    const chatwootUrl= process.env.CHATWOOT_URL!
+    const chatwootToken= process.env.CHATWOOT_AGENT_BOT_ACCESS_TOKEN!
+    console.log("chatwootUrl:", chatwootUrl)
+    if (!chatwootUrl || !chatwootToken) {
+        console.error("CHATWOOT_URL or CHATWOOT_AGENT_BOT_ACCESS_TOKEN is not set")
+        return
+    }
+
+    const client = new ChatwootClient({
+        config: {
+            basePath: chatwootUrl,
+            with_credentials: true,
+            credentials: "include",
+            token: chatwootToken
+        }
+    })
+
+    const response= await client.messages.create({
+        accountId: accountId,
+        conversationId: conversationId,        
+        data: {
+            content: "Mensaje de audio",
+            attachments: [
+                {
+                    content: audioBase64,
+                    encoding: "base64",
+                    filename: "audio.mp3",
+                }
+            ]
+        }
+    })
+
+    return response
+}
+
 export async function addLabelToConversation(accountId: number, conversationId: number, labels: string[]) {
     const chatwootUrl= process.env.CHATWOOT_URL!
     const chatwootToken= process.env.CHATWOOT_ACCESS_TOKEN!
     console.log("chatwootUrl:", chatwootUrl)
-    console.log("chatwootToken:", chatwootToken)
     if (!chatwootUrl || !chatwootToken) {
         console.error("CHATWOOT_URL or CHATWOOT_ACCESS_TOKEN is not set")
         return

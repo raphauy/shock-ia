@@ -1,6 +1,6 @@
 "use server"
 
-import { setHaveAgents, setHaveCRM, setHaveEvents, setTokensPrice, setWapSendFrequency } from "@/services/clientService"
+import { setHaveAgents, setHaveAudioResponse, setHaveCRM, setHaveEvents, setTokensPrice, setWapSendFrequency } from "@/services/clientService"
 import { addTagToFunction, removeTagFromFunction } from "@/services/function-services"
 import { revalidatePath } from "next/cache"
 
@@ -63,4 +63,12 @@ export async function setWapSendFrequencyAction(clientId: string, notUsed: strin
     revalidatePath(`/admin/config`)
 
     return true    
+}
+
+export async function setHaveAudioResponseAction(clientId: string, haveAudioResponse: boolean) {
+    const client= await setHaveAudioResponse(clientId, haveAudioResponse)
+
+    revalidatePath(`/admin/config`)
+
+    return client    
 }

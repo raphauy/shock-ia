@@ -1,6 +1,7 @@
 import * as z from "zod"
 import { prisma } from "@/lib/db"
 import { ProviderDAO, getProviderDAO } from "./provider-services"
+import OpenAI from "openai"
 
 export type ModelDAO = {
 	id: string
@@ -146,4 +147,22 @@ export async function getFullModelDAOByName(name: string) {
 		}
   })
   return found as ModelDAO
+}
+
+export async function generateAudio(text: string): Promise<string> {
+  console.log("generating audio")
+  console.log("text: ", text)
+  const client = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY_FOR_EMBEDDINGS,
+  })
+  const response = await client.audio.speech.create({
+      model: "tts-1",
+      input: text,
+      voice: "echo"
+  })
+
+  // return the base64 of the audio
+  const audioBuffer= await response.arrayBuffer()
+  const audioBase64= Buffer.from(audioBuffer).toString('base64')
+  return audioBase64
 }

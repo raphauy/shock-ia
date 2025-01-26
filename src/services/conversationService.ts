@@ -8,13 +8,13 @@ import { sendWapMessage } from "./osomService";
 import { getContext, setSectionsToMessage } from "./section-services";
 import { googleCompletionInit } from "./google-function-call-services";
 import { ChatCompletion } from "groq-sdk/resources/chat/completions.mjs";
-import { getFullModelDAO, getFullModelDAOByName } from "./model-services";
+import { generateAudio, getFullModelDAO, getFullModelDAOByName } from "./model-services";
 import { completionInit } from "./function-call-services";
 import { groqCompletionInit } from "./groq-function-call-services";
 import { getChatwootAccountId, getClient } from "./clientService";
 import { getDocument } from "./functions";
 import { sendText } from "./wrc-sdk";
-import { sendTextToConversation } from "./chatwoot";
+import { sendAudioToConversation, sendTextToConversation } from "./chatwoot";
 import { ContactFormValues, createContact, getContactByChatwootId } from "./contact-services";
 import { getUserByEmail } from "./userService";
 
@@ -433,7 +433,14 @@ export async function processMessage(id: string, modelName?: string) {
       if (!chatwootAccountId) throw new Error("chatwootAccountId not found")
       const chatwootConversationId= conversation.chatwootConversationId
       if (!chatwootConversationId) throw new Error("chatwootConversationId not found")
-      await sendTextToConversation(parseInt(chatwootAccountId), chatwootConversationId, assistantResponse)
+      
+      const lastMessageWasAudio= conversation.lastMessageWasAudio
+      if (lastMessageWasAudio) {
+        const audioBase64 = await generateAudio(assistantResponse)    
+        await sendAudioToConversation(parseInt(chatwootAccountId), chatwootConversationId, audioBase64)
+      } else {
+        await sendTextToConversation(parseInt(chatwootAccountId), chatwootConversationId, assistantResponse)
+      }
       return
     }
 
@@ -848,6 +855,29 @@ export async function removeContactFromAllConversations(contactId: string, clien
     data: {
       contactId: null,
       chatwootConversationId: null
+    }
+  })
+}
+
+export async function getLastMessageWasAudio(id: string) {
+  const conversation= await prisma.conversation.findUnique({
+    where: {
+      id
+    },
+    select: {
+      lastMessageWasAudio: true
+    }
+  })
+  return conversation?.lastMessageWasAudio
+}
+
+export async function setLastMessageWasAudio(id: string, lastMessageWasAudio: boolean) {
+  await prisma.conversation.update({
+    where: { 
+      id 
+    },
+    data: { 
+      lastMessageWasAudio 
     }
   })
 }

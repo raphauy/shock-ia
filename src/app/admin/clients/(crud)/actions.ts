@@ -32,6 +32,7 @@ export type DataClient = {
     haveEvents: boolean
     haveAgents: boolean
     haveCRM: boolean
+    haveAudioResponse: boolean
     wapSendFrequency: number
     whatsappInstance?: WhatsappInstanceDAO
     inboxProvider: InboxProvider
@@ -67,6 +68,7 @@ export async function getDataClient(clientId: string): Promise<DataClient | null
         haveEvents: client.haveEvents,
         haveAgents: client.haveAgents,
         haveCRM: client.haveCRM,
+        haveAudioResponse: client.haveAudioResponse,
         wapSendFrequency: client.wapSendFrequency,
         inboxProvider: client.inboxProvider
     }
@@ -106,6 +108,7 @@ export async function getDataClientOfUser(userId: string): Promise<DataClient | 
         haveEvents: client.haveEvents,
         haveAgents: client.haveAgents,
         haveCRM: client.haveCRM,
+        haveAudioResponse: client.haveAudioResponse,
         wapSendFrequency: client.wapSendFrequency,
         inboxProvider: client.inboxProvider
     }
@@ -143,6 +146,7 @@ export async function getDataClientBySlug(slug: string): Promise<DataClient | nu
         haveEvents: client.haveEvents,
         haveAgents: client.haveAgents,
         haveCRM: client.haveCRM,
+        haveAudioResponse: client.haveAudioResponse,
         wapSendFrequency: client.wapSendFrequency,
         inboxProvider: client.inboxProvider
     }
@@ -178,6 +182,7 @@ export async function getLastClientAction(): Promise<DataClient | null>{
         haveEvents: client.haveEvents,
         haveAgents: client.haveAgents,
         haveCRM: client.haveCRM,
+        haveAudioResponse: client.haveAudioResponse,
         wapSendFrequency: client.wapSendFrequency,
         inboxProvider: client.inboxProvider
     }
@@ -220,6 +225,7 @@ export async function getDataClients() {
                 haveEvents: client.haveEvents,
                 haveAgents: client.haveAgents,
                 haveCRM: client.haveCRM,
+                haveAudioResponse: client.haveAudioResponse,
                 wapSendFrequency: client.wapSendFrequency,
                 whatsappInstance: client.whatsappInstances.length === 0 ? undefined : client.whatsappInstances[0],
                 inboxProvider: client.inboxProvider

@@ -874,3 +874,14 @@ export async function getClientAndCustomFieldsBySlug(slug: string) {
   return client
 }
 
+export async function setHaveAudioResponse(clientId: string, haveAudioResponse: boolean) {
+  const client= await prisma.client.update({
+    where: {
+      id: clientId
+    },
+    data: {
+      haveAudioResponse
+    }
+  })
+  return client
+}

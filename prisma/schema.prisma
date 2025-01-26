@@ -84,6 +84,7 @@ model Client {
   haveEvents            Boolean   @default(false)
   haveAgents            Boolean   @default(false)
   haveCRM               Boolean   @default(false)
+  haveAudioResponse     Boolean   @default(false)
   wapSendFrequency      Int       @default(30)
 
   functions             ClientFunction[]
@@ -162,6 +163,7 @@ model Conversation {
   presupuesto String?
 
   closed      Boolean  @default(false)
+  lastMessageWasAudio Boolean @default(false)
 
   narvaez     Narvaez?
   summit      Summit?
