@@ -5,7 +5,7 @@ import { format } from "date-fns"
 import * as z from "zod"
 import { createChatwootConversation, sendTextToConversation } from "./chatwoot"
 import { getChatwootAccountId, getClient, getClientName, getClientOfCampaign, getWhatsappInstance } from "./clientService"
-import { addTagsToContact, ContactDAOWithStage, setNewStage } from "./contact-services"
+import { addTagsToContact, ContactDAO, ContactDAOWithStage, setNewStage } from "./contact-services"
 import { createConversation, getLastConversationByContactId, messageArrived } from "./conversationService"
 
 const baseUrl= process.env.NEXTAUTH_URL === "http://localhost:3000" ? "https://local.rctracker.dev" : process.env.NEXTAUTH_URL
@@ -197,42 +197,15 @@ export async function processCampaignContact(campaignContactId: string) {
   console.log("phone: ", contact.phone)
   console.log("message: ", message)
 
-  const phone= contact.phone
-//  const phoneRegex= /^\+?[0-9]+$/
-//  if (!phone || !phoneRegex.test(phone)) throw new Error("Contacto no tiene teléfono válido")
-
-  console.log("phone: ", phone)
-  const chatwootAccountId= await getChatwootAccountId(campaign.clientId)
-  if (!chatwootAccountId) throw new Error("Chatwoot account not found")
-  console.log("chatwootAccountId: ", chatwootAccountId)
-
-  let conversation= await getLastConversationByContactId(contact.id, campaign.clientId)
-  if (!conversation) {
-    const whatsappInstance= await getWhatsappInstance(campaign.clientId)
-    if (!whatsappInstance) throw new Error("Whatsapp instance not found")
-    if (!whatsappInstance.whatsappInboxId) throw new Error("Whatsapp inbox not found")
-    if (!contact.chatwootId) throw new Error("Chatwoot contact not found")
-    const chatwootConversationId= await createChatwootConversation(Number(chatwootAccountId), whatsappInstance.whatsappInboxId, contact.chatwootId)
-    if (!chatwootConversationId) throw new Error("Chatwoot conversation not found")
-    conversation= await createConversation(phone, campaign.clientId, contact.id, chatwootConversationId)
-  }
-
-  if (!conversation) throw new Error("Conversation not found")
-
-  const assistantMessage= "Información del sistema: A través de una campaña el usuario recibió el siguiente mensaje:\n\n" + message
-  await messageArrived(conversation.phone, assistantMessage, conversation.clientId, "assistant", "", undefined, undefined, conversation.chatwootConversationId || undefined, Number(contact.chatwootId))
-    
-  const chatwootConversationId= conversation.chatwootConversationId
-  if (!chatwootConversationId) throw new Error("Chatwoot conversation not found")
-
-  await sendTextToConversation(Number(chatwootAccountId), chatwootConversationId, message)
+  const by= "camp-" + campaign.name
+  const conversationId= await sendMessageToContact(campaign.clientId, contact, message, campaign.tags, campaign.moveToStageId, by)
 
   const updated = await prisma.campaignContact.update({
     where: {
       id: campaignContactId
     },
     data: {
-      conversationId: conversation.id,
+      conversationId,
       status: CampaignContactStatus.ENVIADO,
       sentAt: new Date(),
     }
@@ -240,22 +213,156 @@ export async function processCampaignContact(campaignContactId: string) {
 
   if (!updated) throw new Error("Error al procesar el contacto")
 
-  const tags= campaign.tags
-  if (tags.length > 0) {
-    const by= "camp-" + campaign.name
-    await addTagsToContact(contact.id, tags, by)
-  }
-
-  const moveToStageId= campaign.moveToStageId
-  if (moveToStageId) {
-    console.log("setting new stage to contact, by: CAMP-" + campaign.name)
-    await setNewStage(contact.id, moveToStageId, "CAMP-" + campaign.name)
-  }
-
   await checkAndUpdateCampaignStatus(campaign.id)
 
   return updated
+
+//   const phone= contact.phone
+// //  const phoneRegex= /^\+?[0-9]+$/
+// //  if (!phone || !phoneRegex.test(phone)) throw new Error("Contacto no tiene teléfono válido")
+
+//   console.log("phone: ", phone)
+//   const chatwootAccountId= await getChatwootAccountId(campaign.clientId)
+//   if (!chatwootAccountId) throw new Error("Chatwoot account not found")
+//   console.log("chatwootAccountId: ", chatwootAccountId)
+
+//   let conversation= await getLastConversationByContactId(contact.id, campaign.clientId)
+//   if (!conversation) {
+//     const whatsappInstance= await getWhatsappInstance(campaign.clientId)
+//     if (!whatsappInstance) throw new Error("Whatsapp instance not found")
+//     if (!whatsappInstance.whatsappInboxId) throw new Error("Whatsapp inbox not found")
+//     if (!contact.chatwootId) throw new Error("Chatwoot contact not found")
+//     const chatwootConversationId= await createChatwootConversation(Number(chatwootAccountId), whatsappInstance.whatsappInboxId, contact.chatwootId)
+//     if (!chatwootConversationId) throw new Error("Chatwoot conversation not found")
+//     conversation= await createConversation(phone, campaign.clientId, contact.id, chatwootConversationId)
+//   }
+
+//   if (!conversation) throw new Error("Conversation not found")
+
+//   const assistantMessage= "Información del sistema: A través de una campaña el usuario recibió el siguiente mensaje:\n\n" + message
+//   await messageArrived(conversation.phone, assistantMessage, conversation.clientId, "assistant", "", undefined, undefined, conversation.chatwootConversationId || undefined, Number(contact.chatwootId))
+    
+//   const chatwootConversationId= conversation.chatwootConversationId
+//   if (!chatwootConversationId) throw new Error("Chatwoot conversation not found")
+
+//   await sendTextToConversation(Number(chatwootAccountId), chatwootConversationId, message)
+
+//   const updated = await prisma.campaignContact.update({
+//     where: {
+//       id: campaignContactId
+//     },
+//     data: {
+//       conversationId: conversation.id,
+//       status: CampaignContactStatus.ENVIADO,
+//       sentAt: new Date(),
+//     }
+//   })
+
+//   if (!updated) throw new Error("Error al procesar el contacto")
+
+//   const tags= campaign.tags
+//   if (tags.length > 0) {
+//     const by= "camp-" + campaign.name
+//     await addTagsToContact(contact.id, tags, by)
+//   }
+
+//   const moveToStageId= campaign.moveToStageId
+//   if (moveToStageId) {
+//     console.log("setting new stage to contact, by: CAMP-" + campaign.name)
+//     await setNewStage(contact.id, moveToStageId, "CAMP-" + campaign.name)
+//   }
+
+//   await checkAndUpdateCampaignStatus(campaign.id)
+
+//   return updated
 }
+
+export async function sendMessageToContact(clientId: string, contact: ContactDAO, message: string, tags: string[], moveToStageId: string | null, by: string) {
+  const phone= contact.phone
+  if (!phone) throw new Error("Contacto no tiene teléfono")
+
+  console.log("phone: ", phone)
+  const chatwootAccountId= await getChatwootAccountId(clientId)
+  if (!chatwootAccountId) throw new Error("Chatwoot account not found")
+  console.log("chatwootAccountId: ", chatwootAccountId)
+
+  let chatwootConversationId= undefined
+  let conversation= await getLastConversationByContactId(contact.id, clientId)
+  if (!conversation) {
+    console.log("no conversation found, creating new one on chatwoot")
+    const whatsappInstance= await getWhatsappInstance(clientId)
+    if (!whatsappInstance) throw new Error("Whatsapp instance not found")
+    if (!whatsappInstance.whatsappInboxId) throw new Error("Whatsapp inbox not found")
+    if (!contact.chatwootId) throw new Error("Chatwoot contact not found")
+    chatwootConversationId= await createChatwootConversation(Number(chatwootAccountId), whatsappInstance.whatsappInboxId, contact.chatwootId)
+    if (!chatwootConversationId) throw new Error("Chatwoot conversation not found")
+  } else {
+    console.log("conversation found, using it")
+    chatwootConversationId= conversation.chatwootConversationId
+  }
+
+  console.log("chatwootConversationId: ", chatwootConversationId)
+  const assistantMessage= "Información del sistema: Se le ha enviado al usuario el siguiente mensaje:\n\n" + message
+  const messageCreated= await messageArrived(phone, assistantMessage, clientId, "assistant", "", undefined, undefined, chatwootConversationId || undefined, Number(contact.chatwootId))
+    
+  if (!chatwootConversationId) throw new Error("Chatwoot conversation not found")
+
+  await sendTextToConversation(Number(chatwootAccountId), chatwootConversationId, message)
+
+  if (tags.length > 0) {
+    await addTagsToContact(contact.id, tags, by)
+  }
+
+  if (moveToStageId) {
+    console.log("setting new stage to contact, by: " + by)
+    await setNewStage(contact.id, moveToStageId, by)
+  }
+
+  return messageCreated.conversationId
+}
+
+// export async function sendMessageToContact(clientId: string, contact: ContactDAO, message: string, tags: string[], moveToStageId: string | null, by: string) {
+//   const phone= contact.phone
+//   if (!phone) throw new Error("Contacto no tiene teléfono")
+
+//   console.log("phone: ", phone)
+//   const chatwootAccountId= await getChatwootAccountId(clientId)
+//   if (!chatwootAccountId) throw new Error("Chatwoot account not found")
+//   console.log("chatwootAccountId: ", chatwootAccountId)
+
+//   let conversation= await getLastConversationByContactId(contact.id, clientId)
+//   if (!conversation) {
+//     const whatsappInstance= await getWhatsappInstance(clientId)
+//     if (!whatsappInstance) throw new Error("Whatsapp instance not found")
+//     if (!whatsappInstance.whatsappInboxId) throw new Error("Whatsapp inbox not found")
+//     if (!contact.chatwootId) throw new Error("Chatwoot contact not found")
+//     const chatwootConversationId= await createChatwootConversation(Number(chatwootAccountId), whatsappInstance.whatsappInboxId, contact.chatwootId)
+//     if (!chatwootConversationId) throw new Error("Chatwoot conversation not found")
+//     conversation= await createConversation(phone, clientId, contact.id, chatwootConversationId)
+//   }
+
+//   if (!conversation) throw new Error("Conversation not found")
+
+//   const assistantMessage= "Información del sistema: Se le ha enviado al usuario el siguiente mensaje:\n\n" + message
+//   await messageArrived(conversation.phone, assistantMessage, conversation.clientId, "assistant", "", undefined, undefined, conversation.chatwootConversationId || undefined, Number(contact.chatwootId))
+    
+//   const chatwootConversationId= conversation.chatwootConversationId
+//   if (!chatwootConversationId) throw new Error("Chatwoot conversation not found")
+
+//   await sendTextToConversation(Number(chatwootAccountId), chatwootConversationId, message)
+
+//   if (tags.length > 0) {
+//     await addTagsToContact(contact.id, tags, by)
+//   }
+
+//   if (moveToStageId) {
+//     console.log("setting new stage to contact, by: " + by)
+//     await setNewStage(contact.id, moveToStageId, by)
+//   }
+
+//   return conversation
+// }
+
 
 async function checkAndUpdateCampaignStatus(campaignId: string) {
   // check if all contacts are sent and update campaign status to COMPLETADA

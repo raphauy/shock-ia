@@ -23,8 +23,9 @@ export default function ContactsHook({ basePath }: Props) {
 
     return (
         <div className="w-full p-4 mt-2 border rounded-lg">
-            <p className="text-2xl font-bold">Contacts</p>
-            <SimpleCopyHook name="createContacts" path={`${basePath}/api/${clientId}/contacts`} />
+            <p className="text-2xl font-bold">CRM</p>
+            <SimpleCopyHook name="createContacts" path={`${basePath}/api/${clientId}/crm/contacts`} />
+            <SimpleCopyHook name="sendMessage" path={`${basePath}/api/${clientId}/crm/message`} />
         </div>
     )
 }

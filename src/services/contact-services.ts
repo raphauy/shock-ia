@@ -140,6 +140,35 @@ export async function createContact(data: ContactFormValues) {
   return created
 }
 
+export async function getOrCreateContact(clientId: string, phone: string, name: string) {
+  let contact= await getContactByPhone(phone, clientId)
+
+  if (contact) {
+    return contact
+  }
+
+  const whatsappInstance= await getWhatsappInstance(clientId)
+  if (!whatsappInstance) throw new Error("Whatsapp instance not found")
+  if (!whatsappInstance.whatsappInboxId) throw new Error("Whatsapp inbox not found")
+
+  const chatwootContact= await createContactInChatwoot(Number(whatsappInstance.chatwootAccountId), Number(whatsappInstance.whatsappInboxId), phone, name)
+  if (!chatwootContact.id) throw new Error("Error al crear el contacto en Chatwoot")
+  
+  const maxRetries= 5
+  let retries= 1
+  while (retries <= maxRetries) {
+    // sleep 1 second
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    console.log("buscando contacto en la base de datos, intento: ", retries)
+    contact= await getContactByPhone(phone, clientId)
+    if (contact) {
+      return contact
+    }
+    retries++
+  }
+
+  throw new Error("No se encontró el contacto en la base de datos con el teléfono " + phone)
+}
 export async function getMinOrderOfStage(stageId: string) {
   const found = await prisma.contact.findFirst({
     where: {
