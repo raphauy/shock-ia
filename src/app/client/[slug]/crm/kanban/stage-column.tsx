@@ -25,10 +25,8 @@ export default function StageColumn({ stage, index, allTags, filteredTags, phone
     .filter(({ contact }) => {
       if (filteredTags.length === 0 && !phoneFilter) return true
       
-      const matchesTags = filteredTags.length === 0 || 
-        filteredTags.some((tag) => contact.tags?.includes(tag))
-      const matchesPhone = !phoneFilter || 
-        contact.phone?.toLowerCase().includes(phoneFilter.toLowerCase())
+      const matchesTags = filteredTags.length === 0 || filteredTags.some((tag) => contact.tags?.includes(tag))
+      const matchesPhone = !phoneFilter || contact.phone?.toLowerCase().includes(phoneFilter.toLowerCase()) || contact.name?.toLowerCase().includes(phoneFilter.toLowerCase())
       return matchesTags && matchesPhone
     })
 
