@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
-import { BookOpen, Bot, ChevronRightSquare, DatabaseZap, Kanban, LayoutDashboard, LogOut, Megaphone, MessageCircle, MessagesSquare, Phone, RectangleEllipsis, Tag, User, Users } from "lucide-react";
+import { BookOpen, Bot, ChevronRightSquare, DatabaseZap, Kanban, LayoutDashboard, LogOut, Megaphone, MessageCircle, MessagesSquare, Phone, QrCode, RectangleEllipsis, Tag, User, Users } from "lucide-react";
 import { useParams, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -55,6 +55,12 @@ const items = [
     url: `crm/campaigns`,
     icon: Megaphone,
     group: "campaigns",
+  },
+  {
+    title: "Conectar con QR",
+    url: `crm/whatsapp`,
+    icon: QrCode,
+    group: "whatsapp",
   }
 ]
 
@@ -74,6 +80,10 @@ const groups = [
   {
     id: "campaigns",
     label: "Campañas"
+  },
+  {
+    id: "whatsapp",
+    label: "Whatsapp"
   }
 ];
 

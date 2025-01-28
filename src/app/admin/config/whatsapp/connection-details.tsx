@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import { connectInstanceAction, deleteInstanceAction, getConnectionStatusAction, logoutInstanceAction, restartInstanceAction } from "./actions";
 import ChatwootButton from "./chatwoot-button";
 import InboxButton from "./inbox-button";
+import { useSession } from "next-auth/react";
 
 interface ConnectionDetailsProps {
   clientId: string
@@ -30,6 +31,9 @@ export function ConnectionDetails({ clientId, instance, chatwootAccountId, whats
   const [status, setStatus] = useState(instance.connectionStatus)
   const [qrCode, setQRCode] = useState<string | null>(null)
   const [qrCodeCount, setQRCodeCount] = useState(0)
+
+  const session= useSession()
+  const userRole= session.data?.user.role
 
   useEffect(() => {
     console.log("getConnectionStatusAction")
@@ -158,7 +162,7 @@ export function ConnectionDetails({ clientId, instance, chatwootAccountId, whats
             <CardContent className="p-4">
               <div className="flex items-center space-x-2">
                 <User className="w-5 h-5 text-primary" />
-                <CardTitle className="text-lg">Usuarios</CardTitle>
+                <CardTitle className="text-lg">Contactos</CardTitle>
               </div>
               <p className="text-3xl font-bold mt-2">{instance._count.Contact}</p>
             </CardContent>
@@ -186,11 +190,12 @@ export function ConnectionDetails({ clientId, instance, chatwootAccountId, whats
             { loadingLogout ? <Loader className="w-4 h-4 mr-2 animate-spin" /> : <LogOut className="w-4 h-4 mr-2" /> }
             Desconectar
           </Button>
-          <Button variant="destructive" disabled={status === 'open'} onClick={handleDelete} className="col-span-2 mt-8">
-            { loadingDelete ? <Loader className="w-4 h-4 mr-2 animate-spin" /> : <Trash2 className="w-4 h-4 mr-2" /> }
-            Eliminar
-          </Button>
-
+          { userRole === "admin" &&
+            <Button variant="destructive" disabled={status === 'open'} onClick={handleDelete} className="col-span-2 mt-8">
+              { loadingDelete ? <Loader className="w-4 h-4 mr-2 animate-spin" /> : <Trash2 className="w-4 h-4 mr-2" /> }
+              Eliminar
+            </Button>
+          }
         </div>
         <div className="flex justify-center items-center w-full">
           {qrCode && <QRCodeSVG value={qrCode} size={500} />}
@@ -204,7 +209,8 @@ export function ConnectionDetails({ clientId, instance, chatwootAccountId, whats
             ) : (
               <div className="space-y-4">
                 <div className="text-center font-bold">Chatwoot asociado a la cuenta {chatwootAccountId}</div>
-                <InboxButton clientId={clientId} initialWhatsappInboxId={whatsappInboxId || ''} />
+                <div className="text-center font-bold">Inbox {whatsappInboxId}</div>
+                {/* <InboxButton clientId={clientId} initialWhatsappInboxId={whatsappInboxId || ''} /> */}
               </div>
             )
           }
