@@ -1,4 +1,5 @@
 import { sendMessageToContact } from "@/services/campaign-services";
+import { getApiKey } from "@/services/clientService";
 import { getContactByPhone, getOrCreateContact } from "@/services/contact-services";
 import { createImportedContact, fireProcessPendingContactsAPI, ImportedContactFormValues } from "@/services/imported-contacts-services";
 import { getStageByName } from "@/services/stage-services";
@@ -11,14 +12,17 @@ export const dynamic = 'force-dynamic'
 export async function POST(request: Request, { params }: { params: { clientId: string } }) {
 
     try {
+        const clientId = params.clientId
+        if (!clientId) return NextResponse.json({ error: "clientId not found" }, { status: 400 })
+
+        const apiKey= await getApiKey(clientId)
+        if (!apiKey) return NextResponse.json({ error: "apiKey not found for client" }, { status: 400 })
+
         const authorization = request.headers.get("authorization")
         if (!authorization) return NextResponse.json({ error: "authorization is required" }, { status: 400 })
         const apiToken= authorization.replace("Bearer ", "")
         if (!apiToken) return NextResponse.json({ error: "apiToken is required" }, { status: 400 })
-        if (apiToken !== process.env.API_TOKEN) return NextResponse.json({ error: "Bad apiToken" }, { status: 400 })
-        
-        const clientId = params.clientId
-        if (!clientId) return NextResponse.json({ error: "clientId not found" }, { status: 400 })
+        if (apiToken !== apiKey) return NextResponse.json({ error: "Bad apiToken" }, { status: 400 })        
 
         const json= await request.json()
         console.log("json: ", json)

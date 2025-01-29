@@ -79,7 +79,7 @@ export default async function ConfigPage({ searchParams }: Props) {
                     <RegistrosHook basePath={BASE_PATH} />
                     {
                         client.haveCRM &&
-                        <ContactsHook basePath={BASE_PATH} />
+                        <ContactsHook basePath={BASE_PATH} apiToken={client.apiKey || ""} />
                     }
                 </TabsContent>
                 <TabsContent value="whatsapp">

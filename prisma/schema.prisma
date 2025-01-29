@@ -87,6 +87,8 @@ model Client {
   haveAudioResponse     Boolean   @default(false)
   wapSendFrequency      Int       @default(30)
 
+  apiKey                String @default(uuid()) @unique
+
   functions             ClientFunction[]
 
   // Todo: make this field not optional

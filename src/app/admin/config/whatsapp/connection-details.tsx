@@ -35,7 +35,7 @@ export function ConnectionDetails({ clientId, instance, chatwootAccountId, whats
   const [qrCodeCount, setqrCodeCount] = useState(0)
 
   const session= useSession()
-  const userRole= session.data?.user.role
+  const userEmail= session.data?.user.email
 
   // only on status connecting, check and update status and do it every 2 seconds
   useEffect(() => {
@@ -225,7 +225,7 @@ export function ConnectionDetails({ clientId, instance, chatwootAccountId, whats
             { loadingLogout ? <Loader className="w-4 h-4 mr-2 animate-spin" /> : <LogOut className="w-4 h-4 mr-2" /> }
             Desconectar
           </Button>
-          { userRole === "admin" &&
+          { userEmail === "rapha.uy@rapha.uy" &&
             <Button variant="destructive" disabled={status === 'open'} onClick={handleDelete} className="col-span-2 mt-8">
               { loadingDelete ? <Loader className="w-4 h-4 mr-2 animate-spin" /> : <Trash2 className="w-4 h-4 mr-2" /> }
               Eliminar

@@ -34,6 +34,7 @@ export type DataClient = {
     haveCRM: boolean
     haveAudioResponse: boolean
     wapSendFrequency: number
+    apiKey: string
     whatsappInstance?: WhatsappInstanceDAO
     inboxProvider: InboxProvider
   }
@@ -70,6 +71,7 @@ export async function getDataClient(clientId: string): Promise<DataClient | null
         haveCRM: client.haveCRM,
         haveAudioResponse: client.haveAudioResponse,
         wapSendFrequency: client.wapSendFrequency,
+        apiKey: client.apiKey,
         inboxProvider: client.inboxProvider
     }
     return data
@@ -110,6 +112,7 @@ export async function getDataClientOfUser(userId: string): Promise<DataClient | 
         haveCRM: client.haveCRM,
         haveAudioResponse: client.haveAudioResponse,
         wapSendFrequency: client.wapSendFrequency,
+        apiKey: client.apiKey,
         inboxProvider: client.inboxProvider
     }
     return data
@@ -148,6 +151,7 @@ export async function getDataClientBySlug(slug: string): Promise<DataClient | nu
         haveCRM: client.haveCRM,
         haveAudioResponse: client.haveAudioResponse,
         wapSendFrequency: client.wapSendFrequency,
+        apiKey: client.apiKey,
         inboxProvider: client.inboxProvider
     }
     return data
@@ -184,6 +188,7 @@ export async function getLastClientAction(): Promise<DataClient | null>{
         haveCRM: client.haveCRM,
         haveAudioResponse: client.haveAudioResponse,
         wapSendFrequency: client.wapSendFrequency,
+        apiKey: client.apiKey,
         inboxProvider: client.inboxProvider
     }
     return data
@@ -227,6 +232,7 @@ export async function getDataClients() {
                 haveCRM: client.haveCRM,
                 haveAudioResponse: client.haveAudioResponse,
                 wapSendFrequency: client.wapSendFrequency,
+                apiKey: client.apiKey,
                 whatsappInstance: client.whatsappInstances.length === 0 ? undefined : client.whatsappInstances[0],
                 inboxProvider: client.inboxProvider
             };

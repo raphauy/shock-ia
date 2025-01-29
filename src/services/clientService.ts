@@ -885,3 +885,17 @@ export async function setHaveAudioResponse(clientId: string, haveAudioResponse: 
   })
   return client
 }
+
+export async function getApiKey(clientId: string) {
+  const client= await prisma.client.findUnique({
+    where: {
+      id: clientId
+    },
+    select: {
+      apiKey: true
+    }
+  })
+  if (!client) return null
+  
+  return client.apiKey
+}

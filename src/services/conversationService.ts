@@ -435,7 +435,7 @@ export async function processMessage(id: string, modelName?: string) {
       if (!chatwootConversationId) throw new Error("chatwootConversationId not found")
       
       const lastMessageWasAudio= conversation.lastMessageWasAudio
-      if (lastMessageWasAudio) {
+      if (lastMessageWasAudio && client.haveAudioResponse) {
         const audioBase64 = await generateAudio(assistantResponse)    
         await sendAudioToConversation(parseInt(chatwootAccountId), chatwootConversationId, audioBase64)
       } else {
