@@ -35,8 +35,21 @@ export function ConnectionDetails({ clientId, instance, chatwootAccountId, whats
   const session= useSession()
   const userRole= session.data?.user.role
 
+  // only on status connecting, check and update status and do it every 2 seconds
   useEffect(() => {
-    console.log("getConnectionStatusAction")
+    if (status === 'connecting') {
+      const intervalId = setInterval(() => {
+        console.log("handleConnect()")
+        handleConnect()
+      }, 2000)
+      return () => clearInterval(intervalId)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [handleConnect])
+
+  useEffect(() => {
+    console.log("getConnectionStatusAction by qrCode change")
+    toast({ title: "Para conectar escanea este nuevo código QR" })
     getConnectionStatusAction(instance.name)
     .then((instance) => {
       setStatus(instance.state)
@@ -73,7 +86,6 @@ export function ConnectionDetails({ clientId, instance, chatwootAccountId, whats
     .then((code) => {
         setQRCode(code)
         setQRCodeCount(qrCodeCount + 1)
-        toast({ title: "Para conectar escanea el código QR" })
     })
     .catch((error) => {
         toast({ title: "Error conectando instancia", description: error.message, variant: "destructive" })
