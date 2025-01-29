@@ -5,9 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/components/ui/use-toast";
-import { getStatusColorAndLabel } from "@/lib/utils";
+import { cn, getStatusColorAndLabel } from "@/lib/utils";
 import { WRCInstance } from "@/services/wrc-sdk-types";
-import { Loader, LogOut, MessageSquare, Power, Trash2, User } from "lucide-react";
+import { Loader, LogOut, MessageSquare, Power, QrCode, Trash2, User } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { QRCodeSVG } from 'qrcode.react';
 import { useEffect, useState } from "react";
@@ -225,7 +225,11 @@ export function ConnectionDetails({ clientId, instance, chatwootAccountId, whats
         <div className="flex justify-center items-center w-full">
           {qrCode && <QRCodeSVG value={qrCode} size={500} />}
         </div>
-        {checkCount > 0 && <p className="text-center">QR # {qrCodeCount} / {MAX_QR_CODE_COUNT}</p>}
+        {checkCount > 0 && 
+          <div className="text-center flex justify-center items-center gap-2">            
+            <QrCode className={cn("w-4 h-4", loadingConnect && "animate-spin")} />
+            <p>{qrCodeCount} / {MAX_QR_CODE_COUNT}</p>
+          </div>}
 
         <div className="col-span-2 mt-8">
           {
