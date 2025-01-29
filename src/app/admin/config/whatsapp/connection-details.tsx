@@ -8,12 +8,13 @@ import { toast } from "@/components/ui/use-toast";
 import { getStatusColorAndLabel } from "@/lib/utils";
 import { WRCInstance } from "@/services/wrc-sdk-types";
 import { Loader, LogOut, MessageSquare, Power, Trash2, User } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { QRCodeSVG } from 'qrcode.react';
 import { useEffect, useState } from "react";
 import { connectInstanceAction, deleteInstanceAction, getConnectionStatusAction, logoutInstanceAction, restartInstanceAction } from "./actions";
 import ChatwootButton from "./chatwoot-button";
-import InboxButton from "./inbox-button";
-import { useSession } from "next-auth/react";
+
+const MAX_QR_CODE_COUNT = 10
 
 interface ConnectionDetailsProps {
   clientId: string
@@ -30,7 +31,8 @@ export function ConnectionDetails({ clientId, instance, chatwootAccountId, whats
   const [loadingRestart, setLoadingRestart] = useState(false)
   const [status, setStatus] = useState(instance.connectionStatus)
   const [qrCode, setQRCode] = useState<string | null>(null)
-  const [qrCodeCount, setQRCodeCount] = useState(0)
+  const [checkCount, setcheckCount] = useState(0)
+  const [qrCodeCount, setqrCodeCount] = useState(0)
 
   const session= useSession()
   const userRole= session.data?.user.role
@@ -39,8 +41,14 @@ export function ConnectionDetails({ clientId, instance, chatwootAccountId, whats
   useEffect(() => {
     if (status === 'connecting') {
       const intervalId = setInterval(() => {
-        console.log("handleConnect()")
-        handleConnect()
+        if (qrCodeCount >= MAX_QR_CODE_COUNT) {
+          // disconnect
+          clearInterval(intervalId)
+          handleLogout()
+        } else {
+          console.log("handleConnect()")
+          handleConnect()
+        }
       }, 2000)
       return () => clearInterval(intervalId)
     }
@@ -49,7 +57,10 @@ export function ConnectionDetails({ clientId, instance, chatwootAccountId, whats
 
   useEffect(() => {
     console.log("getConnectionStatusAction by qrCode change")
-    toast({ title: "Para conectar escanea este nuevo código QR" })
+    if (checkCount > 0) {
+      toast({ title: "Para conectar escanea este nuevo código QR" })
+      setqrCodeCount(qrCodeCount + 1)
+    }
     getConnectionStatusAction(instance.name)
     .then((instance) => {
       setStatus(instance.state)
@@ -57,6 +68,7 @@ export function ConnectionDetails({ clientId, instance, chatwootAccountId, whats
     .catch((error) => {
       toast({ title: "Error obteniendo estado de conexión", description: error.message, variant: "destructive" })
     })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [instance.name, qrCode])
 
   useEffect(() => {
@@ -64,7 +76,7 @@ export function ConnectionDetails({ clientId, instance, chatwootAccountId, whats
       handleConnect()
     } else {
       setQRCode(null)
-      setQRCodeCount(0)
+      setcheckCount(0)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status])
@@ -85,7 +97,7 @@ export function ConnectionDetails({ clientId, instance, chatwootAccountId, whats
     connectInstanceAction(instance.name)
     .then((code) => {
         setQRCode(code)
-        setQRCodeCount(qrCodeCount + 1)
+        setcheckCount(checkCount + 1)
     })
     .catch((error) => {
         toast({ title: "Error conectando instancia", description: error.message, variant: "destructive" })
@@ -104,7 +116,7 @@ export function ConnectionDetails({ clientId, instance, chatwootAccountId, whats
         if (instance) {
             setStatus(instance.connectionStatus)
             setQRCode(null)
-            setQRCodeCount(0)
+            setcheckCount(0)
             toast({ title: "Instancia desconectada" })
         } else {
             toast({ title: "Instancia desconectada", description: "Instancia no encontrada", variant: "destructive" })
@@ -212,7 +224,7 @@ export function ConnectionDetails({ clientId, instance, chatwootAccountId, whats
         <div className="flex justify-center items-center w-full">
           {qrCode && <QRCodeSVG value={qrCode} size={500} />}
         </div>
-        {qrCodeCount > 0 && <p className="text-center"># {qrCodeCount}</p>}
+        {checkCount > 0 && <p className="text-center">QR # {qrCodeCount} / {MAX_QR_CODE_COUNT}</p>}
 
         <div className="col-span-2 mt-8">
           {
