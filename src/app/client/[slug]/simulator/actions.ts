@@ -75,6 +75,7 @@ export async function getDataClientWithModel(slug: string, modelName?: string): 
       haveCRM: client.haveCRM,
       haveAudioResponse: client.haveAudioResponse,
       wapSendFrequency: client.wapSendFrequency,
+      apiKey: client.apiKey,
       inboxProvider: client.inboxProvider
   }
   return data
