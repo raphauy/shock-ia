@@ -39,13 +39,13 @@ export function ConnectionDetails({ clientId, instance, chatwootAccountId, whats
 
   // only on status connecting, check and update status and do it every 2 seconds
   useEffect(() => {
+    console.log("useEffect status connecting")
     if (status === 'connecting') {
       const intervalId = setInterval(() => {
         if (qrCodeCount >= MAX_QR_CODE_COUNT) {
           // disconnect
           clearInterval(intervalId)
           handleLogout()
-          //setqrCodeCount(0)
         } else {
           handleConnect()
         }
@@ -129,6 +129,16 @@ export function ConnectionDetails({ clientId, instance, chatwootAccountId, whats
     .finally(() => {
         setLoadingLogout(false)
     })
+
+    // check connection status
+    getConnectionStatusAction(instance.name)
+    .then((instance) => {
+      setStatus(instance.state)
+    })
+    .catch((error) => {
+      toast({ title: "Error obteniendo estado de conexión", description: error.message, variant: "destructive" })
+    })
+    
   }
 
   function handleDelete() {
