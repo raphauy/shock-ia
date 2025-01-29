@@ -45,8 +45,8 @@ export function ConnectionDetails({ clientId, instance, chatwootAccountId, whats
           // disconnect
           clearInterval(intervalId)
           handleLogout()
+          //setqrCodeCount(0)
         } else {
-          console.log("handleConnect()")
           handleConnect()
         }
       }, 2000)
@@ -77,6 +77,7 @@ export function ConnectionDetails({ clientId, instance, chatwootAccountId, whats
     } else {
       setQRCode(null)
       setcheckCount(0)
+      setqrCodeCount(0)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status])
@@ -92,7 +93,7 @@ export function ConnectionDetails({ clientId, instance, chatwootAccountId, whats
   }
 
   function handleConnect() {
-    console.log("connect")
+    console.log("connecting...")
     setLoadingConnect(true)
     connectInstanceAction(instance.name)
     .then((code) => {
