@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db"
 import * as z from "zod"
-import { CustomFieldDAO } from "./customfield-services"
+import { CustomFieldDAO, getClientCustomFieldByName } from "./customfield-services"
 
 export type FieldValueDAO = {
 	id: string
@@ -102,4 +102,23 @@ export async function createOrUpdateFieldValue(data: FieldValueFormValues) {
     updated= await createFieldValue(data)
   }
   return updated
+}
+
+export async function createOrUpdateFieldValues(objectWithFieldValues: any, clientId: string, contactId: string) {
+  // Validar que objectWithFieldValues sea un objeto válido
+  if (!objectWithFieldValues || typeof objectWithFieldValues !== 'object' || Array.isArray(objectWithFieldValues)) {
+    throw new Error('customFields debe ser un objeto válido')
+  }
+
+  // iterar sobre la claves del objeto, buscar el customFieldId, crear o actualizar el fieldValue
+  for (const key in objectWithFieldValues) {
+    const customField= await getClientCustomFieldByName(clientId, key)
+    if (customField) {
+      const fieldValue= await createOrUpdateFieldValue({
+        value: objectWithFieldValues[key],
+        customFieldId: customField.id,
+        contactId
+      })
+    }
+  }
 }

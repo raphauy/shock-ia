@@ -1,6 +1,7 @@
 import { sendMessageToContact } from "@/services/campaign-services";
 import { getApiKey } from "@/services/clientService";
 import { getContactByPhone, getOrCreateContact } from "@/services/contact-services";
+import { createOrUpdateFieldValues } from "@/services/fieldvalue-services";
 import { createImportedContact, fireProcessPendingContactsAPI, ImportedContactFormValues } from "@/services/imported-contacts-services";
 import { getStageByName } from "@/services/stage-services";
 import { waitUntil } from "@vercel/functions";
@@ -24,11 +25,33 @@ export async function POST(request: Request, { params }: { params: { clientId: s
         if (!apiToken) return NextResponse.json({ error: "apiToken is required" }, { status: 400 })
         if (apiToken !== apiKey) return NextResponse.json({ error: "Bad apiToken" }, { status: 400 })        
 
-        const json= await request.json()
+        let json;
+        try {
+            json = await request.json()
+        } catch (parseError) {
+            return NextResponse.json({ 
+                error: "Error al procesar el JSON", 
+                details: parseError instanceof Error ? parseError.message : "JSON inválido"
+            }, { status: 400 })
+        }
         console.log("json: ", json)
 
         const jsonContact= json.contact as ContactAPI
+        if (!jsonContact?.name || !jsonContact?.phone) {
+            return NextResponse.json({ 
+                error: "Datos de contacto inválidos",
+                details: "Se requiere name y phone en el objeto contact"
+            }, { status: 400 })
+        }
+
         const message= json.message as string
+        if (!message) {
+            return NextResponse.json({ 
+                error: "Mensaje requerido",
+                details: "El campo message es obligatorio"
+            }, { status: 400 })
+        }
+
         const tags= jsonContact.tags
         const moveToStageName= jsonContact.stageName
         let moveToStageId= null
@@ -56,17 +79,27 @@ export async function POST(request: Request, { params }: { params: { clientId: s
                 const tagsArray= tags ? tags.split(",") : []
                 await sendMessageToContact(clientId, contact, message, tagsArray, moveToStageId, "sendMmessage-API")
                 console.log("message sent to contact: ", contact.name)
+                const customFields= json.customFields ? json.customFields : {}
+                await createOrUpdateFieldValues(customFields, clientId, contact.id)
             } else {
-                console.log("contact not found or created: ", jsonContact.phone)
+                throw new Error("No se pudo crear o encontrar el contacto con teléfono: " + jsonContact.phone)
             }
         } catch (error) {
-            console.log("error: ", error)
+            console.error("Error procesando la solicitud:", error)
+            return NextResponse.json({ 
+                error: "Error procesando la solicitud",
+                details: error instanceof Error ? error.message : "Error desconocido"
+            }, { status: 400 })
         }
 
-        return NextResponse.json( { "data": "ACK" }, { status: 200 })
+        return NextResponse.json({ "data": "ACK" }, { status: 200 })
 
     } catch (error) {
-        return NextResponse.json({ error: "error: " + error}, { status: 502 })        
+        console.error("Error en la API:", error)
+        return NextResponse.json({ 
+            error: "Error interno del servidor",
+            details: error instanceof Error ? error.message : "Error desconocido"
+        }, { status: 500 })        
     }
    
 }

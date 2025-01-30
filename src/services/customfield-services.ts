@@ -113,3 +113,13 @@ export async function getClientCustomFields(clientId: string) {
   })
   return fields as CustomFieldDAO[]
 }
+
+export async function getClientCustomFieldByName(clientId: string, name: string) {
+  const field = await prisma.customField.findFirst({
+    where: {
+      clientId,
+      name
+    }
+  })
+  return field
+}
