@@ -46,11 +46,11 @@ export default function ContactsHook({ basePath, apiToken }: Props) {
             <p className="text-2xl font-bold">CRM</p>
             <SimpleCopyHook name="createContacts" path={`${basePath}/api/${clientId}/crm/contacts`} />
             
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
                 <SimpleCopyHook name="sendMessage" path={`${basePath}/api/${clientId}/crm/message`} />
                 <ExampleDialog basePath={basePath} apiToken={apiToken} clientId={clientId} />
                 <Link href="/ShockIA-sendMessage-API.pdf" target="_blank">
-                    <Button variant="link" className="gap-2 mt-4">Documentación</Button>
+                    <Button variant="link" className="gap-2 mt-5 p-0">Documentación</Button>
                 </Link>
             </div>
 
