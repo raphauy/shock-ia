@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/db"
 import * as z from "zod"
 import { CustomFieldDAO, getClientCustomFieldByName } from "./customfield-services"
+import { createContactEvent } from "./contact-event-services"
+import { ContactEventType } from "@prisma/client"
 
 export type FieldValueDAO = {
 	id: string
@@ -119,6 +121,8 @@ export async function createOrUpdateFieldValues(objectWithFieldValues: any, clie
         customFieldId: customField.id,
         contactId
       })
+      // create contact event
+      createContactEvent(ContactEventType.CUSTOM_FIELD_VALUE_UPDATED, customField.name + ": " + fieldValue.value, "sendMessage-API", contactId)
     }
   }
 }
