@@ -106,7 +106,7 @@ export async function createOrUpdateFieldValue(data: FieldValueFormValues) {
   return updated
 }
 
-export async function createOrUpdateFieldValues(objectWithFieldValues: any, clientId: string, contactId: string) {
+export async function createOrUpdateFieldValues(objectWithFieldValues: any, clientId: string, contactId: string, by: string) {
   // Validar que objectWithFieldValues sea un objeto válido
   if (!objectWithFieldValues || typeof objectWithFieldValues !== 'object' || Array.isArray(objectWithFieldValues)) {
     throw new Error('customFields debe ser un objeto válido')
@@ -122,7 +122,7 @@ export async function createOrUpdateFieldValues(objectWithFieldValues: any, clie
         contactId
       })
       // create contact event
-      createContactEvent(ContactEventType.CUSTOM_FIELD_VALUE_UPDATED, customField.name + ": " + fieldValue.value, "sendMessage-API", contactId)
+      createContactEvent(ContactEventType.CUSTOM_FIELD_VALUE_UPDATED, customField.name + ": " + fieldValue.value, by, contactId)
     }
   }
 }

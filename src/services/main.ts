@@ -41,7 +41,7 @@ async function main() {
     }
     const clientId= "clsnvcntc003okaqc2gfrme4b"
     const contactId= "cm6gx7wf8001kkjbbto035kdf"
-    await createOrUpdateFieldValues(objectWithFieldValues, clientId, contactId)
+    await createOrUpdateFieldValues(objectWithFieldValues, clientId, contactId, "main")
 }
   
 //main()

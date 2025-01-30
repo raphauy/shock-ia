@@ -80,7 +80,7 @@ export async function POST(request: Request, { params }: { params: { clientId: s
                 await sendMessageToContact(clientId, contact, message, tagsArray, moveToStageId, "sendMmessage-API")
                 console.log("message sent to contact: ", contact.name)
                 const customFields= json.customFields ? json.customFields : {}
-                await createOrUpdateFieldValues(customFields, clientId, contact.id)
+                await createOrUpdateFieldValues(customFields, clientId, contact.id, "sendMessage-API")
             } else {
                 throw new Error("No se pudo crear o encontrar el contacto con teléfono: " + jsonContact.phone)
             }
