@@ -6,9 +6,10 @@ import { useSearchParams } from "next/navigation"
 import useCopyToClipboard from "@/lib/useCopyToClipboard"
 import { toast } from "@/components/ui/use-toast"
 import { Button } from "@/components/ui/button"
-import { Copy } from "lucide-react"
+import { Copy, FileText } from "lucide-react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import CodeBlock from "@/components/code-block"
+import Link from "next/link"
 
 interface Props {
     basePath: string
@@ -18,7 +19,6 @@ interface Props {
 export default function ContactsHook({ basePath, apiToken }: Props) {
 
     const [value, copy] = useCopyToClipboard()
-    const [apiTokenValue, setApiTokenValue] = useState(apiToken)
 
     const [clientId, setClientId]= useState("") 
 
@@ -32,8 +32,13 @@ export default function ContactsHook({ basePath, apiToken }: Props) {
     if (!clientId) return null
 
     function copyApiTokenToClipboard(){   
-        copy(apiTokenValue)    
+        copy(apiToken)    
         toast({title: "API token copiado" })
+    }
+
+    function copyClientIdToClipboard(){
+        copy(clientId)
+        toast({title: "Client ID copiado" })
     }
 
     return (
@@ -44,10 +49,17 @@ export default function ContactsHook({ basePath, apiToken }: Props) {
             <div className="flex items-center gap-4">
                 <SimpleCopyHook name="sendMessage" path={`${basePath}/api/${clientId}/crm/message`} />
                 <ExampleDialog basePath={basePath} apiToken={apiToken} clientId={clientId} />
+                <Link href="/ShockIA-sendMessage-API.pdf" target="_blank">
+                    <Button variant="link" className="gap-2 mt-4">Documentación</Button>
+                </Link>
             </div>
 
-            <div className="flex items-end gap-4 pb-3 mb-3 border-b mt-10">
-                <p className="mt-5"><strong>API token (Bearer)</strong>: {apiTokenValue}</p>
+            <div className="flex items-end gap-4 mt-10">
+                <p className="mt-5"><strong>Client ID</strong>: {clientId}</p>
+                <Button variant="ghost" className="p-1 h-7"><Copy onClick={copyClientIdToClipboard} /></Button>
+            </div>
+            <div className="flex items-end gap-4 pb-3 mb-3 border-b">
+                <p className="mt-5"><strong>API token (Bearer)</strong>: {apiToken.slice(0, 15)}...</p>
                 <Button variant="ghost" className="p-1 h-7"><Copy onClick={copyApiTokenToClipboard} /></Button>
             </div>
         </div>
@@ -89,7 +101,7 @@ export function ExampleDialog({ basePath, apiToken, clientId }: ExampleDialogPro
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button variant="link" className="mt-5">Ver ejemplo</Button>
+                <Button variant="link" className="mt-5 whitespace-nowrap">Ver ejemplo</Button>
             </DialogTrigger>
             <DialogContent className="max-w-3xl">
                 <DialogHeader>
