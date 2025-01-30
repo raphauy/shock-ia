@@ -43,7 +43,7 @@ export default function ContactsHook({ basePath, apiToken }: Props) {
             
             <div className="flex items-center gap-4">
                 <SimpleCopyHook name="sendMessage" path={`${basePath}/api/${clientId}/crm/message`} />
-                <ExampleDialog />
+                <ExampleDialog basePath={basePath} apiToken={apiToken} clientId={clientId} />
             </div>
 
             <div className="flex items-end gap-4 pb-3 mb-3 border-b mt-10">
@@ -54,11 +54,16 @@ export default function ContactsHook({ basePath, apiToken }: Props) {
     )
 }
 
+type ExampleDialogProps = {
+    basePath: string
+    apiToken: string
+    clientId: string
+}
 
-export function ExampleDialog() {
-    const curlCommand = `curl -X POST "https://local.rctracker.dev/api/clsnvcntc003okaqc2gfrme4b/crm/message" \\
+export function ExampleDialog({ basePath, apiToken, clientId }: ExampleDialogProps) {
+    const curlCommand = `curl -X POST "${basePath}/api/${clientId}/crm/message" \\
   -H "Content-Type: application/json" \\
-  -H "Authorization: Bearer 15d97755-daf0-4ab2-9d7c-23258384fd22" \\
+  -H "Authorization: Bearer ${apiToken}" \\
   -d '{
     "contact": {
       "name": "Juan Pérez",
