@@ -172,7 +172,7 @@ export function ContactDetailsSheet({ contact, isOpen, onClose }: ContactDetails
           
             <div className="relative">
                 <h3 className="font-semibold mb-4 text-center">Historial</h3>
-                <ScrollArea className="h-[calc(100vh-350px)] pr-4 -mr-4">
+                <ScrollArea className="h-[calc(100vh-350px)] pr-4 -mr-4 pb-40">
                     <div className="relative">
                         {/* Vertical line with higher z-index */}
                         <div className="absolute left-1/2 top-0 bottom-0 w-px bg-border" style={{ zIndex: 10 }} />
