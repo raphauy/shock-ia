@@ -4,6 +4,7 @@ import { createExternalPayment } from "./cobros-wap"
 import { createContactInChatwoot, createChatwootConversation, getInboxId, deleteContactInChatwoot, sendAudioToConversation } from "./chatwoot"
 import { generateAudio } from "./model-services"
 import { createOrUpdateFieldValues } from "./fieldvalue-services"
+import { formatMinutesBefore } from "@/lib/utils"
 config()
 
 async function main() {
@@ -35,13 +36,18 @@ async function main() {
     // const response= await sendAudioToConversation(accountId, conversationId, audioBase64)
     // console.log("response:", response)
 
-    const objectWithFieldValues= {
-        "origen": "Test 2",
-        "Domicilio": "Calle 123"
-    }
-    const clientId= "clsnvcntc003okaqc2gfrme4b"
-    const contactId= "cm6gx7wf8001kkjbbto035kdf"
-    await createOrUpdateFieldValues(objectWithFieldValues, clientId, contactId, "main")
+    // const objectWithFieldValues= {
+    //     "origen": "Test 2",
+    //     "Domicilio": "Calle 123"
+    // }
+    // const clientId= "clsnvcntc003okaqc2gfrme4b"
+    // const contactId= "cm6gx7wf8001kkjbbto035kdf"
+    // await createOrUpdateFieldValues(objectWithFieldValues, clientId, contactId, "main")
+
+    const minutesBefore= 1755
+    console.log("minutesBefore:", minutesBefore)
+    const formatted= formatMinutesBefore(minutesBefore)
+    console.log("formatted:", formatted)
 }
   
 //main()

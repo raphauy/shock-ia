@@ -327,3 +327,19 @@ export function checkValidPhone(phone: string) {
   return expReg.test(phone)
 }
 
+export function formatMinutesBefore(minutes: number) {
+  // quiero que devuelva un string con el tiempo antes en formato humano, por ejemplo:
+  // 5 -> 5 minutos
+  // 60 -> 1 hora
+  // 65 -> 1 hora y 5 minutos
+  // 1561 -> 1 día, 1 hora y 1 minuto
+
+  const hours = Math.floor(minutes / 60)
+  const remainingMinutes = minutes % 60
+
+  if (hours > 0) {
+    return `${hours} hora${hours > 1 ? "s" : ""}${remainingMinutes > 0 ? ` y ${remainingMinutes} minuto${remainingMinutes > 1 ? "s" : ""}` : ""} antes`
+  } else {
+    return `${minutes} minuto${minutes > 1 ? "s" : ""} antes`
+  }
+}

@@ -109,6 +109,7 @@ model Client {
   campaigns             Campaign[]     // gennext: skip.list
 
   importedContacts      ImportedContact[]
+  reminderDefinitions   ReminderDefinition[]
 }
 
 model Document {
@@ -526,6 +527,8 @@ model Contact {
   conversations Conversation[]                         // gennext: skip.list
   contactEvents ContactEvent[]                         // gennext: skip.list
   campaigns     CampaignContact[]                       // gennext: skip.list
+  reminders     Reminder[]                               // gennext: skip.list
+
   createdAt     DateTime    @default(now())                 // gennext: skip.zod
   updatedAt     DateTime    @updatedAt                      // gennext: skip.zod
 
@@ -709,6 +712,52 @@ model ImportedContact {
 
   client             Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
   clientId           String
+
+  createdAt          DateTime   @default(now())                 // gennext: skip.zod
+  updatedAt          DateTime   @updatedAt                      // gennext: skip.zod
+}
+
+model ReminderDefinition {
+  id                 String      @id @default(cuid())
+  name               String                                     // gennext: show.column
+  description        String?                                    // gennext: show.column
+  message            String                                     // gennext: show.column
+  minutesBefore      Int                                        // gennext: show.column  
+
+  client             Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId           String
+
+  reminders          Reminder[]                                 // gennext: skip.list
+
+  createdAt          DateTime   @default(now())                 // gennext: skip.zod
+  updatedAt          DateTime   @updatedAt                      // gennext: skip.zod
+}
+
+enum ReminderStatus {
+  PENDIENTE
+  PROGRAMADO
+  ENVIADO
+  CANCELADO
+  ERROR
+}
+
+model Reminder {
+  id                 String      @id @default(cuid())
+  status             ReminderStatus @default(PENDIENTE)         // gennext: show.column
+  eventTime          DateTime                                   // gennext: show.column
+  scheduledFor       DateTime                                   // gennext: show.column
+  message            String                                     // gennext: show.column
+  conversationId     String?
+  scheduledId        String?
+
+  sentAt             DateTime?                                  // gennext: show.column
+  error              String?                                    // gennext: show.column
+
+  contact            Contact    @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  contactId          String
+
+  reminderDefinition ReminderDefinition @relation(fields: [reminderDefinitionId], references: [id], onDelete: Cascade)
+  reminderDefinitionId String
 
   createdAt          DateTime   @default(now())                 // gennext: skip.zod
   updatedAt          DateTime   @updatedAt                      // gennext: skip.zod

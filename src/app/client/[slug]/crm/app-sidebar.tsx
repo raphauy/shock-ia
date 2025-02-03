@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
-import { BookOpen, Bot, ChevronRightSquare, DatabaseZap, Kanban, LayoutDashboard, LogOut, Megaphone, MessageCircle, MessagesSquare, Phone, QrCode, RectangleEllipsis, Tag, User, Users } from "lucide-react";
+import { Bell, BookDashed, BookOpen, Bot, ChevronRightSquare, DatabaseZap, Kanban, LayoutDashboard, LogOut, Megaphone, MessageCircle, MessagesSquare, Phone, QrCode, RectangleEllipsis, Tag, User, Users } from "lucide-react";
 import { useParams, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -25,6 +25,18 @@ const items = [
     url: `crm/contacts?last=30D`,
     icon: User,
     group: "data",
+  },
+  {
+    title: "Plantilllas",
+    url: `crm/reminder-definitions`,
+    icon: BookDashed,
+    group: "reminders",
+  },
+  {
+    title: "Recordatorios",
+    url: `crm/reminders`,
+    icon: Bell,
+    group: "reminders",
   },
   {
     title: "Importación",
@@ -74,12 +86,16 @@ const groups = [
     label: "Contactos"
   },
   {
-    id: "configuracion",
-    label: "Configuración"
+    id: "reminders",
+    label: "Recordatorios"
   },
   {
     id: "campaigns",
     label: "Campañas"
+  },
+  {
+    id: "configuracion",
+    label: "Configuración"
   },
   {
     id: "whatsapp",

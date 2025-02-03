@@ -1,17 +1,16 @@
 "use client"
 
+import { DatePicker } from "@/components/date-picker"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
-import { cn, getMonthName } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 import { endOfMonth, format, parse, startOfMonth } from 'date-fns'
 import { es } from 'date-fns/locale'
-import Link from "next/link"
-import { useParams, useRouter, useSearchParams } from "next/navigation"
-import { useEffect, useState } from "react"
-import TagSelector from "../contacts/tag-selector"
-import { DatePicker } from "@/components/date-picker"
 import { X } from "lucide-react"
+import Link from "next/link"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useEffect, useState } from "react"
 
 type Props = {
   baseUrl: string
