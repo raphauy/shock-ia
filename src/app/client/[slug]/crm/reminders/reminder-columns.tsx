@@ -87,7 +87,7 @@ export const columns: ColumnDef<ReminderDAO>[] = [
       return (
         <div>
           <p className="text-foreground pb-2">{data.contact.name} {data.contact.phone}</p>
-          <p className="text-xs text-muted-foreground">{data.message}</p>
+          <p className="text-muted-foreground">{data.message}</p>
         </div>
       )
     },
