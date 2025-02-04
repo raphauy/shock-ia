@@ -1,22 +1,14 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-} from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { ReminderDefinitionDAO } from "@/services/reminder-definition-services"
 import { addReminderDefinitionToEventAction, removeReminderDefinitionFromEventAction } from "@/app/client/[slug]/events/event-actions"
 import { Bell, Check, Plus, Loader2, X } from "lucide-react"
 import { useState } from "react"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/use-toast"
 
 type Props = {
   eventId: string
@@ -35,14 +27,14 @@ export default function ReminderDefinitionSelector({ eventId, eventReminderDefin
       setLoadingId(reminderDefinitionId)
       if (isSelected) {
         await removeReminderDefinitionFromEventAction(eventId, reminderDefinitionId)
-        toast.success("Recordatorio removido")
+        toast({ title: "Recordatorio removido" })
       } else {
         await addReminderDefinitionToEventAction(eventId, reminderDefinitionId)
-        toast.success("Recordatorio agregado")
+        toast({ title: "Recordatorio agregado" })
       }
     } catch (error) {
       console.error(error)
-      toast.error("Error al actualizar recordatorios")
+      toast({ title: "Error al actualizar recordatorios", variant: "destructive" })
     } finally {
       setLoading(false)
       setLoadingId(null)
