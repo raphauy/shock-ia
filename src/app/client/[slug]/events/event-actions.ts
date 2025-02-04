@@ -2,14 +2,10 @@
   
 import { checkValidPhone } from "@/lib/utils"
 import { getClientBySlug } from "@/services/clientService"
-import { EventDAO, createEvent, deleteEvent, getFullEventDAO, setAvailability, setEventDateTime, updateEventBooleanField, updateEventField, updateEventNumberField, setSeatsPerTimeSlot, setTagsOfEvent, setMoveToStageIdEvent, setEventNotifyPhones } from "@/services/event-services"
+import { EventDAO, addReminderDefinitionToEvent, createEvent, deleteEvent, removeReminderDefinitionFromEvent, setAvailability, setEventDateTime, setEventNotifyPhones, setMoveToStageIdEvent, setSeatsPerTimeSlot, setTagsOfEvent, updateEventBooleanField, updateEventField, updateEventNumberField } from "@/services/event-services"
 import { EventType } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 
-
-export async function getEventDAOAction(id: string): Promise<EventDAO | null> {
-    return getFullEventDAO(id)
-}
 
 export async function createEventAction(clientSlug: string, name: string, type: EventType): Promise<EventDAO | null> {    
     const client= await getClientBySlug(clientSlug)
@@ -123,4 +119,20 @@ export async function setEventNotifyPhonesAction(id: string, notifyPhones: strin
     revalidatePath("/client/[slug]/events", 'page')
 
     return true
+}
+
+export async function addReminderDefinitionToEventAction(eventId: string, reminderDefinitionId: string): Promise<boolean> {
+    const updated= await addReminderDefinitionToEvent(eventId, reminderDefinitionId)
+
+    revalidatePath("/client/[slug]/events", 'page')
+
+    return updated
+}
+
+export async function removeReminderDefinitionFromEventAction(eventId: string, reminderDefinitionId: string): Promise<boolean> {
+    const updated= await removeReminderDefinitionFromEvent(eventId, reminderDefinitionId)
+
+    revalidatePath("/client/[slug]/events", 'page')
+
+    return updated
 }

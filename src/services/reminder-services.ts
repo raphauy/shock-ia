@@ -3,11 +3,12 @@ import { prisma } from "@/lib/db"
 import { ContactDAO, getContactDAO } from "./contact-services"
 import { getReminderDefinitionDAO, ReminderDefinitionDAO } from "./reminder-definition-services"
 import { ReminderStatus } from "@prisma/client"
-import { addMinutes, format } from "date-fns"
+import { addMinutes, addSeconds, format } from "date-fns"
 import { toZonedTime } from "date-fns-tz"
 import { sendMessageToContact } from "./campaign-services"
 import { Client } from "@upstash/qstash"
 import { getClientName } from "./clientService"
+import { BookingDAO } from "./booking-services"
 
 const baseUrl= process.env.NEXTAUTH_URL === "http://localhost:3000" ? "https://local.rctracker.dev" : process.env.NEXTAUTH_URL
 const client = new Client({ token: process.env.QSTASH_TOKEN! })
@@ -26,6 +27,8 @@ export type ReminderDAO = {
 	contactId: string
 	reminderDefinition: ReminderDefinitionDAO
 	reminderDefinitionId: string
+	booking: BookingDAO | null
+	bookingId: string | null
 	createdAt: Date
 	updatedAt: Date
 }
@@ -34,6 +37,8 @@ export const ReminderSchema = z.object({
 	eventTime: z.date({required_error: "targetDate is required."}),
 	contactId: z.string().min(1, "contactId is required."),
 	reminderDefinitionId: z.string().min(1, "reminderDefinitionId is required."),
+	bookingId: z.string().optional(),
+  eventName: z.string().optional(),
 })
 
 export type ReminderFormValues = z.infer<typeof ReminderSchema>
@@ -47,7 +52,7 @@ export async function getRemindersDAO(clientId: string) {
       }
     },
     orderBy: {
-      id: 'asc'
+      createdAt: 'desc'
     },
     include: {
       contact: true,
@@ -81,16 +86,36 @@ export async function createReminder(data: ReminderFormValues) {
   if (!contact) {
     throw new Error("Contact not found")
   }
+  const eventTime = data.eventTime
   const messageTemplate = reminderDefinition.message
   const timezone= "America/Montevideo"
-  const eventTime = data.eventTime
+  const eventTimeInUyTimezone = toZonedTime(eventTime, timezone)
+  let message = messageTemplate.replace('{nombre}', contact.name)
+  message = message.replace('{fecha}', format(eventTimeInUyTimezone, 'dd/MM/yyyy'))
+  message = message.replace('{hora}', format(eventTimeInUyTimezone, 'HH:mm'))
+  message = message.replace('{fecha_y_hora}', format(eventTimeInUyTimezone, 'dd/MM/yyyy HH:mm'))
+  message = message.replace('{evento}', data.eventName || "")
+
   const minutesBefore = reminderDefinition.minutesBefore
   const scheduledFor = addMinutes(eventTime, -minutesBefore)
-  const scheduledForInUyTimezone = toZonedTime(scheduledFor, timezone)
-  let message = messageTemplate.replace('{nombre}', contact.name)
-  message = message.replace('{fecha}', format(scheduledForInUyTimezone, 'dd/MM/yyyy'))
-  message = message.replace('{hora}', format(scheduledForInUyTimezone, 'HH:mm'))
-  message = message.replace('{fecha_y_hora}', format(scheduledForInUyTimezone, 'dd/MM/yyyy HH:mm'))
+  // workaround temporary for max delay of 1 week (604800 seconds)
+  const oneWeekFromNow = addSeconds(new Date(), 604800)
+  if (scheduledFor > oneWeekFromNow) {
+    //create a reminder with status ERROR
+    const created = await prisma.reminder.create({
+      data: {
+        eventTime,
+        scheduledFor,
+        message, 
+        error: "Max delay is 1 week.",
+        contactId: contact.id,
+        reminderDefinitionId: reminderDefinition.id,
+        bookingId: data.bookingId || null,
+        status: ReminderStatus.ERROR
+      }
+    })
+    return created
+  }
 
   const created = await prisma.reminder.create({
     data: {
@@ -99,6 +124,7 @@ export async function createReminder(data: ReminderFormValues) {
       message,
       contactId: contact.id,
       reminderDefinitionId: reminderDefinition.id,
+      bookingId: data.bookingId || null
     }
   })  
   const notBefore = Math.floor(scheduledFor.getTime() / 1000)
@@ -174,6 +200,7 @@ export async function processReminder(reminderId: string) {
     },
     data: {
       status: ReminderStatus.ENVIADO,
+      sentAt: new Date(),
       conversationId
     }
   })

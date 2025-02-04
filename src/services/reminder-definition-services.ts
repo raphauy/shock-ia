@@ -80,3 +80,18 @@ export async function deleteReminderDefinition(id: string) {
   return deleted
 }
 
+export async function getReminderDefinitionsDAOByEventId(eventId: string) {
+  const found = await prisma.eventReminderDefinition.findMany({
+    where: {
+      eventId
+    },
+    include: {
+      reminderDefinition: {
+        include: {
+          reminders: true
+        }
+      }
+    }
+  })
+  return found.map((item) => item.reminderDefinition)
+}

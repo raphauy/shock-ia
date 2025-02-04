@@ -5,6 +5,12 @@ import * as z from "zod"
 import { getClient } from "./clientService"
 import { getBookingsDAO } from "./booking-services"
 import { createField, FieldDAO } from "./field-services"
+import { ReminderDefinitionDAO } from "./reminder-definition-services"
+
+export type EventWithReminderDefinitions = EventDAO & {
+  reminderDefinitions: ReminderDefinitionDAO[],
+  clientHaveCRM: boolean
+}
 
 export type EventDAO = {
 	id: string
@@ -196,12 +202,13 @@ export async function getFullEventsDAO(slug: string) {
     include: {
 			client: true,
       fields: true,
+      reminderDefinitions: true
 		}
   })
   return found as EventDAO[]
 }
   
-export async function getFullEventDAO(id: string) {
+export async function getFullEventDAO(id: string): Promise<EventWithReminderDefinitions> {
   const found = await prisma.event.findUnique({
     where: {
       id
@@ -212,10 +219,23 @@ export async function getFullEventDAO(id: string) {
         orderBy: {
           order: "asc"
         }
+      },
+      reminderDefinitions: {
+        include: {
+          reminderDefinition: true
+        }
       }
 		}
   })
-  return found as EventDAO
+
+  if (!found) throw new Error("Event not found")
+
+  // Transform the data to match EventWithReminderDefinitions type
+  return {
+    ...found,
+    clientHaveCRM: found.client.haveCRM,
+    reminderDefinitions: found.reminderDefinitions.map(rd => rd.reminderDefinition)
+  } as EventWithReminderDefinitions
 }
     
 export async function getAvailability(id: string) {
@@ -386,6 +406,28 @@ export async function setEventNotifyPhones(id: string, notifyPhones: string[]) {
     },
     data: {
       notifyPhones
+    }
+  })
+  return updated !== null
+}
+
+export async function addReminderDefinitionToEvent(eventId: string, reminderDefinitionId: string) {
+  const updated = await prisma.eventReminderDefinition.create({
+    data: {
+      eventId,
+      reminderDefinitionId
+    }
+  })
+  return updated !== null
+}
+
+export async function removeReminderDefinitionFromEvent(eventId: string, reminderDefinitionId: string) {
+  const updated = await prisma.eventReminderDefinition.delete({
+    where: {
+      eventId_reminderDefinitionId: {
+        eventId,
+        reminderDefinitionId
+      }
     }
   })
   return updated !== null

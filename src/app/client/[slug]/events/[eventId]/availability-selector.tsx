@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch"
 import { Availability, AvailabilitySlot, Schedule } from '@/services/calcom-sdk-v2'
 import { format } from "date-fns"
-import { Loader } from 'lucide-react'
+import { Loader, Save } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
 import { useMemo, useState } from 'react'
 import { setAvailabilityAction } from "../event-actions"
@@ -140,7 +140,7 @@ export default function AvailabilitySelector({ eventId, initialAvailability }: P
       </CardContent>
       <CardFooter>
         <Button onClick={handleSave} className='w-full gap-2' disabled={!needSave}>
-          { loading && <Loader className="w-4 h-4 animate-spin" /> }
+          { loading ? <Loader className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" /> }
           Guardar disponibilidad
         </Button>
       </CardFooter>

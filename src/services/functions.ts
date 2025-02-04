@@ -1,7 +1,7 @@
 import { checkDateTimeFormatForSlot, decodeAndCorrectText } from "@/lib/utils";
 import { ContactEventType, EventType } from "@prisma/client";
 import { addMinutes, format, parse } from "date-fns";
-import { toZonedTime } from "date-fns-tz";
+import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import moment from 'moment-timezone';
 import { revalidatePath } from "next/cache";
 import { BookingFormValues, cancelBooking, createBooking, getBookingDAO, getFutureBookingsDAOByContact, getFutureBookingsDAOByEventId } from "./booking-services";
@@ -28,6 +28,8 @@ import { setMoveToStageIdOfClientFunctionAction } from "@/app/admin/repositories
 import { JsonValue } from "@prisma/client/runtime/library";
 import { createOrUpdateFieldValue } from "./fieldvalue-services";
 import { createContactEvent } from "./contact-event-services";
+import { getReminderDefinitionsDAOByEventId } from "./reminder-definition-services";
+import { createReminder, ReminderFormValues } from "./reminder-services";
 
 export type CompletionInitResponse = {
   assistantResponse: string | null
@@ -517,6 +519,25 @@ export async function reservarParaEvento(clientId: string, conversationId: strin
         await createContactEvent(ContactEventType.CUSTOM_FIELD_VALUE_UPDATED, field.name + ": " + value, "EV-" + event.name, contactId)
       }
     }
+
+    const eventTimezone= event.timezone
+    // create reminders, one reminder for each reminderDefinition of the event
+    const reminderDefinitions= await getReminderDefinitionsDAOByEventId(eventId)
+    for (const reminderDefinition of reminderDefinitions) {
+      const eventTime= fromZonedTime(created.start, eventTimezone)
+      const reminderValues: ReminderFormValues= {
+        reminderDefinitionId: reminderDefinition.id,
+        contactId,
+        eventTime,
+        bookingId: created.id,
+        eventName: event.name,
+      }
+      try {
+        await createReminder(reminderValues)
+      } catch (error) {
+        console.log("Error al crear el recordatorio", error)
+      }
+    }
   }
 
   return "Reserva registrada."
@@ -663,6 +684,26 @@ export async function reservarParaEventoDeUnicaVez(clientId: string, conversatio
         await createContactEvent(ContactEventType.CUSTOM_FIELD_VALUE_UPDATED, field.name + ": " + value, "EV-" + event.name, contactId)
       }
     }
+
+    const eventTimezone= event.timezone
+    // create reminders, one reminder for each reminderDefinition of the event
+    const reminderDefinitions= await getReminderDefinitionsDAOByEventId(eventId)
+    for (const reminderDefinition of reminderDefinitions) {
+      const eventTime= fromZonedTime(created.start, eventTimezone)
+      const reminderValues: ReminderFormValues= {
+        reminderDefinitionId: reminderDefinition.id,
+        contactId,
+        eventTime,
+        bookingId: created.id,
+        eventName: event.name,
+      }
+      try {
+        await createReminder(reminderValues)
+      } catch (error) {
+        console.log("Error al crear el recordatorio", error)
+      }
+    }
+
   }
 
 

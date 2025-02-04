@@ -444,6 +444,7 @@ model Event {
   clientId          String
 
   bookings          Booking[]                            // gennext: skip.list
+  reminderDefinitions EventReminderDefinition[]               // gennext: skip.list
 
   metadata          String?
   askInSequence     Boolean   @default(false)
@@ -474,6 +475,9 @@ model Booking {
 
   createdAt         DateTime    @default(now())                 // gennext: skip.zod
   updatedAt         DateTime    @updatedAt                      // gennext: skip.zod
+
+  // reminders
+  reminders         Reminder[]                                 // gennext: skip.list
 
   event             Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
   eventId           String
@@ -729,8 +733,23 @@ model ReminderDefinition {
 
   reminders          Reminder[]                                 // gennext: skip.list
 
+  events             EventReminderDefinition[]                                    // gennext: skip.list
+
   createdAt          DateTime   @default(now())                 // gennext: skip.zod
   updatedAt          DateTime   @updatedAt                      // gennext: skip.zod
+}
+
+model EventReminderDefinition {
+  event              Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId            String
+
+  reminderDefinition ReminderDefinition @relation(fields: [reminderDefinitionId], references: [id], onDelete: Cascade)
+  reminderDefinitionId String
+
+  createdAt          DateTime   @default(now())                 // gennext: skip.zod
+  updatedAt          DateTime   @updatedAt                      // gennext: skip.zod
+
+  @@unique([eventId, reminderDefinitionId])
 }
 
 enum ReminderStatus {
@@ -758,6 +777,9 @@ model Reminder {
 
   reminderDefinition ReminderDefinition @relation(fields: [reminderDefinitionId], references: [id], onDelete: Cascade)
   reminderDefinitionId String
+
+  booking            Booking? @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  bookingId          String?
 
   createdAt          DateTime   @default(now())                 // gennext: skip.zod
   updatedAt          DateTime   @updatedAt                      // gennext: skip.zod

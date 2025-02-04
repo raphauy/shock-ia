@@ -113,6 +113,7 @@ export function ReminderDefinitionForm({ id, clientId, closeDialog }: Props) {
                   <p>- {`{fecha}`} para referirte a la fecha del recordatorio.</p>
                   <p>- {`{hora}`} para referirte a la hora del recordatorio.</p>
                   <p>- {`{fecha_y_hora}`} para referirte a la fecha y hora del recordatorio.</p>
+                  <p>- {`{evento}`} para referirte al nombre del evento.</p>
                 </FormDescription>
               </FormItem>
             )}

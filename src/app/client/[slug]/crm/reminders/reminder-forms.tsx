@@ -60,7 +60,11 @@ export function ReminderForm({ id, contacts, reminderDefinitions, closeDialog }:
     if (id) {
       getReminderDAOAction(id).then((data) => {
         if (data) {
-          form.reset(data)
+          const formData = {
+            ...data,
+            bookingId: data.bookingId || undefined
+          }
+          form.reset(formData)
         }
         Object.keys(form.getValues()).forEach((key: any) => {
           if (form.getValues(key) === null) {

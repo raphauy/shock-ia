@@ -113,9 +113,9 @@ export const columns: ColumnDef<ReminderDAO>[] = [
       const data= row.original
       const date= data.sentAt && format(new Date(data.sentAt), "yyyy-MM-dd HH:mm")
       return (
-        <div className="flex items-center justify-center">
+        <div className="">
           <p>{date}</p>
-          <p>{data.error}</p>
+          <p className="text-red-500">{data.error}</p>
         </div>
       )
     }

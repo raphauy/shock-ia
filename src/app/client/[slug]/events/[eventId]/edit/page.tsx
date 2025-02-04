@@ -11,7 +11,7 @@ import { getFullEventDAO } from "@/services/event-services";
 import { getStagesDAO } from "@/services/stage-services";
 import { EventType } from "@prisma/client";
 import { isAfter } from "date-fns";
-import { Archive, Globe, LayoutDashboard, ListChecks, ListCollapse, Palette, Settings, Tag } from "lucide-react";
+import { Archive, ExternalLink, Globe, LayoutDashboard, ListChecks, ListCollapse, Palette, Settings, Tag } from "lucide-react";
 import { setEventBooleanFieldAction, setEventFieldAction, setEventNotifyPhonesAction } from "../../event-actions";
 import EventFieldsBox from "./event-fields-box";
 import { EventTaggerComponent } from "./event-tagger";
@@ -19,6 +19,10 @@ import FixedDateEdits from "./fixed-date-edits";
 import SelectEventStage from "./select-stage";
 import SingleSlotEdits from "./single-slot-edits";
 import { getClientCustomFields } from "@/services/customfield-services";
+import { getReminderDefinitionsDAO } from "@/services/reminder-definition-services";
+import ReminderDefinitionSelector from "./reminder-definition-selector";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 type Props= {
     params: {
@@ -27,14 +31,19 @@ type Props= {
     }
 }
 export default async function EditEventPage({ params }: Props) {
-  const event= await getFullEventDAO(params.eventId)
+  const { slug, eventId } = params
+  const event= await getFullEventDAO(eventId)
   if (!event) return <div>Event not found</div>
+
+  const clientHaveCRM= event.clientHaveCRM
 
   const stages= await getStagesDAO(event.clientId)
 
   const isEnded= event.startDateTime && event.endDateTime && isAfter(new Date(), event.endDateTime)
 
   const clientCustomFields= await getClientCustomFields(event.clientId)
+
+  const allReminderDefinitions= await getReminderDefinitionsDAO(event.clientId)
 
   return (
     <div className=" mt-4 border rounded-lg w-full">
@@ -121,6 +130,24 @@ export default async function EditEventPage({ params }: Props) {
                     update={setEventBooleanFieldAction}
                   />
 
+                  <div className="flex items-center justify-between mt-6">
+                    <div className="flex items-center gap-x-2">
+                      <IconBadge icon={Settings} />
+                      <h2 className="text-xl">
+                        Recordatorios
+                      </h2>
+                    </div>
+                    {clientHaveCRM && (
+                      <Link href={`/client/${slug}/crm/reminder-definitions`} target="_blank">
+                        <Button variant="link" className="gap-2">Plantillas<ExternalLink className="w-4 h-4" /></Button>
+                      </Link>
+                    )}
+                  </div>
+                  {clientHaveCRM ? (
+                    <ReminderDefinitionSelector eventId={event.id} eventReminderDefinitions={event.reminderDefinitions} allReminderDefinitions={allReminderDefinitions} />
+                  ) : (
+                    <p className="text-sm text-muted-foreground p-4 border-dashed border rounded-md mt-6">El cliente no tiene CRM, por lo que no se pueden configurar recordatorios.</p>
+                  )}
 
               </div>
               <div className="min-w-96">
