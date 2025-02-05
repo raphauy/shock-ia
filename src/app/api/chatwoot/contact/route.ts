@@ -34,7 +34,9 @@ export async function POST(request: Request) {
 
         if (event === "contact_created") {
             console.log("contact_created")
-            await createContact(contactValues)
+            if (contactValues.src !== "widget-web") {
+                await createContact(contactValues)
+            }
         } else if (event === "contact_updated") {
             let contact= await getContactByChatwootId(String(json.id), clientId)
             if (!contact) {
