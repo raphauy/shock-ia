@@ -433,6 +433,9 @@ export async function getFilteredContacts(clientId: string, from: Date | null, t
   const found = await prisma.contact.findMany({
     where: {
       clientId,
+      name: {
+        not: 'WRC'
+      },
       updatedAt: {
         gte: from || undefined,
         lte: to || undefined

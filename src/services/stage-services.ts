@@ -197,6 +197,9 @@ export async function getKanbanStagesDAO(clientId: string, from: Date | null, to
     include: {
       contacts: {
         where: {
+          name: {
+            not: 'WRC'
+          },
           createdAt: {
             gte: from || undefined,
             lte: to || undefined
