@@ -13,6 +13,7 @@ export type FieldDAO = {
 	required: boolean
   order: number
   etiquetar: boolean
+  listOptions: string[]
 	repositoryId: string | null | undefined
   eventId: string | null | undefined
   linkedCustomFieldId: string | null | undefined
@@ -26,6 +27,7 @@ export const repoFieldSchema = z.object({
 	description: z.string().min(1, "description is required."),
 	required: z.boolean().default(false),
   etiquetar: z.boolean().default(false),
+  listOptions: z.array(z.string()).default([]),
 	repositoryId: z.string().optional(),
   eventId: z.string().optional(),
   linkedCustomFieldId: z.string().optional(),
@@ -213,7 +215,14 @@ export async function getDataTags(repositoryId: string, data: string | JsonValue
   const jsonData = typeof data === 'string' ? JSON.parse(data) : data
   for (const field of fields) {
     if (field.etiquetar && jsonData[field.name]) {
-      tags.push(jsonData[field.name])
+      if (field.type === "list") {
+        const values = Array.isArray(jsonData[field.name]) 
+          ? jsonData[field.name] 
+          : jsonData[field.name].split(",")
+        tags.push(...values)
+      } else {
+        tags.push(jsonData[field.name])
+      }
     }
   }
   

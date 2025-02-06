@@ -918,7 +918,7 @@ export async function defaultFunction(clientId: string, name: string, args: any)
     if (contactId) {
       const fields= await getFieldsDAOByRepositoryId(repo.id)
       for (const field of fields) {
-        const value= data[field.name]
+        const value= field.type === "list" ? data[field.name]?.join(", ") : data[field.name]
         if (value && field.linkedCustomFieldId) {
           await createOrUpdateFieldValue({
             contactId,

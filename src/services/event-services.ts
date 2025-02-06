@@ -112,6 +112,7 @@ export async function createEvent(clientId: string, name: string, type: EventTyp
     description: fieldDescription,
     required: fieldRequired,
     etiquetar: false,
+    listOptions: [],
     eventId: created.id
   })
   const updated= await updateEventMetadata(created.id)
@@ -313,9 +314,13 @@ export async function updateEventMetadata(id: string) {
   const fields= event.fields.sort((a, b) => a.order - b.order)
   const properties= fields.map((field) => ({
     name: field.name,
-    type: field.type,
+    type: (field.type === "list" ? "array" : field.type) as "string" | "number" | "boolean" | "array",
     description: field.description,
-    required: field.required
+    required: field.required,
+    items: field.type === "list" ? {
+      type: "string" as const,
+      enum: field.listOptions ?? []
+    } : undefined
   }))
  
   const updatedMetadata= generateMetadata(properties)
@@ -336,31 +341,44 @@ export async function updateEventMetadata(id: string) {
 
 export type Property= {
   name: string
-  type: "string" | "number" | "boolean"
+  type: "string" | "number" | "boolean" | "array"
   description: string
   required: boolean
+  items?: {
+    type: "string"
+    enum: string[]
+  }
 }
 
-
 export function generateMetadata(properties: Property[]): string {
-
-  const metadata= properties.reduce((acc: { [key: string]: { type: string; description: string, required: boolean } }, property) => {
-    acc[property.name] = {
-      type: property.type,
-      description: property.description,
-      required: property.required
-    };
+  const metadata= properties.reduce((acc: { [key: string]: { type: string; description: string, required: boolean, items?: { type: string, enum: string[] } } }, property) => {
+    if (property.type === "array") {
+      acc[property.name] = {
+        type: property.type,
+        description: property.description,
+        required: property.required,
+        items: {
+          type: "string",
+          enum: property.items?.enum ?? []
+        }
+      };
+    } else {
+      acc[property.name] = {
+        type: property.type,
+        description: property.description,
+        required: property.required
+      };
+    }
     return acc;
   }, {})
 
   const jsonString = JSON.stringify(metadata, null, 2)
 
-  // Verify that the jsonString is valid JSON
   try {
     JSON.parse(jsonString);
   } catch (error) {
-    console.error("Error parsing functionDefinition: ", error);
-    throw new Error("Error parsing functionDefinition");
+    console.error("Error parsing metadata: ", error);
+    throw new Error("Error parsing metadata");
   }
 
   return jsonString;

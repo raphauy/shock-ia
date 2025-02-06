@@ -15,6 +15,8 @@ import { FieldType } from "@prisma/client"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { CustomFieldDAO } from "@/services/customfield-services"
+import { ListGenerator } from "./list-generator"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 type Props= {
   id?: string
@@ -39,7 +41,8 @@ export function FieldForm({ id, repoId, eventId, customFields, closeDialog }: Pr
             type: data.type,
             description: data.description,
             required: data.required,
-            etiquetar: data.etiquetar
+            etiquetar: data.etiquetar,
+            listOptions: data.listOptions ?? []
           }
         }
       }
@@ -52,6 +55,7 @@ export function FieldForm({ id, repoId, eventId, customFields, closeDialog }: Pr
         repositoryId: repoId ?? undefined,
         eventId: eventId ?? undefined,
         linkedCustomFieldId: undefined,
+        listOptions: []
       }
     },
     mode: "onChange",
@@ -61,6 +65,7 @@ export function FieldForm({ id, repoId, eventId, customFields, closeDialog }: Pr
   const [filteredCustomFields, setFilteredCustomFields] = useState<CustomFieldDAO[]>(customFields)
 
   const watchedType = form.watch("type")
+  const watchedListOptions = form.watch("listOptions")
   console.log(watchedType)
 
   useEffect(() => {
@@ -98,147 +103,159 @@ export function FieldForm({ id, repoId, eventId, customFields, closeDialog }: Pr
             type: data.type,
             description: data.description,
             required: data.required,
-            etiquetar: data.etiquetar
+            etiquetar: data.etiquetar,
+            listOptions: data.listOptions ?? []
           })
         }
       })
     }
   }, [form, id])
 
+  function handleListOptionsChange(options: string[]) {
+    form.setValue("listOptions", options)
+  }
+
   return (
-    <div className="p-4 bg-white rounded-md">
+    <div className="rounded-md">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <ScrollArea className="h-[800px] max-h-[80vh] pr-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 p-1">
           
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nombre</FormLabel>
-                <FormControl>
-                  <Input placeholder="ej: nombre" {...field} disabled={field.value === "nombre"}/>
-                </FormControl>
-                <FormDescription>Sin espacios y sin tildes ni eñes, para más de una palabra se recomienda camelCase, ej: nombreCompleto</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-      
-          <FormField
-            control={form.control}
-            name="type"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tipo</FormLabel>
-                <FormControl>
-                  <Select onValueChange={(value) => field.onChange(value)} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecciona un Tipo" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {Object.values(FieldType).map((type) => (
-                        <SelectItem key={type} value={type}>{type}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-      
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Descripción</FormLabel>
-                <FormControl>
-                  <Textarea rows={5} placeholder="ej: Nombre completo del lead" {...field} />
-                </FormControl>
-                <FormDescription>Esta descripción es clave para que el LLM pueda entender qué tiene que preguntar al usuario</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-      
-          <FormField
-            control={form.control}
-            name="required"
-            render={({ field }) => (
-              <FormItem>
-                <div className="flex items-center gap-2">
-                  <FormLabel className="mt-1">Obligatorio</FormLabel>
-                  <FormControl>
-                    <Switch checked={field.value} onCheckedChange={field.onChange} />
-                  </FormControl>
-                </div>
-                <FormDescription>Si está marcado, el LLM debería insistir en que el usuario responda la información de este campo</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="etiquetar"
-            render={({ field }) => (
-              <FormItem>
-                <div className="flex items-center gap-2">
-                  <FormLabel className="mt-1">Etiquetar</FormLabel>
-                  <FormControl>
-                    <Switch checked={field.value} onCheckedChange={field.onChange} />
-                  </FormControl>
-                </div>
-                <FormDescription>Si está marcado, cuando se ejecuta esta FC, se agregará una etiqueta con el valor de este campo</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="linkedCustomFieldId"
-            render={({ field }) => {
-              return (
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Linkear campo personalizado</FormLabel>
+                  <FormLabel>Nombre</FormLabel>
                   <FormControl>
-                    <Select 
-                      onValueChange={field.onChange}
-                      value={field.value}
-                    >
+                    <Input placeholder="ej: nombre" {...field} disabled={field.value === "nombre"}/>
+                  </FormControl>
+                  <FormDescription>Sin espacios y sin tildes ni eñes, para más de una palabra se recomienda camelCase, ej: nombreCompleto</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          
+        
+            <FormField
+              control={form.control}
+              name="type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tipo</FormLabel>
+                  <FormControl>
+                    <Select onValueChange={(value) => field.onChange(value)} value={field.value}>
                       <FormControl>
-                        <SelectTrigger disabled={customFields.length === 0}>
-                          <SelectValue placeholder="Selecciona un Campo" />
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecciona un Tipo" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {filteredCustomFields.map((customField) => (
-                          <SelectItem key={customField.id} value={customField.id}>{customField.name}</SelectItem>
+                        {Object.values(FieldType).map((type) => (
+                          <SelectItem key={type} value={type}>{getTypeLabel(type)}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
-              );
-            }}
-          />
+              )}
+            />
+
+            {/* add a field for the list options here */}
+            {
+              watchedType === "list" && 
+                <ListGenerator options={watchedListOptions ?? []} onChange={handleListOptionsChange} />
+            }
+        
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descripción</FormLabel>
+                  <FormControl>
+                    <Textarea rows={5} placeholder="ej: Nombre completo del lead" {...field} />
+                  </FormControl>
+                  <FormDescription>Esta descripción es clave para que el LLM pueda entender qué tiene que preguntar al usuario</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          
+        
+            <FormField
+              control={form.control}
+              name="required"
+              render={({ field }) => (
+                <FormItem>
+                  <div className="flex items-center gap-2">
+                    <FormLabel className="mt-1">Obligatorio</FormLabel>
+                    <FormControl>
+                      <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                  </div>
+                  <FormDescription>Si está marcado, el LLM debería insistir en que el usuario responda la información de este campo</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="etiquetar"
+              render={({ field }) => (
+                <FormItem>
+                  <div className="flex items-center gap-2">
+                    <FormLabel className="mt-1">Etiquetar</FormLabel>
+                    <FormControl>
+                      <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                  </div>
+                  <FormDescription>Si está marcado, cuando se ejecuta esta FC, se agregará una etiqueta con el valor de este campo</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="linkedCustomFieldId"
+              render={({ field }) => {
+                return (
+                  <FormItem>
+                    <FormLabel>Linkear campo personalizado</FormLabel>
+                    <FormControl>
+                      <Select 
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger disabled={customFields.length === 0}>
+                            <SelectValue placeholder="Selecciona un Campo" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {filteredCustomFields.map((customField) => (
+                            <SelectItem key={customField.id} value={customField.id}>{customField.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                  </FormItem>
+                );
+              }}
+            />
           
 
-        <div className="flex justify-end">
-            <Button onClick={() => closeDialog()} type="button" variant={"secondary"} className="w-32">Cancelar</Button>
-            <Button type="submit" className="w-32 ml-2">
-              {loading ? <Loader className="h-4 w-4 animate-spin" /> : <p>Guardar</p>}
-            </Button>
-          </div>
-        </form>
+          <div className="flex justify-end">
+              <Button onClick={() => closeDialog()} type="button" variant={"secondary"} className="w-32">Cancelar</Button>
+              <Button type="submit" className="w-32 ml-2">
+                {loading ? <Loader className="h-4 w-4 animate-spin" /> : <p>Guardar</p>}
+              </Button>
+            </div>
+          </form>
+        </ScrollArea>
       </Form>
     </div>     
   )
@@ -279,3 +296,12 @@ export function DeleteFieldForm({ id, closeDialog }: DeleteProps) {
   )
 }
 
+function getTypeLabel(type: FieldType) {
+  switch (type) {
+    case "string": return "Texto"
+    case "number": return "Número"
+    case "boolean": return "Booleando (SI/NO)"
+    case "list": return "Lista"
+    default: return type
+  }
+}

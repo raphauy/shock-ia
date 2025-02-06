@@ -18,8 +18,13 @@ export default function DataCard({ repoName, jsonData }: Props) {
                 <div className="">
                     {
                         keys.map((key, i) => {
-                            const value = jsonData[key];
+                            let value = jsonData[key];
+                            // log value type
                             const normalKey = camelCaseToNormal(key);
+                            const type = typeof value
+                            if (type === "object") {
+                                value = value.join(", ")
+                            }
                             const keyWithTildes = putTildes(normalKey);
                             return (
                                 <div key={i} className="grid grid-cols-2">

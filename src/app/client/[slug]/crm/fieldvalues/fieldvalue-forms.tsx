@@ -79,7 +79,7 @@ export function FieldValueForm({ id, contactId, customFieldId, customFieldName, 
                 <FormLabel>{customFieldName}</FormLabel>
                 <FormControl>
                   <div>
-                    {customFieldType === 'string' && (
+                    {(customFieldType === 'string' || customFieldType === 'list') && (
                       <Input placeholder="Valor del campo" {...field} />
                     )}
                     {customFieldType === 'number' && (

@@ -300,7 +300,11 @@ export async function updateFunctionDefinition(id: string) {
   const fields= repo.fields.sort((a, b) => a.order - b.order)
   const properties= fields.map((field) => ({
     name: field.name,
-    type: field.type,
+    type: field.type === "list" ? "array" : field.type as "string" | "number" | "boolean" | "array",
+    items: field.type === "list" ? {
+      type: "string" as const,
+      enum: field.listOptions ?? [],
+    } : undefined,
     description: field.description,
   }))
   const required= fields.filter((field) => field.required).map((field) => field.name)
@@ -333,8 +337,12 @@ export async function updateFunctionDefinition(id: string) {
 
 export type Property= {
   name: string
-  type: "string" | "number" | "boolean"
+  type: "string" | "number" | "boolean" | "array"
   description: string
+  items?: {
+    type: "string"
+    enum: string[]
+  }
 }
 
 export type Parameters= {
@@ -368,11 +376,22 @@ export function generateFunctionDefinition(name: string, description: string, pa
 
   const jsonParameters = {
     type: "object",
-    properties: properties.reduce((acc: { [key: string]: { type: string; description: string } }, property) => {
-      acc[property.name] = {
-        type: property.type,
-        description: property.description,
-      };
+    properties: properties.reduce((acc: { [key: string]: { type: string; items?: { type: string; enum: string[] }; description: string } }, property) => {
+      if (property.type === "array") {
+        acc[property.name] = {
+          type: "array",
+          items: {
+            type: "string",
+            enum: property.items?.enum ?? [],
+          },
+          description: property.description,
+        };
+      } else {
+        acc[property.name] = {
+          type: property.type,
+          description: property.description,
+        };
+      }
       return acc;
     }, {}),
     required: required,
