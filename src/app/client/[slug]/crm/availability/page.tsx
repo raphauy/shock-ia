@@ -21,7 +21,7 @@ export default async function AvailabilityPage({ params }: Props) {
   const initialTimezone= client.timezone
 
   return (
-    <div className="flex flex-col gap-4 p-4">
+    <div className="flex flex-col gap-2 p-4">
         <p className="text-3xl font-bold">Horarios de actividad</p>
         <p className="text-sm text-muted-foreground">Selecciona los días y horarios en los que el bot responderá mensajes de los usuarios.</p>
         <p className="text-sm text-muted-foreground">Fuera de estos horarios, el bot ignorará los mensajes recibidos.</p>

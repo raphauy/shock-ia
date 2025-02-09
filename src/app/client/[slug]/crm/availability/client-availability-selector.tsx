@@ -2,12 +2,12 @@
 'use client'
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { toast } from "@/components/ui/use-toast"
-import { Loader, Plus, Save, X } from 'lucide-react'
+import { Loader, Plus, Save, TriangleAlert, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { setAvailabilityAction } from "./actions"
 
@@ -190,6 +190,11 @@ export default function ClientAvailabilitySelector({ clientId, initialAvailabili
           ))}
         </div>
       </CardContent>
+      {Object.keys(availability).length === 0 && 
+        <CardHeader>
+          <CardDescription className="flex items-center justify-center gap-2 text-foreground font-bold"><TriangleAlert className="w-4 h-4" />Este bot responderá mensajes de los usuarios 24/7.</CardDescription>
+        </CardHeader>
+      }
       <CardFooter>
         <Button onClick={handleSave} className='w-full gap-2' disabled={!needSave}>
           {loading ? <Loader className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
