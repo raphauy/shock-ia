@@ -941,13 +941,13 @@ export async function checkWorkingHoursNow(clientId: string): Promise<boolean> {
   const availability = client.availability
   const timezone = client.timezone || 'America/Montevideo'
   
-  // Si no hay disponibilidad configurada o es un array vacío, asumimos disponibilidad 24/7
-  if (!availability || availability.length === 0) {
+  // Si no hay disponibilidad configurada o todos los días están vacíos, asumimos disponibilidad 24/7
+  if (!availability || availability.length === 0 || availability.every(slot => !slot)) {
     console.log('📅 Sin horarios configurados - asumiendo disponibilidad 24/7')
     return true
   }
   
-  //console.log('📅 Disponibilidad configurada:', availability)
+  console.log('📅 Disponibilidad configurada:', availability)
   console.log('🌍 Timezone:', timezone)
   
   // Obtener la fecha actual en la zona horaria del cliente usando date-fns-tz

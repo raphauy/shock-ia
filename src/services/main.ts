@@ -55,5 +55,5 @@ async function main() {
     console.log("isAvailable:", isAvailable)
 }
   
-//main()
+main()
 
