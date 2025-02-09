@@ -4,6 +4,8 @@ import { addFunctionToClient, FunctionDAO, getFunctionIdByFunctionName, removeFu
 import { InboxProvider } from "@prisma/client";
 import { WhatsappInstanceDAO } from "./wrc-sdk-types";
 import { createDefaultStages, getFirstStageOfClient } from "./stage-services";
+import { toZonedTime, formatInTimeZone } from 'date-fns-tz'
+import { getDay, getHours, getMinutes } from 'date-fns'
 
 
 export default async function getClients() {
@@ -898,4 +900,109 @@ export async function getApiKey(clientId: string) {
   if (!client) return null
   
   return client.apiKey
+}
+
+export async function setAvailability(clientId: string, availability: string[]) {
+  const client= await prisma.client.update({
+    where: {
+      id: clientId
+    },
+    data: {
+      availability
+    }
+  })
+  return client
+}
+
+export async function setTimezone(clientId: string, timezone: string): Promise<boolean> {
+  const client= await prisma.client.update({
+    where: {
+      id: clientId
+    },
+    data: {
+      timezone
+    }
+  })
+  if (!client) return false
+  return true
+}
+
+export async function checkWorkingHoursNow(clientId: string): Promise<boolean> {
+  
+  const client = await prisma.client.findUnique({
+    where: {
+      id: clientId
+    }
+  })
+  if (!client) throw new Error('Client not found')
+
+  console.log('⏰ Verificando horario de atención para cliente:', client.name)
+
+  const availability = client.availability
+  const timezone = client.timezone || 'America/Montevideo'
+  
+  // Si no hay disponibilidad configurada o es un array vacío, asumimos disponibilidad 24/7
+  if (!availability || availability.length === 0) {
+    console.log('📅 Sin horarios configurados - asumiendo disponibilidad 24/7')
+    return true
+  }
+  
+  //console.log('📅 Disponibilidad configurada:', availability)
+  console.log('🌍 Timezone:', timezone)
+  
+  // Obtener la fecha actual en la zona horaria del cliente usando date-fns-tz
+  const now = new Date()
+  const clientTime = toZonedTime(now, timezone)
+  
+  console.log('🕐 Hora actual UTC:', formatInTimeZone(now, 'UTC', 'yyyy-MM-dd HH:mm:ss zzz'))
+  console.log('🕐 Hora en timezone del cliente:', formatInTimeZone(now, timezone, 'yyyy-MM-dd HH:mm:ss zzz'))
+  
+  // Obtener el día de la semana (1 = lunes, ..., 7 = domingo)
+  let dayOfWeek = getDay(clientTime)
+  // Convertir a formato donde 0 = lunes, ..., 6 = domingo
+  dayOfWeek = dayOfWeek === 0 ? 6 : dayOfWeek - 1
+  
+  console.log('📆 Día de la semana (0=lunes, 6=domingo):', dayOfWeek)
+  
+  // Obtener los rangos horarios para el día actual
+  const todayRanges = availability[dayOfWeek]
+  console.log('⏰ Rangos horarios para hoy:', todayRanges || 'Sin horarios definidos')
+  
+  if (!todayRanges) return false
+  
+  // Obtener la hora actual en formato de minutos desde medianoche usando date-fns
+  const currentMinutes = getHours(clientTime) * 60 + getMinutes(clientTime)
+  //console.log('⏱️ Minutos transcurridos desde medianoche:', currentMinutes)
+  
+  // Dividir los rangos si hay múltiples (separados por coma)
+  const ranges = todayRanges.split(',')
+  
+  // Verificar cada rango
+  for (const range of ranges) {
+    if (!range) continue
+    
+    const [start, end] = range.split('-')
+    if (!start || !end) continue
+    
+    // Convertir las horas de inicio y fin a minutos
+    const [startHour, startMinute] = start.split(':').map(Number)
+    const [endHour, endMinute] = end.split(':').map(Number)
+    
+    const startMinutes = startHour * 60 + startMinute
+    const endMinutes = endHour * 60 + endMinute
+    
+    console.log('🔍 Verificando rango:', range)
+    // console.log('   ├─ Inicio (minutos):', startMinutes)
+    // console.log('   ├─ Actual (minutos):', currentMinutes)
+    // console.log('   └─ Fin (minutos):', endMinutes)
+    
+    // Verificar si la hora actual está dentro del rango
+    if (currentMinutes >= startMinutes && currentMinutes <= endMinutes) {
+      console.log('✅ Dentro del horario de atención')
+      return true
+    }
+  }
+  
+  console.log('❌ Fuera del horario de atención')
+  return false
 }

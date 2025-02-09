@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
-import { Bell, BookDashed, BookOpen, Bot, ChevronRightSquare, DatabaseZap, Kanban, LayoutDashboard, LogOut, Megaphone, MessageCircle, MessagesSquare, Phone, QrCode, RectangleEllipsis, Tag, User, Users } from "lucide-react";
+import { Bell, BookDashed, BookOpen, Bot, Calendar, ChevronRightSquare, Clock, DatabaseZap, Kanban, LayoutDashboard, LogOut, Megaphone, MessageCircle, MessagesSquare, Phone, QrCode, RectangleEllipsis, Tag, User, Users } from "lucide-react";
 import { useParams, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -60,6 +60,12 @@ const items = [
     title: "Campos personalizados",
     url: `crm/custom-fields`,
     icon: RectangleEllipsis,
+    group: "configuracion",
+  },
+  {
+    title: "Horarios de actividad",
+    url: `crm/availability`,
+    icon: Clock,
     group: "configuracion",
   },
   {

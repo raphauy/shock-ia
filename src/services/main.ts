@@ -5,6 +5,7 @@ import { createContactInChatwoot, createChatwootConversation, getInboxId, delete
 import { generateAudio } from "./model-services"
 import { createOrUpdateFieldValues } from "./fieldvalue-services"
 import { formatMinutesBefore } from "@/lib/utils"
+import { checkWorkingHoursNow } from "./clientService"
 config()
 
 async function main() {
@@ -44,10 +45,14 @@ async function main() {
     // const contactId= "cm6gx7wf8001kkjbbto035kdf"
     // await createOrUpdateFieldValues(objectWithFieldValues, clientId, contactId, "main")
 
-    const minutesBefore= 1755
-    console.log("minutesBefore:", minutesBefore)
-    const formatted= formatMinutesBefore(minutesBefore)
-    console.log("formatted:", formatted)
+    // const minutesBefore= 1755
+    // console.log("minutesBefore:", minutesBefore)
+    // const formatted= formatMinutesBefore(minutesBefore)
+    // console.log("formatted:", formatted)
+
+    const clientId= "clsnvcntc003okaqc2gfrme4b"
+    const isAvailable= await checkWorkingHoursNow(clientId)
+    console.log("isAvailable:", isAvailable)
 }
   
 //main()

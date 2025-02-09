@@ -40,7 +40,7 @@ export function SelectTimezoneForm({ id, icon, label, description, initialValue,
   }
 
   return (
-    <div className="mt-6 border rounded-md p-4 w-full">
+    <div className="mt-6 border rounded-md p-4 w-full xl:max-w-2xl">
       <div className="">
         <div className="flex items-center gap-2 mb-2 font-bold border-b">
           {icon && icon}

@@ -76,7 +76,9 @@ export async function getDataClientWithModel(slug: string, modelName?: string): 
       haveAudioResponse: client.haveAudioResponse,
       wapSendFrequency: client.wapSendFrequency,
       apiKey: client.apiKey,
-      inboxProvider: client.inboxProvider
+      inboxProvider: client.inboxProvider,
+      availability: client.availability,
+      timezone: client.timezone
   }
   return data
 }

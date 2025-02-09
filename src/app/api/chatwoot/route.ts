@@ -1,5 +1,5 @@
 import { sendTextToConversation } from "@/services/chatwoot";
-import { getClient, getClientIdByChatwootAccountId } from "@/services/clientService";
+import { checkWorkingHoursNow, getClient, getClientIdByChatwootAccountId } from "@/services/clientService";
 import { getContactByPhone } from "@/services/contact-services";
 import { setLastMessageWasAudio } from "@/services/conversationService";
 import { MessageDelayResponse, onMessageReceived, processDelayedMessage } from "@/services/messageDelayService";
@@ -119,7 +119,12 @@ export async function POST(request: Request) {
         
         if (delayResponse.wasCreated ) {
             if (delayResponse.message) {
-                waitUntil(processDelayedMessage(delayResponse.message.id, phone))
+                const isWorkingHourNow= await checkWorkingHoursNow(clientId)
+                if (isWorkingHourNow) {
+                    waitUntil(processDelayedMessage(delayResponse.message.id, phone))
+                } else {
+                    console.log("client is not working hour now")
+                }
                 
             } else {
                 console.log("delayResponse.message wasCreated but is null")

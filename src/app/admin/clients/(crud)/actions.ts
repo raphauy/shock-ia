@@ -37,6 +37,8 @@ export type DataClient = {
     apiKey: string
     whatsappInstance?: WhatsappInstanceDAO
     inboxProvider: InboxProvider
+    availability: string[]
+    timezone: string
   }
     
 
@@ -72,7 +74,9 @@ export async function getDataClient(clientId: string): Promise<DataClient | null
         haveAudioResponse: client.haveAudioResponse,
         wapSendFrequency: client.wapSendFrequency,
         apiKey: client.apiKey,
-        inboxProvider: client.inboxProvider
+        inboxProvider: client.inboxProvider,
+        availability: client.availability,
+        timezone: client.timezone
     }
     return data
 }
@@ -113,7 +117,9 @@ export async function getDataClientOfUser(userId: string): Promise<DataClient | 
         haveAudioResponse: client.haveAudioResponse,
         wapSendFrequency: client.wapSendFrequency,
         apiKey: client.apiKey,
-        inboxProvider: client.inboxProvider
+        inboxProvider: client.inboxProvider,
+        availability: client.availability,
+        timezone: client.timezone
     }
     return data
 }
@@ -152,7 +158,9 @@ export async function getDataClientBySlug(slug: string): Promise<DataClient | nu
         haveAudioResponse: client.haveAudioResponse,
         wapSendFrequency: client.wapSendFrequency,
         apiKey: client.apiKey,
-        inboxProvider: client.inboxProvider
+        inboxProvider: client.inboxProvider,
+        availability: client.availability,
+        timezone: client.timezone
     }
     return data
 }
@@ -189,7 +197,9 @@ export async function getLastClientAction(): Promise<DataClient | null>{
         haveAudioResponse: client.haveAudioResponse,
         wapSendFrequency: client.wapSendFrequency,
         apiKey: client.apiKey,
-        inboxProvider: client.inboxProvider
+        inboxProvider: client.inboxProvider,
+        availability: client.availability,
+        timezone: client.timezone
     }
     return data
 }
@@ -234,7 +244,9 @@ export async function getDataClients() {
                 wapSendFrequency: client.wapSendFrequency,
                 apiKey: client.apiKey,
                 whatsappInstance: client.whatsappInstances.length === 0 ? undefined : client.whatsappInstances[0],
-                inboxProvider: client.inboxProvider
+                inboxProvider: client.inboxProvider,
+                availability: client.availability,
+                timezone: client.timezone
             };
         })
     );

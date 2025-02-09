@@ -87,6 +87,9 @@ model Client {
   haveAudioResponse     Boolean   @default(false)
   wapSendFrequency      Int       @default(30)
 
+  availability          String[]  @default([])
+  timezone              String    @default("America/Montevideo")
+
   apiKey                String @default(uuid()) @unique
 
   functions             ClientFunction[]
