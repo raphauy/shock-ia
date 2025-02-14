@@ -1,6 +1,6 @@
 import { ClientFormValues } from "@/app/admin/clients/(crud)/clientForm";
 import { prisma } from "@/lib/db";
-import { addFunctionToClient, FunctionDAO, getFunctionIdByFunctionName, removeFunctionFromClient } from "./function-services";
+import { FunctionDAO, getFunctionIdByFunctionName } from "./function-services";
 import { InboxProvider } from "@prisma/client";
 import { WhatsappInstanceDAO } from "./wrc-sdk-types";
 import { createDefaultStages, getFirstStageOfClient } from "./stage-services";
@@ -329,7 +329,8 @@ export async function getFunctionsOfClient(clientId: string) {
       }
     },
     include: {
-      repositories: true
+      repositories: true,
+      clients: true
     }
   })
 
@@ -433,6 +434,26 @@ export async function setFunctions(clientId: string, functionIs: string[]) {
   })))
 
   return true
+}
+
+export async function addFunctionToClient(clientId: string, functionId: string) {
+  await prisma.clientFunction.create({
+    data: {
+      clientId,
+      functionId
+    }
+  })
+}
+
+export async function removeFunctionFromClient(clientId: string, functionId: string) {
+  await prisma.clientFunction.delete({
+    where: {
+      clientId_functionId: {
+        clientId,
+        functionId
+      }
+    }
+  })
 }
 
 export async function getComplementaryClients(clientsIds: string[]) {

@@ -19,6 +19,10 @@ import FCTab from "./fc-tab"
 import { getReposOfClient } from "@/services/repository-services"
 import CRMPropsEdit from "./crm-edit-box"
 import ContactsHook from "./contacts-hook"
+import { FCPanel } from "./fc-panel"
+import { getGenericFunctions } from "@/services/function-services"
+import { Separator } from "@/components/ui/separator"
+import { getCurrentUser } from "@/lib/auth"
 
 type Props = {
     searchParams: {
@@ -27,6 +31,10 @@ type Props = {
     }
 }
 export default async function ConfigPage({ searchParams }: Props) {
+
+    const user= await getCurrentUser()
+    if (!user) return <div>No hay usuario logueado</div>
+    const isSuperAdmin= user.email === "rapha.uy@rapha.uy"
 
     const clientId= searchParams.clientId
 
@@ -39,6 +47,7 @@ export default async function ConfigPage({ searchParams }: Props) {
     const functionsOfClient= await getFunctionsOfClient(clientId)
     const haveCarServiceFunction= functionsOfClient.find((f) => f.name === "reservarServicio") !== undefined
 
+    const genericFunctions= await getGenericFunctions()
     const BASE_PATH= process.env.NEXTAUTH_URL || "NOT-CONFIGURED"
 
     return (
@@ -59,8 +68,13 @@ export default async function ConfigPage({ searchParams }: Props) {
                     <PromptForm id={client.id} update={updatePrompt} prompt={client.prompt || ""} />
                 </TabsContent>
                 <TabsContent value="functions">
-                    <ClientFunctionsBox clientId={client.id} />
+                    { client.haveCRM &&
+                        <FCPanel clientId={client.id} haveCRM={client.haveCRM} genericFunctions={genericFunctions} functionsOfClient={functionsOfClient} />
+                    }
+
                     <FCTab client={client} searchParams={searchParams} />
+                    <Separator className="my-4" />
+                    { isSuperAdmin && <ClientFunctionsBox clientId={client.id} />}
                 </TabsContent>
                 <TabsContent value="props" className="space-y-6">
                     <PropsEdit clientId={client.id} haveEvents={client.haveEvents} haveAgents={client.haveAgents} haveAudioResponse={client.haveAudioResponse} inboxProvider={client.inboxProvider} />

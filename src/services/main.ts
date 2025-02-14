@@ -1,7 +1,7 @@
 
 import { config } from "dotenv"
 import { createExternalPayment } from "./cobros-wap"
-import { createContactInChatwoot, createChatwootConversation, getInboxId, deleteContactInChatwoot, sendAudioToConversation } from "./chatwoot"
+import { createContactInChatwoot, createChatwootConversation, getInboxId, deleteContactInChatwoot, sendAudioToConversation, listAccountAgents } from "./chatwoot"
 import { generateAudio } from "./model-services"
 import { createOrUpdateFieldValues } from "./fieldvalue-services"
 import { formatMinutesBefore } from "@/lib/utils"
@@ -50,10 +50,14 @@ async function main() {
     // const formatted= formatMinutesBefore(minutesBefore)
     // console.log("formatted:", formatted)
 
-    const clientId= "clsnvcntc003okaqc2gfrme4b"
-    const isAvailable= await checkWorkingHoursNow(clientId)
-    console.log("isAvailable:", isAvailable)
+    // const clientId= "clsnvcntc003okaqc2gfrme4b"
+    // const isAvailable= await checkWorkingHoursNow(clientId)
+    // console.log("isAvailable:", isAvailable)
+
+    const accountId= 11
+    const agents= await listAccountAgents(accountId)
+    console.log("agents:", agents)
 }
   
-main()
+//main()
 

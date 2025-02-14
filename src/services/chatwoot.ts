@@ -403,3 +403,25 @@ export async function deleteContactInChatwoot(accountId: number, contactId: numb
     await client.contacts.delete({ accountId: accountId, id: contactId })
     console.log("Contact deleted in chatwoot: ", contactId)
 }
+
+export async function listAccountAgents(accountId: number) {
+    const chatwootUrl= process.env.CHATWOOT_URL!
+    const chatwootToken= process.env.CHATWOOT_ACCESS_TOKEN!
+    console.log("chatwootUrl:", chatwootUrl)
+    if (!chatwootUrl || !chatwootToken) {
+        console.error("CHATWOOT_URL or CHATWOOT_ACCESS_TOKEN is not set")
+        return
+    }
+
+    const client = new ChatwootClient({
+        config: {
+            basePath: chatwootUrl,
+            with_credentials: true,
+            credentials: "include",
+            token: chatwootToken
+        }
+    });
+
+    const agentListResponse = await client.agents.list({ accountId: accountId })
+    return agentListResponse
+}

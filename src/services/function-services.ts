@@ -424,3 +424,21 @@ export async function setNotifyPhones(clientId: string, functionId: string, noti
   })
   return updated
 }
+
+export async function getGenericFunctions(): Promise<FunctionDAO[]> {
+  const gfNames= ["getDocument", "notificarAgente"]
+
+  const found= await prisma.function.findMany({
+    where: {
+      name: {
+        in: gfNames
+      }
+    },
+    include: {
+      clients: true,
+      repositories: true
+    }
+  })
+
+  return found as FunctionDAO[]
+}

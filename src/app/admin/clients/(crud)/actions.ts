@@ -1,6 +1,6 @@
 "use server"
 
-import getClients, { clientHaveCRM, clientHaveEvents, createClient, deleteClient, editClient, getClient, getClientBySlug, getComplementaryFunctionsOfClient, getFunctionsOfClient, getLastClient, setFunctions, setPrompt, setWhatsAppEndpoing, setWhatsAppNumbers } from "@/services/clientService";
+import getClients, { addFunctionToClient, clientHaveCRM, clientHaveEvents, createClient, deleteClient, editClient, getClient, getClientBySlug, getComplementaryFunctionsOfClient, getFunctionsOfClient, getLastClient, removeFunctionFromClient, setFunctions, setPrompt, setWhatsAppEndpoing, setWhatsAppNumbers } from "@/services/clientService";
 import { getUser } from "@/services/userService";
 import { Client, InboxProvider } from "@prisma/client";
 import { revalidatePath } from "next/cache";
@@ -337,4 +337,16 @@ export async function clientHaveEventsAction(slug: string): Promise<boolean> {
 export async function clientHaveCRMAction(slug: string): Promise<boolean> {
     const haveCRM= await clientHaveCRM(slug)
     return haveCRM
+}
+
+export async function addFunctionToClientAction(clientId: string, functionId: string) {
+    await addFunctionToClient(clientId, functionId)
+
+    revalidatePath(`/admin/config`) 
+}
+
+export async function removeFunctionFromClientAction(clientId: string, functionId: string) {
+    await removeFunctionFromClient(clientId, functionId)
+
+    revalidatePath(`/admin/config`)
 }
