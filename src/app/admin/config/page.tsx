@@ -68,13 +68,14 @@ export default async function ConfigPage({ searchParams }: Props) {
                     <PromptForm id={client.id} update={updatePrompt} prompt={client.prompt || ""} />
                 </TabsContent>
                 <TabsContent value="functions">
-                    { client.haveCRM &&
-                        <FCPanel clientId={client.id} haveCRM={client.haveCRM} genericFunctions={genericFunctions} functionsOfClient={functionsOfClient} />
+                    { client.haveCRM ?
+                        <FCPanel clientId={client.id} haveCRM={client.haveCRM} genericFunctions={genericFunctions} functionsOfClient={functionsOfClient} /> :
+                        <ClientFunctionsBox clientId={client.id} />
                     }
 
                     <FCTab client={client} searchParams={searchParams} />
                     <Separator className="my-4" />
-                    { isSuperAdmin && <ClientFunctionsBox clientId={client.id} />}
+                    { client.haveCRM && isSuperAdmin && <ClientFunctionsBox clientId={client.id} />}
                 </TabsContent>
                 <TabsContent value="props" className="space-y-6">
                     <PropsEdit clientId={client.id} haveEvents={client.haveEvents} haveAgents={client.haveAgents} haveAudioResponse={client.haveAudioResponse} inboxProvider={client.inboxProvider} />
