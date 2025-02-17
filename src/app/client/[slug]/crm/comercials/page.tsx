@@ -25,7 +25,12 @@ export default async function ComercialPage({ params }: Props) {
   const whatsappInstance= await getWhatsappInstance(client.id)
   const allChhatwootUsers= await getChatwootUsers(Number(whatsappInstance?.chatwootAccountId))
   // filter actual comercial users
-  const chatwootUsers= allChhatwootUsers.filter(user => !data.some(comercial => comercial.chatwootUserId === user.id) && user.name !== "Shock IA")
+  let chatwootUsers 
+  if (slug === "shock") {
+    chatwootUsers= allChhatwootUsers.filter(user => !data.some(comercial => comercial.chatwootUserId === user.id) && user.name !== "Shock IA")
+  } else {
+    chatwootUsers= allChhatwootUsers.filter(user => !data.some(comercial => comercial.chatwootUserId === user.id) && user.name !== "Shock IA" && user.name !== "Agustin" && user.name !== "Joaco")
+  }
 
   if (data.length === 0) {
     return <div className="mx-10">{getEmptyComercialsComponent(client.id, users, chatwootUsers)}</div>
