@@ -7,6 +7,7 @@ import { getActiveComercialsDAOAction } from "../comercials/comercial-actions"
 import { BriefcaseBusiness, Loader } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { asignarContactoAction } from "./contact-actions"
+import { toast } from "@/components/ui/use-toast"
 
 type Props = {
   contact: ContactDAO
@@ -29,8 +30,18 @@ export function ComercialSelector({ contact }: Props) {
 
     async function handleComercialChange(comercialId: string) {
         setLoading(true)
-        await asignarContactoAction(contact.id, comercialId)
-        setComercial(comercials.find(comercial => comercial.id === comercialId) || null)
+        try {
+            await asignarContactoAction(contact.id, comercialId)
+            setComercial(comercials.find(comercial => comercial.id === comercialId) || null)
+            toast({ title: "Comercial asignado" })
+        } catch (error) {
+            const description= error instanceof Error ? error.message : "Hubo un error al asignar el comercial. Por favor, inténtelo de nuevo."
+            toast({
+                title: "Error al asignar el comercial",
+                description,
+                variant: "destructive",
+            })
+        }
         setLoading(false)
     }
 
@@ -43,7 +54,7 @@ export function ComercialSelector({ contact }: Props) {
         )
     }
 
-    if (comercials.length === 0) {
+    if (comercials.length === 0 || contact.src === "simulador") {
         return null
     }
 

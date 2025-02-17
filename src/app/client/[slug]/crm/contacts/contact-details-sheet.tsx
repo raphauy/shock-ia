@@ -170,7 +170,7 @@ export function ContactDetailsSheet({ contact, isOpen, onClose }: ContactDetails
               })}
             </div>
 
-            { (comercials.length > 0 || repoDataCount > 0) && <Separator className="my-2" />}
+            { (comercials.length > 0 || repoDataCount > 0) && contact.src !== "simulador" && <Separator className="my-2" />}
 
             <div className="flex justify-between items-center">
               <ComercialSelector contact={contact} />
