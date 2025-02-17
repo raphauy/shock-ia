@@ -282,8 +282,7 @@ export async function getContext(clientId: string, phone: string, userInput: str
       contextString += `{
   docId: "${doc.id}",
   docName: "${doc.name}",
-  docDescription: "${doc.description}",
-  docURL: "${doc.url}",
+  docDescription: "${doc.description}"
 },
 `
     })
