@@ -1,13 +1,14 @@
 import { prisma } from "@/lib/db"
 import { ContactEventType } from "@prisma/client"
 import * as z from "zod"
-import { createChatwootConversation, createContactInChatwoot, deleteContactInChatwoot } from "./chatwoot"
+import { assignConversationToAgent, createChatwootConversation, createContactInChatwoot, deleteContactInChatwoot } from "./chatwoot"
 import { getChatwootAccountId, getClient, getWhatsappInstance } from "./clientService"
 import { createContactEvent } from "./contact-event-services"
 import { getImportedContactByChatwootId } from "./imported-contacts-services"
 import { createDefaultStages, getFirstStageOfClient, getStageByName, StageDAO } from "./stage-services"
-import { createConversation, getLastConversationByContactId, removeContactFromAllConversations } from "./conversationService"
+import { createConversation, getLastChatwootConversationId, getLastConversationByContactId, removeContactFromAllConversations } from "./conversationService"
 import { ApiError } from "@figuro/chatwoot-sdk"
+import { getComercialDAO } from "./comercial-services"
 
 export type ContactDAO = {
 	id: string
@@ -20,6 +21,7 @@ export type ContactDAO = {
 	order: number
 	clientId: string
 	stageId: string
+	comercialId: string | null
 	createdAt: Date
 	updatedAt: Date
 }
@@ -518,4 +520,31 @@ export async function getLastChatwootConversationIdByPhoneNumber(phone: string, 
 
     return lastConversation.chatwootConversationId
   }
+}
+
+export async function asignarContacto(id: string, comercialId: string) {
+  const contact= await getContactDAO(id)
+  if (!contact) throw new Error("Contacto no encontrado")
+
+  const whatsappInstance= await getWhatsappInstance(contact.clientId)
+  if (!whatsappInstance) throw new Error("Instancia de WhatsApp no encontrada")
+
+  const lastChatwootConversationId= await getLastChatwootConversationId(contact.id)
+  if (!lastChatwootConversationId) throw new Error("Última conversación de Chatwoot no encontrada")
+
+  const comercial= await getComercialDAO(comercialId)
+  if (!comercial) throw new Error("Comercial no encontrado")
+  const chatwootUserId= comercial.chatwootUserId
+  if (!chatwootUserId) throw new Error("Usuario de Chatwoot del comercial no encontrado")
+  await assignConversationToAgent(Number(whatsappInstance.chatwootAccountId), Number(lastChatwootConversationId), chatwootUserId)
+
+  const updated= await prisma.contact.update({
+    where: { 
+      id,
+    },
+    data: { 
+      comercialId 
+    }
+  })
+  return updated
 }

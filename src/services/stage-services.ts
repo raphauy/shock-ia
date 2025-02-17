@@ -212,7 +212,10 @@ export async function getKanbanStagesDAO(clientId: string, from: Date | null, to
           {
             order: 'asc',
           },
-        ]
+        ],
+        include: {
+          comercial: true
+        }
       }
     }
   })

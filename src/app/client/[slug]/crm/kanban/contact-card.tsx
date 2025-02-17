@@ -7,10 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { cn, formatWhatsAppStyle } from "@/lib/utils";
 import { ContactDAO } from "@/services/contact-services";
 import { Draggable } from "@hello-pangea/dnd";
-import { Expand } from "lucide-react";
-import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { getRepoDataCountAction } from "../contacts/contact-actions";
+import { BriefcaseBusiness, Expand } from "lucide-react";
 
 type Props = {
   contact: ContactDAO
@@ -19,18 +16,6 @@ type Props = {
   onContactClick: (contact: ContactDAO) => void
 }
 export default function ContactCard({ contact, index, allTags, onContactClick }: Props) {
-
-  // const params= useParams()
-  // const slug= params.slug as string
-
-  // const [repoDataCount, setRepoDataCount] = useState(0)
-
-  // useEffect(() => {
-  //   getRepoDataCountAction(contact.id)
-  //   .then((count) => {
-  //     setRepoDataCount(count)
-  //   })
-  // }, [contact.id])
 
   return (
     <>
@@ -50,8 +35,6 @@ export default function ContactCard({ contact, index, allTags, onContactClick }:
                           <p className="text-sm text-gray-500">{contact.name === contact.phone ? "" : contact.phone}</p>
                         </div>
                       </div>
-                      {/* <DisplayContactDialog contact={contact} /> */}
-                      {/* <ResponsiveModalSide contact={contact} allTags={allTags} /> */}
                       <Button variant="outline" onClick={() => onContactClick(contact)}>
                         <Expand className="h-4 w-4" />
                       </Button>
@@ -63,11 +46,7 @@ export default function ContactCard({ contact, index, allTags, onContactClick }:
                           <Badge key={index} className="h-5">{tag}</Badge>
                         ))}
                       </div>
-                      {/* <Button variant="ghost" className={cn("p-1", repoDataCount === 0 && "hidden")}>
-                        <Link href={`/client/${slug}/crm/registros?contactId=${contact.id}`}>
-                          <DatabaseZap />
-                        </Link>
-                      </Button> */}
+                      {contact.comercialId && <div className="self-end"><BriefcaseBusiness className="h-5 w-5" /></div>}
                     </div>
                   </CardContent>
                 </Card>

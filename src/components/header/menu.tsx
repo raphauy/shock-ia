@@ -1,7 +1,7 @@
 
 import { getCurrentUser } from "@/lib/auth";
 import getClients from "@/services/clientService";
-import { getUser } from "@/services/userService";
+import { getUser } from "@/services/user-service";
 import { ClientSelector, SelectorData } from "./client-selector";
 import MenuAdmin from "./menu-admin";
 import MenuCliente from "./menu-cliente";

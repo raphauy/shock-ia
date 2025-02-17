@@ -24,6 +24,10 @@ import { FieldValueDAO } from '@/services/fieldvalue-services'
 import { getClientCustomFieldsAction } from '../custom-fields/customfield-actions'
 import { getFieldValuesByContactIdAction } from '../fieldvalues/fieldvalue-actions'
 import { FieldValueDialog } from '../fieldvalues/fieldvalue-dialogs'
+import { ComercialDAO } from '@/services/comercial-services'
+import { getActiveComercialsDAOAction } from '../comercials/comercial-actions'
+import { ComercialSelector } from './comercial-selector'
+import { DatabaseZapIcon } from 'lucide-react'
 
 type ContactDetailsSheetProps = {
   contact: ContactDAO | null
@@ -40,6 +44,7 @@ export function ContactDetailsSheet({ contact, isOpen, onClose }: ContactDetails
   const [repoDataCount, setRepoDataCount] = useState(0)
   const [customFields, setCustomFields] = useState<CustomFieldDAO[]>([])
   const [fieldValues, setFieldValues] = useState<FieldValueDAO[]>([])
+  const [comercials, setComercials] = useState<ComercialDAO[]>([])
 
   const params= useParams()
   const slug= params.slug as string
@@ -57,6 +62,10 @@ export function ContactDetailsSheet({ contact, isOpen, onClose }: ContactDetails
       getRepoDataCountAction(contact.id)
       .then(respCount => {
         setRepoDataCount(respCount)
+      })
+      getActiveComercialsDAOAction(contact.clientId)
+      .then(respComercials => {
+        setComercials(respComercials)
       })
     }
   }, [contact])
@@ -122,20 +131,22 @@ export function ContactDetailsSheet({ contact, isOpen, onClose }: ContactDetails
             </div>
         </SheetHeader>
 
-        <div className="mt-5">
+        <div className="mt-3">
             <div className='flex justify-between'>
-                <div className="flex flex-wrap gap-2 mb-4 items-center">
+                <div className="flex flex-wrap gap-2 items-center">
                   {contactTags.map((tag) => (
                       <Badge key={tag} className="h-5">{tag}</Badge>
                   ))}
                   <TagSelectorDialog contact={contact} initialTags={contactTags} allTags={allTags} tagChangeCount={() => setChangeCount(changeCount + 1)} />
                 </div>
-                <p className="text-sm text-muted-foreground mb-6">
+                <p className="text-sm text-muted-foreground">
                     {formatWhatsAppStyle(contact.updatedAt)}
                 </p>
             </div>
 
-            <div className={cn("flex flex-col gap-2 border-t pt-4", customFields.length === 0 && "hidden")}>
+            { customFields.length >0 && <Separator className="my-2" />}
+
+            <div className={cn("flex flex-col gap-2", customFields.length === 0 && "hidden")}>
               {customFields.map((field) => {
                 const fieldValue = fieldValues.find(fv => fv.customFieldId === field.id)
                 return (
@@ -159,16 +170,26 @@ export function ContactDetailsSheet({ contact, isOpen, onClose }: ContactDetails
               })}
             </div>
 
-            <div className={cn("flex justify-end", repoDataCount === 0 && "hidden")}>
-              <Button variant="outline">
-                <Link href={`/client/${slug}/crm/registros?contactId=${contact.id}`}>
-                  Ver registros ({repoDataCount})
-                </Link>
-              </Button>
+            { (comercials.length > 0 || repoDataCount > 0) && <Separator className="my-2" />}
+
+            <div className="flex justify-between items-center">
+              <ComercialSelector contact={contact} />
+              <p/>
+              <div className={cn(repoDataCount === 0 && "hidden")}>
+                <div className="flex items-center gap-2">
+                  <DatabaseZapIcon className="h-5 w-5" />
+                  <Button variant="outline">
+                    <Link href={`/client/${slug}/crm/registros?contactId=${contact.id}`}>
+                      Ver registros ({repoDataCount})
+                    </Link>
+                  </Button>
+                </div>
+              </div>
             </div>
 
 
-            <Separator className="my-4" />
+
+            <Separator className="my-2" />
           
             <div className="relative">
                 <h3 className="font-semibold mb-4 text-center">Historial</h3>

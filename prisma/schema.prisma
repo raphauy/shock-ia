@@ -22,6 +22,8 @@ model User {
 
   client        Client?    @relation(fields: [clientId], references: [id], onDelete: Cascade)
   clientId      String?
+
+  comercial     Comercial?
 }
 
 model Account {
@@ -108,11 +110,13 @@ model Client {
   contacts              Contact[]      // gennext: skip.list
   customFields          CustomField[]  // gennext: skip.list
   stages                Stage[]        // gennext: skip.list
-  tags         String[]       // gennext: skip.list
+  tags                  String[]       // gennext: skip.list
   campaigns             Campaign[]     // gennext: skip.list
 
   importedContacts      ImportedContact[]
   reminderDefinitions   ReminderDefinition[]
+
+  comerciales          Comercial[]
 }
 
 model Document {
@@ -530,6 +534,9 @@ model Contact {
   stage         Stage      @relation(fields: [stageId], references: [id], onDelete: Restrict)
   stageId       String
 
+  comercial     Comercial? @relation(fields: [comercialId], references: [id], onDelete: SetNull)
+  comercialId   String?
+
   fieldValues   FieldValue[]                               // gennext: skip.list
   stageHistory  StageHistory[]                           // gennext: skip.list
   conversations Conversation[]                         // gennext: skip.list
@@ -787,4 +794,22 @@ model Reminder {
 
   createdAt          DateTime   @default(now())                 // gennext: skip.zod
   updatedAt          DateTime   @updatedAt                      // gennext: skip.zod
+}
+
+model Comercial {
+  id                 String    @id @default(cuid())
+  chatwootUserId     Int?                                          // gennext: show.column
+  chatwootUserName   String?                                       // gennext: show.column
+  activo             Boolean   @default(true)                      // gennext: show.column
+
+  user               User      @relation(fields: [userId], references: [id], onDelete: Restrict)
+  userId             String    @unique
+
+  contacts           Contact[]                                     // gennext: skip.list
+  
+  client             Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId           String
+
+  createdAt          DateTime  @default(now())                     // gennext: skip.zod
+  updatedAt          DateTime  @updatedAt                          // gennext: skip.zod
 }

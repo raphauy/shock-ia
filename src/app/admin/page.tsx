@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getCurrentUser } from "@/lib/auth";
 import { getClientBySlug, getClientIdBySlug, getClientsCount, getLastClient, getLastClientId } from "@/services/clientService";
 import { getDocumentsCount } from "@/services/document-services";
-import getUsers from "@/services/userService";
+import getUsers from "@/services/user-service";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { BookOpen, Briefcase, Settings, User } from "lucide-react";

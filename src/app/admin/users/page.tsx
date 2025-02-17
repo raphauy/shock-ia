@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button"
-import getUsers from "@/services/userService"
+import getUsers from "@/services/user-service"
 import { PlusCircle } from "lucide-react"
 import { create, getDataUsers, update } from "./(crud)/actions"
 import { UserDialog } from "./(crud)/user-dialog"

@@ -1,7 +1,7 @@
 "use server"
 
 import getClients, { addFunctionToClient, clientHaveCRM, clientHaveEvents, createClient, deleteClient, editClient, getClient, getClientBySlug, getComplementaryFunctionsOfClient, getFunctionsOfClient, getLastClient, removeFunctionFromClient, setFunctions, setPrompt, setWhatsAppEndpoing, setWhatsAppNumbers } from "@/services/clientService";
-import { getUser } from "@/services/userService";
+import { getUser } from "@/services/user-service";
 import { Client, InboxProvider } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { EndpointFormValues } from "../../config/(crud)/endpoint-form";

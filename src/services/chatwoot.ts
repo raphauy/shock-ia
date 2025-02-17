@@ -1,5 +1,5 @@
 import axios from 'axios'
-import ChatwootClient from "@figuro/chatwoot-sdk"
+import ChatwootClient, { agent } from "@figuro/chatwoot-sdk"
 import { getChatwootAccountId, getClient } from "./clientService"
 
 
@@ -408,6 +408,7 @@ export async function listAccountAgents(accountId: number) {
     const chatwootUrl= process.env.CHATWOOT_URL!
     const chatwootToken= process.env.CHATWOOT_ACCESS_TOKEN!
     console.log("chatwootUrl:", chatwootUrl)
+    console.log("searching agents for accountId:", accountId)
     if (!chatwootUrl || !chatwootToken) {
         console.error("CHATWOOT_URL or CHATWOOT_ACCESS_TOKEN is not set")
         return
@@ -424,4 +425,24 @@ export async function listAccountAgents(accountId: number) {
 
     const agentListResponse = await client.agents.list({ accountId: accountId })
     return agentListResponse
+}
+
+export async function getChatwootUserName(accountId: number, userId: number) {
+    const agentListResponse= await listAccountAgents(accountId)
+    if (!agentListResponse) {
+        console.error("Agent list not found")
+        return null
+    }
+    const agent = agentListResponse.find((agent: agent) => agent.id === userId)
+    return agent?.name
+}
+
+export async function assignConversationToAgent(accountId: number, conversationId: number, agentId: number) {
+    const chatwootUrl= process.env.CHATWOOT_URL!
+    const chatwootToken= process.env.CHATWOOT_ACCESS_TOKEN!
+
+    const client = await getChatwootClient(chatwootToken)
+
+    const response = await client.conversationAssignment.assign({ accountId: accountId, conversationId: conversationId, data: { assignee_id: agentId } })
+    return response
 }

@@ -16,7 +16,7 @@ import { getDocument } from "./functions";
 import { sendText } from "./wrc-sdk";
 import { sendAudioToConversation, sendTextToConversation } from "./chatwoot";
 import { ContactFormValues, createContact, getContactByChatwootId } from "./contact-services";
-import { getUserByEmail } from "./userService";
+import { getUserByEmail } from "./user-service";
 
 
 export default async function getConversations() {
@@ -880,4 +880,19 @@ export async function setLastMessageWasAudio(id: string, lastMessageWasAudio: bo
       lastMessageWasAudio 
     }
   })
+}
+
+export async function getLastChatwootConversationId(contactId: string) {
+  const conversation= await prisma.conversation.findFirst({
+    where: {
+      contactId,
+      chatwootConversationId: {
+        not: null
+      }
+    },
+    orderBy: {
+      createdAt: 'desc'
+    }
+  })
+  return conversation?.chatwootConversationId
 }

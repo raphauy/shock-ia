@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
-import { Bell, BookDashed, BookOpen, Bot, Calendar, ChevronRightSquare, Clock, DatabaseZap, Kanban, LayoutDashboard, LogOut, Megaphone, MessageCircle, MessagesSquare, Phone, QrCode, RectangleEllipsis, Tag, User, Users } from "lucide-react";
+import { Bell, BookDashed, BookOpen, Bot, BriefcaseBusiness, Calendar, ChevronRightSquare, Clock, DatabaseZap, Kanban, LayoutDashboard, LogOut, Megaphone, MessageCircle, MessagesSquare, Phone, QrCode, RectangleEllipsis, Tag, User, Users } from "lucide-react";
 import { useParams, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -49,6 +49,18 @@ const items = [
     url: `crm/registros`,
     icon: DatabaseZap,
     group: "data",
+  },
+  {
+    title: "Usuarios",
+    url: `crm/users`,
+    icon: Users,
+    group: "configuracion",
+  },
+  {
+    title: "Comerciales",
+    url: `crm/comercials`,
+    icon: BriefcaseBusiness,
+    group: "configuracion",
   },
   {
     title: "Etiquetas",

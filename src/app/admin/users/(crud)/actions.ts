@@ -1,6 +1,6 @@
 "use server"
 
-import getUsers, { createUser, deleteUser, editUser, getUser, getUsersOfClient } from "@/services/userService";
+import getUsers, { createUser, deleteUser, editUser, getUser, getUsersOfClient } from "@/services/user-service";
 import { revalidatePath } from "next/cache";
 import { User } from "@prisma/client";
 import { UserFormValues } from "./userForm";
