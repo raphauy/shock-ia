@@ -1,17 +1,20 @@
 'use client'
 
+import { Switch } from '@/components/ui/switch'
 import { toast } from '@/components/ui/use-toast'
+import { ComercialDAO } from '@/services/comercial-services'
 import { ContactDAO } from '@/services/contact-services'
 import { KanbanStageDAO, KanbanStageDAOWithContacts } from '@/services/stage-services'
 import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd'
+import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 import { createMovedToStageEventAction, updateStageContactsAction } from '../contacts/contact-actions'
+import { ContactDetailsSheet } from '../contacts/contact-details-sheet'
+import TagSelector from '../contacts/tag-selector'
 import { updateKanbanStagesAction } from '../stages/stage-actions'
 import { StageDialog } from '../stages/stage-dialogs'
 import StageColumn from './stage-column'
-import TagSelector from '../contacts/tag-selector'
-import { Separator } from '@/components/ui/separator'
-import { ContactDetailsSheet } from '../contacts/contact-details-sheet'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 function reorder<T>(list: T[], startIndex: number, endIndex: number) {
   const result = Array.from(list)
@@ -24,17 +27,46 @@ type Props = {
   clientId: string
   initialStages: KanbanStageDAOWithContacts[]
   allTags: string[]
+  comercials: ComercialDAO[]
 }
 
-export function KanbanComponent({ clientId, initialStages, allTags }: Props) {
+export function KanbanComponent({ clientId, initialStages, allTags, comercials }: Props) {
   const [stages, setStages] = useState<KanbanStageDAOWithContacts[]>(initialStages)
   const [filteredTags, setFilteredTags] = useState<string[]>([])
   const [phoneFilter, setPhoneFilter] = useState<string>("")
+  const [selectedComercial, setSelectedComercial] = useState<string>("")
+  const [showMyContacts, setShowMyContacts] = useState(false)
   const [selectedContact, setSelectedContact] = useState<ContactDAO | null>(null)
+  const { data: session } = useSession()
+  const user = session?.user
+
+  // Buscar el comercial asociado al usuario actual
+  const userComercial = comercials.find(comercial => comercial.userId === user?.id)
 
   useEffect(() => {
-    setStages(initialStages)
-  }, [initialStages])
+    const filteredStages = initialStages.map(stage => ({
+      ...stage,
+      contacts: stage.contacts.filter(contact => {
+        const matchesTags = filteredTags.length === 0 || contact.tags?.some(tag => filteredTags.includes(tag));
+        const matchesPhone = !phoneFilter || 
+          contact.phone?.toLowerCase().includes(phoneFilter.toLowerCase()) ||
+          contact.name?.toLowerCase().includes(phoneFilter.toLowerCase());
+        const matchesComercial = !selectedComercial || contact.comercialId === selectedComercial;
+        
+        return matchesTags && matchesPhone && matchesComercial;
+      })
+    }));
+    setStages(filteredStages);
+  }, [initialStages, filteredTags, phoneFilter, selectedComercial]);
+
+  // Efecto para manejar el switch de "Mis contactos"
+  useEffect(() => {
+    if (showMyContacts && userComercial) {
+      setSelectedComercial(userComercial.id);
+    } else if (!showMyContacts && userComercial) {
+      setSelectedComercial("");
+    }
+  }, [showMyContacts, userComercial]);
 
   const handleContactClick = (contact: ContactDAO) => {
     setSelectedContact(contact)
@@ -135,6 +167,45 @@ export function KanbanComponent({ clientId, initialStages, allTags }: Props) {
   return (
     <div>
       <div className="flex flex-col gap-4 max-w-[820px] w-full mb-4">
+        {comercials.length > 0 && (
+          <div className="flex items-center gap-2">
+            <p className="font-bold w-24">Comercial:</p>
+            <div className="flex-1">
+              <Select
+                value={selectedComercial}
+                onValueChange={(value) => {
+                  setSelectedComercial(value);
+                  setShowMyContacts(false);
+                }}
+                disabled={showMyContacts}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Todos los comerciales" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Todos los comerciales</SelectItem>
+                  {comercials.map((comercial) => (
+                    <SelectItem key={comercial.id} value={comercial.id}>
+                      {comercial.user.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {userComercial && (
+              <div className="flex items-center gap-2 ml-4">
+                <Switch
+                  checked={showMyContacts}
+                  onCheckedChange={setShowMyContacts}
+                  id="my-contacts"
+                />
+                <label htmlFor="my-contacts" className="text-sm font-medium">
+                  Mis contactos
+                </label>
+              </div>
+            )}
+          </div>
+        )}
         <div className="flex items-center gap-2">
           <p className="font-bold w-24">Etiquetas:</p>
           <TagSelector actualTags={filteredTags} allTags={allTags} onChange={handleTagsChange} placeholder='Filtrar etiquetas...' />

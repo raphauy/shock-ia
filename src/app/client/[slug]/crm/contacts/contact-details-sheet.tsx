@@ -1,33 +1,29 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
-import { ContactDAO } from "@/services/contact-services"
-import { ContactEventDAO } from '@/services/contact-event-services'
-import { ContactEventType, FieldType } from '@prisma/client'
-import { getAllTagsAction, getContactEventsAction, getRepoDataCountAction, getStageByContactIdAction, getTagsOfContactAction } from './contact-actions'
-import { cn, formatWhatsAppStyle } from '@/lib/utils'
-import { Separator } from '@/components/ui/separator'
-import TagSelectorDialog from './tag-selector-dialog'
-import { Input } from '@/components/ui/input'
-import TagSelector from './tag-selector'
 import { Button } from '@/components/ui/button'
-import Link from 'next/link'
-import { useParams } from 'next/navigation'
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Separator } from '@/components/ui/separator'
+import { Sheet, SheetContent, SheetHeader } from "@/components/ui/sheet"
+import { cn, formatWhatsAppStyle } from '@/lib/utils'
+import { ComercialDAO } from '@/services/comercial-services'
+import { ContactEventDAO } from '@/services/contact-event-services'
+import { ContactDAO } from "@/services/contact-services"
 import { CustomFieldDAO } from '@/services/customfield-services'
 import { FieldValueDAO } from '@/services/fieldvalue-services'
+import { ContactEventType, FieldType } from '@prisma/client'
+import { DatabaseZapIcon } from 'lucide-react'
+import Link from 'next/link'
+import { useParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { getActiveComercialsDAOAction } from '../comercials/comercial-actions'
 import { getClientCustomFieldsAction } from '../custom-fields/customfield-actions'
 import { getFieldValuesByContactIdAction } from '../fieldvalues/fieldvalue-actions'
 import { FieldValueDialog } from '../fieldvalues/fieldvalue-dialogs'
-import { ComercialDAO } from '@/services/comercial-services'
-import { getActiveComercialsDAOAction } from '../comercials/comercial-actions'
-import { ComercialSelector } from './comercial-selector'
-import { DatabaseZapIcon } from 'lucide-react'
+import { getAllTagsAction, getContactEventsAction, getRepoDataCountAction, getStageByContactIdAction, getTagsOfContactAction } from './contact-actions'
+import TagSelectorDialog from './tag-selector-dialog'
+import { SheetComercialSelector } from "./sheet-comercial-selector"
 
 type ContactDetailsSheetProps = {
   contact: ContactDAO | null
@@ -173,7 +169,7 @@ export function ContactDetailsSheet({ contact, isOpen, onClose }: ContactDetails
             { (comercials.length > 0 || repoDataCount > 0) && contact.src !== "simulador" && <Separator className="my-2" />}
 
             <div className="flex justify-between items-center">
-              <ComercialSelector contact={contact} />
+              <SheetComercialSelector contact={contact} />
               <p/>
               <div className={cn(repoDataCount === 0 && "hidden")}>
                 <div className="flex items-center gap-2">
