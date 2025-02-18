@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from '@/components/ui/separator'
-import { Sheet, SheetContent, SheetHeader } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { cn, formatWhatsAppStyle } from '@/lib/utils'
 import { ComercialDAO } from '@/services/comercial-services'
 import { ContactEventDAO } from '@/services/contact-event-services'
@@ -46,46 +46,36 @@ export function ContactDetailsSheet({ contact, isOpen, onClose }: ContactDetails
   const slug= params.slug as string
 
   useEffect(() => {
-    if (contact) {
-      getStageByContactIdAction(contact.id)
-      .then(respStage => {
-        setStage(respStage)
-      })
-      getAllTagsAction(contact.clientId)
-      .then(respTags => {
-        setAllTags(respTags)
-      })
-      getRepoDataCountAction(contact.id)
-      .then(respCount => {
-        setRepoDataCount(respCount)
-      })
+    if (!contact?.id || !contact?.clientId) return;
+    
+    Promise.all([
+      getStageByContactIdAction(contact.id),
+      getAllTagsAction(contact.clientId),
+      getRepoDataCountAction(contact.id),
       getActiveComercialsDAOAction(contact.clientId)
-      .then(respComercials => {
-        setComercials(respComercials)
-      })
-    }
-  }, [contact])
+    ]).then(([respStage, respTags, respCount, respComercials]) => {
+      setStage(respStage)
+      setAllTags(respTags)
+      setRepoDataCount(respCount)
+      setComercials(respComercials)
+    })
+  }, [contact?.id, contact?.clientId])
 
   useEffect(() => {
-    if (contact) {
-      getContactEventsAction(contact.id)
-      .then(respEvents => {        
-        setEvents(respEvents)
-      })
-      getTagsOfContactAction(contact.id || '')
-      .then(respTags => {
-        setContactTags(respTags)
-      })
-      getClientCustomFieldsAction(contact.clientId)
-      .then(respCustomFields => {
-        setCustomFields(respCustomFields)
-      })
+    if (!contact?.id || !contact?.clientId) return;
+
+    Promise.all([
+      getContactEventsAction(contact.id),
+      getTagsOfContactAction(contact.id),
+      getClientCustomFieldsAction(contact.clientId),
       getFieldValuesByContactIdAction(contact.id)
-      .then(respFieldValues => {
-        setFieldValues(respFieldValues)
-      })
-    }
-  }, [changeCount, contact])
+    ]).then(([respEvents, respTags, respCustomFields, respFieldValues]) => {
+      setEvents(respEvents)
+      setContactTags(respTags)
+      setCustomFields(respCustomFields)
+      setFieldValues(respFieldValues)
+    })
+  }, [contact?.id, contact?.clientId, changeCount])
 
   if (!contact) return null  
 
@@ -109,6 +99,7 @@ export function ContactDetailsSheet({ contact, isOpen, onClose }: ContactDetails
         
       <SheetContent className="sm:max-w-[500px] md:max-w-[600px] lg:max-w-[700px] w-full">
         <SheetHeader>
+            <SheetTitle className="sr-only">Detalles del contacto</SheetTitle>
             <div className="flex items-center justify-between mt-4">
                 <div className="flex items-center space-x-4">
                     <Avatar className="h-12 w-12">

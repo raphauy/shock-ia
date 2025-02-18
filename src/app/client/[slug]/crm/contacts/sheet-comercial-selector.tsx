@@ -21,8 +21,11 @@ export function SheetComercialSelector({ contact }: Props) {
     useEffect(() => {
         getActiveComercialsDAOAction(contact.clientId)
         .then(respComercials => {
-        setComercials(respComercials)
+            setComercials(respComercials)
         })
+    }, [contact])
+
+    useEffect(() => {
         if (contact.comercialId) {
             setComercial(comercials.find(comercial => comercial.id === contact.comercialId) || null)
         }
