@@ -28,9 +28,10 @@ type Props = {
   initialStages: KanbanStageDAOWithContacts[]
   allTags: string[]
   comercials: ComercialDAO[]
+  phone: string
 }
 
-export function KanbanComponent({ clientId, initialStages, allTags, comercials }: Props) {
+export function KanbanComponent({ clientId, initialStages, allTags, comercials, phone }: Props) {
   const [stages, setStages] = useState<KanbanStageDAOWithContacts[]>(initialStages)
   const [filteredTags, setFilteredTags] = useState<string[]>([])
   const [phoneFilter, setPhoneFilter] = useState<string>("")
@@ -67,6 +68,10 @@ export function KanbanComponent({ clientId, initialStages, allTags, comercials }
       setSelectedComercial("");
     }
   }, [showMyContacts, userComercial]);
+
+  useEffect(() => {
+    setPhoneFilter(phone.trim())
+  }, [phone])
 
   const handleContactClick = (contact: ContactDAO) => {
     setSelectedContact(contact)
@@ -170,7 +175,7 @@ export function KanbanComponent({ clientId, initialStages, allTags, comercials }
         {comercials.length > 0 && (
           <div className="flex items-center gap-2">
             <p className="font-bold w-24">Comercial:</p>
-            <div className="flex-1">
+            <div className="w-full">
               <Select
                 value={selectedComercial}
                 onValueChange={(value) => {

@@ -2,13 +2,14 @@ import { prisma } from "@/lib/db"
 import { ContactEventType } from "@prisma/client"
 import * as z from "zod"
 import { assignConversationToAgent, createChatwootConversation, createContactInChatwoot, deleteContactInChatwoot } from "./chatwoot"
-import { getChatwootAccountId, getClient, getWhatsappInstance } from "./clientService"
+import { getChatwootAccountId, getClient, getClientSlug, getWhatsappInstance } from "./clientService"
 import { createContactEvent } from "./contact-event-services"
 import { getImportedContactByChatwootId } from "./imported-contacts-services"
 import { createDefaultStages, getFirstStageOfClient, getStageByName, StageDAO } from "./stage-services"
 import { createConversation, getLastChatwootConversationId, getLastConversationByContactId, removeContactFromAllConversations } from "./conversationService"
 import { ApiError } from "@figuro/chatwoot-sdk"
 import { getComercialDAO } from "./comercial-services"
+import { sendMessageToContact } from "./campaign-services"
 
 export type ContactDAO = {
 	id: string
@@ -547,5 +548,25 @@ export async function asignarContacto(id: string, comercialId: string) {
       comercialId 
     }
   })
+
+  // check and notify comercial if notifyAssigned is true
+  if (comercial.notifyAssigned && comercial.phone) {
+    const comercialContact= await getOrCreateContact(comercial.clientId, comercial.phone, comercial.user.name)
+    if (comercialContact && contact.phone) {
+        console.log("contact found: ", comercialContact.name + " " + comercialContact.phone)
+        const message= await getMessageToNotifyComercial(contact.phone, comercial.clientId)
+        await sendMessageToContact(comercial.clientId, comercialContact, message, [], null, "Contact Assign")
+        console.log("message sent to contact: ", comercialContact.name)
+    } else {
+        console.log("contact not found on notify comercial")
+    }
+  }
   return updated
+}
+
+async function getMessageToNotifyComercial(phone: string, clientId: string) {
+  const slug= await getClientSlug(clientId)
+  const basePath= process.env.NEXTAUTH_URL
+  const url= `${basePath}/client/${slug}/crm?phone=${phone}`
+  return `Se te ha asignado un nuevo contacto: ${url}`
 }

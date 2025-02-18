@@ -1,7 +1,8 @@
 "use client"
 
 import { Input } from "@/components/ui/input"
-import { ComercialDAO } from "@/services/comercial-services"
+import { ChatwootUserDAO, ComercialDAO } from "@/services/comercial-services"
+import { UserDAO } from "@/services/user-service"
 import { Search } from "lucide-react"
 import { useState } from "react"
 import ComercialCard from "./comercial-card"

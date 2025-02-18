@@ -1027,3 +1027,15 @@ export async function checkWorkingHoursNow(clientId: string): Promise<boolean> {
   console.log('❌ Fuera del horario de atención')
   return false
 }
+
+export async function getClientSlug(clientId: string) {
+  const client= await prisma.client.findUnique({
+    where: {
+      id: clientId
+    },
+    select: {
+      slug: true
+    }
+  })
+  return client?.slug || null
+}

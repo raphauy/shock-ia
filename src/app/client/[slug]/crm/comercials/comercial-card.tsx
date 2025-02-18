@@ -1,13 +1,14 @@
 import { Badge } from "@/components/ui/badge"
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
 import { toast } from "@/hooks/use-toast"
-import { ComercialDAO } from "@/services/comercial-services"
+import { ChatwootUserDAO, ComercialDAO } from "@/services/comercial-services"
 import { formatDistanceToNow } from "date-fns"
 import { es } from "date-fns/locale"
-import { CheckCircle2, Clock, Loader, Mail, User, XCircle } from "lucide-react"
+import { Bell, BellOff, CheckCircle2, Clock, Loader, Mail, Phone, User, XCircle } from "lucide-react"
 import { useState } from "react"
 import { toggleComercialStatusAction } from "./comercial-actions"
-import { DeleteComercialDialog } from "./comercial-dialogs"
+import { ComercialDialog, DeleteComercialDialog } from "./comercial-dialogs"
+import { UserDAO } from "@/services/user-service"
 
 type Props = {
     comercial: ComercialDAO
@@ -62,14 +63,32 @@ export default function ComercialCard({ comercial }: Props) {
                 </Badge>
             </CardHeader>
             <CardContent className="flex justify-between items-center py-2">
-                <div className="flex items-center space-x-2 text-muted-foreground">
-                    <Mail className="h-4 w-4" />
-                    <span className="text-sm">{comercial.user.email}</span>
+                <div className="space-y-4">
+                    <div className="flex items-center space-x-2 text-muted-foreground">
+                        <Mail className="h-4 w-4" />
+                        <span className="text-sm">{comercial.user.email}</span>
+                    </div>
+                    <div className="flex items-center space-x-2 text-muted-foreground">
+                        { comercial.notifyAssigned ? <Bell className="h-4 w-4" /> : <BellOff className="h-4 w-4" />}
+                        <span className="text-sm">{comercial.notifyAssigned ? "Notificar asignación" : "NO notificar asignación"}</span>
+                    </div>
+                    <div className="flex items-center space-x-2 text-muted-foreground">
+                        <Phone className="h-4 w-4" />
+                        <span className="text-sm">{comercial.phone}</span>
+                    </div>
                 </div>
-                <DeleteComercialDialog 
-                    id={comercial.id} 
-                    description={`¿Estás seguro que deseas eliminar al comercial ${comercial.user.name}? Todos los contactos asignados a este comercial quedarán sin comercial.`}
-                />
+                <div className="flex items-center gap-2">
+                    <ComercialDialog
+                        id={comercial.id}
+                        clientId={comercial.clientId}
+                        users={[]}
+                        chatwootUsers={[]}
+                    />
+                    <DeleteComercialDialog 
+                        id={comercial.id} 
+                        description={`¿Estás seguro que deseas eliminar al comercial ${comercial.user.name}? Todos los contactos asignados a este comercial quedarán sin comercial.`}
+                    />
+                </div>
             </CardContent>
             <CardFooter className="flex justify-between pt-2">
                 <div className="flex items-center gap-2 text-muted-foreground">

@@ -14,11 +14,13 @@ type Props = {
     from: string
     to: string
     last: string
+    phone: string
   }
 }
 export default async function CRMKanban({ params, searchParams }: Props) {
 
   const { from, to }= getDatesFromSearchParams(searchParams)
+  const phone= searchParams.phone
 
   const client = await getClientBySlug(params.slug)
   if (!client) {
@@ -35,7 +37,7 @@ export default async function CRMKanban({ params, searchParams }: Props) {
         <DatesFilter baseUrl={baseUrl} allTags={allTags} />
       </div>
 
-      <KanbanComponent initialStages={stages} clientId={client.id} allTags={allTags} comercials={comercials} />
+      <KanbanComponent initialStages={stages} clientId={client.id} allTags={allTags} comercials={comercials} phone={phone} />
     </div>
   )
 }

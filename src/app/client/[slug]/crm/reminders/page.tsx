@@ -9,7 +9,7 @@ import { getReminderDefinitionsDAO } from "@/services/reminder-definition-servic
 type Props= {
   params: {
     slug: string
-  }
+  },
 }
 export default async function ReminderPage({ params }: Props) {
   const clientSlug= params.slug

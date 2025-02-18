@@ -9,6 +9,9 @@ export type ComercialDAO = {
 	chatwootUserId: number | undefined
 	chatwootUserName: string | undefined
 	activo: boolean
+	lastAssignedAt: Date | null
+	notifyAssigned: boolean
+	phone: string | undefined
 	user: UserDAO
 	userId: string
 	clientId: string
@@ -23,7 +26,9 @@ export type ChatwootUserDAO = {
 
 export const ComercialSchema = z.object({
 	chatwootUserId: z.number().optional(),
-	activo: z.boolean(),	
+	activo: z.boolean(),
+	notifyAssigned: z.boolean(),
+	phone: z.string().optional(),
 	userId: z.string().min(1, "userId is required."),
 	clientId: z.string().min(1, "clientId is required."),
 })
@@ -64,6 +69,9 @@ export async function getComercialDAO(id: string) {
     where: {
       id
     },
+    include: {
+      user: true
+    }
   })
   return found as ComercialDAO
 }
@@ -76,21 +84,27 @@ export async function createComercial(data: ComercialFormValues) {
     throw new Error("Chatwoot user not found")
   }
   const chatwootUserName= await getChatwootUserName(Number(whatsappInstance?.chatwootAccountId), data.chatwootUserId)
+  const phone= !data.phone?.startsWith("+") ? `+${data.phone}` : data.phone
   const created = await prisma.comercial.create({
     data: {
       ...data,
-      chatwootUserName
+      chatwootUserName,
+      phone
     }
   })
   return created
 }
 
 export async function updateComercial(id: string, data: ComercialFormValues) {
+  const phone= !data.phone?.startsWith("+") ? `+${data.phone}` : data.phone
   const updated = await prisma.comercial.update({
     where: {
       id
     },
-    data
+    data: {
+      ...data,
+      phone
+    }
   })
   return updated
 }
