@@ -1,6 +1,6 @@
 "use client"
 
-import { FunctionClientDAO, SimpleFunction } from "@/services/function-services"
+import { SimpleFunction } from "@/services/function-services"
 import { Loader } from "lucide-react"
 import { useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"

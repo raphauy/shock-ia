@@ -7,7 +7,7 @@ import { Separator } from "@/components/ui/separator"
 import { getComplementaryClients } from "@/services/clientService"
 import { getFullRepositoryDAO } from "@/services/repository-services"
 import { Briefcase, Database, Sparkles, Tag } from "lucide-react"
-import { setConversationLLMOffAction, setFinalMessageAction, setFunctionDescriptionAction, setFunctionNameAction, setLLMOffMessageAction, setNameAction, setNotifyPhonesAction, setWebHookUrlAction } from "../repository-actions"
+import { setAssignToComercialAction, setConversationLLMOffAction, setFinalMessageAction, setFunctionDescriptionAction, setFunctionNameAction, setLLMOffMessageAction, setNameAction, setNotifyPhonesAction, setWebHookUrlAction } from "../repository-actions"
 import { DeleteRepositoryDialog } from "../repository-dialogs"
 import { ClientSelector, SelectorData } from "./client-selector"
 import FieldsBox from "./fields-box"
@@ -20,6 +20,8 @@ import SelectStage from "./select-stage"
 import { getStagesDAO } from "@/services/stage-services"
 import { ClientFunctionTextForm } from "@/components/client-function-text-form"
 import { getClientCustomFields } from "@/services/customfield-services"
+import { Switch } from "@/components/ui/switch"
+import ToggleAssignComercial from "./toggle-assign-comercial"
 
 type Props = {
   clientId?: string
@@ -165,6 +167,11 @@ export default async function FCConfig({ clientId, repoId, fullMode, haveCRM }: 
                         <div className="p-4 bg-muted border rounded-md mt-6">
                           <p className="font-medium border-b pb-2">Cambiar estado:</p>
                           <SelectStage functionClient={functionClient} stages={stages} />
+                        </div>
+                        <div className="p-4 bg-muted border rounded-md mt-6 space-y-2">
+                          <p className="font-medium border-b pb-2">Asignar Contacto a comercial:</p>
+                          <ToggleAssignComercial clientId={functionClient.clientId} functionId={functionClient.functionId} assignToComercial={functionClient.assignToComercial} />
+                          <p className="text-sm">Si esta casilla está marcada, cuando se ejecute esta FC, se asignará el Contacto en cuestión a un comercial. Siempre y cuando el Contacto no tenga ya un comercial asignado.</p>
                         </div>
                       </>
                     }

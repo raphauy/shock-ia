@@ -238,6 +238,7 @@ model ClientFunction {
 
   tags           String[]                         // gennext: show.column
   moveToStageId  String?
+  assignToComercial Boolean @default(false)
 
   client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
   clientId String
@@ -801,7 +802,7 @@ model Comercial {
   chatwootUserId     Int?                                          // gennext: show.column
   chatwootUserName   String?                                       // gennext: show.column
   activo             Boolean   @default(true)                      // gennext: show.column
-  lastAssignedAt     DateTime?                                     // gennext: show.column
+  lastAssignedAt     DateTime  @default(now())                     // gennext: show.column
   notifyAssigned     Boolean   @default(true)                      // gennext: show.column
   phone              String?                                       // gennext: show.column
 

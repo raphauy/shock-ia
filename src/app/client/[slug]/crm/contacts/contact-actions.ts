@@ -3,7 +3,7 @@
 import { getCurrentUser } from "@/lib/auth"
 import { getAllTags } from "@/services/clientService"
 import { createContactEvent, getContactEventsDAO } from "@/services/contact-event-services"
-import { ContactDAO, ContactFormValues, createContact, deleteContact, getContactDAO, getContactsByStage, getStageByContactId, getTagsOfContact, asignarContacto, setTagsOfContact, updateContact, updateStageContacts } from "@/services/contact-services"
+import { ContactDAO, ContactFormValues, createContact, deleteContact, getContactDAO, getContactsByStage, getStageByContactId, getTagsOfContact, assignContactToComercial, setTagsOfContact, updateContact, updateStageContacts } from "@/services/contact-services"
 import { getRepoDataCount } from "@/services/repodata-services"
 import { ContactEventType } from "@prisma/client"
 import { revalidatePath } from "next/cache"
@@ -98,7 +98,7 @@ export async function getRepoDataCountAction(contactId: string) {
 }
 
 export async function asignarContactoAction(contactId: string, comercialId: string) {
-    const resp= await asignarContacto(contactId, comercialId)
+    const resp= await assignContactToComercial(contactId, comercialId)
     revalidatePath("/client/[slug]/crm", "page")
     return resp
 }

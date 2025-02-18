@@ -156,3 +156,21 @@ export async function toggleComercialStatus(id: string): Promise<boolean> {
   })  
   return updated !== null
 }
+
+export async function getNextComercialIdToAssign(clientId: string) {
+  const comercials = await prisma.comercial.findMany({
+    where: {
+      clientId,
+      activo: true
+    },
+    orderBy: {
+      lastAssignedAt: 'asc'
+    }
+  })
+
+  if (comercials.length === 0) {
+    return null
+  }
+  
+  return comercials[0].id
+}

@@ -6,6 +6,7 @@ import { generateAudio } from "./model-services"
 import { createOrUpdateFieldValues } from "./fieldvalue-services"
 import { formatMinutesBefore } from "@/lib/utils"
 import { checkWorkingHoursNow } from "./clientService"
+import { getNextComercialIdToAssign } from "./comercial-services"
 config()
 
 async function main() {
@@ -54,14 +55,18 @@ async function main() {
     // const isAvailable= await checkWorkingHoursNow(clientId)
     // console.log("isAvailable:", isAvailable)
 
-    const accountId= 16
-    const agents= await listAccountAgents(accountId)
-    console.log("agents:", agents)
+    // const accountId= 16
+    // const agents= await listAccountAgents(accountId)
+    // console.log("agents:", agents)
 
-    const conversationId= 27
-    const agentId= 15
-    const response= await assignConversationToAgent(accountId, conversationId, agentId)
-    console.log("response:", response)
+    // const conversationId= 27
+    // const agentId= 15
+    // const response= await assignConversationToAgent(accountId, conversationId, agentId)
+    // console.log("response:", response)
+
+    const clientId= "clsnvcntc003okaqc2gfrme4b"
+    const comercialId= await getNextComercialIdToAssign(clientId)
+    console.log("comercialId:", comercialId)
 }
   
 main()

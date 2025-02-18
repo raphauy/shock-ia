@@ -1,7 +1,7 @@
 "use server"
   
 import { checkValidPhone } from "@/lib/utils"
-import { addFunctionToClient, getFunctionDAO, removeFunctionFromClient, setMoveToStageIdOfClientFunction, setNotifyPhones } from "@/services/function-services"
+import { addFunctionToClient, getFunctionDAO, removeFunctionFromClient, setAssignToComercial, setMoveToStageIdOfClientFunction, setNotifyPhones } from "@/services/function-services"
 import { RepositoryDAO, createRepository, deleteRepository, getFullRepositoryDAO, setConversationLLMOff, setFinalMessage, setFunctionActive, setFunctionDescription, setFunctionName, setLLMOffMessage, setName, setNotifyExecution, setWebHookUrl } from "@/services/repository-services"
 import { revalidatePath } from "next/cache"
 
@@ -167,6 +167,16 @@ export async function setNotifyPhonesAction(clientId: string, functionId: string
             throw new Error("Teléfono inválido: " + phone)
     }
     const updated= await setNotifyPhones(clientId, functionId, notifyPhonesArray)
+
+    if (!updated) return false
+
+    revalidatePath(`/admin/repositories`)
+
+    return true
+}
+
+export async function setAssignToComercialAction(clientId: string, functionId: string, assignToComercial: boolean): Promise<boolean> {
+    const updated= await setAssignToComercial(clientId, functionId, assignToComercial)
 
     if (!updated) return false
 

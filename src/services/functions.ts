@@ -9,7 +9,7 @@ import { CarServiceFormValues, createCarService } from "./carservice-services";
 import { addLabelToConversation, sendTextToConversation, toggleConversationStatus } from "./chatwoot";
 import { createExternalPayment } from "./cobros-wap";
 import { getValue, setValue } from "./config-services";
-import { addTagsToContact, getContactDAO, getTagsOfContact, setNewStage } from "./contact-services";
+import { addTagsToContact, assignContactToComercial, getContactDAO, getTagsOfContact, setNewStage } from "./contact-services";
 import { getConversation, messageArrived } from "./conversationService";
 import { getDocumentDAO } from "./document-services";
 import { EventDAO, getEventDAO } from "./event-services";
@@ -30,6 +30,7 @@ import { createOrUpdateFieldValue } from "./fieldvalue-services";
 import { createContactEvent } from "./contact-event-services";
 import { getReminderDefinitionsDAOByEventId } from "./reminder-definition-services";
 import { createReminder, ReminderFormValues } from "./reminder-services";
+import { getNextComercialIdToAssign } from "./comercial-services";
 
 export type CompletionInitResponse = {
   assistantResponse: string | null
@@ -927,6 +928,17 @@ export async function defaultFunction(clientId: string, name: string, args: any)
           })
           await createContactEvent(ContactEventType.CUSTOM_FIELD_VALUE_UPDATED, field.name + ": " + value, "FC-" + name, contactId)
         }
+      }
+    }
+
+    const assignToComercial= functionClient?.assignToComercial
+    if (assignToComercial && contactId) {
+      const comercialId= await getNextComercialIdToAssign(clientId)
+      if (comercialId) {
+        console.log("assigning contact to comercial")
+        await assignContactToComercial(contactId, comercialId)
+      } else {
+        console.log("no comercial to assign")
       }
     }
 

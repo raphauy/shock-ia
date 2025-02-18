@@ -14,6 +14,7 @@ export type FunctionClientDAO= {
   notifyPhones: string[]
   tags: string[]
   moveToStageId: string | null
+  assignToComercial: boolean
 }
 type ClientDAO= {
   id: string
@@ -441,4 +442,12 @@ export async function getGenericFunctions(): Promise<FunctionDAO[]> {
   })
 
   return found as FunctionDAO[]
+}
+
+export async function setAssignToComercial(clientId: string, functionId: string, assignToComercial: boolean) {
+  const updated = await prisma.clientFunction.update({
+    where: { clientId_functionId: { clientId, functionId } },
+    data: { assignToComercial }
+  })
+  return updated
 }

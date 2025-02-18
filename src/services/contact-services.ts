@@ -524,9 +524,13 @@ export async function getLastChatwootConversationIdByPhoneNumber(phone: string, 
   }
 }
 
-export async function asignarContacto(id: string, comercialId: string) {
+export async function assignContactToComercial(id: string, comercialId: string) {
   const contact= await getContactDAO(id)
   if (!contact) throw new Error("Contacto no encontrado")
+  if (contact.comercialId) {
+    console.log("contact already has a comercial assigned")
+    return contact
+  }
 
   const whatsappInstance= await getWhatsappInstance(contact.clientId)
   if (!whatsappInstance) throw new Error("Instancia de WhatsApp no encontrada")
