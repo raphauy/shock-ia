@@ -1,29 +1,20 @@
 "use client"
 
-import * as React from "react"
+import * as React from "react";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn } from 'next-auth/react';
-import * as z from "zod"
-import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod";
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { cn } from "@/lib/utils"
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
-import { useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
-import { LoadingSpinnerChico } from "@/components/loadingSpinner";
+import { cn } from "@/lib/utils";
 import { Loader } from "lucide-react";
-
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { validateEmailAction } from "./actions";
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -50,9 +41,19 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   async function onSubmit(values: ProfileFormValues) {
     setIsLoading(true)
 
-    const email= values.email
+    const email= values.email.toLowerCase()
     console.log("email " + email);
     console.log("values " + JSON.stringify(values));
+
+    const mailValid = await validateEmailAction(email)
+    if (!mailValid) {
+      toast({
+        title: "Email no encontrado",
+        description: "El email no está registrado en SHOCK IA",
+      })
+      setIsLoading(false)
+      return
+    }
    
     toast({
       title: "Enviando mail!!!",

@@ -190,3 +190,12 @@ export async function updateClientUser(id: string, data: ClientUserFormValues) {
     throw new Error("Error al actualizar el usuario")
   }
 }
+
+export async function validateEmail(email: string): Promise<boolean> {
+  const user = await prisma.user.findUnique({
+    where: {
+      email: email,
+    },
+  });
+  return user !== null;
+}
