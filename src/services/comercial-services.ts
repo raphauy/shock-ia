@@ -96,7 +96,7 @@ export async function createComercial(data: ComercialFormValues) {
 }
 
 export async function updateComercial(id: string, data: ComercialFormValues) {
-  const phone= !data.phone?.startsWith("+") ? `+${data.phone}` : data.phone
+  const phone= data.phone && !data.phone?.startsWith("+") ? `+${data.phone}` : data.phone
   const updated = await prisma.comercial.update({
     where: {
       id
