@@ -28,7 +28,7 @@ type Props = {
   initialStages: KanbanStageDAOWithContacts[]
   allTags: string[]
   comercials: ComercialDAO[]
-  phone: string
+  phone?: string
 }
 
 export function KanbanComponent({ clientId, initialStages, allTags, comercials, phone }: Props) {
@@ -70,7 +70,7 @@ export function KanbanComponent({ clientId, initialStages, allTags, comercials, 
   }, [showMyContacts, userComercial]);
 
   useEffect(() => {
-    setPhoneFilter(phone.trim())
+    setPhoneFilter(phone?.trim() || "")
   }, [phone])
 
   const handleContactClick = (contact: ContactDAO) => {

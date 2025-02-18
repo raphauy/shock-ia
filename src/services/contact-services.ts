@@ -549,6 +549,12 @@ export async function asignarContacto(id: string, comercialId: string) {
     }
   })
 
+  // update comercial lastAssignedAt
+  await prisma.comercial.update({
+    where: { id: comercialId },
+    data: { lastAssignedAt: new Date() }
+  })
+
   // check and notify comercial if notifyAssigned is true
   if (comercial.notifyAssigned && comercial.phone) {
     const comercialContact= await getOrCreateContact(comercial.clientId, comercial.phone, comercial.user.name)
