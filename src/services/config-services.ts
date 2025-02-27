@@ -1,6 +1,5 @@
-import * as z from "zod"
 import { prisma } from "@/lib/db"
-import { getCurrentUser } from "@/lib/auth"
+import * as z from "zod"
 
 export type ConfigDAO = {
   id:  string

@@ -532,6 +532,11 @@ export async function assignContactToComercial(id: string, comercialId: string) 
     return contact
   }
 
+  if (contact.src === "simulador"){
+    console.log("contact is a simulator, skipping assignment")
+    return contact
+  }
+
   const whatsappInstance= await getWhatsappInstance(contact.clientId)
   if (!whatsappInstance) throw new Error("Instancia de WhatsApp no encontrada")
 
