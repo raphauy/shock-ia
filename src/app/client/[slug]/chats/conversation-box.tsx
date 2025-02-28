@@ -94,102 +94,111 @@ export default function ConversationBox({ conversation, promptTokensPrice, compl
 
       <div className="w-full max-w-3xl mt-5 ">
       {
-        messages.map((message, i) => (
-          <div key={i} className="w-full">
-            <div className={cn("flex w-full items-center justify-between px-1 lg:px-4 border-gray-200 py-5",
-                message.role === "user" ? "bg-gray-100 dark:bg-gray-800 border-b border-t" : "bg-background",
-              )}
-            >
-              <div className="flex items-center w-full max-w-screen-md px-5 space-x-4 sm:px-0">
-                {
-                  // @ts-ignore
-                  !message.gptData &&
+        messages.map((message, i) => {
+          // Depurar cada mensaje para ver su estructura completa
+          console.log(`Mensaje ${i}:`, {
+            role: message.role,
+            fecha: message.fecha,
+            gptData: message.gptData ? 'presente' : 'ausente',
+            content: message.content.substring(0, 50) + '...' // Solo mostrar los primeros 50 caracteres
+          });
+          
+          return (
+            <div key={i} className="w-full">
+              <div className={cn("flex w-full items-center justify-between px-1 lg:px-4 border-gray-200 py-5",
+                  message.role === "user" ? "bg-gray-100 dark:bg-gray-800 border-b border-t" : "bg-background",
+                )}
+              >
+                <div className="flex items-center w-full max-w-screen-md px-5 space-x-4 sm:px-0">
+                  {/* Siempre mostrar el ícono y la fecha, independientemente del rol */}
                   <div className="flex flex-col">
                     <div
-                        className={cn(
+                      className={cn(
                         "p-1.5 text-white flex justify-center",
-                        (message.role === "assistant") ? "bg-green-500" : (message.role === "system" || message.role === "function") ? "bg-blue-500" : "bg-black",
+                        message.role === "assistant" ? "bg-green-500" : 
+                        (message.role === "system" || message.role === "function" || message.role === "data") ? "bg-blue-500" : 
+                        "bg-black",
                       )}
                     >
-                        {message.role === "user" ? (
+                      {message.role === "user" ? (
                         <User width={20} />
-                        ) : message.role === "system" || message.role === "function" ? (
-                          <Terminal width={20} />
-                        ) : (
+                      ) : message.role === "system" || message.role === "function" || message.role === "data" ? (
+                        <Terminal width={20} />
+                      ) : (
                         <Bot width={20} />
-                        )
-                        }
+                      )}
                     </div>
                     <p className="text-sm">{message.fecha}</p>
                   </div>
+                  
+                  {/* Contenido del mensaje según su rol */}
+                  {message.role === "system" ?
+                  <Accordion type="single" collapsible className="w-full">
+                    <AccordionItem value="Prompt">
+                      <AccordionTrigger>Prompt</AccordionTrigger>
+                      <AccordionContent>
+                        <div className="whitespace-pre-line">
+                          {removeSectionTexts(message.content)}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion> :
+                    <div className="w-full">
+                      {
+                        message.role != "system" && message.role != "function" &&
+                        (() => {
+                          // Si el contenido contiene backticks, mostrar como texto plano
+                          if (message.content.includes('`')) {
+                            return <div className="whitespace-pre-wrap">{message.content}</div>;
+                          }
+                          
+                          // De lo contrario, intentar renderizar como Markdown
+                          try {
+                            return (
+                              <ReactMarkdown                        
+                                className="prose break-words prose-p:leading-relaxed dark:prose-invert"
+                                remarkPlugins={[remarkGfm]}
+                                components={{
+                                  // open links in new tab
+                                  a: (props) => (
+                                    <a {...props} target="_blank" rel="noopener noreferrer" />
+                                  ),
+                                }}
+                              >
+                                {message.content}
+                              </ReactMarkdown>
+                            );
+                          } catch (error) {
+                            console.error("Error rendering markdown:", error);
+                            return <div className="whitespace-pre-wrap">{message.content}</div>;
+                          }
+                        })()
+                      }
+                    </div>
                 }
-                {message.role === "system" ?
-                <Accordion type="single" collapsible className="w-full">
-                  <AccordionItem value="Prompt">
-                    <AccordionTrigger>Prompt</AccordionTrigger>
-                    <AccordionContent>
-                      <div className="whitespace-pre-line">
-                        {removeSectionTexts(message.content)}
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion> :
-                  <div className="w-full">
-                    {
-                      message.role != "system" && message.role != "function" &&
-                      (() => {
-                        // Si el contenido contiene backticks, mostrar como texto plano
-                        if (message.content.includes('`')) {
-                          return <div className="whitespace-pre-wrap">{message.content}</div>;
-                        }
-                        
-                        // De lo contrario, intentar renderizar como Markdown
-                        try {
-                          return (
-                            <ReactMarkdown                        
-                              className="prose break-words prose-p:leading-relaxed dark:prose-invert"
-                              remarkPlugins={[remarkGfm]}
-                              components={{
-                                // open links in new tab
-                                a: (props) => (
-                                  <a {...props} target="_blank" rel="noopener noreferrer" />
-                                ),
-                              }}
-                            >
-                              {message.content}
-                            </ReactMarkdown>
-                          );
-                        } catch (error) {
-                          console.error("Error rendering markdown:", error);
-                          return <div className="whitespace-pre-wrap">{message.content}</div>;
-                        }
-                      })()
-                    }
-                  </div>
-              }
+                </div>
+                {
+                  message.promptTokens > 0 && isAdmin ? (
+                    <div className="grid p-2 text-right border rounded-md">
+                      <p className="whitespace-nowrap">{Intl.NumberFormat("es-UY").format(message.promptTokens)} pt</p>
+                      <p>{Intl.NumberFormat("es-UY").format(message.completionTokens)} ct</p>
+                    </div>
+                  ) : 
+                  <div></div>
+                }
               </div>
               {
-                message.promptTokens > 0 && isAdmin ? (
-                  <div className="grid p-2 text-right border rounded-md">
-                    <p className="whitespace-nowrap">{Intl.NumberFormat("es-UY").format(message.promptTokens)} pt</p>
-                    <p>{Intl.NumberFormat("es-UY").format(message.completionTokens)} ct</p>
-                  </div>
-                ) : 
-                <div></div>
+                message.gptData && isAdmin && (
+                  <GPTData gptData={message.gptData} slug={conversation.clienteSlug} />
+                )
               }
             </div>
-            {
-              message.gptData && isAdmin && (
-                <GPTData gptData={message.gptData} slug={conversation.clienteSlug} />
-              )
-            }
-          </div>
-        ))
+          )
+        })
       }
       </div>
 
     </main>
   );
 }
-
 
