@@ -1,4 +1,3 @@
-
 import { CustomInfo, getCustomInfoAction } from "@/app/admin/chat/actions"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Button } from "@/components/ui/button"
@@ -138,18 +137,33 @@ export default function ConversationBox({ conversation, promptTokensPrice, compl
                   <div className="w-full">
                     {
                       message.role != "system" && message.role != "function" &&
-                      <ReactMarkdown                        
-                        className="prose break-words prose-p:leading-relaxed dark:prose-invert"
-                        remarkPlugins={[remarkGfm]}
-                        components={{
-                          // open links in new tab
-                          a: (props) => (
-                            <a {...props} target="_blank" rel="noopener noreferrer" />
-                          ),
-                        }}
-                      >
-                        {message.content}
-                      </ReactMarkdown>
+                      (() => {
+                        // Si el contenido contiene backticks, mostrar como texto plano
+                        if (message.content.includes('`')) {
+                          return <div className="whitespace-pre-wrap">{message.content}</div>;
+                        }
+                        
+                        // De lo contrario, intentar renderizar como Markdown
+                        try {
+                          return (
+                            <ReactMarkdown                        
+                              className="prose break-words prose-p:leading-relaxed dark:prose-invert"
+                              remarkPlugins={[remarkGfm]}
+                              components={{
+                                // open links in new tab
+                                a: (props) => (
+                                  <a {...props} target="_blank" rel="noopener noreferrer" />
+                                ),
+                              }}
+                            >
+                              {message.content}
+                            </ReactMarkdown>
+                          );
+                        } catch (error) {
+                          console.error("Error rendering markdown:", error);
+                          return <div className="whitespace-pre-wrap">{message.content}</div>;
+                        }
+                      })()
                     }
                   </div>
               }
