@@ -30,8 +30,6 @@ export default function ChatPage({ searchParams: { id }, params: { slug } }: Pro
   const [client, setClient] = useState<DataClient>()
   const [dataConversations, setDataConversations] = useState<DataConversationShort[]>([])
 
-  console.log("slug: ", slug)
-
   useEffect(() => {
     setLoadingChat(true)
 

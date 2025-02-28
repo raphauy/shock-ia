@@ -53,7 +53,6 @@ export async function getDataConversationAction(conversationId: string): Promise
 }
 
 export async function getLastDataConversationAction(slug: string): Promise<DataConversation | null>{
-    console.log("slug: ", slug)
     const conversation= await getLastConversation(slug)
     if (!conversation) return null
 

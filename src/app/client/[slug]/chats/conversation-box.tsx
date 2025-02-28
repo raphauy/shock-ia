@@ -110,7 +110,7 @@ export default function ConversationBox({ conversation, promptTokensPrice, compl
                 )}
               >
                 <div className="flex items-center w-full max-w-screen-md px-5 space-x-4 sm:px-0">
-                  {/* Siempre mostrar el ícono y la fecha, independientemente del rol */}
+                  { message.role !== "function" && 
                   <div className="flex flex-col">
                     <div
                       className={cn(
@@ -122,7 +122,7 @@ export default function ConversationBox({ conversation, promptTokensPrice, compl
                     >
                       {message.role === "user" ? (
                         <User width={20} />
-                      ) : message.role === "system" || message.role === "function" || message.role === "data" ? (
+                      ) : message.role === "system" || message.role === "function" ? (
                         <Terminal width={20} />
                       ) : (
                         <Bot width={20} />
@@ -130,7 +130,7 @@ export default function ConversationBox({ conversation, promptTokensPrice, compl
                     </div>
                     <p className="text-sm">{message.fecha}</p>
                   </div>
-                  
+                  }
                   {/* Contenido del mensaje según su rol */}
                   {message.role === "system" ?
                   <Accordion type="single" collapsible className="w-full">
