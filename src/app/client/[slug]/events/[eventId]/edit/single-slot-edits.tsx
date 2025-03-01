@@ -3,9 +3,10 @@ import { SelectNumberForm } from "@/components/select-number-form";
 import { cn } from "@/lib/utils";
 import { EventDAO } from "@/services/event-services";
 import { EventType } from "@prisma/client";
-import { Calendar } from "lucide-react";
+import { Calendar, PersonStanding } from "lucide-react";
 import { seEventNumberFieldAction } from "../../event-actions";
 import AvailabilitySelector from "../availability-selector";
+import { NumberForm } from "@/components/number-form";
 
 type Props = {
     event: EventDAO;
@@ -39,7 +40,7 @@ export default function SingleSlotEdits({ event }: Props) {
             />
         </div>
         <div className="grid grid-cols-2 gap-2">
-            <div className="col-span-2">
+            <div className="">
                 <SelectNumberForm
                     label="Duración"
                     initialValue={event.maxDuration!}
@@ -49,9 +50,8 @@ export default function SingleSlotEdits({ event }: Props) {
                     update={seEventNumberFieldAction}
                 />
             </div>
-            {/* <div>
+            <div>
                 <NumberForm
-                    disabled={true}
                     id={event.id}
                     icon={<PersonStanding className="w-6 h-6" />}
                     label="Cupos"
@@ -59,7 +59,7 @@ export default function SingleSlotEdits({ event }: Props) {
                     fieldName="seatsPerTimeSlot"
                     update={seEventNumberFieldAction}
                 />
-            </div> */}
+            </div>
         </div>
     </div>
   )

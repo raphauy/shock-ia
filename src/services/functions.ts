@@ -358,6 +358,8 @@ type SlotsResult = {
   start: string
   end: string
   available: boolean
+  seatsTotal?: number
+  seatsAvailable?: number
 }
 
 export async function obtenerDisponibilidad(clientId: string, eventId: string, date: string){
@@ -380,7 +382,10 @@ export async function obtenerDisponibilidad(clientId: string, eventId: string, d
   const bookings= await getFutureBookingsDAOByEventId(eventId, event.timezone)
 //  console.log("bookings: ", bookings)
 
-  const slots= getSlots(dateStr, bookings, event.availability, event.minDuration!, event.timezone)
+  // Usar el valor de seatsPerTimeSlot del evento, o 1 si no está definido
+  const seatsPerTimeSlot = event.seatsPerTimeSlot || 1;
+  
+  const slots= getSlots(dateStr, bookings, event.availability, event.minDuration!, event.timezone, seatsPerTimeSlot)
 //  console.log("slots: ", slots)
 
   const result: SlotsResult[]= slots.map((slot) => ({
@@ -388,25 +393,34 @@ export async function obtenerDisponibilidad(clientId: string, eventId: string, d
     start: format(toZonedTime(slot.start, event.timezone), "yyyy-MM-dd HH:mm"),
     end: format(toZonedTime(slot.end, event.timezone), "yyyy-MM-dd HH:mm"),
     available: slot.available,
+    seatsTotal: slot.seatsTotal,
+    seatsAvailable: slot.seatsAvailable
   }))
   console.log("result: ", result)
 
   return JSON.stringify(result)
 }
 
-export async function reservarParaEvento(clientId: string, conversationId: string, eventId: string, start: string, duration: string, metadata: string){
+export async function reservarParaEvento(clientId: string, conversationId: string, eventId: string, start: string, duration: string, metadata: string, seats: string = "1"){
   console.log("reservarParaEvento")
   console.log(`\tconversationId: ${conversationId}`)
   console.log(`\teventId: ${eventId}`)
   console.log(`\tstart: ${start}`)
   console.log(`\tduration: ${duration}`)
   console.log(`\tmetadata: ${metadata}`)
+  console.log(`\tseats: ${seats}`)
 
   if (!conversationId) return "conversationId es obligatorio"
   if (!eventId) return "eventId es obligatorio"
   if (!start) return "start es obligatorio"
   if (!duration) return "duration es obligatorio"
   if (!metadata) return "metadata es obligatorio"
+
+  // Validar que el número de asientos sea un número válido
+  const seatsNumber = parseInt(seats);
+  if (isNaN(seatsNumber) || seatsNumber <= 0) {
+    return "El número de asientos debe ser un número positivo";
+  }
 
   let name= "No proporcionado"
   let metadataObj
@@ -443,10 +457,11 @@ export async function reservarParaEvento(clientId: string, conversationId: strin
   startDate= addMinutes(startDate, -offsetInMinutes)
   endDate= addMinutes(endDate, -offsetInMinutes)
 
-  const isAvailable= await checkBookingAvailability(startDate, endDate, event)
+  // Verificar disponibilidad considerando el número de asientos solicitados
+  const isAvailable= await checkBookingAvailability(startDate, endDate, event, seatsNumber)
   console.log("isAvailable: ", isAvailable)
   if (!isAvailable) 
-    return `El slot ${format(startDate, dateTimeFormat)} - ${format(endDate, dateTimeFormat)} no está disponible`
+    return `El slot ${format(startDate, dateTimeFormat)} - ${format(endDate, dateTimeFormat)} no tiene suficientes asientos disponibles (solicitados: ${seatsNumber})`
 
   const conversation= await getConversation(conversationId)
   if (!conversation) return "No se encontró la conversación, revisar el conversationId"
@@ -459,7 +474,7 @@ export async function reservarParaEvento(clientId: string, conversationId: strin
     start: startDate,
     end: endDate,
     contact,
-    seats: "1",
+    seats: seats,
     name,
     data: metadata,
     clientId,
@@ -1026,7 +1041,7 @@ export async function processFunctionCall(clientId: string, name: string, args: 
       break
 
     case "reservarParaEvento":
-      content= await reservarParaEvento(clientId, args.conversationId, args.eventId, args.start, args.duration, args.metadata)
+      content= await reservarParaEvento(clientId, args.conversationId, args.eventId, args.start, args.duration, args.metadata, args.seats)
       break
 
     case "reservarParaEventoDeUnicaVez":

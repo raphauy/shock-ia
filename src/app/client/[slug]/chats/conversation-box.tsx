@@ -95,13 +95,6 @@ export default function ConversationBox({ conversation, promptTokensPrice, compl
       <div className="w-full max-w-3xl mt-5 ">
       {
         messages.map((message, i) => {
-          // Depurar cada mensaje para ver su estructura completa
-          console.log(`Mensaje ${i}:`, {
-            role: message.role,
-            fecha: message.fecha,
-            gptData: message.gptData ? 'presente' : 'ausente',
-            content: message.content.substring(0, 50) + '...' // Solo mostrar los primeros 50 caracteres
-          });
           
           return (
             <div key={i} className="w-full">

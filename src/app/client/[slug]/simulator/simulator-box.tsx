@@ -141,7 +141,6 @@ export default function SimulatorBox() {
     setLoading(true)
     const email= session?.data?.user?.email
     setUserEmail(email as string)
-    console.log("updating messages")
     
     if (email) {
       getActiveMessagesAction(email, client.id)
@@ -226,7 +225,6 @@ export default function SimulatorBox() {
           messages.map((message, i) => {
             // @ts-ignore
             const gptData= message.gptData
-            console.log("content", message.content);
             
             return(
               <div key={i} className="w-full">

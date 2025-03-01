@@ -78,30 +78,46 @@ function getSingleSlotCalendarEvents(event: EventDAO, bookings: BookingDAO[]): C
   const duration= event.minDuration || 30
   const timezone= event.timezone
   const result: CalendarEvent[] = [];
+  
+  // Crear la fecha actual en la zona horaria correcta
   const now = new Date();
   const zonedNow = toZonedTime(now, timezone);
 
   const DAYS_AHEAD= 60
   for (let i = 0; i < DAYS_AHEAD; i++) {
-    const dateStr= format(addDays(zonedNow, i), "yyyy-MM-dd")
+    // Formato de fecha para getSlots
+    const dateStr = format(addDays(zonedNow, i), "yyyy-MM-dd")
 
-    const slots= getSlots(dateStr, bookings, availability, duration, timezone)
-    const seatsBooked= bookings.reduce((acc, booking) => acc + booking.seats, 0)
-    const seatsPerTimeSlot= event.seatsPerTimeSlot || 1
+    const seatsPerTimeSlot = event.seatsPerTimeSlot || 1;
+    
+    // Obtener los slots para este día
+    const slots = getSlots(dateStr, bookings, availability, duration, timezone, seatsPerTimeSlot);
 
     slots.forEach(slot => {
+      let title;
+      if (slot.available) {
+        title = `Libre (${slot.seatsAvailable}/${slot.seatsTotal})`;
+      } else if (slot.seatsAvailable && slot.seatsAvailable > 0) {
+        title = `${slot.seatsAvailable}/${slot.seatsTotal} disponibles`;
+      } else {
+        title = "Completo";
+      }
+
+      // Los slots ya vienen con las fechas en UTC desde getSlots
       result.push({
         bookingId: slot.bookingId,
-        title: slot.available ? "Libre" : slot.name || "",
+        title: title,
         start: slot.start,
         end: slot.end,
         color: slot.available ? "#fafffb" : event.color || "",
         status: "available" as const,
         clientId: event.clientId,
         eventId: event.id,
-        seatsLeft: seatsPerTimeSlot - seatsBooked,
-        maxSeats: seatsPerTimeSlot,
-        type: slot.available ? "free" : "booking"
+        seatsLeft: slot.seatsAvailable || 0,
+        maxSeats: slot.seatsTotal || seatsPerTimeSlot,
+        type: slot.available ? "free" : (slot.seatsAvailable && slot.seatsAvailable > 0) ? "partially_booked" : "fully_booked",
+        bookings: slot.bookings,
+        bigDuration: duration >= 120 // Consideramos slots grandes a los de 180 minutos o más
       })
     })
   }

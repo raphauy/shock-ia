@@ -44,8 +44,8 @@ export async function cancelBookingAction(id: string): Promise<BookingDAO | null
     return canceled as BookingDAO
 }
 
-export async function blockSlotAction(eventId: string, start: Date, end: Date): Promise<boolean> {    
-    const blocked= await blockSlot(eventId, start, end)
+export async function blockSlotAction(eventId: string, start: Date, end: Date, seats: number = 1): Promise<boolean> {    
+    const blocked= await blockSlot(eventId, start, end, seats)
     if (!blocked) return false
 
     revalidatePath("/[slug]/bookings", "page")

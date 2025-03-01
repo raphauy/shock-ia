@@ -41,6 +41,10 @@ const reservarParaEvento=
         "type": "integer",
         "description": "Duración de la reserva en minutos."
       },
+      "seats": {
+        "type": "integer",
+        "description": "Cantidad de cupos que se quiere reservar. Por defecto es 1."
+      },
       "metadata": {
         "type": "string",
         "description": "Este campo es un objeto JSON serializado. Los campos de la metadata están junto a la información del evento."

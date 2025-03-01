@@ -17,9 +17,10 @@ type Props= {
   clientId: string
   date: Date
   closeDialog: () => void
+  maxSeats?: number
 }
 
-export function BookingForm({ id, eventId, clientId, date, closeDialog }: Props) {
+export function BookingForm({ id, eventId, clientId, date, closeDialog, maxSeats = 1 }: Props) {
   const form = useForm<BookingFormValues>({
     resolver: zodResolver(bookingSchema),
     defaultValues: {
@@ -100,19 +101,25 @@ export function BookingForm({ id, eventId, clientId, date, closeDialog }: Props)
             )}
           />
 
-          {/* <FormField
+          <FormField
             control={form.control}
             name="seats"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Cupos</FormLabel>
                 <FormControl>
-                  <Input placeholder="Booking's seats" {...field} disabled={true}/>
+                  <Input 
+                    type="number" 
+                    placeholder="Número de cupos" 
+                    {...field} 
+                    min="1" 
+                    max={maxSeats.toString()} 
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
-          /> */}
+          />
           
       
         <div className="flex justify-end">
@@ -202,18 +209,19 @@ type BlockProps= {
   start: Date
   end: Date
   closeDialog: () => void
+  seats?: number
 }
 
-export function BlockSlotForm({ eventId, start, end, closeDialog }: BlockProps) {
+export function BlockSlotForm({ eventId, start, end, closeDialog, seats = 1 }: BlockProps) {
   const [loading, setLoading] = useState(false)
 
   async function handleBlock() {
     if (!eventId) return
     setLoading(true)
-    blockSlotAction(eventId, start, end)
+    blockSlotAction(eventId, start, end, seats)
     .then((ok) => {
       if (ok) {
-        toast({title: "Slot bloqueado" })
+        toast({title: `Slot bloqueado (${seats} cupo${seats !== 1 ? 's' : ''})` })
       } else {
         toast({title: "Error", description: "No se pudo bloquear el slot", variant: "destructive"})
       } 
@@ -232,7 +240,7 @@ export function BlockSlotForm({ eventId, start, end, closeDialog }: BlockProps) 
       <Button onClick={() => closeDialog && closeDialog()} type="button" variant={"secondary"} className="w-32">Cancelar</Button>
       <Button onClick={handleBlock} variant="destructive" className="ml-2 gap-1">
         { loading && <Loader className="h-4 w-4 animate-spin" /> }
-        Bloquear slot  
+        Bloquear {seats} cupo{seats !== 1 ? 's' : ''}
       </Button>
     </div>
   )

@@ -214,10 +214,10 @@ export async function getFullBookingDAO(id: string) {
   return found as BookingDAO
 }
     
-export async function blockSlot(eventId: string, start: Date, end: Date) {
+export async function blockSlot(eventId: string, start: Date, end: Date, seats: number = 1) {
   const event= await getEventDAO(eventId)
   if (!event) throw new Error("Event not found")
-  const isAvailable= checkBookingAvailability(start, end, event)
+  const isAvailable= await checkBookingAvailability(start, end, event, seats)
   if (!isAvailable) throw new Error("Slot not available")
 
   start= toZonedTime(start, event.timezone)
@@ -232,7 +232,7 @@ export async function blockSlot(eventId: string, start: Date, end: Date) {
       end,
       contact: "BLOQUEADO",
       eventName: event.name,
-      seats: 0,      
+      seats: seats,      
       status: "BLOQUEADO"
     }
   })

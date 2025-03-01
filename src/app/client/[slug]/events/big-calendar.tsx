@@ -31,7 +31,13 @@ export type CalendarEvent = {
   eventId: string
   seatsLeft: number
   maxSeats: number
-  type: "booking" | "free" | "fixed-date"
+  type: "booking" | "free" | "fixed-date" | "partially_booked" | "fully_booked"
+  bookings?: {
+    bookingId: string
+    name: string
+    seats: number
+  }[]
+  bigDuration?: boolean
 }
 
 type Props = {
@@ -46,11 +52,18 @@ export default function BigCalendar({ initialEvents, timezone }: Props) {
   const [view, setView] = useState<View>(Views.WEEK)
   
   useEffect(() => {
-    let adjustedEvents = initialEvents.map(event => ({
-      ...event,
-      start: moment.utc(event.start).tz(timezone).toDate(),
-      end: moment.utc(event.end).tz(timezone).toDate(),
-    }))
+    // Convertir las fechas de UTC a la zona horaria local del calendario
+    let adjustedEvents = initialEvents.map(event => {
+      // Asegurarnos de que las fechas estén en la zona horaria correcta
+      const startDate = moment.utc(event.start).tz(timezone).toDate();
+      const endDate = moment.utc(event.end).tz(timezone).toDate();
+      
+      return {
+        ...event,
+        start: startDate,
+        end: endDate,
+      };
+    });
 
     if (view === 'month') {
       adjustedEvents = adjustedEvents.filter(event => event.title !== "Libre")

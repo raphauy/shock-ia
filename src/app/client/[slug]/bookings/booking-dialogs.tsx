@@ -13,12 +13,13 @@ type Props= {
   clientId: string
   date: Date
   eventType: EventType
+  maxSeats?: number
 }
 
 
 const updateTrigger= <Pencil size={30} className="pr-2 hover:cursor-pointer"/>
 
-export function BookingDialog({ id, eventId, clientId, date, eventType }: Props) {
+export function BookingDialog({ id, eventId, clientId, date, eventType, maxSeats }: Props) {
   const [open, setOpen] = useState(false);
 
   const addTrigger= eventType === EventType.SINGLE_SLOT ? <PlusCircle className="h-4 w-4 text-green-500"/> 
@@ -38,7 +39,7 @@ export function BookingDialog({ id, eventId, clientId, date, eventType }: Props)
           <DialogTitle>{id ? 'Actualizar' : 'Crear'} Reserva
           </DialogTitle>
         </DialogHeader>
-        <BookingForm closeDialog={() => setOpen(false)} id={id} eventId={eventId} clientId={clientId} date={date} />
+        <BookingForm closeDialog={() => setOpen(false)} id={id} eventId={eventId} clientId={clientId} date={date} maxSeats={maxSeats} />
       </DialogContent>
     </Dialog>
   )
@@ -112,9 +113,10 @@ type BlockProps= {
   end: Date
   description: string
   size?: "sm" | "lg"
+  seats?: number
 }
 
-export function BlockSlotDialog({ eventId, start, end, description, size }: BlockProps) {
+export function BlockSlotDialog({ eventId, start, end, description, size, seats }: BlockProps) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -136,7 +138,7 @@ export function BlockSlotDialog({ eventId, start, end, description, size }: Bloc
           <DialogTitle>Bloquear slot</DialogTitle>
           <DialogDescription className="py-8">{description}</DialogDescription>
         </DialogHeader>
-        <BlockSlotForm eventId={eventId} start={start} end={end} closeDialog={() => setOpen(false)} />
+        <BlockSlotForm eventId={eventId} start={start} end={end} closeDialog={() => setOpen(false)} seats={seats} />
       </DialogContent>
     </Dialog>
   )
