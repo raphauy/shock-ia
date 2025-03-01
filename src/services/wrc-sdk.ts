@@ -77,11 +77,16 @@ export async function createInstanceBasic(instanceName: string): Promise<CreateI
     console.log("baseURL", baseURL)
 
     try {
-        const response = await axios.post<CreateInstanceResponse>(`${baseURL}/instance/create`, { instanceName, groupsIgnore: true }, {
-            headers: {
-                'apiKey': `${apiKey}`,
-            },
-        })
+        const response = await axios.post<CreateInstanceResponse>(`${baseURL}/instance/create`, 
+            { 
+                instanceName, 
+                groupsIgnore: true, 
+                integration: "WHATSAPP-BAILEYS", 
+            }, 
+            { 
+                headers: { 'apiKey': `${apiKey}` } 
+            }
+        )
 
         return response.data
     } catch (error: unknown) {
