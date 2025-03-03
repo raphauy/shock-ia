@@ -19,8 +19,9 @@ type Props = {
   event: EventDAO
   bookings: BookingDAO[]
   clientSlug: string
+  clientHaveCRM: boolean
 }
-export default function FixedDateEventList({event, bookings, clientSlug}: Props) {
+export default function FixedDateEventList({event, bookings, clientSlug, clientHaveCRM}: Props) {
     const [searchTerm, setSearchTerm] = useState("")
 
     const filteredBookings = useMemo(() => {
@@ -111,7 +112,7 @@ export default function FixedDateEventList({event, bookings, clientSlug}: Props)
                                                 booking.confirmationDate ? (
                                                     <Badge variant="archived"><BellRing className="w-4 h-4 mb-0.5" />{formatWhatsAppStyle(booking.confirmationDate)}</Badge>
                                                 ) : (
-                                                    <ConfirmBookingDialog bookingId={booking.id} phone={booking.contact} />
+                                                    <ConfirmBookingDialog bookingId={booking.id} phone={booking.contact} clientHaveCRM={clientHaveCRM} />
                                                 )
                                             }
                                         </>

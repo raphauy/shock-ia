@@ -765,6 +765,9 @@ export async function getClientHaveCRM(clientId: string) {
   const client= await prisma.client.findUnique({
     where: {
       id: clientId
+    },
+    select: {
+      haveCRM: true
     }
   })
   return client?.haveCRM || false
@@ -1039,3 +1042,4 @@ export async function getClientSlug(clientId: string) {
   })
   return client?.slug || null
 }
+

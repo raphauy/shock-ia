@@ -201,20 +201,28 @@ export default async function EditEventPage({ params }: Props) {
                   </h2>
                 </div>
 
-                <LongTextForm
-                    label="Plantilla para confirmación"
-                    initialValue={event.confirmationTemplate || ""}
-                    id={event.id}
-                    fieldName="confirmationTemplate"
-                    update={setEventFieldAction}
-                />
-                <div className="text-sm text-muted-foreground p-4 border-dashed border rounded-md mt-2">
-                  <p>Variables disponibles para la plantilla:</p>
-                  <p>- {`{nombre}`} para referirte al nombre del contacto.</p>
-                  <p>- {`{fecha}`} para referirte a la fecha de la reserva.</p>
-                  <p>- {`{hora}`} para referirte a la hora de la reserva.</p>
-                  <p>- {`{fecha_y_hora}`} para referirte a la fecha y hora de la reserva.</p>
-                </div>
+                {clientHaveCRM ? (
+                  <>
+                    <LongTextForm
+                        label="Plantilla para confirmación"
+                        initialValue={event.confirmationTemplate || ""}
+                        id={event.id}
+                        fieldName="confirmationTemplate"
+                        update={setEventFieldAction}
+                    />
+                    <div className="text-sm text-muted-foreground p-4 border-dashed border rounded-md mt-2">
+                      <p>Variables disponibles para la plantilla:</p>
+                      <p>- {`{nombre}`} para referirte al nombre del contacto.</p>
+                      <p>- {`{fecha}`} para referirte a la fecha de la reserva.</p>
+                      <p>- {`{hora}`} para referirte a la hora de la reserva.</p>
+                      <p>- {`{fecha_y_hora}`} para referirte a la fecha y hora de la reserva.</p>
+                    </div>
+                  </>
+                  ) : (
+                    <p className="text-sm text-muted-foreground p-4 border-dashed border rounded-md mt-6">El cliente no tiene CRM, por lo que no se pueden configurar notificaciones de confirmación.</p>
+                  )}
+
+
 
 
                 {

@@ -148,15 +148,16 @@ export function BlockSlotDialog({ eventId, start, end, description, size, seats 
 type ConfirmProps= {
   bookingId: string
   phone: string
+  clientHaveCRM: boolean
 }
 
-export function ConfirmBookingDialog({ bookingId, phone }: ConfirmProps) {
+export function ConfirmBookingDialog({ bookingId, phone, clientHaveCRM }: ConfirmProps) {
   const [open, setOpen] = useState(false);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="w-44" disabled={phone.includes("@")}>
+        <Button variant="outline" size="sm" className="w-44" disabled={phone.includes("@") || !clientHaveCRM}>
           <CheckCircle className="h-4 w-4 mr-2" />
           Confirmar reserva
         </Button>

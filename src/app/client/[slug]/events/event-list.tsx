@@ -13,8 +13,9 @@ import { toZonedTime } from "date-fns-tz"
 type Props = {
   bookings: BookingDAO[]
   clientSlug: string
+  clientHaveCRM: boolean
 }
-export default function EventList({bookings, clientSlug}: Props) {
+export default function EventList({bookings, clientSlug, clientHaveCRM}: Props) {
 
     if (bookings.length === 0) {
         return <p className="text-center text-muted-foreground mt-4">No hay reservas</p>
@@ -79,7 +80,7 @@ export default function EventList({bookings, clientSlug}: Props) {
                                                     booking.confirmationDate ? (
                                                         <Badge variant="statusEnviado" className="flex items-center gap-2 text-sm"><BellRing className="w-4 h-4" />{formatWhatsAppStyle(toZonedTime(booking.confirmationDate, "America/Montevideo"))}</Badge>
                                                     ) : (
-                                                        <ConfirmBookingDialog bookingId={booking.id} phone={booking.contact} />
+                                                        <ConfirmBookingDialog bookingId={booking.id} phone={booking.contact} clientHaveCRM={clientHaveCRM} />
                                                     )
                                                 }
                                             </>

@@ -7,8 +7,9 @@ import FixedDateEventList from "../fixed-date-event-list"
 
 type Props = {
     eventId: string
+    clientHaveCRM: boolean
 }
-export default async function FixedDateTabsPage({eventId}: Props) {
+export default async function FixedDateTabsPage({eventId, clientHaveCRM}: Props) {
 
     const event= await getEventDAO(eventId)
     const client= await getClient(event.clientId)
@@ -29,10 +30,10 @@ export default async function FixedDateTabsPage({eventId}: Props) {
                 </div>
             </TabsList>
             <TabsContent value="activas">
-                <FixedDateEventList event={event} bookings={activeBookings} clientSlug={client.slug} />
+                <FixedDateEventList event={event} bookings={activeBookings} clientSlug={client.slug} clientHaveCRM={clientHaveCRM} />
             </TabsContent>
             <TabsContent value="canceladas">
-                <FixedDateEventList event={event} bookings={canceledBookings} clientSlug={client.slug} />
+                <FixedDateEventList event={event} bookings={canceledBookings} clientSlug={client.slug} clientHaveCRM={clientHaveCRM}    />
             </TabsContent>
         </Tabs>    
     )

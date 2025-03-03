@@ -9,6 +9,7 @@ import AvailabilityDisplay from "./availability-display";
 import EventHeader from "./event-header";
 import FixedDateTabsPage from "./tabs-fixed-date";
 import SingleSlotTabsPage from "./tabs-single-slot";
+import { getClientHaveCRM } from "@/services/clientService";
 
 type Props= {
     params: {
@@ -20,6 +21,7 @@ export default async function EventPage({ params }: Props) {
     const eventId = params.eventId
     const slug = params.slug
     if (!eventId) return <div>No se encontró el event ID</div>
+    const clientHaveCRM= await getClientHaveCRM(slug)
 
     const event= await getEventDAO(eventId)
     let calendarEvents: CalendarEvent[] = []
@@ -45,12 +47,12 @@ export default async function EventPage({ params }: Props) {
           <div className="w-full">
             {
               event.type === EventType.SINGLE_SLOT && 
-              <SingleSlotTabsPage eventId={eventId} initialEvents={calendarEvents} timezone={event.timezone} />
+              <SingleSlotTabsPage eventId={eventId} initialEvents={calendarEvents} timezone={event.timezone} clientHaveCRM={clientHaveCRM} />
             }
 
             {
               event.type === EventType.FIXED_DATE && 
-              <FixedDateTabsPage eventId={eventId} />
+              <FixedDateTabsPage eventId={eventId} clientHaveCRM={clientHaveCRM} />
             }
           </div>
         </div>

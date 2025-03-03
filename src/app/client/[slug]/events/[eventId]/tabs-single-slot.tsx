@@ -10,8 +10,9 @@ type Props = {
     eventId: string
     initialEvents: CalendarEvent[]
     timezone: string
+    clientHaveCRM: boolean
 }
-export default async function SingleSlotTabsPage({eventId, initialEvents, timezone}: Props) {
+export default async function SingleSlotTabsPage({eventId, initialEvents, timezone, clientHaveCRM}: Props) {
 
     const event= await getEventDAO(eventId)
     const client= await getClient(event.clientId)
@@ -37,10 +38,10 @@ export default async function SingleSlotTabsPage({eventId, initialEvents, timezo
                 <BigCalendar initialEvents={initialEvents} timezone={timezone} />
             </TabsContent>
             <TabsContent value="listado">
-                <EventList bookings={noBlockedBookings} clientSlug={client.slug} />
+                <EventList bookings={noBlockedBookings} clientSlug={client.slug} clientHaveCRM={clientHaveCRM} />
             </TabsContent>
             <TabsContent value="canceladas">
-                <EventList bookings={canceledBookings} clientSlug={client.slug} />
+                <EventList bookings={canceledBookings} clientSlug={client.slug} clientHaveCRM={clientHaveCRM} />
             </TabsContent>
         </Tabs>    
     )
