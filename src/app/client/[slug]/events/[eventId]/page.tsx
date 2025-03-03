@@ -107,7 +107,12 @@ function getSingleSlotCalendarEvents(event: EventDAO, bookings: BookingDAO[]): C
       } else if (slot.seatsAvailable && slot.seatsAvailable > 0) {
         title = `${slot.seatsAvailable}/${slot.seatsTotal} disponibles`;
       } else {
-        title = "Completo";
+        // chequear si está bloqueado
+        if (slot.bookings?.some(booking => booking.name === "Bloqueado")) {
+          title = "Bloqueado";
+        } else {
+          title = "Completo";
+        }
       }
 
       // Los slots ya vienen con las fechas en UTC desde getSlots
