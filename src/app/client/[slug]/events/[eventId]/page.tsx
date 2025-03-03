@@ -108,7 +108,7 @@ function getSingleSlotCalendarEvents(event: EventDAO, bookings: BookingDAO[]): C
         title = `${slot.seatsAvailable}/${slot.seatsTotal} disponibles`;
       } else {
         // chequear si está bloqueado
-        if (slot.bookings?.some(booking => booking.name === "Bloqueado")) {
+        if (slot.seatsTotal === 1 && slot.bookings?.some(booking => booking.name === "Bloqueado")) {
           title = "Bloqueado";
         } else {
           title = "Completo";
