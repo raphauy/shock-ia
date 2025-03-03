@@ -1,4 +1,5 @@
 import { BookingDAO, getFutureBookingsDAOByEventId } from "@/services/booking-services";
+import { getClientHaveCRMBySlug } from "@/services/clientService";
 import { EventDAO, getEventDAO } from "@/services/event-services";
 import { getSlots } from "@/services/slots-service";
 import { EventType } from "@prisma/client";
@@ -9,7 +10,6 @@ import AvailabilityDisplay from "./availability-display";
 import EventHeader from "./event-header";
 import FixedDateTabsPage from "./tabs-fixed-date";
 import SingleSlotTabsPage from "./tabs-single-slot";
-import { getClientHaveCRM } from "@/services/clientService";
 
 type Props= {
     params: {
@@ -21,7 +21,7 @@ export default async function EventPage({ params }: Props) {
     const eventId = params.eventId
     const slug = params.slug
     if (!eventId) return <div>No se encontró el event ID</div>
-    const clientHaveCRM= await getClientHaveCRM(slug)
+    const clientHaveCRM= await getClientHaveCRMBySlug(slug)
 
     const event= await getEventDAO(eventId)
     let calendarEvents: CalendarEvent[] = []

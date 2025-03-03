@@ -1,18 +1,8 @@
-import * as z from "zod"
-import { prisma } from "@/lib/db"
-import { OpenAIEmbeddings } from "langchain/embeddings/openai"
+import { prisma } from "@/lib/db";
+import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import pgvector from 'pgvector/utils';
-import { DocumentDAO, getDocumentsDAOByClient } from "./document-services";
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
-import { getClient, getClientHaveCRM, getFunctionsOfClient } from "./clientService";
-import { getActiveConversation } from "./conversationService";
-import { toZonedTime } from "date-fns-tz";
-import { getActiveEventsDAOByClientId } from "./event-services";
-import { EventType } from "@prisma/client";
-import { getContactByPhone } from "./contact-services";
-import { getClientCustomFields, getCustomFieldsDAO } from "./customfield-services";
-import { getFieldValuesByContactId } from "./fieldvalue-services";
+import * as z from "zod";
+import { DocumentDAO } from "./document-services";
 
 export type SectionDAO = {
 	id: string
