@@ -165,7 +165,7 @@ export function ConfirmBookingDialog({ bookingId, phone, clientHaveCRM }: Confir
         <DialogHeader>
           <DialogTitle>Confirmar Reserva</DialogTitle>
           <DialogDescription className="text-foreground text-md">
-            Al confirmar, enviaremos el siguiente mensaje de confirmación al usuario que realizó la reserva ({phone}):
+            Destinatario: {phone}
           </DialogDescription>
         </DialogHeader>
         <ConfirmBookingForm closeDialog={() => setOpen(false)} bookingId={bookingId} />
