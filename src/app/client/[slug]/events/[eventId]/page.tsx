@@ -98,7 +98,12 @@ function getSingleSlotCalendarEvents(event: EventDAO, bookings: BookingDAO[]): C
     slots.forEach(slot => {
       let title;
       if (slot.available) {
-        title = `Libre (${slot.seatsAvailable}/${slot.seatsTotal})`;
+        if (slot.seatsTotal === 1) {
+          title = `Libre`;
+        } else {
+          title = `Libre (${slot.seatsAvailable}/${slot.seatsTotal})`;
+        }
+        
       } else if (slot.seatsAvailable && slot.seatsAvailable > 0) {
         title = `${slot.seatsAvailable}/${slot.seatsTotal} disponibles`;
       } else {
