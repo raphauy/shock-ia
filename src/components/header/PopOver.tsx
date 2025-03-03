@@ -3,15 +3,15 @@
 import * as RadixPopover from "@radix-ui/react-popover";
 
 interface PopOverProps{
-  trigger: React.ReactNode
+  email: string
   body: React.ReactNode
 }
 
-export default function PopOver({ trigger, body }: PopOverProps) {
+export default function PopOver({ email, body }: PopOverProps) {
   return (
     <>
       <RadixPopover.Root>
-        <RadixPopover.Trigger>{trigger}</RadixPopover.Trigger>
+        <RadixPopover.Trigger>{email}</RadixPopover.Trigger>
         <RadixPopover.Portal>
           <RadixPopover.Content align="end"
             className="rounded p-3 w-fit bg-white

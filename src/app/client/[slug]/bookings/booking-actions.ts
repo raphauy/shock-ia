@@ -1,7 +1,7 @@
 "use server"
   
 import { revalidatePath } from "next/cache"
-import { BookingDAO, BookingFormValues, createBooking, updateBooking, getFullBookingDAO, deleteBooking, cancelBooking, blockSlot } from "@/services/booking-services"
+import { BookingDAO, BookingFormValues, createBooking, updateBooking, getFullBookingDAO, deleteBooking, cancelBooking, blockSlot, getConfirmationMessage, confirmBooking } from "@/services/booking-services"
 
 
 export async function getBookingDAOAction(id: string): Promise<BookingDAO | null> {
@@ -17,21 +17,21 @@ export async function createOrUpdateBookingAction(id: string | null, data: Booki
         console.log("booking created: ", updated)
     }     
 
-    revalidatePath("/[slug]/bookings", "page")
+    revalidatePath("/client/[slug]/events", "page")
 
     return updated as BookingDAO
 }
 
 export async function createBookingAction(data: BookingFormValues): Promise<BookingDAO | null> {
     const created= await createBooking(data)
-    revalidatePath("/[slug]/bookings", "page")
+    revalidatePath("/client/[slug]/events", "page")
     return created as BookingDAO
 }
 
 export async function deleteBookingAction(id: string): Promise<BookingDAO | null> {    
     const deleted= await deleteBooking(id)
 
-    revalidatePath("/[slug]/bookings", "page")
+    revalidatePath("/client/[slug]/events", "page")
 
     return deleted as BookingDAO
 }
@@ -39,7 +39,7 @@ export async function deleteBookingAction(id: string): Promise<BookingDAO | null
 export async function cancelBookingAction(id: string): Promise<BookingDAO | null> {    
     const canceled= await cancelBooking(id)
 
-    revalidatePath("/[slug]/bookings", "page")
+    revalidatePath("/client/[slug]/events", "page")
 
     return canceled as BookingDAO
 }
@@ -48,7 +48,23 @@ export async function blockSlotAction(eventId: string, start: Date, end: Date, s
     const blocked= await blockSlot(eventId, start, end, seats)
     if (!blocked) return false
 
-    revalidatePath("/[slug]/bookings", "page")
+    revalidatePath("/client/[slug]/events", "page")
 
     return true
+}
+
+export async function ConfirmBookingAction(bookingId: string, message: string): Promise<boolean> {
+    const confirmed= await confirmBooking(bookingId, message)
+    if (!confirmed) return false
+
+    revalidatePath("/client/[slug]/events", "page")
+
+    return true
+}
+
+
+export async function getConfirmationMessageAction(bookingId: string): Promise<string> {
+    const message= await getConfirmationMessage(bookingId)
+    if (!message) throw new Error("El mensaje de confirmación no se pudo generar")
+    return message
 }

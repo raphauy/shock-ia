@@ -2,10 +2,11 @@
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Ban, CircleX, Pencil, PlusCircle, Trash2, XIcon } from "lucide-react";
-import { useState } from "react";
-import { BlockSlotForm, BookingForm, CancelBookingForm, DeleteBookingForm } from "./booking-forms";
 import { EventType } from "@prisma/client";
+import { Ban, CheckCircle, CircleX, Pencil, PlusCircle, Trash2, XIcon } from "lucide-react";
+import { useEffect, useState } from "react";
+import { BlockSlotForm, BookingForm, CancelBookingForm, ConfirmBookingForm, DeleteBookingForm } from "./booking-forms";
+import { getConfirmationMessageAction } from "./booking-actions";
 
 type Props= {
   id?: string
@@ -88,7 +89,7 @@ export function CancelBookingDialog({ id, description, size }: CancelProps) {
           size === "sm" ? (
             <CircleX className="h-4 w-4"/>
           ) : (
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="w-44">
               <XIcon className="h-4 w-4 mr-2" />
                 Cancelar reserva
             </Button>
@@ -139,6 +140,35 @@ export function BlockSlotDialog({ eventId, start, end, description, size, seats 
           <DialogDescription className="py-8">{description}</DialogDescription>
         </DialogHeader>
         <BlockSlotForm eventId={eventId} start={start} end={end} closeDialog={() => setOpen(false)} seats={seats} />
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+type ConfirmProps= {
+  bookingId: string
+  phone: string
+}
+
+export function ConfirmBookingDialog({ bookingId, phone }: ConfirmProps) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm" className="w-44" disabled={phone.includes("@")}>
+          <CheckCircle className="h-4 w-4 mr-2" />
+          Confirmar reserva
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Confirmar Reserva</DialogTitle>
+          <DialogDescription className="text-foreground text-md">
+            Al confirmar, enviaremos el siguiente mensaje de confirmación al usuario que realizó la reserva ({phone}):
+          </DialogDescription>
+        </DialogHeader>
+        <ConfirmBookingForm closeDialog={() => setOpen(false)} bookingId={bookingId} />
       </DialogContent>
     </Dialog>
   )

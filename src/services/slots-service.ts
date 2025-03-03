@@ -89,9 +89,6 @@ export function getSlots(dateStr: string, bookings: BookingDAO[], availability: 
             !isAfter(slotEnd, addMinutes(timeEnd, 1)) && 
             isAfter(slotStart, nowPlusMargin)
         ) {
-            console.log("slotStart:", slotStart)
-            console.log("slotEnd:", slotEnd)
-            console.log("bookings:", bookings)
             const zonedSlotStart = toZonedTime(slotStart, timezone)
             const zonedSlotEnd = toZonedTime(slotEnd, timezone)
             // Filtrar todas las reservas que coinciden con este slot
@@ -99,7 +96,6 @@ export function getSlots(dateStr: string, bookings: BookingDAO[], availability: 
                 b.start.getTime() === zonedSlotStart.getTime() && 
                 b.end.getTime() === zonedSlotEnd.getTime()
             );
-            console.log("slotBookings:", slotBookings)
 
             // Calcular cuántos asientos están ocupados
             const occupiedSeats = slotBookings.reduce((total, booking) => total + booking.seats, 0);

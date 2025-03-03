@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client-js"
   previewFeatures = ["postgresqlExtensions"]
@@ -117,6 +116,8 @@ model Client {
   reminderDefinitions   ReminderDefinition[]
 
   comerciales          Comercial[]
+
+  notifications         Notification[]
 }
 
 model Document {
@@ -436,6 +437,7 @@ model Event {
   seatsAvailable    Int?                                        // gennext: show.column
   price             Float?                                      // gennext: show.column
   isArchived        Boolean   @default(false)                   // gennext: show.column
+  confirmationTemplate String?
 
   moveToStageId  String?
 
@@ -484,9 +486,11 @@ model Booking {
 
   createdAt         DateTime    @default(now())                 // gennext: skip.zod
   updatedAt         DateTime    @updatedAt                      // gennext: skip.zod
+  confirmationDate  DateTime?
 
   // reminders
   reminders         Reminder[]                                 // gennext: skip.list
+  notification      Notification?                              // gennext: skip.list
 
   event             Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
   eventId           String
@@ -494,8 +498,8 @@ model Booking {
   client            Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
   clientId          String
 
-  conversation        Conversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
-  conversationId      String?
+  conversation      Conversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+  conversationId    String?
 }
 
 model WhatsappInstance {
@@ -816,4 +820,23 @@ model Comercial {
 
   createdAt          DateTime  @default(now())                     // gennext: skip.zod
   updatedAt          DateTime  @updatedAt                          // gennext: skip.zod
+}
+
+enum NotificationType {
+  BOOKING_CONFIRMATION
+}
+
+model Notification {
+  id                 String    @id @default(cuid())
+  phone              String                                          // gennext: show.column
+  message            String                                          // gennext: show.column
+  type               NotificationType @default(BOOKING_CONFIRMATION) // gennext: show.column
+  sentAt             DateTime @default(now())                        // gennext: show.column
+  error              String?                                         // gennext: show.column
+
+  booking            Booking?  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  bookingId          String?   @unique
+
+  client             Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId           String
 }

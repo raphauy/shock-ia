@@ -12,7 +12,5 @@ export default async function Logged() {
 
     const { user } = session
 
-    const avatar= <p>{user.email}</p>
-
-    return (<PopOver trigger={avatar} body={<PopOverUserHandler />} />)
+    return (<PopOver email={user.email ?? ""} body={<PopOverUserHandler />} />)
 }

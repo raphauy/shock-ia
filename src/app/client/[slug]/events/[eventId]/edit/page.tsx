@@ -6,23 +6,23 @@ import { PhonesForm } from "@/components/phones-form";
 import { SelectTimezoneForm } from "@/components/select-timezone";
 import { ShortTextForm } from "@/components/short-text-form";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { cn, getEventTypeLabel } from "@/lib/utils";
+import { getClientCustomFields } from "@/services/customfield-services";
 import { getFullEventDAO } from "@/services/event-services";
+import { getReminderDefinitionsDAO } from "@/services/reminder-definition-services";
 import { getStagesDAO } from "@/services/stage-services";
 import { EventType } from "@prisma/client";
 import { isAfter } from "date-fns";
-import { Archive, ExternalLink, Globe, LayoutDashboard, ListChecks, ListCollapse, Palette, Settings, Tag } from "lucide-react";
+import { Archive, Bell, CalendarCheck, ExternalLink, Globe, LayoutDashboard, ListChecks, ListCollapse, Palette, Settings, Tag } from "lucide-react";
+import Link from "next/link";
 import { setEventBooleanFieldAction, setEventFieldAction, setEventNotifyPhonesAction } from "../../event-actions";
 import EventFieldsBox from "./event-fields-box";
 import { EventTaggerComponent } from "./event-tagger";
 import FixedDateEdits from "./fixed-date-edits";
+import ReminderDefinitionSelector from "./reminder-definition-selector";
 import SelectEventStage from "./select-stage";
 import SingleSlotEdits from "./single-slot-edits";
-import { getClientCustomFields } from "@/services/customfield-services";
-import { getReminderDefinitionsDAO } from "@/services/reminder-definition-services";
-import ReminderDefinitionSelector from "./reminder-definition-selector";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
 
 type Props= {
     params: {
@@ -172,6 +172,13 @@ export default async function EditEventPage({ params }: Props) {
                   update={setEventBooleanFieldAction}
                 />
 
+                <div className="flex items-center gap-x-2 mt-6">
+                  <IconBadge icon={Bell} />
+                  <h2 className="text-xl">
+                      Notificaciones
+                  </h2>
+                </div>
+
                 <ShortTextForm
                     label="Webhook"
                     initialValue={event.webHookUrl || ""}
@@ -187,6 +194,27 @@ export default async function EditEventPage({ params }: Props) {
                   update={setEventNotifyPhonesAction}
                 />
 
+                <div className="flex items-center gap-x-2 mt-6">
+                  <IconBadge icon={CalendarCheck} />
+                  <h2 className="text-xl">
+                      Confirmación de reserva
+                  </h2>
+                </div>
+
+                <LongTextForm
+                    label="Plantilla para confirmación"
+                    initialValue={event.confirmationTemplate || ""}
+                    id={event.id}
+                    fieldName="confirmationTemplate"
+                    update={setEventFieldAction}
+                />
+                <div className="text-sm text-muted-foreground p-4 border-dashed border rounded-md mt-2">
+                  <p>Variables disponibles para la plantilla:</p>
+                  <p>- {`{nombre}`} para referirte al nombre del contacto.</p>
+                  <p>- {`{fecha}`} para referirte a la fecha de la reserva.</p>
+                  <p>- {`{hora}`} para referirte a la hora de la reserva.</p>
+                  <p>- {`{fecha_y_hora}`} para referirte a la fecha y hora de la reserva.</p>
+                </div>
 
 
                 {

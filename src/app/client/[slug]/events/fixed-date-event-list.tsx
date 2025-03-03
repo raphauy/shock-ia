@@ -2,11 +2,11 @@
 
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
-import { cn } from "@/lib/utils"
+import { cn, formatWhatsAppStyle } from "@/lib/utils"
 import { BookingDAO } from "@/services/booking-services"
 import { format, isSameDay } from "date-fns"
-import { Calendar, MessageCircle, PersonStanding, Search, TicketCheck, X } from "lucide-react"
-import { BookingDialog, CancelBookingDialog, DeleteBookingDialog } from "../bookings/booking-dialogs"
+import { BellRing, Calendar, MessageCircle, PersonStanding, Search, TicketCheck, X } from "lucide-react"
+import { BookingDialog, CancelBookingDialog, ConfirmBookingDialog, DeleteBookingDialog } from "../bookings/booking-dialogs"
 import { EventDAO } from "@/services/event-services"
 import { EventType } from "@prisma/client"
 import { Input } from "@/components/ui/input"
@@ -67,11 +67,11 @@ export default function FixedDateEventList({event, bookings, clientSlug}: Props)
                     
 
                     <Card>
-                        {filteredBookings.map((reservation: BookingDAO, index: number) => {
-                            const conversationId= reservation.conversationId
-                            const statusColor= reservation.status === "CANCELADO" ? "bg-gray-200" : reservation.status === "CONFIRMADO" ? "bg-green-200" : reservation.status === "RESERVADO" ? "bg-sky-200" : reservation.status === "PAGADO" ? "bg-blue-200" : reservation.status === "BLOQUEADO" ? "bg-red-200" : "bg-yellow-200"
+                        {filteredBookings.map((booking: BookingDAO, index: number) => {
+                            const conversationId= booking.conversationId
+                            const statusColor= booking.status === "CANCELADO" ? "bg-gray-200" : booking.status === "CONFIRMADO" ? "bg-green-200" : booking.status === "RESERVADO" ? "bg-sky-200" : booking.status === "PAGADO" ? "bg-blue-200" : booking.status === "BLOQUEADO" ? "bg-red-200" : "bg-yellow-200"
 
-                            const parsedData = reservation.data ? JSON.parse(reservation.data as string) : {}
+                            const parsedData = booking.data ? JSON.parse(booking.data as string) : {}
                             const jsonReplaced = Object.keys(parsedData).reduce((acc, key) => {
                               if (key !== "nombre") {
                                 acc[key] = parsedData[key] === true ? "SI" : parsedData[key] === false ? "NO" : parsedData[key]
@@ -86,44 +86,53 @@ export default function FixedDateEventList({event, bookings, clientSlug}: Props)
                                     conversationId ? (
                                         <div className="w-48">
                                             <Link href={`/client/${clientSlug}/chats?id=${conversationId}`} className="flex items-center gap-4" target="_blank">
-                                                <p className="font-bold">{reservation.name}</p>
+                                                <p className="font-bold">{booking.name}</p>
                                                 <MessageCircle className="w-5 h-5 mb-1" />
                                             </Link>
-                                            <p className="mt-2">{reservation.contact}</p>
+                                            <p className="mt-2">{booking.contact}</p>
                                         </div>                                    
                                     )
                                     :
                                     (
-                                        <p className="font-bold">{reservation.name}</p>
+                                        <p className="font-bold">{booking.name}</p>
                                     )
                                 }
                                 <div className="flex-1">
                                     <BookingDataCard jsonData={jsonReplaced} />
                                 </div>
 
-                                <div className="flex flex-col items-end space-y-4 justify-self-end">
-                                    { reservation.status === "CANCELADO" ? 
-                                        <DeleteBookingDialog id={reservation.id} description={`Seguro que desea eliminar la reserva de ${reservation.name}?`} />
+                                <div className="flex items-center gap-2">
+                                    { booking.status === "CANCELADO" ? 
+                                        <DeleteBookingDialog id={booking.id} description={`Seguro que desea eliminar la reserva de ${booking.name}?`} />
                                         :
-                                        <CancelBookingDialog id={reservation.id} description={`Seguro que desea cancelar la reserva de ${reservation.name}?`} />
+                                        <>
+                                            <CancelBookingDialog id={booking.id} description={`Seguro que desea cancelar la reserva de ${booking.name}?`} />
+                                            {
+                                                booking.confirmationDate ? (
+                                                    <Badge variant="archived"><BellRing className="w-4 h-4 mb-0.5" />{formatWhatsAppStyle(booking.confirmationDate)}</Badge>
+                                                ) : (
+                                                    <ConfirmBookingDialog bookingId={booking.id} phone={booking.contact} />
+                                                )
+                                            }
+                                        </>
                                     }
                                 </div>
                                 </div>
                                 <div className="mt-2 flex justify-between">
                                     <span className="inline-block bg-secondary text-secondary-foreground rounded px-2 py-1 text-xs font-bold border">
-                                        {reservation.eventName}
+                                        {booking.eventName}
                                     </span>
 
                                     <div className="flex items-center gap-4">
                                         <div className="flex items-center gap-1 justify-end text-muted-foreground text-sm">
                                             <TicketCheck className="w-4 h-4 mb-0.5" />
-                                            <span>{format(reservation.createdAt, "dd MMM")}</span>
+                                            <span>{format(booking.createdAt, "dd MMM")}</span>
                                         </div>
                                         <div className="flex items-center gap-1 justify-end text-muted-foreground">
                                             <PersonStanding className="w-4 h-4 mb-0.5" />
-                                            <span>{reservation.seats}</span>
+                                            <span>{booking.seats}</span>
                                         </div>
-                                        <Badge variant="outline" className={cn(statusColor, "border-gray-300")}>{reservation.status}</Badge>
+                                        <Badge variant="outline" className={cn(statusColor, "border-gray-300")}>{booking.status}</Badge>
                                     </div>
                                 </div>
                             </div>

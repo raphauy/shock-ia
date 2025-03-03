@@ -190,7 +190,7 @@ export function ReminderForm({ id, contacts, reminderDefinitions, closeDialog }:
             name="reminderDefinitionId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Tipo de Recordatorio</FormLabel>
+                <FormLabel>Plantilla</FormLabel>
                 <FormControl>
                   <Popover open={openDefinition} onOpenChange={setOpenDefinition}>
                     <PopoverTrigger asChild>

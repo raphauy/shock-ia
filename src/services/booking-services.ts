@@ -1,11 +1,15 @@
 import { prisma } from "@/lib/db"
 import { Booking, BookingStatus } from "@prisma/client"
-import { addMinutes, isAfter } from "date-fns"
+import { addMinutes, format, isAfter } from "date-fns"
 import { toZonedTime } from "date-fns-tz"
 import * as z from "zod"
 import { getClientBySlug } from "./clientService"
 import { getEventDAO, updateSeatsAvailable } from "./event-services"
 import { checkBookingAvailability } from "./slots-service"
+import { createNotification, NotificationFormValues } from "./notification-services"
+import { getOrCreateContact } from "./contact-services"
+import { sendMessageToContact } from "./campaign-services"
+import { es } from "date-fns/locale"
 
 export type BookingDAO = {
 	id: string
@@ -20,6 +24,7 @@ export type BookingDAO = {
 	data: string | undefined | null
 	createdAt: Date
 	updatedAt: Date
+	confirmationDate: Date | undefined | null
 	eventId: string
 	clientId: string
 	conversationId: string | undefined | null
@@ -161,9 +166,14 @@ export async function getFutureBookingsDAOByEventId(eventId: string, timezone: s
         gt: now
       }
     },
-    orderBy: {
-      start: 'asc'
-    },
+    orderBy: [
+      {
+        start: 'asc'
+      },
+      {
+        createdAt: 'asc'
+      }
+    ],
   })
   return found as BookingDAO[]
 }
@@ -267,4 +277,83 @@ export async function getFutureBookingsDAOByContact(contact: string, clientId: s
     }
   }
   return result
+}
+
+export async function getConfirmationMessage(bookingId: string) {
+  const booking= await prisma.booking.findUnique({
+    where: {
+      id: bookingId
+    },
+    include: {
+      event: {
+        select: {
+          confirmationTemplate: true,
+        }
+      }
+    }
+  })
+  if (!booking) throw new Error("Booking not found")
+
+  if (!booking.event.confirmationTemplate) throw new Error("Este evento no tiene una plantilla de confirmación")
+
+  let message= booking.event.confirmationTemplate.replace("{nombre}", booking.name)
+  message= message?.replace("{fecha}", format(booking.start, "PPPP", { locale: es }))
+  message= message?.replace("{hora}", format(booking.start, "HH:mm"))
+  message= message?.replace("{fecha_y_hora}", format(booking.start, "dd/MM/yyyy HH:mm"))
+  return message
+}
+
+export async function confirmBooking(bookingId: string, message: string) {
+  const booking= await getBookingDAO(bookingId)
+  if (!booking) throw new Error("Booking not found")
+
+  // send whatsapp message vía Chatwoot
+  const contact= await getOrCreateContact(booking.clientId, booking.contact, booking.name)
+  if (contact) {
+      console.log("contact found: ", contact.name + " " + contact.phone)
+      await sendMessageToContact(booking.clientId, contact, message, [], null, "confirmBooking")
+      console.log("message sent to contact: ", contact.name)
+  } else {
+      throw new Error("No se pudo crear o encontrar ni crear el contacto con teléfono: " + booking.contact)
+  }
+
+  const notificationValues: NotificationFormValues = {
+    bookingId,
+    message,
+    type: "BOOKING_CONFIRMATION",
+    clientId: booking.clientId,
+    phone: booking.contact,
+  }
+  const notification= await createNotification(notificationValues)
+  await prisma.booking.update({
+    where: {
+      id: bookingId
+    },
+    data: {
+      confirmationDate: new Date()
+    }
+  })
+  return notification
+}
+
+
+export async function getFutureBookingsDAOByPhone(phone: string, clientId: string) {
+  const now= toZonedTime(new Date(), "America/Montevideo")
+  console.log("now: ", now)
+  const found = await prisma.booking.findMany({
+    where: {
+      clientId,
+      contact: phone,
+      status: {
+        not: "CANCELADO"
+      },
+      start: {
+        gt: now
+      }
+    },
+    orderBy: {
+      start: 'asc'
+    },
+  })
+  return found as BookingDAO[]
 }

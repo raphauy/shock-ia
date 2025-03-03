@@ -1,13 +1,14 @@
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
-import { cn } from "@/lib/utils"
+import { cn, formatWhatsAppStyle } from "@/lib/utils"
 import { BookingDAO } from "@/services/booking-services"
 import { format, isSameDay } from "date-fns"
 import { es } from "date-fns/locale"
-import { Calendar, MessageCircle, PersonStanding, TicketCheck } from "lucide-react"
-import { CancelBookingDialog, DeleteBookingDialog } from "../bookings/booking-dialogs"
+import { BellRing, Calendar, MessageCircle, PersonStanding, TicketCheck } from "lucide-react"
+import { CancelBookingDialog, ConfirmBookingDialog, DeleteBookingDialog } from "../bookings/booking-dialogs"
 import BookingDataCard from "./booking-data-card"
 import Link from "next/link"
+import { toZonedTime } from "date-fns-tz"
 
 type Props = {
   bookings: BookingDAO[]
@@ -27,11 +28,11 @@ export default function EventList({bookings, clientSlug}: Props) {
             <div className="mb-8">
                 <h3 className="text-sm font-semibold text-muted-foreground mb-2">{title}</h3>
                 <Card>
-                    {bookings.map((reservation: BookingDAO, index: number) => {
-                        const time= `${format(reservation.start, 'HH:mm')} - ${format(reservation.end, 'HH:mm')}`
-                        const statusColor= reservation.status === "CANCELADO" ? "bg-gray-200" : reservation.status === "CONFIRMADO" ? "bg-green-200" : reservation.status === "RESERVADO" ? "bg-sky-200" : reservation.status === "PAGADO" ? "bg-blue-200" : reservation.status === "BLOQUEADO" ? "bg-red-200" : "bg-yellow-200"
+                    {bookings.map((booking: BookingDAO, index: number) => {
+                        const time= `${format(booking.start, 'HH:mm')} - ${format(booking.end, 'HH:mm')}`
+                        const statusColor= booking.status === "CANCELADO" ? "bg-gray-200" : booking.status === "CONFIRMADO" ? "bg-green-200" : booking.status === "RESERVADO" ? "bg-sky-200" : booking.status === "PAGADO" ? "bg-blue-200" : booking.status === "BLOQUEADO" ? "bg-red-200" : "bg-yellow-200"
 
-                        const parsedData = reservation.data ? JSON.parse(reservation.data as string) : {}
+                        const parsedData = booking.data ? JSON.parse(booking.data as string) : {}
                         const jsonReplaced = Object.keys(parsedData).reduce((acc, key) => {
                           if (key !== "nombre") {
                             acc[key] = parsedData[key] === true ? "SI" : parsedData[key] === false ? "NO" : parsedData[key]
@@ -39,7 +40,7 @@ export default function EventList({bookings, clientSlug}: Props) {
                           return acc;
                         }, {} as Record<string, any>)
 
-                        const conversationId= reservation.conversationId
+                        const conversationId= booking.conversationId
                   
                         return (
                         <div key={index} className={`p-4 ${index !== 0 ? 'border-t' : ''}`}>
@@ -48,15 +49,15 @@ export default function EventList({bookings, clientSlug}: Props) {
                                     conversationId ? (
                                         <div>
                                             <Link href={`/client/${clientSlug}/chats?id=${conversationId}`} className="flex items-center gap-4" target="_blank">
-                                                <p className="font-bold">{reservation.name}</p>
+                                                <p className="font-bold">{booking.name}</p>
                                                 <MessageCircle className="w-5 h-5 mb-1" />
                                             </Link>
-                                            <p className="mt-2">{reservation.contact}</p>
+                                            <p className="mt-2">{booking.contact}</p>
                                         </div>                                    
                                     )
                                     :
                                     (
-                                        <p className="font-bold">{reservation.name}</p>
+                                        <p className="font-bold">{booking.name}</p>
                                     )
                                 }
                                 <div className="">
@@ -64,15 +65,24 @@ export default function EventList({bookings, clientSlug}: Props) {
                                 </div>
                                 <div className="flex flex-col items-end space-y-4">
                                     <div>
-                                        <p className="font-semibold">{format(reservation.start, 'dd MMMM', {locale: es})}</p>
+                                        <p className="font-semibold">{format(booking.start, 'dd MMMM', {locale: es})}</p>
                                         <p className="text-sm text-muted-foreground">{time}</p>
                                     </div>
 
                                     <div className="flex items-center gap-2">
-                                        { reservation.status === "CANCELADO" ? 
-                                            <DeleteBookingDialog id={reservation.id} description={`Seguro que desea eliminar la reserva de ${reservation.name}?`} />
+                                        { booking.status === "CANCELADO" ? 
+                                            <DeleteBookingDialog id={booking.id} description={`Seguro que desea eliminar la reserva de ${booking.name}?`} />
                                             :
-                                            <CancelBookingDialog id={reservation.id} description={`Seguro que desea cancelar la reserva de ${reservation.name}?`} />
+                                            <>
+                                                <CancelBookingDialog id={booking.id} description={`Seguro que desea cancelar la reserva de ${booking.name}?`} />
+                                                {
+                                                    booking.confirmationDate ? (
+                                                        <Badge variant="statusEnviado" className="flex items-center gap-2 text-sm"><BellRing className="w-4 h-4" />{formatWhatsAppStyle(toZonedTime(booking.confirmationDate, "America/Montevideo"))}</Badge>
+                                                    ) : (
+                                                        <ConfirmBookingDialog bookingId={booking.id} phone={booking.contact} />
+                                                    )
+                                                }
+                                            </>
                                         }
 
                                     </div>
@@ -80,18 +90,18 @@ export default function EventList({bookings, clientSlug}: Props) {
                                 </div>
                             </div>
                             <div className="mt-4 flex justify-between">
-                                <Badge variant="secondary" className="border-gray-300 rounded font-bold">{reservation.eventName}</Badge>
+                                <Badge variant="secondary" className="border-gray-300 rounded font-bold">{booking.eventName}</Badge>
                                 
                                 <div className="flex items-center gap-4">
                                     <div className="flex items-center gap-1 justify-end text-muted-foreground text-sm">
                                         <TicketCheck className="w-4 h-4 mb-0.5" />
-                                        <span>{format(reservation.createdAt, "dd MMM", {locale: es})}</span>
+                                        <span>{format(booking.createdAt, "dd MMM", {locale: es})}</span>
                                     </div>
                                     <div className="flex items-center gap-1 justify-end text-muted-foreground">
                                         <PersonStanding className="w-4 h-4 mb-0.5" />
-                                        <span>{reservation.seats}</span>
+                                        <span>{booking.seats}</span>
                                     </div>
-                                    <Badge variant="outline" className={cn(statusColor, "border-gray-300")}>{reservation.status}</Badge>
+                                    <Badge variant="outline" className={cn(statusColor, "border-gray-300")}>{booking.status}</Badge>
                                 </div>
                             </div>
                         </div>

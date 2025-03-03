@@ -1,15 +1,16 @@
 "use client"
 
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { toast } from "@/components/ui/use-toast"
-import { useEffect, useState } from "react"
-import { deleteBookingAction, createOrUpdateBookingAction, getBookingDAOAction, cancelBookingAction, blockSlotAction } from "./booking-actions"
-import { bookingSchema, BookingFormValues } from '@/services/booking-services'
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { toast } from "@/components/ui/use-toast"
+import { BookingFormValues, bookingSchema } from '@/services/booking-services'
+import { zodResolver } from "@hookform/resolvers/zod"
 import { Loader } from "lucide-react"
+import { useEffect, useState } from "react"
+import { useForm } from "react-hook-form"
+import { blockSlotAction, cancelBookingAction, ConfirmBookingAction, createOrUpdateBookingAction, deleteBookingAction, getBookingDAOAction, getConfirmationMessageAction } from "./booking-actions"
+import { checkValidPhone } from "@/lib/utils"
 
 type Props= {
   id?: string
@@ -36,10 +37,15 @@ export function BookingForm({ id, eventId, clientId, date, closeDialog, maxSeats
   const [loading, setLoading] = useState(false)
 
   const onSubmit = async (data: BookingFormValues) => {
+    // check if the phone is valid
+    if (!checkValidPhone(data.contact)) {
+      toast({ title: "Error", description: "El teléfono no es válido, el formato debe ser +598991234567 o 598991234567", variant: "destructive" })
+      return
+    }
     setLoading(true)
     try {
       await createOrUpdateBookingAction(id ? id : null, data)
-      toast({ title: id ? "Booking updated" : "Booking created" })
+      toast({ title: id ? "Reserva actualizada" : "Reserva creada" })
       closeDialog()
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" })
@@ -123,9 +129,9 @@ export function BookingForm({ id, eventId, clientId, date, closeDialog, maxSeats
           
       
         <div className="flex justify-end">
-            <Button onClick={() => closeDialog()} type="button" variant={"secondary"} className="w-32">Cancel</Button>
+            <Button onClick={() => closeDialog()} type="button" variant={"secondary"} className="w-32">Cancelar</Button>
             <Button type="submit" className="w-32 ml-2">
-              {loading ? <Loader className="h-4 w-4 animate-spin" /> : <p>Save</p>}
+              {loading ? <Loader className="h-4 w-4 animate-spin" /> : <p>Guardar</p>}
             </Button>
           </div>
         </form>
@@ -160,10 +166,10 @@ export function DeleteBookingForm({ id, closeDialog }: DeleteProps) {
   
   return (
     <div>
-      <Button onClick={() => closeDialog && closeDialog()} type="button" variant={"secondary"} className="w-32">Cancel</Button>
+      <Button onClick={() => closeDialog && closeDialog()} type="button" variant={"secondary"} className="w-32">Cancelar</Button>
       <Button onClick={handleDelete} variant="destructive" className="w-32 ml-2 gap-1">
         { loading && <Loader className="h-4 w-4 animate-spin" /> }
-        Delete  
+        Eliminar  
       </Button>
     </div>
   )
@@ -244,4 +250,54 @@ export function BlockSlotForm({ eventId, start, end, closeDialog, seats = 1 }: B
       </Button>
     </div>
   )
+}
+
+type ConfirmProps = {
+  bookingId: string
+  closeDialog: () => void
+}
+
+export function ConfirmBookingForm({ bookingId, closeDialog }: ConfirmProps) {
+
+  const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState("")
+
+  useEffect(() => {
+    getConfirmationMessageAction(bookingId).then((message: string) => {
+      setMessage(message)
+    })
+    .catch((error) => {
+      toast({title: "Error", description: error.message, variant: "destructive"})
+    })
+  }, [bookingId])
+
+  function handleSubmit() {
+    setLoading(true)
+    ConfirmBookingAction(bookingId, message)
+    .then(() => {
+      toast({title: "Confirmación enviada" })
+      closeDialog()
+    })
+    .catch((error) => {
+      toast({title: "Error", description: error.message, variant: "destructive"})
+    })
+    .finally(() => {
+      setLoading(false)
+    })
+  }
+
+  return (
+    <div className="space-y-4">      
+      <p className="italic">{message}</p>
+      <p>{!message && "No se pudo generar el mensaje de confirmación, probablemente el evento no tenga una plantilla de confirmación configurada."}</p>
+      <div className="flex justify-end">
+        <Button onClick={() => closeDialog && closeDialog()} type="button" variant={"secondary"} className="w-32">Cancelar</Button>
+        <Button onClick={handleSubmit} disabled={!message} className="w-32 ml-2 gap-1">
+          { loading && <Loader className="h-4 w-4 animate-spin" /> }
+          Confirmar  
+        </Button>
+      </div>
+    </div>
+  )
+
 }

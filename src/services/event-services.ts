@@ -28,6 +28,7 @@ export type EventDAO = {
   seatsAvailable: number | undefined
 	price: number | undefined
 	isArchived: boolean
+  confirmationTemplate: string | undefined
   moveToStageId: string | undefined
   availability: string[]
   timezone: string
@@ -450,3 +451,4 @@ export async function removeReminderDefinitionFromEvent(eventId: string, reminde
   })
   return updated !== null
 }
+
