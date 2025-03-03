@@ -263,11 +263,9 @@ export function ConfirmBookingForm({ bookingId, closeDialog }: ConfirmProps) {
   const [message, setMessage] = useState("")
 
   useEffect(() => {
-    getConfirmationMessageAction(bookingId).then((message: string) => {
+    getConfirmationMessageAction(bookingId)
+    .then((message: string) => {
       setMessage(message)
-    })
-    .catch((error) => {
-      toast({title: "Error", description: error.message, variant: "destructive"})
     })
   }, [bookingId])
 

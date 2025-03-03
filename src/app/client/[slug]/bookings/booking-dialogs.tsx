@@ -4,9 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { EventType } from "@prisma/client";
 import { Ban, CheckCircle, CircleX, Pencil, PlusCircle, Trash2, XIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { BlockSlotForm, BookingForm, CancelBookingForm, ConfirmBookingForm, DeleteBookingForm } from "./booking-forms";
-import { getConfirmationMessageAction } from "./booking-actions";
 
 type Props= {
   id?: string
