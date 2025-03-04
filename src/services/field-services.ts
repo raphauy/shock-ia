@@ -211,6 +211,20 @@ export async function getDataTags(repositoryId: string, data: string | JsonValue
     }
   })
 
+  return getTagsFromData(fields, data)
+}
+
+export async function getEventDataTags(eventId: string, data: string | JsonValue) {
+  const fields = await prisma.field.findMany({
+    where: {
+      eventId
+    }
+  })
+
+  return getTagsFromData(fields, data)
+}
+
+function getTagsFromData(fields: FieldDAO[], data: string | JsonValue) {
   const tags: string[] = []
   const jsonData = typeof data === 'string' ? JSON.parse(data) : data
   for (const field of fields) {
@@ -223,24 +237,6 @@ export async function getDataTags(repositoryId: string, data: string | JsonValue
       } else {
         tags.push(jsonData[field.name])
       }
-    }
-  }
-  
-  return tags
-}
-
-export async function getEventDataTags(eventId: string, data: string | JsonValue) {
-  const fields = await prisma.field.findMany({
-    where: {
-      eventId
-    }
-  })
-
-  const tags: string[] = []
-  const jsonData = typeof data === 'string' ? JSON.parse(data) : data
-  for (const field of fields) {
-    if (field.etiquetar && jsonData[field.name]) {
-      tags.push(jsonData[field.name])
     }
   }
   return tags
