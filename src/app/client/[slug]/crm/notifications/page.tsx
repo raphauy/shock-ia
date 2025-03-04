@@ -1,10 +1,22 @@
 import { getNotificationsDAO } from "@/services/notification-services"
 import { DataTable } from "./notification-table"
 import { columns } from "./notification-columns"
+import { getClientBySlug } from "@/services/clientService"
 
-export default async function NotificationPage() {
+type Props = {
+  params: {
+    slug: string
+  }
+}
+
+export default async function NotificationPage({ params }: Props) {
+
+  const client = await getClientBySlug(params.slug)
+  if (!client) {
+    return <div>Cliente no encontrado</div>
+  }
   
-  const data= await getNotificationsDAO()
+  const data= await getNotificationsDAO(client.id)
 
   return (
     <div className="w-full">      

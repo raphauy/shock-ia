@@ -24,8 +24,11 @@ export const NotificationSchema = z.object({
 export type NotificationFormValues = z.infer<typeof NotificationSchema>
 
 
-export async function getNotificationsDAO() {
+export async function getNotificationsDAO(clientId: string) {
   const found = await prisma.notification.findMany({
+    where: {
+      clientId
+    },
     orderBy: {
       id: 'asc'
     },
