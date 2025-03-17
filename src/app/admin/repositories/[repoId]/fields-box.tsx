@@ -78,7 +78,6 @@ export default function FieldsBox({ initialFields, repoId, fullMode, customField
                                 {field.type}
                             </Badge>
                             <FieldDialog repoId={field.repositoryId} id={field.id} customFields={customFields} />
-                            {/* <DeleteCotizationNoteDialog id={note.id} description={`seguro que quieres eliminar la nota ${note.text}?`} /> */}
                             {
                                 loading && deletingId === field.id ? <Loader className="h-5 w-5 animate-spin" />
                                 : 

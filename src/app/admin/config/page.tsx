@@ -23,6 +23,8 @@ import { FCPanel } from "./fc-panel"
 import { getGenericFunctions } from "@/services/function-services"
 import { Separator } from "@/components/ui/separator"
 import { getCurrentUser } from "@/lib/auth"
+import PromptVersionManager from "@/app/client/[slug]/prompt/prompt-version-manager"
+import { getPromptVersionsDAO } from "@/services/prompt-version-services"
 
 type Props = {
     searchParams: {
@@ -50,6 +52,8 @@ export default async function ConfigPage({ searchParams }: Props) {
     const genericFunctions= await getGenericFunctions()
     const BASE_PATH= process.env.NEXTAUTH_URL || "NOT-CONFIGURED"
 
+    const versions= await getPromptVersionsDAO(clientId)
+
     return (
         <div className="flex flex-col items-center w-full p-5 gap-7">
             <Tabs defaultValue="prompt" className="min-w-[700px] xl:min-w-[1000px]">
@@ -65,7 +69,7 @@ export default async function ConfigPage({ searchParams }: Props) {
                     </div>
                 </TabsList>
                 <TabsContent value="prompt">
-                    <PromptForm id={client.id} update={updatePrompt} prompt={client.prompt || ""} />
+                    <PromptVersionManager clientId={client.id} prompt={client.prompt || ""} versions={versions} timezone={client.timezone}/>    
                 </TabsContent>
                 <TabsContent value="functions">
                     { client.haveCRM ?

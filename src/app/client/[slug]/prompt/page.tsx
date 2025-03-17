@@ -1,6 +1,6 @@
 import { getClientBySlug } from "@/services/clientService"
-import { PromptForm } from "@/app/admin/prompts/prompt-form"
-import { updatePrompt } from "@/app/admin/clients/(crud)/actions"
+import { getPromptVersionsDAO } from "@/services/prompt-version-services"
+import PromptVersionManager from "./prompt-version-manager"
 
 type Props= {
     params: {
@@ -15,14 +15,7 @@ export default async function PromptPage({ params }: Props) {
       return <div>Cliente no encontrado</div>
     }
 
-    return (
-        <div className="container mt-10 space-y-5">
-            <div 
-                className="w-full p-4 border rounded-lg">
-                <p className="text-2xl font-bold">{client.name}</p>
-                <PromptForm id={client.id} update={updatePrompt} prompt={client.prompt || ""} />
-            </div>
-            
-        </div>
-    )
+    const versions= await getPromptVersionsDAO(client.id)
+
+    return <PromptVersionManager clientId={client.id} prompt={client.prompt || ""} versions={versions} timezone={client.timezone}/>
 }

@@ -1054,4 +1054,3 @@ export async function getClientSlug(clientId: string) {
   })
   return client?.slug || null
 }
-

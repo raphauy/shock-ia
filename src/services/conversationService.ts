@@ -275,6 +275,7 @@ export async function messageArrived(phone: string, text: string, clientId: stri
       
       let name= phone
       if (isSimulator) {
+        console.log("isSimulator")
         const user= await getUserByEmail(phone)
         if (user) {
           name= user.name || phone

@@ -1,13 +1,11 @@
 "use client"
 
-import { useEffect, useState } from "react";
-import { ArrowLeftRight, ChevronsLeft, ChevronsRight, Loader, Pencil, PlusCircle, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { toast } from "@/components/ui/use-toast";
-import { FieldForm, DeleteFieldForm } from "./field-forms"
-import { getFieldDAOAction } from "./field-actions"
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { CustomFieldDAO } from "@/services/customfield-services";
+import { Pencil, PlusCircle, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { DeleteFieldForm, FieldForm } from "./field-forms";
 
 type Props= {
   id?: string

@@ -916,11 +916,7 @@ export async function defaultFunction(clientId: string, name: string, args: any)
       const repoTags= await getDataTags(repo.id, data as string)
       const allTags= [...tags, ...repoTags]
       console.log("adding tags to contact, tags: ", allTags)
-      await addTagsToContact(contactId, allTags, "FC-" + name)
-      // repoTags.forEach((tag) => {
-      //   createContactEvent(ContactEventType.TAGGED, tag, "IA-" + name, contactId)
-      // })
-    
+      await addTagsToContact(contactId, allTags, "FC-" + name)    
     } else {
       console.log("no tags to add to contact")
     }

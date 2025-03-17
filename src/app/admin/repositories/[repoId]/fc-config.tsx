@@ -22,6 +22,7 @@ import { ClientFunctionTextForm } from "@/components/client-function-text-form"
 import { getClientCustomFields } from "@/services/customfield-services"
 import { Switch } from "@/components/ui/switch"
 import ToggleAssignComercial from "./toggle-assign-comercial"
+import { FunctionDescriptionForm } from "./function-description-form"
 
 type Props = {
   clientId?: string
@@ -80,12 +81,9 @@ export default async function FCConfig({ clientId, repoId, fullMode, haveCRM }: 
                         id={repository.id}
                         update={setFunctionNameAction}
                     />
-                    <DescriptionForm
-                        label="Descripción de la function"
-                        initialValue={repository.functionDescription}
-                        id={repository.id}
-                        update={setFunctionDescriptionAction}
-                    />
+                    
+                    <FunctionDescriptionForm repository={repository} />
+
                     <DescriptionForm
                         label="Respuesta al LLM luego de que esta FC se ejecute"
                         initialValue={repository.finalMessage || ""}

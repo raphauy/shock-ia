@@ -115,9 +115,10 @@ model Client {
   importedContacts      ImportedContact[]
   reminderDefinitions   ReminderDefinition[]
 
-  comerciales          Comercial[]
+  comerciales           Comercial[]
 
   notifications         Notification[]
+  promptVersions        PromptVersion[]
 }
 
 model Document {
@@ -839,4 +840,14 @@ model Notification {
 
   client             Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
   clientId           String
+}
+
+model PromptVersion {
+  id                  String       @id @default(cuid())
+  content             String
+  timestamp           DateTime     @default(now())
+  user                String
+
+  client              Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId            String
 }
