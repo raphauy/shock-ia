@@ -209,7 +209,7 @@ export function FieldForm({ id, repoId, eventId, customFields, closeDialog }: Pr
                   <div className="flex items-center gap-2">
                     <FormLabel className="mt-1">Etiquetar</FormLabel>
                     <FormControl>
-                      <Switch checked={field.value} onCheckedChange={field.onChange} />
+                      <Switch checked={field.value} onCheckedChange={field.onChange} disabled={watchedType === "number"} />
                     </FormControl>
                   </div>
                   <FormDescription>Si está marcado, cuando se ejecuta esta FC, se agregará una etiqueta con el valor de este campo</FormDescription>
