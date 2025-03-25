@@ -616,17 +616,22 @@ async function generateEmbedding(text: string): Promise<number[]> {
 }
 
 /**
- * Genera embeddings para productos que no tienen o que necesitan actualizarse
+ * Genera embeddings para productos que aún no los tienen
  * @param clientId ID del cliente
- * @param forceUpdate Si es true, actualiza todos los embeddings independientemente de la fecha
- * @param batchSize Número de productos a procesar por lote. Si es 0 o negativo, procesa todos los productos pendientes.
- * @returns Número de productos actualizados
+ * @param forceUpdate Si es true, actualiza todos los embeddings, no solo los que faltan
+ * @param batchSize Límite de productos a procesar (0 = sin límite)
+ * @returns Objeto con el número de embeddings actualizados y tiempo de ejecución
  */
 export async function generateProductEmbeddings(
   clientId: string,
   forceUpdate: boolean = false,
   batchSize: number = 0
-): Promise<number> {
+): Promise<{
+  updatedCount: number,
+  executionTime: number
+}> {
+  const startTime = Date.now();
+  
   // Obtenemos productos que necesitan generación de embeddings
   // Ahora usamos el embeddingUpdatedAt = null como indicador de que necesita actualización
   const whereClause = forceUpdate
@@ -680,8 +685,16 @@ export async function generateProductEmbeddings(
     }
   }
 
+  const endTime = Date.now();
+  const executionTime = (endTime - startTime) / 1000; // en segundos
+
   console.log(`Proceso completado: ${updatedCount} embeddings generados de ${products.length} productos procesados.`);
-  return updatedCount;
+  console.log(`Tiempo total de ejecución: ${formatExecutionTime(executionTime)}`);
+  
+  return {
+    updatedCount,
+    executionTime
+  };
 }
 
 export type ProductSearchResult = {

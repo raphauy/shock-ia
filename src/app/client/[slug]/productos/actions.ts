@@ -65,7 +65,7 @@ export async function syncProductsAction(feedId: string, maxProducts: number = 0
  * Acción del servidor para generar embeddings para productos
  * @param clientId ID del cliente
  * @param maxEmbeddings Número máximo de embeddings a generar (0 para todos)
- * @returns Número de embeddings actualizados
+ * @returns Información sobre los embeddings actualizados, incluyendo tiempo de ejecución
  */
 export async function generateEmbeddingsAction(clientId: string, maxEmbeddings: number = 10) {
   try {
@@ -99,13 +99,16 @@ export async function generateEmbeddingsAction(clientId: string, maxEmbeddings: 
     }
 
     // Generar embeddings para los productos que lo necesitan
-    const updatedCount = await generateProductEmbeddings(clientId, false, maxEmbeddings)
+    const result = await generateProductEmbeddings(clientId, false, maxEmbeddings)
 
     // Revalidar el path para actualizar la interfaz
     revalidatePath(`/client/${client.slug}/productos`)
 
     // Devolver el resultado
-    return { updatedCount }
+    return {
+      updatedCount: result.updatedCount,
+      executionTime: result.executionTime
+    }
   } catch (error) {
     console.error("Error en generación de embeddings:", error)
     throw error

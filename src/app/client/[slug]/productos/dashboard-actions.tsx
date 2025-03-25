@@ -57,7 +57,10 @@ export default function DashboardActions({ feed, clientId }: DashboardActionsPro
     newProducts: number, 
     executionTime: number 
   } | null>(null)
-  const [embeddingResults, setEmbeddingResults] = useState<{ updatedCount: number } | null>(null)
+  const [embeddingResults, setEmbeddingResults] = useState<{ 
+    updatedCount: number,
+    executionTime: number
+  } | null>(null)
   const [maxProducts, setMaxProducts] = useState<number>(10)
   const [maxNewProducts, setMaxNewProducts] = useState<number>(10)
   const [maxEmbeddings, setMaxEmbeddings] = useState<number>(10)
@@ -153,7 +156,7 @@ export default function DashboardActions({ feed, clientId }: DashboardActionsPro
       
       toast({
         title: "Embeddings generados",
-        description: `Se actualizaron ${result.updatedCount} embeddings con éxito`,
+        description: `Se actualizaron ${result.updatedCount} embeddings en ${formatExecutionTime(result.executionTime)}`,
       })
     } catch (error) {
       console.error("Error generando embeddings:", error)
@@ -347,7 +350,7 @@ export default function DashboardActions({ feed, clientId }: DashboardActionsPro
                   type="number"
                   value={maxEmbeddings === 0 ? "" : maxEmbeddings}
                   onChange={handleMaxEmbeddingsChange}
-                  placeholder="10"
+                  placeholder="Sin límite"
                   min="0"
                   className="w-full"
                   disabled={isGeneratingEmbeddings}
@@ -367,9 +370,12 @@ export default function DashboardActions({ feed, clientId }: DashboardActionsPro
           </div>
 
           {embeddingResults && (
-            <div className="bg-muted p-3 rounded-md mb-4">
-              <p className="text-sm font-medium">Resultado de la generación:</p>
-              <p className="text-sm">Se actualizaron {embeddingResults.updatedCount} embeddings</p>
+            <div className="bg-muted p-3 rounded-md">
+              <p className="text-sm font-medium">Resultado:</p>
+              <div className="mt-1 grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                <p>• {embeddingResults.updatedCount} embeddings generados</p>
+                <p>• Tiempo: {formatExecutionTime(embeddingResults.executionTime)}</p>
+              </div>
             </div>
           )}
         </CardContent>
@@ -382,12 +388,12 @@ export default function DashboardActions({ feed, clientId }: DashboardActionsPro
             {isGeneratingEmbeddings ? (
               <>
                 <Loader className="mr-2 h-4 w-4 animate-spin" />
-                Generando embeddings...
+                Generando...
               </>
             ) : (
               <>
                 <Database className="mr-2 h-4 w-4" />
-                Generar Embeddings
+                Generar
               </>
             )}
           </Button>
