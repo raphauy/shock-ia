@@ -736,10 +736,12 @@ export async function clientHaveCRM(slug: string) {
     where: {
       slug
     },
+    select: {
+      haveCRM: true
+    }
   })
-  if (!client) return false
 
-  return client.haveCRM
+  return client?.haveCRM || false
 }
 
 export async function setHaveCRM(clientId: string, haveCRM: boolean) {
@@ -759,6 +761,18 @@ export async function setHaveCRM(clientId: string, haveCRM: boolean) {
   })
 
   return updated
+}
+
+export async function clientHaveProducts(slug: string) {
+  const client= await prisma.client.findUnique({
+    where: {
+      slug
+    },
+    select: {
+      haveProducts: true
+    }
+  })
+  return client?.haveProducts || false
 }
 
 export async function getClientHaveCRM(clientId: string) {
@@ -923,6 +937,74 @@ export async function setHaveAudioResponse(clientId: string, haveAudioResponse: 
   })
   return client
 }
+
+export async function setHaveProducts(clientId: string, haveProducts: boolean) {
+  const client = await prisma.client.update({
+    where: { id: clientId },
+    data: {
+      haveProducts
+    }
+  })
+
+  if (haveProducts) {
+    await addProductFunctionsToClient(clientId)
+  } else {
+    await removeProductFunctionsFromClient(clientId)
+  }
+
+  return client
+}
+
+async function addProductFunctionsToClient(clientId: string) {
+  const productFunctions = [
+    "buscarProducto"
+  ];
+
+  const results = await Promise.all(
+    productFunctions.map(async (functionName) => {
+      try {
+        const functionId = await getFunctionIdByFunctionName(functionName);
+        if (!functionId) {
+          console.warn(`Función ${functionName} no encontrada`);
+          return false;
+        }
+        await addFunctionToClient(clientId, functionId);
+        return true;
+      } catch (error) {
+        console.error(`Error al agregar función ${functionName}:`, error);
+        return false;
+      }
+    })
+  );
+
+  return results.some(result => result); // retorna true si al menos una función se agregó exitosamente  
+}
+
+async function removeProductFunctionsFromClient(clientId: string) {
+  const productFunctions = [
+    "buscarProducto"
+  ];
+ 
+  const results = await Promise.all(
+    productFunctions.map(async (functionName) => {
+      try {
+        const functionId = await getFunctionIdByFunctionName(functionName);
+        if (!functionId) {
+          console.warn(`Función ${functionName} no encontrada`);
+          return false;
+        }
+        await removeFunctionFromClient(clientId, functionId);
+        return true;
+      } catch (error) {
+        console.error(`Error al eliminar función ${functionName}:`, error);
+        return false;
+      }
+    })
+  );
+
+  return results.some(result => result); // retorna true si al menos una función se eliminó exitosamente
+}
+
 
 export async function getApiKey(clientId: string) {
   const client= await prisma.client.findUnique({

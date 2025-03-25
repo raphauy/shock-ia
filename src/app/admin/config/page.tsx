@@ -1,4 +1,3 @@
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ClientSelector, SelectorData } from "../client-selector"
 import { getDataClients, updatePrompt, updateWhatsAppNumbersAction } from "../clients/(crud)/actions"
@@ -25,6 +24,10 @@ import { Separator } from "@/components/ui/separator"
 import { getCurrentUser } from "@/lib/auth"
 import PromptVersionManager from "@/app/client/[slug]/prompt/prompt-version-manager"
 import { getPromptVersionsDAO } from "@/services/prompt-version-services"
+import ProductsConfig from "./products-config"
+
+// Configuración para extender el tiempo máximo de ejecución
+export const maxDuration = 800; // 800 segundos (máximo para plan Pro con Fluid Compute)
 
 type Props = {
     searchParams: {
@@ -73,7 +76,7 @@ export default async function ConfigPage({ searchParams }: Props) {
                 </TabsContent>
                 <TabsContent value="functions">
                     { client.haveCRM ?
-                        <FCPanel clientId={client.id} haveCRM={client.haveCRM} genericFunctions={genericFunctions} functionsOfClient={functionsOfClient} /> :
+                        <FCPanel clientId={client.id} haveCRM={client.haveCRM} haveProducts={client.haveProducts} genericFunctions={genericFunctions} functionsOfClient={functionsOfClient} /> :
                         <ClientFunctionsBox clientId={client.id} />
                     }
 
@@ -84,6 +87,7 @@ export default async function ConfigPage({ searchParams }: Props) {
                 <TabsContent value="props" className="space-y-6">
                     <PropsEdit clientId={client.id} haveEvents={client.haveEvents} haveAgents={client.haveAgents} haveAudioResponse={client.haveAudioResponse} inboxProvider={client.inboxProvider} />
                     <CRMPropsEdit clientId={client.id} haveCRM={client.haveCRM} inboxProvider={client.inboxProvider} wapSendFrequency={client.wapSendFrequency} />
+                    <ProductsConfig clientId={client.id} haveProducts={client.haveProducts} />
                     <WhatsappNumbersForm id={client.id} update={updateWhatsAppNumbersAction} whatsappNumbers={client.whatsappNumbers} />
                     <TokensPrice clientId={client.id} promptTokensPrice={client.promptTokensPrice} completionTokensPrice={client.completionTokensPrice} />
                 </TabsContent>

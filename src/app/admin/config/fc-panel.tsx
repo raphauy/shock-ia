@@ -10,10 +10,12 @@ import { toast } from "@/components/ui/use-toast"
 import { Loader } from "lucide-react"
 
 const crmFunctions= ["obtenerDisponibilidad", "reservarParaEvento", "obtenerReservas", "cancelarReserva", "reservarParaEventoDeUnicaVez"]
+const productFunctions= ["buscarProducto"]
 
 type Props= {
     clientId: string
     haveCRM: boolean
+    haveProducts: boolean
     genericFunctions: FunctionDAO[]
     functionsOfClient: FunctionDAO[]
 }
@@ -33,9 +35,13 @@ const getDescription = (func: FunctionDAO): string => {
     return 'Sin descripción'
 }
 
-export function FCPanel({ clientId, haveCRM, genericFunctions, functionsOfClient }: Props) {
+export function FCPanel({ clientId, haveCRM, haveProducts, genericFunctions, functionsOfClient }: Props) {
     const [loadingFunctions, setLoadingFunctions] = useState<{[key: string]: boolean}>({})
     const functionsWithOutCRM= functionsOfClient.filter(func => !crmFunctions.includes(func.name))
+    const functionsWithOutProducts= functionsOfClient.filter(func => !productFunctions.includes(func.name))
+
+    // Funciones custom are the ones that are not in the crmFunctions or productFunctions
+    const functionsCustom= functionsOfClient.filter(func => !crmFunctions.includes(func.name) && !productFunctions.includes(func.name))
 
     const handleToggle = async (functionId: string, isEnabled: boolean) => {
         try {
@@ -71,7 +77,7 @@ export function FCPanel({ clientId, haveCRM, genericFunctions, functionsOfClient
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-4">
-                        {functionsWithOutCRM.map((func) => (
+                        {functionsCustom.map((func) => (
                             <div key={func.id} className="border-b pb-3 last:border-0">
                                 <h3 className="font-medium">
                                     {func.name}
@@ -88,6 +94,16 @@ export function FCPanel({ clientId, haveCRM, genericFunctions, functionsOfClient
                                 <h3 className="font-medium">CRM</h3>
                                 <p className="text-sm text-muted-foreground">
                                     {crmFunctions.map(func => (
+                                        <p key={func}>{func}</p>
+                                    ))}
+                                </p>
+                            </div>
+                        }
+                        {haveProducts &&
+                            <div className="border-b pb-3 last:border-0">
+                                <h3 className="font-medium">Productos</h3>
+                                <p className="text-sm text-muted-foreground">
+                                    {productFunctions.map(func => (
                                         <p key={func}>{func}</p>
                                     ))}
                                 </p>

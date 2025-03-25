@@ -182,3 +182,23 @@ const cambiarEstadoDeContacto=
     "required": ["contactId", "nuevoEstado"]
   }
 }
+
+const buscarProducto=
+{
+  "name": "buscarProducto",
+  "description": "Busca un producto en la base de datos de productos. Esta es una búsqueda semántica, por lo que la query será transformada a un vector y se buscarán productos que tengan una similaridad semántica. Entre los resultados viene el campo similarity que indica la similaridad del producto con la query, cuanto más cercano a 0, más similar es el producto con la query.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "conversationId": {
+        "type": "string",
+        "description": "Id de la conversación que se proporciona en el prompt."
+      },
+      "query": {
+        "type": "string",
+        "description": "Nombre, descripción o algún otro aspecto del producto que se quiere buscar."
+      }
+    }
+  },
+  "required": ["conversationId", "query"]
+}

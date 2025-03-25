@@ -6,6 +6,9 @@ const nextConfig = {
         },
     },
     reactStrictMode: false,
+    images: {
+        domains: ['f.fcdn.app'],
+    },
 }
 
 module.exports = nextConfig

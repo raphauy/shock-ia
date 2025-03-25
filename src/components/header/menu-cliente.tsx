@@ -1,6 +1,6 @@
 "use client"
 
-import { clientHaveCRMAction, getDataClientBySlug } from "@/app/admin/clients/(crud)/actions";
+import { clientHaveCRMAction, clientHaveProductsAction, getDataClientBySlug } from "@/app/admin/clients/(crud)/actions";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -14,7 +14,7 @@ export default function MenuCliente() {
     const [haveAgentes, setHaveAgentes]= useState(false)
     const [haveEvents, setHaveEvents]= useState(false)
     const [haveCRM, setHaveCRM]= useState(false)
-
+    const [haveProducts, setHaveProducts]= useState(false)
     useEffect(() => {
         if (clientSlug) {
             getDataClientBySlug(clientSlug)
@@ -36,7 +36,18 @@ export default function MenuCliente() {
             .catch((error) => {
                 console.log(error)
             })
-            }
+            clientHaveProductsAction(clientSlug)
+            .then((haveProducts) => {
+                if (haveProducts) {
+                    setHaveProducts(true)
+                } else {
+                    setHaveProducts(false)
+                }
+            })
+            .catch((error) => {
+                console.log(error)
+            })
+        }
     }, [clientSlug])
 
     return (
@@ -68,6 +79,13 @@ export default function MenuCliente() {
                         haveCRM &&
                         <li className={`flex items-center border-b-shock-color hover:border-b-shock-color hover:border-b-2 h-11 ${path.includes("crm") && "border-b-2"}`}>
                             <Link href={`/client/${clientSlug}/crm`}><Button className="text-lg" variant="ghost">CRM</Button></Link>
+                        </li>
+                    }
+
+                    {
+                        haveProducts &&
+                        <li className={`flex items-center border-b-shock-color hover:border-b-shock-color hover:border-b-2 h-11 ${path.includes("productos") && "border-b-2"}`}>
+                            <Link href={`/client/${clientSlug}/productos`}><Button className="text-lg" variant="ghost">Productos</Button></Link>
                         </li>
                     }
                 </ul>

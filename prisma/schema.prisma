@@ -86,6 +86,7 @@ model Client {
   haveAgents            Boolean   @default(false)
   haveCRM               Boolean   @default(false)
   haveAudioResponse     Boolean   @default(false)
+  haveProducts          Boolean   @default(false)
   wapSendFrequency      Int       @default(30)
 
   availability          String[]  @default([])
@@ -119,6 +120,9 @@ model Client {
 
   notifications         Notification[]
   promptVersions        PromptVersion[]
+
+  ecommerceFeeds        EcommerceFeed[]
+  products            Product[]
 }
 
 model Document {
@@ -850,4 +854,69 @@ model PromptVersion {
 
   client              Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
   clientId            String
+}
+
+enum EcommerceProvider {
+  FENICIO
+  SHOPIFY
+  WIX
+  WOOCOMMERCE
+  OTHER
+}
+
+model EcommerceFeed {
+  id                  String       @id @default(cuid())
+  name                String                             // Nombre descriptivo del feed
+  provider            EcommerceProvider @default(FENICIO) // Proveedor del ecommerce
+  url                 String                             // URL del feed de productos
+  format              String       @default("google")    // Formato del feed (google, facebook, etc)
+  active              Boolean      @default(true)        // Si el feed está activo
+  lastSync            DateTime?                          // Última sincronización exitosa
+  syncFrequency       Int          @default(1440)        // Frecuencia de sincronización en minutos (por defecto 24h)
+  totalProductsInFeed Int          @default(0)           // Total de productos disponibles en el feed
+  
+  client              Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId            String
+
+  products            Product[]                         // Productos asociados a este feed
+  
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+}
+
+model Product {
+  id                  String       @id @default(cuid())
+  externalId          String                            // ID del producto en el sistema original
+  groupId             String?                           // ID del grupo de productos (variantes)
+  title               String                            // Título/nombre del producto
+  description         String       @db.Text             // Descripción completa
+  link                String                            // URL al producto
+  availability        String       @default("in stock") // Disponibilidad (in stock, out of stock, etc)
+  price               Decimal                           // Precio normal
+  currency            String       @default("UYU")      // Moneda del precio
+  salePrice           Decimal?                          // Precio de oferta (si aplica)
+  brand               String?                           // Marca
+  condition           String       @default("new")      // Condición (new, used, etc)
+  adult               Boolean      @default(false)      // Si es contenido para adultos
+  category            String?                           // Categoría/tipo de producto
+  size                String?                           // Talla si aplica
+  
+  imageUrl            String                            // URL de la imagen principal
+  additionalImages    String[]     @default([])         // URLs de imágenes adicionales
+  tags                String[]     @default([])         // Etiquetas o labels personalizados
+  
+  embedding           Unsupported("vector(1536)")?      // Vector de embeddings para búsqueda semántica
+  embeddingUpdatedAt  DateTime?                         // Última actualización del embedding
+  contentHash         String?                           // Hash MD5 del contenido relevante para el embedding
+  
+  feed                EcommerceFeed @relation(fields: [feedId], references: [id], onDelete: Cascade)
+  feedId              String
+  
+  client              Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId            String
+  
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+  
+  @@unique([clientId, externalId])
 }

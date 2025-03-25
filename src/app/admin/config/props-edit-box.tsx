@@ -15,7 +15,13 @@ interface Props {
     inboxProvider: InboxProvider
 }
 
-export default function PropsEdit({ clientId, haveEvents: initialHaveEvents, haveAgents: initialHaveAgents, haveAudioResponse: initialHaveAudioResponse, inboxProvider }: Props) {
+export default function PropsEdit({ 
+    clientId, 
+    haveEvents: initialHaveEvents, 
+    haveAgents: initialHaveAgents, 
+    haveAudioResponse: initialHaveAudioResponse,
+    inboxProvider 
+}: Props) {
 
     const [loadingEvents, setLoadingEvents] = useState(false)
     const [loadingAgents, setLoadingAgents] = useState(false)

@@ -34,6 +34,8 @@ export default function SimulatorBox() {
   let redirectUri= `/client/${slug}/simulator?r=${milis}`
   if (pathname.includes("crm")) {
     redirectUri= `/client/${slug}/crm/simulator?r=${milis}`
+  } else if (pathname.includes("productos")) {
+    redirectUri= `/client/${slug}/productos/simulator?r=${milis}`
   } else if (pathname.includes("events")) {
     redirectUri= `/client/${slug}/events/id/simulator?r=${milis}`
   }

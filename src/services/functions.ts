@@ -31,6 +31,7 @@ import { createContactEvent } from "./contact-event-services";
 import { getReminderDefinitionsDAOByEventId } from "./reminder-definition-services";
 import { createReminder, ReminderFormValues } from "./reminder-services";
 import { getNextComercialIdToAssign } from "./comercial-services";
+import { searchProductsWithEmbeddings } from "./product-services";
 
 export type CompletionInitResponse = {
   assistantResponse: string | null
@@ -844,6 +845,23 @@ export async function cambiarEstadoDeContacto(clientId: string, contactId: strin
   return `Estado del contacto cambiado correctamente. Mensaje para el usuario: 'Un agente se pondrá en contacto contigo a la brevedad' y no le preguntes más nada.`
 }
 
+export async function buscarProducto(clientId: string, conversationId: string, query: string) {
+  console.log("buscarProducto")
+  console.log(`\tconversationId: ${conversationId}`)
+  console.log(`\tquery: ${query}`)
+  
+  try {
+    const products= await searchProductsWithEmbeddings(clientId, query, 10, 0.6)
+    for (const product of products) {
+      console.log("product: ", product.title, product.similarity)
+    }
+    return products
+  } catch (error) {
+    console.log("Error al buscar productos: ", error)
+    return "Hubo un error al buscar productos"
+  }
+}
+
 export async function defaultFunction(clientId: string, name: string, args: any) {
   console.log("defaultFunction")
   console.log("clientId: ", clientId)
@@ -1062,6 +1080,10 @@ export async function processFunctionCall(clientId: string, name: string, args: 
 
     case "cambiarEstadoDeContacto":
       content= await cambiarEstadoDeContacto(clientId, args.contactId, args.nuevoEstado)
+      break
+
+    case "buscarProducto":
+      content= await buscarProducto(clientId, args.conversationId, args.query)
       break
 
     default:

@@ -4,7 +4,7 @@ import Link from "next/link"
 import { Button } from "../ui/button"
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { clientHaveCRMAction, clientHaveEventsAction } from "@/app/admin/clients/(crud)/actions";
+import { clientHaveCRMAction, clientHaveEventsAction, clientHaveProductsAction } from "@/app/admin/clients/(crud)/actions";
 
 export default function MenuAdmin() {
 
@@ -13,7 +13,8 @@ export default function MenuAdmin() {
     const [slug, setSlug]= useState("")
     const [haveEvents, setHaveEvents]= useState(false)
     const [haveCRM, setHaveCRM]= useState(false)
-
+    const [haveProducts, setHaveProducts]= useState(false)
+    
     useEffect(() => {
         const newSlug= path.split('/')[2]
         if (newSlug) {
@@ -46,6 +47,17 @@ export default function MenuAdmin() {
         .catch((error) => {
             console.log(error)
         })
+        clientHaveProductsAction(slug)
+        .then((haveProducts) => {
+            if (haveProducts) {
+                setHaveProducts(true)
+            } else {
+                setHaveProducts(false)
+            }
+        })
+        .catch((error) => {
+            console.log(error)
+        })
     }, [slug])
 
 
@@ -72,6 +84,12 @@ export default function MenuAdmin() {
                         haveCRM &&
                         <li className={`flex items-center border-b-shock-color hover:border-b-shock-color hover:border-b-2 h-11 ${path.includes("crm") && "border-b-2"}`}>
                             <Link href={`/client/${slug}/crm`}><Button className="text-lg" variant="ghost">CRM</Button></Link>
+                        </li>
+                    }
+                    {
+                        haveProducts &&
+                        <li className={`flex items-center border-b-shock-color hover:border-b-shock-color hover:border-b-2 h-11 ${path.includes("productos") && "border-b-2"}`}>
+                            <Link href={`/client/${slug}/productos`}><Button className="text-lg" variant="ghost">Productos</Button></Link>
                         </li>
                     }
                     <li className={`flex items-center border-b-shock-color hover:border-b-shock-color hover:border-b-2 h-11 whitespace-nowrap ${path === "/agentes" && "border-b-2"}`}>

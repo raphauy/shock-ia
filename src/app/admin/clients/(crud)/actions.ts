@@ -1,6 +1,6 @@
 "use server"
 
-import getClients, { addFunctionToClient, clientHaveCRM, clientHaveEvents, createClient, deleteClient, editClient, getClient, getClientBySlug, getComplementaryFunctionsOfClient, getFunctionsOfClient, getLastClient, removeFunctionFromClient, setFunctions, setPrompt, setWhatsAppEndpoing, setWhatsAppNumbers } from "@/services/clientService";
+import getClients, { addFunctionToClient, clientHaveCRM, clientHaveEvents, clientHaveProducts, createClient, deleteClient, editClient, getClient, getClientBySlug, getComplementaryFunctionsOfClient, getFunctionsOfClient, getLastClient, removeFunctionFromClient, setFunctions, setPrompt, setWhatsAppEndpoing, setWhatsAppNumbers } from "@/services/clientService";
 import { getUser } from "@/services/user-service";
 import { Client, InboxProvider } from "@prisma/client";
 import { revalidatePath } from "next/cache";
@@ -33,6 +33,7 @@ export type DataClient = {
     haveAgents: boolean
     haveCRM: boolean
     haveAudioResponse: boolean
+    haveProducts: boolean
     wapSendFrequency: number
     apiKey: string
     whatsappInstance?: WhatsappInstanceDAO
@@ -72,6 +73,7 @@ export async function getDataClient(clientId: string): Promise<DataClient | null
         haveAgents: client.haveAgents,
         haveCRM: client.haveCRM,
         haveAudioResponse: client.haveAudioResponse,
+        haveProducts: client.haveProducts,
         wapSendFrequency: client.wapSendFrequency,
         apiKey: client.apiKey,
         inboxProvider: client.inboxProvider,
@@ -115,6 +117,7 @@ export async function getDataClientOfUser(userId: string): Promise<DataClient | 
         haveAgents: client.haveAgents,
         haveCRM: client.haveCRM,
         haveAudioResponse: client.haveAudioResponse,
+        haveProducts: client.haveProducts,
         wapSendFrequency: client.wapSendFrequency,
         apiKey: client.apiKey,
         inboxProvider: client.inboxProvider,
@@ -156,6 +159,7 @@ export async function getDataClientBySlug(slug: string): Promise<DataClient | nu
         haveAgents: client.haveAgents,
         haveCRM: client.haveCRM,
         haveAudioResponse: client.haveAudioResponse,
+        haveProducts: client.haveProducts,
         wapSendFrequency: client.wapSendFrequency,
         apiKey: client.apiKey,
         inboxProvider: client.inboxProvider,
@@ -195,6 +199,7 @@ export async function getLastClientAction(): Promise<DataClient | null>{
         haveAgents: client.haveAgents,
         haveCRM: client.haveCRM,
         haveAudioResponse: client.haveAudioResponse,
+        haveProducts: client.haveProducts,
         wapSendFrequency: client.wapSendFrequency,
         apiKey: client.apiKey,
         inboxProvider: client.inboxProvider,
@@ -241,6 +246,7 @@ export async function getDataClients() {
                 haveAgents: client.haveAgents,
                 haveCRM: client.haveCRM,
                 haveAudioResponse: client.haveAudioResponse,
+                haveProducts: client.haveProducts,
                 wapSendFrequency: client.wapSendFrequency,
                 apiKey: client.apiKey,
                 whatsappInstance: client.whatsappInstances.length === 0 ? undefined : client.whatsappInstances[0],
@@ -337,6 +343,11 @@ export async function clientHaveEventsAction(slug: string): Promise<boolean> {
 export async function clientHaveCRMAction(slug: string): Promise<boolean> {
     const haveCRM= await clientHaveCRM(slug)
     return haveCRM
+}
+
+export async function clientHaveProductsAction(slug: string): Promise<boolean> {
+    const haveProducts= await clientHaveProducts(slug)
+    return haveProducts
 }
 
 export async function addFunctionToClientAction(clientId: string, functionId: string) {
