@@ -20,6 +20,12 @@ export const dynamic = 'force-dynamic'
 export async function POST(req: Request) {
 
   const { messages: origMessages, clientId, modelName } = await req.json()
+  
+  // Validar que clientId exista
+  if (!clientId) {
+    return new Response("Client ID is required", { status: 400 })
+  }
+  
   const messages= origMessages.filter((message: any) => message.role !== "system")
   // replace role function by system
   for (let i = 0; i < messages.length; i++) {

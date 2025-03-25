@@ -31,7 +31,7 @@ export default function SemanticSearchPage({ params }: Props) {
   
   const [query, setQuery] = useState("")
   const [limit, setLimit] = useState<number>(10)
-  const [thresholdPercentage, setThresholdPercentage] = useState<number>(50)
+  const [thresholdPercentage, setThresholdPercentage] = useState<number>(40)
   const [searchResults, setSearchResults] = useState<any[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const [error, setError] = useState<string | null>(null)

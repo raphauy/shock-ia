@@ -60,6 +60,10 @@ export async function getLastClient() {
 
 
 export async function getClient(id: string) {
+  // Verificar si el id está definido y no es una cadena vacía
+  if (!id) {
+    return null;
+  }
 
   const found = await prisma.client.findUnique({
     where: {
