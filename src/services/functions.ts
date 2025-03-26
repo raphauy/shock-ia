@@ -851,7 +851,7 @@ export async function buscarProducto(clientId: string, conversationId: string, q
   console.log(`\tquery: ${query}`)
   
   try {
-    const products= await searchProductsWithEmbeddings(clientId, query, 10, 0.6)
+    const products= await searchProductsWithEmbeddings(clientId, query, 10, 0.65)
     for (const product of products) {
       console.log("product: ", product.title, product.similarity)
     }
