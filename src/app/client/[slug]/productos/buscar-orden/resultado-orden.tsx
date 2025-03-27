@@ -1,6 +1,8 @@
 import { PackageX, Package, Loader, ShieldAlert } from "lucide-react"
 import { Orden } from "../ordenes/types"
 import OrdenCardSimple from "./orden-card-simple"
+import CodeBlock from "@/components/code-block"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 interface ResultadoOrdenProps {
   ordenId?: string
@@ -90,7 +92,31 @@ export default function ResultadoOrden({ ordenId, orden, cargando, error }: Resu
       <h2 className="text-xl font-semibold mb-4">
         Detalles de la Orden
       </h2>
-      <OrdenCardSimple orden={orden} />
+      
+      <Tabs defaultValue="vista">
+        <TabsList className="mb-4">
+          <TabsTrigger value="vista">Vista Formateada</TabsTrigger>
+          <TabsTrigger value="json">JSON Raw (Lo que recibe el LLM)</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="vista">
+          <OrdenCardSimple orden={orden} />
+        </TabsContent>
+        
+        <TabsContent value="json">
+          <div className="border rounded-lg overflow-hidden shadow-sm">
+            <div className="bg-muted p-4">
+              <h3 className="font-mono text-sm">Respuesta de la API (raw)</h3>
+            </div>
+            <div className="max-h-[600px] overflow-auto">
+              <CodeBlock 
+                code={JSON.stringify(orden, null, 2)} 
+                showLineNumbers={true} 
+              />
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 } 

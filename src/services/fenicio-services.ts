@@ -62,6 +62,16 @@ export async function getOrderData(clientId: string, orderId: string) {
             };
         }
         
+        // Limpiar los atributos de cada línea de la orden si existen
+        if (data.orden && data.orden.lineas && Array.isArray(data.orden.lineas)) {
+            data.orden.lineas = data.orden.lineas.map((linea: any) => {
+                // Crear una copia de la línea sin el campo atributos
+                const { atributos, ...lineaSinAtributos } = linea;
+                return lineaSinAtributos;
+            });
+            console.log("🧹 Atributos eliminados de las líneas de la orden");
+        }
+        
         // Mostrar información en consola sobre el resultado
         if (data.error) {
             console.error(`❌ Error al obtener la orden ${orderId}:`, data.msj);
