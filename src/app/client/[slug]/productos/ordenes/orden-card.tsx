@@ -11,6 +11,7 @@ import {
 } from "./types";
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { toZonedTime } from 'date-fns-tz';
 
 interface OrdenCardProps {
   orden: Orden;
@@ -21,12 +22,20 @@ const safeText = (text?: string): string => {
   return text || 'N/A';
 };
 
-// Formatear fecha para mostrar en la UI
+// Formatear fecha para mostrar en la UI ajustada al timezone de Montevideo
 const formatearFecha = (fechaStr: string) => {
   try {
-    const fecha = new Date(fechaStr);
-    return format(fecha, "dd 'de' MMMM 'de' yyyy, HH:mm", { locale: es });
+    // Crear una fecha a partir del string (asumiendo que viene en UTC)
+    const fechaUTC = new Date(fechaStr);
+    
+    // Convertir a timezone de Montevideo
+    const timeZone = 'America/Montevideo';
+    const fechaMontevideo = toZonedTime(fechaUTC, timeZone);
+    
+    // Formatear la fecha ya ajustada al timezone correcto
+    return format(fechaMontevideo, "dd 'de' MMMM 'de' yyyy, HH:mm", { locale: es });
   } catch (e) {
+    console.error("Error al formatear fecha:", e);
     return fechaStr;
   }
 };
