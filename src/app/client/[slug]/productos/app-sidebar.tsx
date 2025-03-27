@@ -33,7 +33,7 @@ const items = [
     group: "productos",
   },
   {
-    title: "Listar",
+    title: "Listar y filtrar",
     url: `productos/ordenes`,
     icon: List,
     group: "ordenes",
