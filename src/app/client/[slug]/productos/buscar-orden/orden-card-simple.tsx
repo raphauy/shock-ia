@@ -137,9 +137,6 @@ export default function OrdenCardSimple({ orden }: OrdenCardSimpleProps) {
             <span className="text-muted-foreground">Email:</span> {safeText(getClienteEmail(orden))}
           </p>
           <p className="text-sm">
-            <span className="text-muted-foreground">Documento:</span> {safeText(getClienteDocumento(orden))}
-          </p>
-          <p className="text-sm">
             <span className="text-muted-foreground">Teléfono:</span> {safeText(getClienteTelefono(orden))}
           </p>
         </div>
