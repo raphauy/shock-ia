@@ -202,3 +202,23 @@ const buscarProducto=
   },
   "required": ["conversationId", "query"]
 }
+
+const buscarOrden= 
+{
+  "name": "buscarOrden",
+  "description": "Busca una orden en la base de datos de ordenes a partir de su ID.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "conversationId": {
+        "type": "string",
+        "description": "Id de la conversación que se proporciona en el prompt."
+      },
+      "orderId": {
+        "type": "string",
+        "description": "Id de la orden que se quiere buscar."
+      }
+    }
+  },
+  "required": ["conversationId", "orderId"]
+}

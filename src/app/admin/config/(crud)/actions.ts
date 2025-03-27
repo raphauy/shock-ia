@@ -1,6 +1,6 @@
 "use server"
 
-import { setHaveAgents, setHaveAudioResponse, setHaveCRM, setHaveEvents, setHaveProducts, setTokensPrice, setWapSendFrequency } from "@/services/clientService"
+import { setHaveAgents, setHaveAudioResponse, setHaveCRM, setHaveEvents, setHaveOrderFunction, setHaveProducts, setTokensPrice, setWapSendFrequency, clientHasOrderFunction } from "@/services/clientService"
 import { createOrUpdateEcommerceFeed, getProductsGoogleFormat } from "@/services/product-services"
 import { addTagToFunction, removeTagFromFunction } from "@/services/function-services"
 import { revalidatePath } from "next/cache"
@@ -81,6 +81,23 @@ export async function setHaveProductsAction(clientId: string, haveProducts: bool
     revalidatePath(`/admin/config`)
 
     return client
+}
+
+export async function setHaveOrderFunctionAction(clientId: string, haveOrderFunction: boolean) {
+    const result = await setHaveOrderFunction(clientId, haveOrderFunction)
+
+    revalidatePath(`/admin/config`)
+
+    return result
+}
+
+/**
+ * Verifica si un cliente tiene la función buscarOrden asociada
+ * @param clientId ID del cliente a verificar
+ * @returns true si el cliente tiene la función buscarOrden asociada
+ */
+export async function checkClientHasOrderFunctionAction(clientId: string): Promise<boolean> {
+    return await clientHasOrderFunction(clientId)
 }
 
 /**

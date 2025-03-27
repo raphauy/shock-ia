@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
-import { Bell, BellRing, BookDashed, BookOpen, Bot, BriefcaseBusiness, Calendar, ChevronRightSquare, Clock, DatabaseZap, Kanban, LayoutDashboard, LogOut, Megaphone, MessageCircle, MessagesSquare, Phone, QrCode, RectangleEllipsis, Search, ShoppingCart, Tag, User, Users } from "lucide-react";
+import { Bell, BellRing, BookDashed, BookOpen, Bot, BriefcaseBusiness, Calendar, ChevronRightSquare, Clock, DatabaseZap, Kanban, LayoutDashboard, List, LogOut, Megaphone, MessageCircle, MessagesSquare, Phone, QrCode, RectangleEllipsis, Search, ShoppingCart, Tag, User, Users } from "lucide-react";
 import { useParams, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -32,6 +32,18 @@ const items = [
     icon: Search,
     group: "productos",
   },
+  {
+    title: "Listar",
+    url: `productos/ordenes`,
+    icon: List,
+    group: "ordenes",
+  },
+  {
+    title: "Buscar Orden",
+    url: `productos/buscar-orden`,
+    icon: Search,
+    group: "ordenes",
+  },
 ]
 
 const groups = [
@@ -42,6 +54,10 @@ const groups = [
   {
     id: "productos",
     label: "Productos"
+  },
+  {
+    id: "ordenes",
+    label: "Ordenes"
   },
 ];
 

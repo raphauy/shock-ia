@@ -6,7 +6,14 @@ import { Loader, AlertCircle, CheckCircle, Save } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { createProductFeedAction, getProductFeedAction, setHaveProductsAction, validateProductFeedAction } from "./(crud)/actions"
+import { 
+    checkClientHasOrderFunctionAction,
+    createProductFeedAction, 
+    getProductFeedAction, 
+    setHaveOrderFunctionAction, 
+    setHaveProductsAction, 
+    validateProductFeedAction 
+} from "./(crud)/actions"
 
 interface Props {
     clientId: string
@@ -21,6 +28,9 @@ export default function ProductsConfig({ clientId, haveProducts: initialHaveProd
     const [feedUrl, setFeedUrl] = useState("")
     const [feedIsValid, setFeedIsValid] = useState<boolean | null>(null)
     const [productCount, setProductCount] = useState<number>(0)
+    const [haveOrderFunction, setHaveOrderFunction] = useState(false)
+    const [loadingOrderFunction, setLoadingOrderFunction] = useState(false)
+    const [checkingOrderFunction, setCheckingOrderFunction] = useState(false)
 
     // Limpiar la URL cuando cambia el cliente
     useEffect(() => {
@@ -46,6 +56,26 @@ export default function ProductsConfig({ clientId, haveProducts: initialHaveProd
         }
     }, [clientId]);
 
+    // Verificar si el cliente tiene la función buscarOrden activada
+    const checkOrderFunction = useCallback(async () => {
+        setCheckingOrderFunction(true)
+        try {
+            const hasOrderFunction = await checkClientHasOrderFunctionAction(clientId)
+            setHaveOrderFunction(hasOrderFunction)
+        } catch (error) {
+            console.error("Error al verificar función de órdenes:", error)
+            setHaveOrderFunction(false)
+        } finally {
+            setCheckingOrderFunction(false)
+        }
+    }, [clientId])
+
+    // Siempre verificamos el estado de la función buscarOrden al cargar el componente
+    // o cuando cambia el clientId, independientemente del estado de productos
+    useEffect(() => {
+        checkOrderFunction()
+    }, [clientId, checkOrderFunction])
+
     // Sincronizar el estado con las props cuando cambian
     useEffect(() => {
         setHaveProducts(initialHaveProducts)
@@ -65,6 +95,14 @@ export default function ProductsConfig({ clientId, haveProducts: initialHaveProd
         try {
             await setHaveProductsAction(clientId, checked)
             setHaveProducts(checked)
+            
+            // Si se desactivan los productos, también desactivamos la función de órdenes
+            if (!checked) {
+                // Desactivamos la función en la base de datos y actualizamos el estado local
+                await setHaveOrderFunctionAction(clientId, false)
+                setHaveOrderFunction(false)
+            }
+            
             toast({
                 title: checked ? "Productos activados" : "Productos desactivados",
                 description: checked 
@@ -80,6 +118,30 @@ export default function ProductsConfig({ clientId, haveProducts: initialHaveProd
             })
         } finally {
             setLoadingHaveProducts(false)
+        }
+    }
+    
+    // Función para activar/desactivar la función buscarOrden
+    const handleHaveOrderFunctionChange = async (checked: boolean) => {
+        setLoadingOrderFunction(true)
+        try {
+            await setHaveOrderFunctionAction(clientId, checked)
+            setHaveOrderFunction(checked)
+            toast({
+                title: checked ? "Función buscarOrden activada" : "Función buscarOrden desactivada",
+                description: checked 
+                    ? "La función buscarOrden ha sido activada correctamente" 
+                    : "La función buscarOrden ha sido desactivada correctamente",
+            })
+        } catch (error) {
+            console.error("Error al cambiar estado de la función buscarOrden:", error)
+            toast({
+                title: "Error",
+                description: "Error al cambiar estado de la función buscarOrden",
+                variant: "destructive"
+            })
+        } finally {
+            setLoadingOrderFunction(false)
         }
     }
 
@@ -222,62 +284,86 @@ export default function ProductsConfig({ clientId, haveProducts: initialHaveProd
                 {loadingHaveProducts && <Loader className="w-4 h-4 animate-spin ml-2" />}
             </div>
 
+            {/* La configuración del feed solo se muestra si haveProducts es true */}
             {haveProducts && (
-                <div className="space-y-2 pt-2">
-                    <h3 className="text-sm font-medium">Feed de productos</h3>
-                    <p className="text-xs text-muted-foreground">
-                        Ingresa la URL del feed de productos en formato Google Shopping
-                    </p>
-                    
-                    <div className="flex flex-col gap-2">
-                        <div className="flex items-center gap-2">
-                            <Input
-                                placeholder="https://ejemplo.com/feed.xml"
-                                value={feedUrl}
-                                onChange={(e) => {
-                                    setFeedUrl(e.target.value)
-                                    setFeedIsValid(null)
-                                }}
-                                className="flex-grow"
-                                disabled={fetchingUrl}
-                            />
-                            <Button 
-                                variant="outline"
-                                onClick={handleValidateUrl} 
-                                disabled={loadingFeed || !feedUrl || fetchingUrl}
-                                className="w-48"
-                            >
-                                {loadingFeed ? <Loader className="w-4 h-4 animate-spin mr-2" /> : <CheckCircle className="w-4 h-4 mr-2" />}
-                                Validar feed
-                            </Button>
-                            <Button 
-                                onClick={handleCreateFeed} 
-                                disabled={loadingFeed || !feedUrl || fetchingUrl || (feedIsValid === false)}
-                                className="w-48"
-                            >
-                                {loadingFeed ? <Loader className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
-                                Guardar feed
-                            </Button>
-                        </div>
-                        
-                        {feedIsValid !== null && (
-                            <div className={`flex items-center text-xs ${feedIsValid ? 'text-green-500' : 'text-destructive'}`}>
-                                {feedIsValid ? 
-                                    <>
-                                        <CheckCircle className="w-4 h-4 mr-1" /> 
-                                        Feed válido - {productCount} productos detectados
-                                    </> : 
-                                    <><AlertCircle className="w-4 h-4 mr-1" /> Feed inválido</>
-                                }
-                            </div>
-                        )}
-                        
+                <div className="space-y-4 pt-2">
+                    <div className="space-y-2">
+                        <h3 className="text-sm font-medium">Feed de productos</h3>
                         <p className="text-xs text-muted-foreground">
-                            <strong>Formato esperado:</strong> Google Shopping (XML)
+                            Ingresa la URL del feed de productos en formato Google Shopping
                         </p>
+                        
+                        <div className="flex flex-col gap-2">
+                            <div className="flex items-center gap-2">
+                                <Input
+                                    placeholder="https://ejemplo.com/feed.xml"
+                                    value={feedUrl}
+                                    onChange={(e) => {
+                                        setFeedUrl(e.target.value)
+                                        setFeedIsValid(null)
+                                    }}
+                                    className="flex-grow"
+                                    disabled={fetchingUrl}
+                                />
+                                <Button 
+                                    variant="outline"
+                                    onClick={handleValidateUrl} 
+                                    disabled={loadingFeed || !feedUrl || fetchingUrl}
+                                    className="w-48"
+                                >
+                                    {loadingFeed ? <Loader className="w-4 h-4 animate-spin mr-2" /> : <CheckCircle className="w-4 h-4 mr-2" />}
+                                    Validar feed
+                                </Button>
+                                <Button 
+                                    onClick={handleCreateFeed} 
+                                    disabled={loadingFeed || !feedUrl || fetchingUrl || (feedIsValid === false)}
+                                    className="w-48"
+                                >
+                                    {loadingFeed ? <Loader className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
+                                    Guardar feed
+                                </Button>
+                            </div>
+                            
+                            {feedIsValid !== null && (
+                                <div className={`flex items-center text-xs ${feedIsValid ? 'text-green-500' : 'text-destructive'}`}>
+                                    {feedIsValid ? 
+                                        <>
+                                            <CheckCircle className="w-4 h-4 mr-1" /> 
+                                            Feed válido - {productCount} productos detectados
+                                        </> : 
+                                        <><AlertCircle className="w-4 h-4 mr-1" /> Feed inválido</>
+                                    }
+                                </div>
+                            )}
+                            
+                            <p className="text-xs text-muted-foreground">
+                                <strong>Formato esperado:</strong> Google Shopping (XML)
+                            </p>
+                        </div>
                     </div>
                 </div>
             )}
+            
+            {/* Switch para la función buscarOrden - Siempre visible pero deshabilitado si haveProducts es false */}
+            <div className="pt-2 border-t">
+                <div className="flex items-center space-x-2">
+                    <Switch 
+                        checked={haveOrderFunction} 
+                        onCheckedChange={handleHaveOrderFunctionChange}
+                        disabled={loadingOrderFunction || !haveProducts || checkingOrderFunction}
+                    />
+                    <span>Agregar la FC buscarOrden</span>
+                    {(loadingOrderFunction || checkingOrderFunction) && <Loader className="w-4 h-4 animate-spin ml-2" />}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                    {checkingOrderFunction ? 
+                        "Verificando estado de la función..." :
+                        haveProducts ? 
+                            "Habilita la función buscarOrden para permitir consultas sobre el estado de pedidos" :
+                            "Debes habilitar primero los productos para poder usar esta función"
+                    }
+                </p>
+            </div>
         </div>
     )
 } 

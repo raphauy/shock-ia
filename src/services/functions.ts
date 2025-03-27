@@ -32,6 +32,7 @@ import { getReminderDefinitionsDAOByEventId } from "./reminder-definition-servic
 import { createReminder, ReminderFormValues } from "./reminder-services";
 import { getNextComercialIdToAssign } from "./comercial-services";
 import { searchProductsWithEmbeddings } from "./product-services";
+import { getOrderData } from "./fenicio-services";
 
 export type CompletionInitResponse = {
   assistantResponse: string | null
@@ -862,6 +863,19 @@ export async function buscarProducto(clientId: string, conversationId: string, q
   }
 }
 
+export async function buscarOrden(clientId: string, conversationId: string, orderId: string) {
+  console.log("buscarOrden")
+  console.log(`\tconversationId: ${conversationId}`)
+  console.log(`\torderId: ${orderId}`)
+
+  const orderData= await getOrderData(clientId, orderId)
+  if (orderData.error) {
+    return orderData.msj
+  }
+  console.log("orderData: ", orderData)
+  return orderData
+}
+
 export async function defaultFunction(clientId: string, name: string, args: any) {
   console.log("defaultFunction")
   console.log("clientId: ", clientId)
@@ -1084,6 +1098,10 @@ export async function processFunctionCall(clientId: string, name: string, args: 
 
     case "buscarProducto":
       content= await buscarProducto(clientId, args.conversationId, args.query)
+      break
+
+    case "buscarOrden":
+      content= await buscarOrden(clientId, args.conversationId, args.orderId)
       break
 
     default:

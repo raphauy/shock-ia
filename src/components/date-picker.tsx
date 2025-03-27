@@ -13,8 +13,10 @@ type Props = {
   label: string
   date: Date | undefined
   setDate: (date: Date | undefined) => void
+  disabled?: boolean
 }
-export function DatePicker({ label, date, setDate }: Props) {
+
+export function DatePicker({ label, date, setDate, disabled = false }: Props) {
   const [open, setOpen] = React.useState(false)
 
   function handleDateChange(date: Date | undefined) {
@@ -23,11 +25,16 @@ export function DatePicker({ label, date, setDate }: Props) {
   }
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={disabled ? false : open} onOpenChange={disabled ? undefined : setOpen}>
       <PopoverTrigger asChild>
         <Button
           variant={date ? "outline" : "ghost"}
-          className={cn("w-32 justify-start text-left font-normal", !date && "text-muted-foreground")}
+          className={cn(
+            "w-full h-10 justify-start text-left font-normal border border-input", 
+            !date && "text-muted-foreground",
+            disabled && "opacity-50 cursor-not-allowed"
+          )}
+          disabled={disabled}
         >
           <div className="flex items-center gap-2">
             <CalendarIcon className="w-4 h-4" />

@@ -1123,4 +1123,12 @@ export async function syncOnlyNewProducts(
   };
 }
 
-
+export async function getFeedURL(clientId: string) {
+  const feed = await prisma.ecommerceFeed.findFirst({
+    where: { clientId }
+  });
+  if (!feed) {
+    return null;
+  }
+  return feed.url;
+}

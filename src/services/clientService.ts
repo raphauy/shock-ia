@@ -1009,6 +1009,99 @@ async function removeProductFunctionsFromClient(clientId: string) {
   return results.some(result => result); // retorna true si al menos una función se eliminó exitosamente
 }
 
+export async function setHaveOrderFunction(clientId: string, haveOrderFunction: boolean) {
+  // No necesitamos actualizar ningún campo en la tabla de clientes específicamente
+  // para esta funcionalidad, solo agregamos o quitamos la función
+
+  if (haveOrderFunction) {
+    await addOrderFunctionToClient(clientId)
+  } else {
+    await removeOrderFunctionFromClient(clientId)
+  }
+
+  return true
+}
+
+async function addOrderFunctionToClient(clientId: string) {
+  const orderFunctions = [
+    "buscarOrden"
+  ];
+
+  const results = await Promise.all(
+    orderFunctions.map(async (functionName) => {
+      try {
+        const functionId = await getFunctionIdByFunctionName(functionName);
+        if (!functionId) {
+          console.warn(`Función ${functionName} no encontrada`);
+          return false;
+        }
+        await addFunctionToClient(clientId, functionId);
+        return true;
+      } catch (error) {
+        console.error(`Error al agregar función ${functionName}:`, error);
+        return false;
+      }
+    })
+  );
+
+  return results.some(result => result); // retorna true si al menos una función se agregó exitosamente  
+}
+
+async function removeOrderFunctionFromClient(clientId: string) {
+  const orderFunctions = [
+    "buscarOrden"
+  ];
+ 
+  const results = await Promise.all(
+    orderFunctions.map(async (functionName) => {
+      try {
+        const functionId = await getFunctionIdByFunctionName(functionName);
+        if (!functionId) {
+          console.warn(`Función ${functionName} no encontrada`);
+          return false;
+        }
+        await removeFunctionFromClient(clientId, functionId);
+        return true;
+      } catch (error) {
+        console.error(`Error al eliminar función ${functionName}:`, error);
+        return false;
+      }
+    })
+  );
+
+  return results.some(result => result); // retorna true si al menos una función se eliminó exitosamente
+}
+
+/**
+ * Verifica si un cliente tiene la función buscarOrden asociada
+ * @param clientId ID del cliente a verificar
+ * @returns true si el cliente tiene la función buscarOrden asociada
+ * @note Esta función debe ser llamada solo desde Server Components o Server Actions.
+ */
+export async function clientHasOrderFunction(clientId: string): Promise<boolean> {
+  try {
+    // Verificamos si existe una relación entre el cliente y la función buscarOrden
+    const functionName = "buscarOrden";
+    const functionId = await getFunctionIdByFunctionName(functionName);
+    
+    if (!functionId) {
+      console.warn(`Función ${functionName} no encontrada`);
+      return false;
+    }
+    
+    const clientFunction = await prisma.clientFunction.findFirst({
+      where: {
+        clientId,
+        functionId
+      }
+    });
+    
+    return !!clientFunction;
+  } catch (error) {
+    console.error("Error al verificar función de órdenes:", error);
+    return false;
+  }
+}
 
 export async function getApiKey(clientId: string) {
   const client= await prisma.client.findUnique({
