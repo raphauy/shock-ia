@@ -10,6 +10,7 @@ type Props = {
   },
   searchParams: {
     ordenId?: string
+    raw?: string
   }
 }
 
@@ -18,7 +19,10 @@ export const dynamic = 'force-dynamic'
 
 export default async function BuscarOrden({ params, searchParams }: Props) {
     const { slug } = params
-    const { ordenId } = searchParams
+    const { ordenId, raw } = searchParams
+    
+    // Convertir el parámetro raw a booleano
+    const showRawJson = raw === 'true'
     
     // Obtener datos del cliente
     const client = await getClientBySlug(params.slug)
@@ -63,6 +67,7 @@ export default async function BuscarOrden({ params, searchParams }: Props) {
                     orden={orden}
                     cargando={cargando}
                     error={error}
+                    raw={showRawJson}
                 />
             </div>
         </div>

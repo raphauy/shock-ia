@@ -9,9 +9,10 @@ interface ResultadoOrdenProps {
   orden?: Orden
   cargando: boolean
   error?: string
+  raw?: boolean
 }
 
-export default function ResultadoOrden({ ordenId, orden, cargando, error }: ResultadoOrdenProps) {
+export default function ResultadoOrden({ ordenId, orden, cargando, error, raw = false }: ResultadoOrdenProps) {
   // Si no hay ordenId, mostrar mensaje inicial
   if (!ordenId) {
     return (
@@ -93,7 +94,7 @@ export default function ResultadoOrden({ ordenId, orden, cargando, error }: Resu
         Detalles de la Orden
       </h2>
       
-      <Tabs defaultValue="vista">
+      <Tabs defaultValue={raw ? "json" : "vista"}>
         <TabsList className="mb-4">
           <TabsTrigger value="vista">Vista Formateada</TabsTrigger>
           <TabsTrigger value="json">JSON Raw (Lo que recibe el LLM)</TabsTrigger>
@@ -108,7 +109,7 @@ export default function ResultadoOrden({ ordenId, orden, cargando, error }: Resu
             <div className="bg-muted p-4">
               <h3 className="font-mono text-sm">Respuesta de la API (raw)</h3>
             </div>
-            <div className="max-h-[600px] overflow-auto">
+            <div>
               <CodeBlock 
                 code={JSON.stringify(orden, null, 2)} 
                 showLineNumbers={true} 

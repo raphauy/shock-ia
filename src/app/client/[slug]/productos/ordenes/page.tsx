@@ -157,7 +157,7 @@ export default async function OrdersPage({ params, searchParams }: Props) {
                         
                         <div className="space-y-4">
                             {ordenesData.ordenes?.map((orden) => (
-                                <OrdenCard key={orden.idOrden} orden={orden} />
+                                <OrdenCard key={orden.idOrden} orden={orden} slug={slug} />
                             ))}
                         </div>
                         

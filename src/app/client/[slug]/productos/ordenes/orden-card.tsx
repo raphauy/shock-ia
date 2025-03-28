@@ -12,9 +12,11 @@ import {
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { toZonedTime } from 'date-fns-tz';
+import Link from 'next/link';
 
 interface OrdenCardProps {
   orden: Orden;
+  slug?: string; // Slug del cliente para construir la URL
 }
 
 // Función de utilidad para obtener texto seguro
@@ -91,13 +93,23 @@ const formatearPrecioProducto = (precio?: number, cantidad: number = 1, moneda?:
   }
 };
 
-export default function OrdenCard({ orden }: OrdenCardProps) {
+export default function OrdenCard({ orden, slug }: OrdenCardProps) {
   return (
     <div className="border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
       {/* Cabecera de la orden */}
       <div className="bg-muted p-4 flex flex-col md:flex-row justify-between">
         <div>
-          <h3 className="font-semibold">Orden ID:{orden.idOrden}</h3>
+          <h3 className="font-semibold flex items-center gap-2">
+            Orden ID: {orden.idOrden}
+            {slug && (
+              <Link 
+                href={`/client/${slug}/productos/buscar-orden?ordenId=${orden.idOrden}&raw=true`}
+                className="inline-flex items-center justify-center px-2 py-1 text-xs font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200"
+              >
+                Ver detalles
+              </Link>
+            )}
+          </h3>
           <p className="text-sm text-muted-foreground">
             {formatearFecha(orden.fechaCarga || orden.fechaInicio || "")}
           </p>
