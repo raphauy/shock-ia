@@ -103,8 +103,9 @@ export default function OrdenCard({ orden, slug }: OrdenCardProps) {
             Orden ID: {orden.idOrden}
             {slug && (
               <Link 
+                target="_blank"
                 href={`/client/${slug}/productos/buscar-orden?ordenId=${orden.idOrden}&raw=true`}
-                className="inline-flex items-center justify-center px-2 py-1 text-xs font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200"
+                className="inline-flex items-center justify-center px-2 py-1 text-xs font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 mb-0.5"
               >
                 Ver detalles
               </Link>
