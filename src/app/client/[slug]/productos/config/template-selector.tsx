@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
-import { Loader2, Save, Timer, TimerOff } from "lucide-react";
+import { Loader, Loader2, Save, Timer, TimerOff } from "lucide-react";
 import { setAbandonedOrdersTemplateAction } from "../abandonadas/actions";
 import { ReminderDefinitionDAO } from "@/services/reminder-definition-services";
 import { formatMinutesDelay } from "@/lib/utils";
@@ -97,18 +97,10 @@ export default function TemplateSelector({ templates, clientId, currentTemplateI
                 <Button 
                     onClick={handleSave} 
                     disabled={isLoading || !selectedTemplateId || selectedTemplateId === currentTemplateId}
+                    className="gap-2"
                 >
-                    {isLoading ? (
-                        <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Guardando...
-                        </>
-                    ) : (
-                        <>
-                            <Save className="mr-2 h-4 w-4" />
-                            Guardar
-                        </>
-                    )}
+                    {isLoading ? <Loader className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                    Guardar
                 </Button>
             </div>
             
