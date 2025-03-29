@@ -9,12 +9,13 @@ import { useState } from "react"
 type Props= {
   id?: string
   clientId: string
+  past: boolean
 }
 
 const addTrigger= <Button><PlusCircle size={22} className="mr-2"/>Crear Plantilla</Button>
 const updateTrigger= <Pencil size={27} className="pr-2 hover:cursor-pointer text-muted-foreground"/>
 
-export function ReminderDefinitionDialog({ id, clientId }: Props) {
+export function ReminderDefinitionDialog({ id, clientId, past }: Props) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -29,7 +30,7 @@ export function ReminderDefinitionDialog({ id, clientId }: Props) {
             {id ? 'Actualiza la plantilla de recordatorio con los siguientes campos:' : 'Crea una nueva plantilla de recordatorio con los siguientes campos:'}
           </DialogDescription>
         </DialogHeader>
-        <ReminderDefinitionForm closeDialog={() => setOpen(false)} id={id} clientId={clientId} />
+        <ReminderDefinitionForm closeDialog={() => setOpen(false)} id={id} clientId={clientId} past={past} />
       </DialogContent>
     </Dialog>
   )

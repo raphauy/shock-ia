@@ -1,10 +1,8 @@
-import { getReminderDefinitionsDAO } from "@/services/reminder-definition-services"
-import { ReminderDefinitionDialog } from "./reminderdefinition-dialogs"
-import { DataTable } from "./reminderdefinition-table"
-import { columns } from "./reminderdefinition-columns"
 import { getClientBySlug } from "@/services/clientService"
+import { getReminderDefinitionsDAO } from "@/services/reminder-definition-services"
 import { notFound } from "next/navigation"
 import { ReminderDefinitionList } from "./reminder-definition-list"
+import { ReminderDefinitionDialog } from "./reminderdefinition-dialogs"
 
 type Props= {
   params: {
@@ -19,13 +17,13 @@ export default async function ReminderDefinitionPage({ params }: Props) {
     return notFound()
   }
   const clientId= client.id
-  const data= await getReminderDefinitionsDAO(clientId)
+  const data= await getReminderDefinitionsDAO(clientId, true)
 
   return (
     <div className="w-full">      
 
       <div className="flex justify-end mx-auto my-2">
-        <ReminderDefinitionDialog clientId={clientId}/>
+        <ReminderDefinitionDialog clientId={clientId} past={true}/>
       </div>
 
       <ReminderDefinitionList reminderDefinitions={data}/>

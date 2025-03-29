@@ -7,7 +7,7 @@ import { ArrowUpDown } from "lucide-react"
 import { format } from "date-fns"
 import { DeleteReminderDialog, ReminderDialog } from "./reminder-dialogs"
 import { Badge } from "@/components/ui/badge"
-import { formatMinutesBefore } from "@/lib/utils"
+import { formatMinutesDelay } from "@/lib/utils"
 import { ReminderStatus } from "@prisma/client"
 import { ConversationLink } from "../campaigns/[campaignId]/conversation-link"
 import { CancelReminderButton } from "./cancel-reminder-button"
@@ -65,7 +65,12 @@ export const columns: ColumnDef<ReminderDAO>[] = [
           <Badge variant="outline">
             {date}
           </Badge>
-          <p className="text-xs text-muted-foreground">{formatMinutesBefore(data.reminderDefinition.minutesBefore)}</p>
+          <p className="text-xs text-muted-foreground">
+            {formatMinutesDelay(
+              data.reminderDefinition.minutesDelay, 
+              data.reminderDefinition.past
+            )}
+          </p>
         </div>
       )
     }

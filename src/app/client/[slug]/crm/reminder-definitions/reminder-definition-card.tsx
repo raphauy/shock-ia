@@ -5,15 +5,17 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { ReminderDefinitionDAO } from "@/services/reminder-definition-services"
 import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { AlertCircle, Bell, Clock, MessageSquare, Timer } from "lucide-react"
+import { AlertCircle, Bell, Clock, MessageSquare, Timer, TimerOff } from "lucide-react"
 import { ReminderDefinitionDialog, DeleteReminderDefinitionDialog } from "./reminderdefinition-dialogs"
-import { formatMinutesBefore } from "@/lib/utils"
+import { formatMinutesDelay } from "@/lib/utils"
 
 type Props = {
   reminderDefinition: ReminderDefinitionDAO
 }
 
 export function ReminderDefinitionCard({ reminderDefinition }: Props) {
+  const { past, minutesDelay } = reminderDefinition;
+  
   return (
     <Card className="hover:shadow-lg transition-shadow duration-200 w-full h-full flex flex-col">
       <CardHeader className="pb-2">
@@ -22,13 +24,23 @@ export function ReminderDefinitionCard({ reminderDefinition }: Props) {
             <Bell className="h-6 w-6 text-primary" />
             <p>{reminderDefinition.name}</p>
           </CardTitle>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Timer className="h-4 w-4" />
-            <span className="text-sm">{formatMinutesBefore(reminderDefinition.minutesBefore)} antes</span>
-          </div>
+          
+          <Badge className="ml-2">{past ? "Previo" : "Posterior"}</Badge>
         </div>
       </CardHeader>
       <CardContent className="flex flex-col flex-1">
+        <div className="flex items-center gap-2 text-muted-foreground mb-3">
+          {past ? (
+            <Timer className="h-4 w-4" />
+          ) : (
+            <TimerOff className="h-4 w-4" />
+          )}
+          <span className="text-sm">
+            {formatMinutesDelay(minutesDelay, past)}
+            {past ? "" : " del abandono"}
+          </span>
+        </div>
+        
         <div className="space-y-3 flex-1">
           {reminderDefinition.description && (
             <div className="flex items-center gap-2">
@@ -56,6 +68,7 @@ export function ReminderDefinitionCard({ reminderDefinition }: Props) {
           <ReminderDefinitionDialog 
             id={reminderDefinition.id}
             clientId={reminderDefinition.clientId}
+            past={reminderDefinition.past}
           />
           <DeleteReminderDefinitionDialog
             id={reminderDefinition.id}

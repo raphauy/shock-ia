@@ -4,9 +4,10 @@ import { prisma } from "@/lib/db"
 export type ReminderDefinitionDAO = {
 	id: string
 	name: string
-	description: string | undefined
+	description: string | null
 	message: string
-	minutesBefore: number
+	minutesDelay: number | null
+	past: boolean
 	clientId: string
 	createdAt: Date
 	updatedAt: Date
@@ -16,17 +17,18 @@ export const ReminderDefinitionSchema = z.object({
 	name: z.string().min(1, "name is required."),
 	description: z.string().optional(),
 	message: z.string().min(1, "message is required."),
-	minutesBefore: z.string().refine((val) => !isNaN(Number(val)), { message: "(debe ser un número)" }),
-	clientId: z.string().min(1, "clientId is required."),
+	minutesDelay: z.string().refine((val) => val && !isNaN(Number(val)), { message: "(debe ser un número)" }),
+	past: z.boolean(),
 })
 
 export type ReminderDefinitionFormValues = z.infer<typeof ReminderDefinitionSchema>
 
 
-export async function getReminderDefinitionsDAO(clientId: string) {
+export async function getReminderDefinitionsDAO(clientId: string, past: boolean): Promise<ReminderDefinitionDAO[]> {
   const found = await prisma.reminderDefinition.findMany({
     where: {
-      clientId
+      clientId,
+      past: past
     },
     orderBy: {
       id: 'asc'
@@ -35,37 +37,46 @@ export async function getReminderDefinitionsDAO(clientId: string) {
   return found as ReminderDefinitionDAO[]
 }
 
-export async function getReminderDefinitionDAO(id: string) {
+export async function getReminderDefinitionDAO(id: string): Promise<ReminderDefinitionDAO | null> {
   const found = await prisma.reminderDefinition.findUnique({
     where: {
       id
     },
   })
-  return found as ReminderDefinitionDAO
+  return found as ReminderDefinitionDAO | null
 }
 
 
     
-export async function createReminderDefinition(data: ReminderDefinitionFormValues) {
-  const minutesBefore= Number(data.minutesBefore)
+export async function createReminderDefinition(data: ReminderDefinitionFormValues, clientId: string) {
+  const delay = Number(data.minutesDelay)
   const created = await prisma.reminderDefinition.create({
     data: {
-      ...data,
-      minutesBefore
+      name: data.name,
+      description: data.description,
+      message: data.message,
+      clientId: clientId,
+      minutesDelay: delay,
+      past: data.past,
+      minutesBefore: delay
     }
   })
   return created
 }
 
 export async function updateReminderDefinition(id: string, data: ReminderDefinitionFormValues) {
-  const minutesBefore= Number(data.minutesBefore) 
+  const delay = Number(data.minutesDelay)
   const updated = await prisma.reminderDefinition.update({
     where: {
       id
     },
     data: {
-      ...data,
-      minutesBefore
+      name: data.name,
+      description: data.description,
+      message: data.message,
+      minutesDelay: delay,
+      past: data.past,
+      minutesBefore: delay
     }
   })
   return updated

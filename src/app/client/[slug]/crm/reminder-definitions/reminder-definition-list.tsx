@@ -25,7 +25,7 @@ export function ReminderDefinitionList({ reminderDefinitions }: Props) {
                 <Search className="absolute left-7 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                     type="search"
-                    placeholder="Buscar vinos..."
+                    placeholder="Buscar plantilla..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full pl-10"

@@ -19,7 +19,7 @@ export default async function ReminderPage({ params }: Props) {
   }
   const data= await getRemindersDAO(clientId)
   const contacts= await getContactsDAO(clientId)
-  const reminderDefinitions= await getReminderDefinitionsDAO(clientId)
+  const reminderDefinitions= await getReminderDefinitionsDAO(clientId, true)
   return (
     <div className="w-full">      
 

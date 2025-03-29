@@ -122,7 +122,8 @@ model Client {
   promptVersions        PromptVersion[]
 
   ecommerceFeeds        EcommerceFeed[]
-  products            Product[]
+  products              Product[]
+  abandonedOrders       AbandonedOrder[]
 }
 
 model Document {
@@ -747,7 +748,9 @@ model ReminderDefinition {
   name               String                                     // gennext: show.column
   description        String?                                    // gennext: show.column
   message            String                                     // gennext: show.column
-  minutesBefore      Int                                        // gennext: show.column  
+  minutesBefore      Int?                                        // gennext: show.column
+  minutesDelay       Int?                                       // Nueva columna opcional
+  past               Boolean     @default(true)                 // NUEVO CAMPO: Indica si es para recordatorios pasados (true) o futuros (false)
 
   client             Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
   clientId           String
@@ -874,6 +877,8 @@ model EcommerceFeed {
   lastSync            DateTime?                          // Última sincronización exitosa
   syncFrequency       Int          @default(1440)        // Frecuencia de sincronización en minutos (por defecto 24h)
   totalProductsInFeed Int          @default(0)           // Total de productos disponibles en el feed
+
+  abandonedOrdersTemplateId String?
   
   client              Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
   clientId            String
@@ -919,4 +924,35 @@ model Product {
   updatedAt           DateTime     @updatedAt
   
   @@unique([clientId, externalId])
+}
+
+enum AbandonedOrderStatus {
+  PENDIENTE
+  RECORDATORIO_PROGRAMADO
+  RECORDATORIO_ENVIADO
+  ERROR
+}
+
+model AbandonedOrder {
+  id                  String       @id @default(cuid())
+  externalId          String                                          // gennext: show.column
+  status              AbandonedOrderStatus @default(PENDIENTE)        // gennext: show.column
+
+  fechaInicio         DateTime                                        // gennext: show.column
+  fechaAbandono       DateTime                                        // gennext: show.column
+  rechaRecuperada     DateTime?                                       // gennext: show.column
+  compradorNombre     String                                          // gennext: show.column
+  compradorTelefono   String                                          // gennext: show.column
+  productos           String[]                                        // gennext: show.column
+
+  impuestos           Decimal?                                        // gennext: show.column
+  importeTotal        Decimal                                         // gennext: show.column
+
+  fechaRecordatorio   DateTime?
+
+  client              Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId            String
+
+  createdAt          DateTime  @default(now())                     // gennext: skip.zod
+  updatedAt          DateTime  @updatedAt                          // gennext: skip.zod
 }

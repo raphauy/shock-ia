@@ -43,7 +43,9 @@ export default async function EditEventPage({ params }: Props) {
 
   const clientCustomFields= await getClientCustomFields(event.clientId)
 
-  const allReminderDefinitions= await getReminderDefinitionsDAO(event.clientId)
+  const remindersBefore = await getReminderDefinitionsDAO(event.clientId, true)
+  const remindersAfter = await getReminderDefinitionsDAO(event.clientId, false)
+  const allReminderDefinitions = [...remindersBefore, ...remindersAfter]
 
   return (
     <div className=" mt-4 border rounded-lg w-full">

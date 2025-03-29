@@ -8,15 +8,16 @@ export async function getReminderDefinitionDAOAction(id: string): Promise<Remind
     return getReminderDefinitionDAO(id)
 }
 
-export async function createOrUpdateReminderDefinitionAction(id: string | null, data: ReminderDefinitionFormValues): Promise<ReminderDefinitionDAO | null> {       
+export async function createOrUpdateReminderDefinitionAction(id: string | null, data: ReminderDefinitionFormValues, clientId: string): Promise<ReminderDefinitionDAO | null> {       
     let updated= null
     if (id) {
         updated= await updateReminderDefinition(id, data)
     } else {
-        updated= await createReminderDefinition(data)
+        updated= await createReminderDefinition(data, clientId)
     }     
 
-    revalidatePath("/client/[slug]/crm", "page")
+    revalidatePath("/client/[slug]/crm/reminder-definitions", "page")
+    revalidatePath("/client/[slug]/productos/config", "page")
 
     return updated as ReminderDefinitionDAO
 }
@@ -24,7 +25,8 @@ export async function createOrUpdateReminderDefinitionAction(id: string | null, 
 export async function deleteReminderDefinitionAction(id: string): Promise<ReminderDefinitionDAO | null> {    
     const deleted= await deleteReminderDefinition(id)
 
-    revalidatePath("/client/[slug]/crm", "page")
+    revalidatePath("/client/[slug]/crm/reminder-definitions", "page")
+    revalidatePath("/client/[slug]/productos/config", "page")
 
     return deleted as ReminderDefinitionDAO
 }

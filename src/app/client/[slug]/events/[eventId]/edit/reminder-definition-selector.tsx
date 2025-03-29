@@ -1,14 +1,15 @@
 "use client"
 
+import { addReminderDefinitionToEventAction, removeReminderDefinitionFromEventAction } from "@/app/client/[slug]/events/event-actions"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
-import { ReminderDefinitionDAO } from "@/services/reminder-definition-services"
-import { addReminderDefinitionToEventAction, removeReminderDefinitionFromEventAction } from "@/app/client/[slug]/events/event-actions"
-import { Bell, Check, Plus, Loader2, X } from "lucide-react"
-import { useState } from "react"
 import { toast } from "@/components/ui/use-toast"
+import { ReminderDefinitionDAO } from "@/services/reminder-definition-services"
+import { formatMinutesDelay } from "@/lib/utils"
+import { Bell, Check, Loader, Plus, X } from "lucide-react"
+import { useState } from "react"
 
 type Props = {
   eventId: string
@@ -57,7 +58,9 @@ export default function ReminderDefinitionSelector({ eventId, eventReminderDefin
                   <Bell className="h-4 w-4 text-muted-foreground" />
                   <div>
                     <p className="font-medium">{rd.name}</p>
-                    <p className="text-sm text-muted-foreground">{rd.minutesBefore} minutos antes</p>
+                    <p className="text-sm text-muted-foreground">
+                      {formatMinutesDelay(rd.minutesDelay, rd.past)}
+                    </p>
                   </div>
                 </div>
                 <Button
@@ -68,7 +71,7 @@ export default function ReminderDefinitionSelector({ eventId, eventReminderDefin
                   disabled={loading}
                 >
                   {isLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loader className="h-4 w-4 animate-spin" />
                   ) : (
                     <X className="h-4 w-4" />
                   )}
@@ -108,7 +111,7 @@ export default function ReminderDefinitionSelector({ eventId, eventReminderDefin
                     >
                       <div className="flex items-center gap-2 flex-1">
                         {isLoading ? (
-                          <Loader2 className="h-5 w-5 animate-spin" />
+                          <Loader className="h-5 w-5 animate-spin" />
                         ) : isSelected ? (
                           <Check className="h-5 w-5 text-green-500 font-bold" />
                         ) : (
@@ -116,7 +119,9 @@ export default function ReminderDefinitionSelector({ eventId, eventReminderDefin
                         )}
                         <div className="flex flex-col items-start">
                           <span className="font-medium">{rd.name}</span>
-                          <span className="text-sm text-muted-foreground">{rd.minutesBefore} minutos antes</span>
+                          <span className="text-sm text-muted-foreground">
+                            {formatMinutesDelay(rd.minutesDelay, rd.past)}
+                          </span>
                         </div>
                       </div>
                     </Button>

@@ -56,7 +56,8 @@ export async function getRemindersDAO(clientId: string) {
     },
     include: {
       contact: true,
-      reminderDefinition: true
+      reminderDefinition: true,
+      booking: true
     }
   })
   return found as ReminderDAO[]
@@ -69,7 +70,8 @@ export async function getReminderDAO(id: string) {
     },
     include: {
       contact: true,
-      reminderDefinition: true
+      reminderDefinition: true,
+      booking: true
     }
   })
   return found as ReminderDAO
@@ -96,12 +98,15 @@ export async function createReminder(data: ReminderFormValues) {
   message = message.replace('{fecha_y_hora}', format(eventTimeInUyTimezone, 'dd/MM/yyyy HH:mm'))
   message = message.replace('{evento}', data.eventName || "")
 
-  const minutesBefore = reminderDefinition.minutesBefore
-  const scheduledFor = addMinutes(eventTime, -minutesBefore)
-  // workaround temporary for max delay of 1 week (604800 seconds)
+  const minutesDelay = reminderDefinition.minutesDelay || 0
+  const isPast = reminderDefinition.past
+  
+  const scheduledFor = isPast 
+    ? addMinutes(eventTime, -minutesDelay)
+    : addMinutes(eventTime, minutesDelay)
+  
   const oneWeekFromNow = addSeconds(new Date(), 604800)
   if (scheduledFor > oneWeekFromNow) {
-    //create a reminder with status ERROR
     const created = await prisma.reminder.create({
       data: {
         eventTime,

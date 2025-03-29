@@ -64,7 +64,7 @@ export function getFormat(date: Date): string {
 
 
 export function formatCurrency(value: number): string {
-  return Intl.NumberFormat("es-UY", { style: "currency", currency: "USD", minimumFractionDigits: 0 }).format(value)  
+  return Intl.NumberFormat("es-UY", { style: "currency", currency: "UYU", minimumFractionDigits: 0 }).format(value)  
 }
 
 export function decodeAndCorrectText(str: string): string {
@@ -341,5 +341,20 @@ export function formatMinutesBefore(minutes: number) {
     return `${hours} hora${hours > 1 ? "s" : ""}${remainingMinutes > 0 ? ` y ${remainingMinutes} minuto${remainingMinutes > 1 ? "s" : ""}` : ""} antes`
   } else {
     return `${minutes} minuto${minutes > 1 ? "s" : ""} antes`
+  }
+}
+
+// Nueva función que tiene en cuenta si es antes o después
+export function formatMinutesDelay(minutes: number | null, past: boolean) {
+  if (minutes === null) return "";
+  
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+  const direction = past ? "antes" : "después";
+
+  if (hours > 0) {
+    return `${hours} hora${hours > 1 ? "s" : ""}${remainingMinutes > 0 ? ` y ${remainingMinutes} minuto${remainingMinutes > 1 ? "s" : ""}` : ""} ${direction}`;
+  } else {
+    return `${minutes} minuto${minutes > 1 ? "s" : ""} ${direction}`;
   }
 }

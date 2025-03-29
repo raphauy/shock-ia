@@ -6,7 +6,7 @@ import { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown } from "lucide-react"
 import { format } from "date-fns"
 import { DeleteReminderDefinitionDialog, ReminderDefinitionDialog } from "./reminderdefinition-dialogs"
-import { formatMinutesBefore } from "@/lib/utils"
+import { formatMinutesDelay } from "@/lib/utils"
 
 
 export const columns: ColumnDef<ReminderDefinitionDAO>[] = [
@@ -55,34 +55,32 @@ export const columns: ColumnDef<ReminderDefinitionDAO>[] = [
   },
 
   {
-    accessorKey: "minutesBefore",
+    accessorKey: "minutesDelay",
     header: ({ column }) => {
         return (
           <Button variant="ghost" className="pl-0 dark:text-white"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-            Tiempo antes
+            Tiempo
             <ArrowUpDown className="w-4 h-4 ml-1" />
           </Button>
     )},
     cell: ({ row }) => {
-      const data= row.original
-      return <span>{formatMinutesBefore(data.minutesBefore)}</span>
+      const data = row.original;
+      return <span>{formatMinutesDelay(data.minutesDelay, data.past)}</span>
     }
   },
   {
     id: "actions",
     cell: ({ row }) => {
-      const data= row.original
+      const data = row.original;
 
-      const deleteDescription= `Do you want to delete ReminderDefinition ${data.id}?`
+      const deleteDescription = `¿Estás seguro que deseas eliminar la plantilla "${data.name}"?`;
  
       return (
         <div className="flex items-center justify-end gap-2">
-
-          <ReminderDefinitionDialog id={data.id} clientId={data.clientId} />
+          <ReminderDefinitionDialog id={data.id} clientId={data.clientId} past={data.past} />
           <DeleteReminderDefinitionDialog description={deleteDescription} id={data.id} />
         </div>
-
       )
     },
   },

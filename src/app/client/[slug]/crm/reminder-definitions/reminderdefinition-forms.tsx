@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form"
 import { toast } from "@/hooks/use-toast"
 import { useEffect, useState } from "react"
 import { deleteReminderDefinitionAction, createOrUpdateReminderDefinitionAction, getReminderDefinitionDAOAction } from "./reminderdefinition-actions"
-import { ReminderDefinitionSchema, ReminderDefinitionFormValues } from '@/services/reminder-definition-services'
+import { ReminderDefinitionSchema, ReminderDefinitionFormValues, ReminderDefinitionDAO } from '@/services/reminder-definition-services'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
@@ -18,18 +18,19 @@ import { Textarea } from "@/components/ui/textarea"
 type Props = {
   id?: string
   clientId: string
+  past: boolean
   closeDialog: () => void
 }
 
-export function ReminderDefinitionForm({ id, clientId, closeDialog }: Props) {
+export function ReminderDefinitionForm({ id, clientId, past, closeDialog }: Props) {
   const form = useForm<ReminderDefinitionFormValues>({
     resolver: zodResolver(ReminderDefinitionSchema),
     defaultValues: {
       name: "",
       description: "",
       message: "",
-      minutesBefore: "30",
-      clientId
+      minutesDelay: "30",
+      past: past
     },
     mode: "onChange",
   })
@@ -39,7 +40,7 @@ export function ReminderDefinitionForm({ id, clientId, closeDialog }: Props) {
   const onSubmit = async (data: ReminderDefinitionFormValues) => {
     setLoading(true)
     try {
-      await createOrUpdateReminderDefinitionAction(id ? id : null, data)
+      await createOrUpdateReminderDefinitionAction(id ? id : null, data, clientId)
       toast({ title: id ? "Plantilla de recordatorio actualizada" : "Plantilla de recordatorio creada" })
       closeDialog()
     } catch (error: any) {
@@ -54,18 +55,24 @@ export function ReminderDefinitionForm({ id, clientId, closeDialog }: Props) {
       getReminderDefinitionDAOAction(id).then((data) => {
         if (data) {
           form.reset({
-            ...data,
-            minutesBefore: data.minutesBefore.toString()
+            name: data.name,
+            description: data.description || "",
+            message: data.message,
+            minutesDelay: data.minutesDelay !== null ? data.minutesDelay.toString() : "",
+            past: data.past
           })
         }
         Object.keys(form.getValues()).forEach((key: any) => {
-          if (form.getValues(key) === null) {
-            form.setValue(key, "")
+          const formKey = key as keyof ReminderDefinitionFormValues;
+          if (form.getValues(formKey) === null) {
+            form.setValue(formKey, "" as any);
           }
         })
       })
     }
   }, [form, id])
+
+  const delayLabel = past ? "Minutos antes del evento" : "Minutos después del abandono";
 
   return (
     <div className="rounded-md">
@@ -91,7 +98,7 @@ export function ReminderDefinitionForm({ id, clientId, closeDialog }: Props) {
               <FormItem>
                 <FormLabel>Descripción</FormLabel>
                 <FormControl>
-                  <Input placeholder="Descripción de la plantilla" {...field} />
+                  <Input placeholder="Descripción de la plantilla" {...field} value={field.value ?? ''}/>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -110,22 +117,22 @@ export function ReminderDefinitionForm({ id, clientId, closeDialog }: Props) {
                 <FormDescription>
                   <p>Variables disponibles:</p>
                   <p>- {`{nombre}`} para referirte al nombre del contacto.</p>
-                  <p>- {`{fecha}`} para referirte a la fecha del recordatorio.</p>
-                  <p>- {`{hora}`} para referirte a la hora del recordatorio.</p>
-                  <p>- {`{fecha_y_hora}`} para referirte a la fecha y hora del recordatorio.</p>
-                  <p>- {`{evento}`} para referirte al nombre del evento.</p>
+                  <p>- {`{fecha}`} para referirte a la fecha del evento/abandono.</p>
+                  <p>- {`{hora}`} para referirte a la hora del evento/abandono.</p>
+                  <p>- {`{fecha_y_hora}`} para referirte a la fecha y hora del evento/abandono.</p>
+                  {past && <p>- {`{evento}`} para referirte al nombre del evento.</p>}
                 </FormDescription>
               </FormItem>
             )}
           />
           <FormField
             control={form.control}
-            name="minutesBefore"
+            name="minutesDelay"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Tiempo antes en minutos</FormLabel>
+                <FormLabel>{delayLabel}</FormLabel>
                 <FormControl>
-                  <Input placeholder="Tiempo antes" {...field} />
+                  <Input type="number" placeholder="Minutos" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
