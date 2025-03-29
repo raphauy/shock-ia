@@ -748,8 +748,7 @@ model ReminderDefinition {
   name               String                                     // gennext: show.column
   description        String?                                    // gennext: show.column
   message            String                                     // gennext: show.column
-  minutesBefore      Int?                                        // gennext: show.column
-  minutesDelay       Int?                                       // Nueva columna opcional
+  minutesDelay       Int                                        // Nueva columna opcional
   past               Boolean     @default(true)                 // NUEVO CAMPO: Indica si es para recordatorios pasados (true) o futuros (false)
 
   client             Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)

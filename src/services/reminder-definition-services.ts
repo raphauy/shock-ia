@@ -6,7 +6,7 @@ export type ReminderDefinitionDAO = {
 	name: string
 	description: string | null
 	message: string
-	minutesDelay: number | null
+	minutesDelay: number
 	past: boolean
 	clientId: string
 	createdAt: Date
@@ -58,7 +58,6 @@ export async function createReminderDefinition(data: ReminderDefinitionFormValue
       clientId: clientId,
       minutesDelay: delay,
       past: data.past,
-      minutesBefore: delay
     }
   })
   return created
@@ -76,7 +75,6 @@ export async function updateReminderDefinition(id: string, data: ReminderDefinit
       message: data.message,
       minutesDelay: delay,
       past: data.past,
-      minutesBefore: delay
     }
   })
   return updated
