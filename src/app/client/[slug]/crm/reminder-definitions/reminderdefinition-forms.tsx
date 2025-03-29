@@ -121,6 +121,7 @@ export function ReminderDefinitionForm({ id, clientId, past, closeDialog }: Prop
                   <p>- {`{hora}`} para referirte a la hora del evento/abandono.</p>
                   <p>- {`{fecha_y_hora}`} para referirte a la fecha y hora del evento/abandono.</p>
                   {past && <p>- {`{evento}`} para referirte al nombre del evento.</p>}
+                  {!past && <p>- {`{productosCantidad}`} para referirte a la cantidad de productos en la orden.</p>}
                 </FormDescription>
               </FormItem>
             )}
