@@ -76,7 +76,7 @@ export default function CheckOrdersButton({ clientId }: CheckOrdersButtonProps) 
             className="flex items-center gap-2"
         >
             {isLoading ? <Loader className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-            Buscar órdenes abandonadas
+            Buscar órdenes (24h)
         </Button>
     );
 } 

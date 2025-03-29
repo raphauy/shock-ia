@@ -5,11 +5,11 @@ import { getTodayAbandonedOrders } from "@/services/fenicio-services"
 import { createAbandonedOrder, externalIdExists, setAbandonedOrdersTemplate } from "@/services/abandoned-orders-service"
 
 /**
- * Server action para buscar órdenes abandonadas del día y guardarlas en la base de datos
+ * Server action para buscar órdenes abandonadas de las últimas 24 horas y guardarlas en la base de datos
  */
 export async function checkAbandonedOrdersAction(clientId: string) {
     try {
-        // Obtener las órdenes abandonadas del día actual
+        // Obtener las órdenes abandonadas de las últimas 24 horas
         const ordenesResponse = await getTodayAbandonedOrders(clientId);
         
         if (ordenesResponse.error) {
@@ -21,10 +21,10 @@ export async function checkAbandonedOrdersAction(clientId: string) {
         }
         
         if (!ordenesResponse.ordenes || ordenesResponse.ordenes.length === 0) {
-            console.log("ℹ️ No se encontraron órdenes abandonadas para el día de hoy");
+            console.log("ℹ️ No se encontraron órdenes abandonadas en las últimas 24 horas");
             return { 
                 error: false, 
-                mensaje: "No se encontraron órdenes abandonadas para el día de hoy",
+                mensaje: "No se encontraron órdenes abandonadas en las últimas 24 horas",
                 totalOrdenes: 0,
                 ordenesProcesadas: 0
             };

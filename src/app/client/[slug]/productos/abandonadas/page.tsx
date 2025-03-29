@@ -153,6 +153,7 @@ export default async function AbandonadasPage({ params }: Props) {
                                                     size="icon" 
                                                     className="h-8 w-8 text-primary hover:text-primary/80"
                                                     title="Enviar recordatorio"
+                                                    disabled={true}
                                                 >
                                                     <Send className="h-4 w-4" />
                                                 </Button>

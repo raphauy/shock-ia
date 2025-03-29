@@ -141,20 +141,23 @@ export async function getTodayAbandonedOrders(clientId: string): Promise<{ error
             console.log("⚠️ No se encontró la URL del proxy en las variables de entorno (PROXY_URL)");
         }
         
-        // Obtener la fecha actual en formato YYYY-MM-DD
+        // Obtener la fecha actual y la fecha de hace 24 horas
         const hoy = new Date();
+        const hace24Horas = new Date(hoy.getTime() - 24 * 60 * 60 * 1000);
+        
         const fechaHoy = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
+        const fechaAyer = `${hace24Horas.getFullYear()}-${String(hace24Horas.getMonth() + 1).padStart(2, '0')}-${String(hace24Horas.getDate()).padStart(2, '0')}`;
         
         // Construir parámetros de consulta
         const params = new URLSearchParams();
         params.append('pag', '1'); // Primera página
         params.append('tot', '100'); // 100 órdenes por página (podemos ajustar este valor)
         params.append('estado', 'ABANDONADA'); // Filtrar solo órdenes abandonadas
-        params.append('fDesde', fechaHoy); // Desde hoy
+        params.append('fDesde', fechaAyer); // Desde hace 24 horas
         params.append('fHasta', fechaHoy); // Hasta hoy
         
         const ordenesUrl = `${ordenesEndpoint}?${params.toString()}`;
-        console.log(`🔍 Consultando órdenes abandonadas del día ${fechaHoy}`);
+        console.log(`🔍 Consultando órdenes abandonadas desde ${fechaAyer} hasta ${fechaHoy}`);
         
         // Realizar la petición para obtener las órdenes abandonadas
         const response = await axios.get(ordenesUrl, {
@@ -198,7 +201,7 @@ export async function getTodayAbandonedOrders(clientId: string): Promise<{ error
         } else if (data.ordenes && data.ordenes.length > 0) {
             console.log(`✅ Órdenes abandonadas obtenidas: ${data.ordenes.length} de un total de ${data.totAbs || 0}`);
         } else {
-            console.log("ℹ️ No se encontraron órdenes abandonadas para el día de hoy");
+            console.log("ℹ️ No se encontraron órdenes abandonadas en las últimas 24 horas");
         }
         
         return {
