@@ -1,7 +1,7 @@
 import { AbandonedOrderStatus } from "@prisma/client";
 import { formatCurrency } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ShoppingBag, Clock, CheckCircle, AlertTriangle, Banknote } from "lucide-react";
+import { ShoppingBag, Clock, CheckCircle, AlertTriangle, Banknote, Calendar } from "lucide-react";
 
 interface StatsCardProps {
     title: string;
@@ -39,13 +39,14 @@ export default function AbandonedOrdersStats({ orders }: AbandonedOrdersStatsPro
     
     // Contar órdenes por estado
     const pendingOrders = orders.filter(order => order.status === AbandonedOrderStatus.PENDIENTE).length;
+    const scheduledOrders = orders.filter(order => order.status === AbandonedOrderStatus.RECORDATORIO_PROGRAMADO).length;
     const notifiedOrders = orders.filter(order => order.status === AbandonedOrderStatus.RECORDATORIO_ENVIADO).length;
     
     // Calcular total de importes
     const totalValue = orders.reduce((sum, order) => sum + Number(order.importeTotal), 0);
     
     return (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             <StatsCard 
                 title="Total de órdenes" 
                 value={totalOrders.toString()}
@@ -62,7 +63,15 @@ export default function AbandonedOrdersStats({ orders }: AbandonedOrdersStatsPro
             />
             
             <StatsCard 
-                title="Recordatorio enviado" 
+                title="Programados" 
+                value={scheduledOrders.toString()}
+                description="Recordatorios programados"
+                icon={<Calendar className="h-4 w-4 text-orange-500" />}
+                className="border-l-4 border-orange-500"
+            />
+            
+            <StatsCard 
+                title="Enviados" 
                 value={notifiedOrders.toString()}
                 description="Clientes ya contactados"
                 icon={<CheckCircle className="h-4 w-4 text-green-500" />}
