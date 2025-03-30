@@ -62,7 +62,8 @@ export function ReminderForm({ id, contacts, reminderDefinitions, closeDialog }:
         if (data) {
           const formData = {
             ...data,
-            bookingId: data.bookingId || undefined
+            bookingId: data.bookingId || undefined,
+            abandonedOrderId: data.abandonedOrderId || undefined
           }
           form.reset(formData)
         }
@@ -248,6 +249,30 @@ export function ReminderForm({ id, contacts, reminderDefinitions, closeDialog }:
                     </PopoverContent>
                   </Popover>
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tipo de recordatorio</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value || "GENERIC"}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Selecciona un tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="GENERIC">Genérico</SelectItem>
+                    <SelectItem value="BOOKING">Reserva</SelectItem>
+                    <SelectItem value="ABANDONED_ORDER">Orden abandonada</SelectItem>
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}

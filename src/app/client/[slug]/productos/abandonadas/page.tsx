@@ -1,5 +1,4 @@
 import { getClientBySlug } from "@/services/clientService"
-import { prisma } from "@/lib/db"
 import { formatCurrency } from "@/lib/utils"
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -11,23 +10,55 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Send, Settings } from "lucide-react"
 import Link from "next/link"
+import SendReminderButton from './send-reminder-button'
+import { AbandonedOrderStatus } from "@prisma/client"
+import { getAbandonedOrdersByClientId } from "@/services/abandoned-orders-service"
 
 // Forzar que la página siempre se renderice dinámicamente
 export const dynamic = 'force-dynamic'
 
+// Tipo para las variantes de badge disponibles en nuestro sistema
+type BadgeVariant = 'statusPendiente' | 'statusProgramado' | 'statusEnviado' | 'secondary' | 'statusError'
+
+// Mapa de variantes de badge según el status
+const statusVariantMap: Record<AbandonedOrderStatus, BadgeVariant> = {
+    'PENDIENTE': 'statusPendiente',
+    'RECORDATORIO_PROGRAMADO': 'statusProgramado',
+    'RECORDATORIO_ENVIADO': 'statusEnviado',
+    'EXPIRADA': 'secondary',
+    'ERROR': 'statusError'
+}
+
+// Mapa de textos a mostrar para cada status
+const statusTextMap: Record<AbandonedOrderStatus, string> = {
+    'PENDIENTE': 'Pendiente',
+    'RECORDATORIO_PROGRAMADO': 'Programado',
+    'RECORDATORIO_ENVIADO': 'Enviado',
+    'EXPIRADA': 'Expirada',
+    'ERROR': 'Error'
+}
+
 // Formatear fecha para mostrar en la UI ajustada al timezone de Montevideo
 const formatearFecha = (fecha: Date) => {
     try {
+        // Asegurarnos de que estamos trabajando con un objeto Date
+        const fechaObj = fecha instanceof Date ? fecha : new Date(fecha);
+        
         // Convertir a timezone de Montevideo
         const timeZone = 'America/Montevideo'
-        const fechaMontevideo = toZonedTime(fecha, timeZone)
+        const fechaMontevideo = toZonedTime(fechaObj, timeZone)
         
         // Formatear la fecha ya ajustada al timezone correcto
         return format(fechaMontevideo, "dd MMM yyyy, HH:mm", { locale: es })
     } catch (e) {
-        console.error("Error al formatear fecha:", e)
-        // Fallback a formato simple
-        return format(fecha, "dd/MM/yyyy HH:mm")
+        console.error("Error al formatear fecha:", e, "Fecha original:", fecha)
+        // Fallback a formato simple, intentando convertir a Date si es necesario
+        try {
+            const fechaObj = fecha instanceof Date ? fecha : new Date(fecha);
+            return format(fechaObj, "dd/MM/yyyy HH:mm")
+        } catch {
+            return "Fecha inválida"
+        }
     }
 }
 
@@ -35,6 +66,49 @@ type Props = {
     params: {
         slug: string
     }
+}
+
+// Componente para mostrar el badge de estado y su información adicional
+type StatusBadgeProps = {
+    status: AbandonedOrderStatus;
+    fechaRecordatorio?: Date | null;
+    fechaRecuperada?: Date | null;
+    error?: string | null;
+}
+
+function StatusBadge({ status, fechaRecordatorio, fechaRecuperada, error }: StatusBadgeProps) {
+    return (
+        <div className="space-y-1">
+            <Badge variant={statusVariantMap[status]}>
+                {statusTextMap[status]}
+            </Badge>
+            
+            {/* Información adicional según el estado */}
+            {status === 'RECORDATORIO_PROGRAMADO' && fechaRecordatorio && (
+                <div className="text-xs text-muted-foreground">
+                    Para: {formatearFecha(fechaRecordatorio)}
+                </div>
+            )}
+            
+            {status === 'RECORDATORIO_ENVIADO' && fechaRecuperada && (
+                <div className="text-xs text-muted-foreground">
+                    Enviado: {formatearFecha(fechaRecuperada)}
+                </div>
+            )}
+            
+            {status === 'EXPIRADA' && fechaRecuperada && (
+                <div className="text-xs text-muted-foreground">
+                    Expirada: {formatearFecha(fechaRecuperada)}
+                </div>
+            )}
+            
+            {status === 'ERROR' && (
+                <div className="text-xs text-destructive max-w-[200px] truncate" title={error || "Error desconocido"}>
+                    {error || "Error desconocido"}
+                </div>
+            )}
+        </div>
+    );
 }
 
 export default async function AbandonadasPage({ params }: Props) {
@@ -51,15 +125,8 @@ export default async function AbandonadasPage({ params }: Props) {
         )
     }
     
-    // Obtener las órdenes abandonadas de la base de datos
-    const abandonedOrders = await prisma.abandonedOrder.findMany({
-        where: {
-            clientId: client.id
-        },
-        orderBy: {
-            fechaAbandono: 'desc'
-        }
-    })
+    // Obtener las órdenes abandonadas utilizando la capa de servicios
+    const abandonedOrders = await getAbandonedOrdersByClientId(client.id);
     
     return (
         <div className="container mx-auto py-6 space-y-6">
@@ -124,39 +191,20 @@ export default async function AbandonadasPage({ params }: Props) {
                                             {formatCurrency(Number(order.importeTotal))}
                                         </TableCell>
                                         <TableCell>
-                                            {order.status === 'PENDIENTE' && (
-                                                <Badge
-                                                    variant="statusPendiente"
-                                                >
-                                                    Pendiente
-                                                </Badge>
-                                            )}
-                                            {order.status === 'RECORDATORIO_ENVIADO' && (
-                                                <Badge
-                                                    variant="statusEnviado"
-                                                >
-                                                    Recordatorio enviado
-                                                </Badge>
-                                            )}
-                                            {order.status === 'ERROR' && (
-                                                <Badge
-                                                    variant="statusError"
-                                                >
-                                                    Error
-                                                </Badge>
-                                            )}
+                                            <StatusBadge
+                                                status={order.status as AbandonedOrderStatus}
+                                                fechaRecordatorio={order.fechaRecordatorio}
+                                                fechaRecuperada={
+                                                    (order.status === 'RECORDATORIO_ENVIADO' || 
+                                                     order.status === 'EXPIRADA') ? 
+                                                    order.updatedAt : null
+                                                }
+                                                error={order.error}
+                                            />
                                         </TableCell>
                                         <TableCell className="text-center">
                                             {order.status === 'PENDIENTE' && (
-                                                <Button 
-                                                    variant="ghost" 
-                                                    size="icon" 
-                                                    className="h-8 w-8 text-primary hover:text-primary/80"
-                                                    title="Enviar recordatorio"
-                                                    disabled={true}
-                                                >
-                                                    <Send className="h-4 w-4" />
-                                                </Button>
+                                                <SendReminderButton orderId={order.id} />
                                             )}
                                         </TableCell>
                                     </TableRow>

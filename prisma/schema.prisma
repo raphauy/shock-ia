@@ -783,9 +783,16 @@ enum ReminderStatus {
   ERROR
 }
 
+enum ReminderType {
+  GENERIC
+  BOOKING
+  ABANDONED_ORDER
+}
+
 model Reminder {
   id                 String      @id @default(cuid())
   status             ReminderStatus @default(PENDIENTE)         // gennext: show.column
+  type               ReminderType @default(GENERIC)             // gennext: show.column
   eventTime          DateTime                                   // gennext: show.column
   scheduledFor       DateTime                                   // gennext: show.column
   message            String                                     // gennext: show.column
@@ -803,6 +810,9 @@ model Reminder {
 
   booking            Booking? @relation(fields: [bookingId], references: [id], onDelete: Cascade)
   bookingId          String?
+
+  abandonedOrder     AbandonedOrder? @relation(fields: [abandonedOrderId], references: [id], onDelete: Cascade)
+  abandonedOrderId   String?
 
   createdAt          DateTime   @default(now())                 // gennext: skip.zod
   updatedAt          DateTime   @updatedAt                      // gennext: skip.zod
@@ -929,6 +939,7 @@ enum AbandonedOrderStatus {
   PENDIENTE
   RECORDATORIO_PROGRAMADO
   RECORDATORIO_ENVIADO
+  EXPIRADA
   ERROR
 }
 
@@ -939,7 +950,6 @@ model AbandonedOrder {
 
   fechaInicio         DateTime                                        // gennext: show.column
   fechaAbandono       DateTime                                        // gennext: show.column
-  rechaRecuperada     DateTime?                                       // gennext: show.column
   compradorNombre     String                                          // gennext: show.column
   compradorTelefono   String                                          // gennext: show.column
   productos           String[]                                        // gennext: show.column
@@ -948,9 +958,12 @@ model AbandonedOrder {
   importeTotal        Decimal                                         // gennext: show.column
 
   fechaRecordatorio   DateTime?
+  error               String?                                         // gennext: show.column
 
   client              Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
   clientId            String
+
+  reminders           Reminder[]                                      // gennext: skip.list
 
   createdAt          DateTime  @default(now())                     // gennext: skip.zod
   updatedAt          DateTime  @updatedAt                          // gennext: skip.zod

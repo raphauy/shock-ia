@@ -1,5 +1,5 @@
 import { checkDateTimeFormatForSlot, decodeAndCorrectText } from "@/lib/utils";
-import { ContactEventType, EventType } from "@prisma/client";
+import { ContactEventType, EventType, ReminderType } from "@prisma/client";
 import { addMinutes, format, parse } from "date-fns";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import moment from 'moment-timezone';
@@ -549,6 +549,7 @@ export async function reservarParaEvento(clientId: string, conversationId: strin
         eventTime,
         bookingId: created.id,
         eventName: event.name,
+        type: ReminderType.BOOKING
       }
       try {
         await createReminder(reminderValues)
@@ -714,6 +715,7 @@ export async function reservarParaEventoDeUnicaVez(clientId: string, conversatio
         eventTime,
         bookingId: created.id,
         eventName: event.name,
+        type: ReminderType.BOOKING
       }
       try {
         await createReminder(reminderValues)

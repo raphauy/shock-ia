@@ -40,7 +40,6 @@ export default function AbandonedOrdersStats({ orders }: AbandonedOrdersStatsPro
     // Contar órdenes por estado
     const pendingOrders = orders.filter(order => order.status === AbandonedOrderStatus.PENDIENTE).length;
     const notifiedOrders = orders.filter(order => order.status === AbandonedOrderStatus.RECORDATORIO_ENVIADO).length;
-    const errorOrders = orders.filter(order => order.status === AbandonedOrderStatus.ERROR).length;
     
     // Calcular total de importes
     const totalValue = orders.reduce((sum, order) => sum + Number(order.importeTotal), 0);
@@ -78,15 +77,6 @@ export default function AbandonedOrdersStats({ orders }: AbandonedOrdersStatsPro
                 className="border-l-4 border-primary"
             />
             
-            {errorOrders > 0 && (
-                <StatsCard 
-                    title="Errores" 
-                    value={errorOrders.toString()}
-                    description="Órdenes con error"
-                    icon={<AlertTriangle className="h-4 w-4 text-destructive" />}
-                    className="border-l-4 border-destructive"
-                />
-            )}
         </div>
     );
 } 

@@ -217,3 +217,42 @@ export async function getTodayAbandonedOrders(clientId: string): Promise<{ error
         };
     }
 }
+
+export async function getOrderStatus(clientId: string, orderId: string): Promise<{ status: string; error?: boolean; msj?: string }> {
+  try {
+    // Obtener los datos completos de la orden
+    const orderData = await getOrderData(clientId, orderId);
+    
+    // Si hay un error en la obtención de datos
+    if (orderData.error) {
+      console.error(`❌ Error al obtener estado de la orden ${orderId}:`, orderData.msj);
+      return { 
+        status: "ERROR",
+        error: true,
+        msj: orderData.msj
+      };
+    }
+    
+    // Si los datos de la orden están disponibles
+    if (orderData.orden) {
+      const estado = orderData.orden.estado;
+      console.log(`✅ Estado de la orden ${orderId} obtenido: ${estado}`);
+      return { status: estado };
+    }
+    
+    // Si no hay datos de orden
+    return { 
+      status: "DESCONOCIDO",
+      error: true,
+      msj: "No se pudieron obtener datos de la orden" 
+    };
+    
+  } catch (err: any) {
+    console.error(`❌ Error al verificar estado de orden ${orderId}:`, err.message);
+    return { 
+      status: "ERROR",
+      error: true,
+      msj: `Error al verificar estado: ${err.message}`
+    };
+  }
+}
