@@ -2,11 +2,13 @@ import { getClientBySlug } from "@/services/clientService"
 import { getReminderDefinitionsDAO } from "@/services/reminder-definition-services"
 import { notFound } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { getAbandonedOrdersTemplateId } from "@/services/abandoned-orders-service"
+import { getAbandonedOrdersTemplateId, getAbandonedOrdersExpireTime } from "@/services/abandoned-orders-service"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Settings, ListPlus } from "lucide-react"
 import TemplateSelector from "./template-selector"
+import ExpireTimeSelector from "./expire-time-selector"
+import { getValue } from "@/services/config-services"
 
 // Forzar que la página siempre se renderice dinámicamente
 export const dynamic = 'force-dynamic'
@@ -30,6 +32,9 @@ export default async function ConfigPage({ params }: Props) {
   
   // Obtener la plantilla actualmente configurada
   const currentTemplateId = await getAbandonedOrdersTemplateId(client.id)
+  
+  // Obtener el tiempo de expiración actual específico del cliente
+  const currentExpireTime = await getAbandonedOrdersExpireTime(client.id)
   
   return (
     <div className="container mx-auto py-6 space-y-6">
@@ -78,6 +83,21 @@ export default async function ConfigPage({ params }: Props) {
               currentTemplateId={currentTemplateId}
             />
           )}
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle>Tiempo de Expiración</CardTitle>
+          <CardDescription>
+            Configura cuándo una orden abandonada se considera expirada y ya no recibirá recordatorios.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ExpireTimeSelector 
+            currentValue={currentExpireTime.toString()} 
+            clientId={client.id}
+          />
         </CardContent>
       </Card>
     </div>

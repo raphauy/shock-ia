@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { Loader, Send } from "lucide-react";
+import { Loader, PlayCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { processAbandonedOrderAction } from "./actions";
@@ -63,8 +63,8 @@ export default function SendReminderButton({ orderId }: SendReminderButtonProps)
             title="Enviar recordatorio"
         >
             {isLoading ? 
-                <Loader className="h-4 w-4 animate-spin" /> : 
-                <Send className="h-4 w-4" />
+                <Loader className="h-5 w-5 animate-spin" /> : 
+                <PlayCircle className="h-5 w-5" />
             }
         </Button>
     );

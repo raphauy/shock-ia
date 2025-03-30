@@ -888,6 +888,7 @@ model EcommerceFeed {
   totalProductsInFeed Int          @default(0)           // Total de productos disponibles en el feed
 
   abandonedOrdersTemplateId String?
+  abandonedOrderExpireTime Int @default(48)
   
   client              Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
   clientId            String

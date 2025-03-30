@@ -102,6 +102,50 @@ export async function getAbandonedOrdersTemplateId(clientId: string): Promise<st
 }
 
 /**
+ * Obtiene el tiempo de expiración configurado para órdenes abandonadas de un cliente
+ * @param clientId ID del cliente
+ * @returns Tiempo de expiración en horas (valor por defecto: 48)
+ */
+export async function getAbandonedOrdersExpireTime(clientId: string): Promise<number> {
+    const feed = await prisma.ecommerceFeed.findFirst({
+        where: {
+            clientId: clientId,
+        },
+        select: {
+            abandonedOrderExpireTime: true
+        }
+    });
+
+    if (!feed || !feed.abandonedOrderExpireTime) {
+        return 48; // Valor por defecto si no hay configuración
+    }
+
+    return feed.abandonedOrderExpireTime;
+}
+
+/**
+ * Establece el tiempo de expiración para órdenes abandonadas de un cliente
+ * @param clientId ID del cliente
+ * @param hours Tiempo de expiración en horas
+ */
+export async function setAbandonedOrdersExpireTime(clientId: string, hours: number): Promise<void> {
+    const feed = await prisma.ecommerceFeed.findFirst({
+        where: {
+            clientId: clientId,
+        }
+    });
+
+    if (!feed) {
+        throw new Error("Feed not found, clientId: " + clientId);
+    }
+
+    await prisma.ecommerceFeed.update({
+        where: { id: feed.id },
+        data: { abandonedOrderExpireTime: hours },
+    });
+}
+
+/**
  * Procesa una orden abandonada, verificando si debe ser expirada o 
  * creando un recordatorio para ser enviado
  * @param orderId ID de la orden abandonada
@@ -136,9 +180,8 @@ export async function processAbandonedOrder(orderId: string) {
     const abandonmentTime = order.fechaAbandono;
     const hoursElapsed = (now.getTime() - abandonmentTime.getTime()) / (1000 * 60 * 60);
     
-    // Obtener el tiempo configurable de expiración (valor por defecto: 48 horas)
-    const expireTimeConfig = await getValue("OA_EXPIRE_TIME_IN_HS");
-    const expireTimeHours = expireTimeConfig ? parseInt(expireTimeConfig) : 48;
+    // Obtener el tiempo de expiración configurado para este cliente
+    const expireTimeHours = await getAbandonedOrdersExpireTime(order.clientId);
 
     if (hoursElapsed > expireTimeHours) {
         console.log(`ℹ️ Orden marcada como EXPIRADA. Han pasado ${Math.floor(hoursElapsed)} horas desde el abandono.`);
