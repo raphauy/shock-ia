@@ -949,93 +949,62 @@ export async function syncOnlyNewProducts(
   const existingIdsSet = new Set(existingProductIds.map(p => p.externalId));
   console.log(`${existingIdsSet.size} productos existentes encontrados en la base de datos`);
 
-  // Calculamos cuántos productos necesitamos buscar para encontrar potencialmente maxProducts nuevos
-  // Usamos un factor de muestreo basado en la proporción actual de productos en DB vs feed
-  const totalInDB = existingIdsSet.size;
-  const totalInFeed = feed.totalProductsInFeed;
+  // Obtenemos todos los productos del feed de una sola vez
+  console.log(`Obteniendo productos del feed: ${feed.url}`);
   
-  // Si no hay datos de totalProductsInFeed, usamos un valor por defecto
-  const batchSize = totalInFeed > 0 ? 
-    // Calculamos un tamaño de lote apropiado según la proporción existente
-    Math.min(
-      Math.max(
-        Math.ceil(maxProducts * (totalInFeed / Math.max(totalInDB, 1)) * 2), // x2 para dar margen
-        30 // Mínimo 30 para asegurar encontrar nuevos productos
-      ),
-      200 // No exceder de 200 por solicitud para evitar timeouts
-    ) : 
-    50; // Valor por defecto si no tenemos datos
-  
-  // Determinar si hay una gran diferencia entre productos en feed y base de datos
-  const isLargeGap = totalInFeed > 0 && totalInFeed > totalInDB * 3;
-  
-  // Log para diagnóstico
-  if (isLargeGap) {
-    console.log(`Detectada gran diferencia entre productos en feed (${totalInFeed}) y base de datos (${totalInDB})`);
-  }
-  
-  console.log(`Buscando ${batchSize} productos para encontrar aproximadamente ${maxProducts} nuevos...`);
-  
-  // Si hay una gran diferencia entre feed y base de datos, usamos una estrategia 
-  // de muestreo aleatorio para obtener diferentes productos en cada sincronización
-  let randomSkip = 0;
-  if (isLargeGap && totalInFeed > batchSize) {
-    // Calculamos un número aleatorio para saltar productos y obtener una muestra diferente
-    const maxSkip = totalInFeed - batchSize;
-    randomSkip = Math.floor(Math.random() * maxSkip);
-    console.log(`Usando estrategia de muestreo aleatorio: saltando ${randomSkip} productos`);
-  }
-
-  // Obtenemos los productos del feed según su formato, respetando el límite calculado
-  // También obtenemos el conteo total de productos en el feed
   let allFeedProducts: GoogleProductItem[] = [];
   let totalProductsInFeed = 0;
-
+  
   if (feed.format === "google") {
-    // Pasamos skip y batchSize para obtener un muestreo aleatorio cuando es necesario
-    const result = await getProductsGoogleFormat(
-      feed.url, 
-      batchSize,
-      randomSkip
-    );
+    // Intentamos obtener todos los productos del feed (sin límite)
+    const result = await getProductsGoogleFormat(feed.url);
     allFeedProducts = result.products;
     totalProductsInFeed = result.totalCount;
   } else {
     throw new Error(`Formato de feed no soportado: ${feed.format}`);
   }
-
+  
   if (allFeedProducts.length === 0) {
     throw new Error(`No se encontraron productos en el feed: ${feed.url}`);
   }
-
-  console.log(`Feed contiene ${totalProductsInFeed} productos en total. Se obtuvieron ${allFeedProducts.length} para análisis.`);
   
-  // Filtramos solo los productos nuevos
-  const newFeedProducts = allFeedProducts.filter(p => !existingIdsSet.has(p.id));
+  console.log(`Feed contiene ${totalProductsInFeed} productos en total. Se obtuvieron ${allFeedProducts.length} productos.`);
   
-  console.log(`De ${allFeedProducts.length} productos analizados, ${newFeedProducts.length} son nuevos`);
-
-  // Si hay un límite de productos a procesar y tenemos más nuevos de los solicitados, lo aplicamos
-  const productsToProcess = maxProducts > 0 && newFeedProducts.length > maxProducts 
-    ? newFeedProducts.slice(0, maxProducts) 
-    : newFeedProducts;
+  // Procesamos los productos localmente
+  const productsToCreate: GoogleProductItem[] = [];
+  let processedProducts = 0;
+  let newProductsFound = 0;
   
-  console.log(`Procesando ${productsToProcess.length} productos nuevos...`);
-
-  // Actualizamos el conteo total de productos en el feed
-  if (totalProductsInFeed > 0) {
-    await prisma.ecommerceFeed.update({
-      where: { id: feed.id },
-      data: { 
-        totalProductsInFeed: totalProductsInFeed
+  console.log(`Buscando hasta ${maxProducts} productos nuevos...`);
+  
+  // Recorremos el feed secuencialmente y filtramos productos nuevos
+  for (const product of allFeedProducts) {
+    processedProducts++;
+    
+    // Si ya no es un producto existente, lo agregamos
+    if (!existingIdsSet.has(product.id)) {
+      productsToCreate.push(product);
+      newProductsFound++;
+      
+      // Si ya encontramos suficientes productos nuevos, terminamos
+      if (maxProducts > 0 && newProductsFound >= maxProducts) {
+        console.log(`Se alcanzó el límite de ${maxProducts} productos nuevos. Deteniendo la búsqueda.`);
+        break;
       }
-    });
+    }
+    
+    // Log de progreso cada 500 productos
+    if (processedProducts % 500 === 0) {
+      console.log(`Progreso: ${processedProducts}/${allFeedProducts.length} productos procesados, ${newProductsFound} nuevos encontrados`);
+    }
   }
-
-  // Paso 5: Sincronizar solo los productos nuevos
+  
+  console.log(`Búsqueda completada. Encontrados ${newProductsFound} productos nuevos después de procesar ${processedProducts} de ${allFeedProducts.length} productos`);
+  
+  // Crear los productos nuevos en la base de datos
   let newCount = 0;
   
-  for (const product of productsToProcess) {
+  for (const product of productsToCreate) {
     try {
       const productData = {
         externalId: product.id,
@@ -1081,23 +1050,23 @@ export async function syncOnlyNewProducts(
       });
       
       newCount++;
-      console.log(`Nuevo producto creado (${newCount}/${productsToProcess.length}): ${product.id} - ${product.title}`);
+      console.log(`Nuevo producto creado (${newCount}/${productsToCreate.length}): ${product.id} - ${product.title}`);
     } catch (error) {
-      console.error(`Error sincronizando producto ${product.id}:`, error);
+      console.error(`Error creando producto ${product.id}:`, error);
     }
   }
 
-  // Actualizamos la fecha de última sincronización solo si se procesaron productos
-  if (newCount > 0) {
-    await prisma.ecommerceFeed.update({
-      where: { id: feed.id },
-      data: {
-        lastSync: new Date(),
-        // Solo actualizamos totalProductsInFeed si es un valor válido (mayor que 0)
-        ...(totalProductsInFeed > 0 ? { totalProductsInFeed } : {})
-      }
-    });
-  }
+  // Actualizamos la fecha de última sincronización y el conteo total en una sola operación
+  await prisma.ecommerceFeed.update({
+    where: { id: feed.id },
+    data: {
+      // Actualizamos lastSync solo si se procesaron productos
+      ...(newCount > 0 ? { lastSync: new Date() } : {}),
+      // Actualizamos totalProductsInFeed si es un valor válido y distinto
+      ...(totalProductsInFeed > 0 && totalProductsInFeed !== feed.totalProductsInFeed ? 
+        { totalProductsInFeed } : {})
+    }
+  });
 
   // Calculamos el tiempo transcurrido
   const endTime = Date.now();
@@ -1108,18 +1077,17 @@ export async function syncOnlyNewProducts(
   
   // Log adicional para diagnóstico
   console.log(`Métricas de la sincronización:
-  - Productos analizados del feed: ${allFeedProducts.length} de ${totalProductsInFeed} totales
-  - Productos nuevos encontrados: ${newFeedProducts.length}
-  - Productos procesados: ${productsToProcess.length}
-  - Productos en base de datos: ${totalInDB}
-  - Tamaño de lote usado: ${batchSize}${randomSkip > 0 ? `\n  - Skip aleatorio aplicado: ${randomSkip}` : ''}
+  - Productos obtenidos del feed: ${allFeedProducts.length}
+  - Productos procesados: ${processedProducts}
+  - Productos nuevos encontrados: ${newProductsFound}
+  - Productos nuevos creados: ${newCount}
   - Tiempo total: ${formatExecutionTime(executionTime)}
   `);
   
   return {
     newProducts: newCount,
-    totalProcessed: productsToProcess.length,
-    executionTime: executionTime
+    totalProcessed: processedProducts,
+    executionTime
   };
 }
 
