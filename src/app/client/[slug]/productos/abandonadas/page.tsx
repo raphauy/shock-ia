@@ -215,7 +215,17 @@ export default async function AbandonadasPage({ params, searchParams }: Props) {
                                         <TableRow key={order.id}>
                                             <TableCell className="font-medium">{order.externalId}</TableCell>
                                             <TableCell>
-                                                <div className="font-medium">{order.compradorNombre}</div>
+                                                {
+                                                    order.conversationId ? (
+                                                        <Link href={`/client/${slug}/chats?id=${order.conversationId}`} target="_blank">
+                                                            <Button variant="link" className="p-0">                                                                
+                                                                {order.compradorNombre}
+                                                            </Button>
+                                                        </Link>
+                                                    ) : (
+                                                        <p>{order.compradorNombre}</p>
+                                                    )
+                                                }
                                                 {order.compradorTelefono && (
                                                     <div className="text-xs text-muted-foreground">{order.compradorTelefono}</div>
                                                 )}

@@ -961,6 +961,8 @@ model AbandonedOrder {
   fechaRecordatorio   DateTime?
   error               String?                                         // gennext: show.column
 
+  conversationId      String?
+
   client              Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
   clientId            String
 

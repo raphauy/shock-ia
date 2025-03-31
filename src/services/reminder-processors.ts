@@ -163,7 +163,7 @@ export class AbandonedOrderReminderProcessor implements ReminderProcessor {
       });
       
       // 4. Actualizar el estado de la orden abandonada utilizando el servicio
-      const updatedAbandonedOrder = await markAbandonedOrderAsReminderSent(abandonedOrder.id);
+      const updatedAbandonedOrder = await markAbandonedOrderAsReminderSent(abandonedOrder.id, conversationId);
       
       console.log(`✅ Recordatorio de orden abandonada enviado con éxito: ${reminder.id}`);
       

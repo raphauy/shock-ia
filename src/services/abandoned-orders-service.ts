@@ -368,13 +368,14 @@ export async function markAbandonedOrderAsExpired(orderId: string) {
  * @param orderId ID de la orden abandonada
  * @returns La orden actualizada
  */
-export async function markAbandonedOrderAsReminderSent(orderId: string) {
+export async function markAbandonedOrderAsReminderSent(orderId: string, conversationId: string) {
     try {
         const updatedOrder = await prisma.abandonedOrder.update({
             where: { id: orderId },
             data: { 
                 status: AbandonedOrderStatus.RECORDATORIO_ENVIADO,
                 // La fecha updatedAt se actualizará automáticamente
+                conversationId: conversationId
             }
         });
         
@@ -472,6 +473,7 @@ export async function getAbandonedOrdersByClientId(
                 importeTotal: true,
                 impuestos: true,
                 error: true,
+                conversationId: true,
                 clientId: true,
                 createdAt: true,
                 updatedAt: true
