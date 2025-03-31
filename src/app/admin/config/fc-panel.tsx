@@ -10,7 +10,7 @@ import { toast } from "@/components/ui/use-toast"
 import { Loader } from "lucide-react"
 
 const crmFunctions= ["obtenerDisponibilidad", "reservarParaEvento", "obtenerReservas", "cancelarReserva", "reservarParaEventoDeUnicaVez"]
-const productFunctions= ["buscarProducto"]
+const productFunctions= ["buscarProducto", "buscarOrden"]
 
 type Props= {
     clientId: string
@@ -103,10 +103,15 @@ export function FCPanel({ clientId, haveCRM, haveProducts, genericFunctions, fun
                             <div className="border-b pb-3 last:border-0">
                                 <h3 className="font-medium">Productos</h3>
                                 <p className="text-sm text-muted-foreground">
-                                    {productFunctions.map(func => (
-                                        <p key={func}>{func}</p>
-                                    ))}
+                                    buscarProducto
                                 </p>
+                                {
+                                    functionsOfClient.filter(func => func.name === "buscarOrden").map(func => (
+                                        <p key={func.id} className="text-sm text-muted-foreground">
+                                            {func.name}
+                                        </p>
+                                    ))
+                                }
                             </div>
                         }
                         {functionsOfClient.length === 0 && (

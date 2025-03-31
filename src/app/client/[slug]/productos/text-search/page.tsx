@@ -90,7 +90,7 @@ export default async function TextSearchPage({ params, searchParams }: Props) {
     imageUrl: product.imageUrl,
     link: product.link
   }))
-  
+ 
   await prisma.$disconnect()
 
   return (
