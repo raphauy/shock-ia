@@ -421,17 +421,44 @@ export async function markAbandonedOrderAsError(orderId: string, error?: string)
 /**
  * Obtiene todas las órdenes abandonadas de un cliente
  * @param clientId ID del cliente
- * @returns Lista de órdenes abandonadas del cliente
+ * @param page Número de página (opcional, por defecto: 1)
+ * @param limit Cantidad de elementos por página (opcional, por defecto: 10)
+ * @param filter Texto para filtrar por nombre o teléfono del comprador (opcional)
+ * @returns Lista de órdenes abandonadas del cliente con metadatos de paginación
  */
-export async function getAbandonedOrdersByClientId(clientId: string) {
+export async function getAbandonedOrdersByClientId(
+    clientId: string, 
+    page: number = 1, 
+    limit: number = 10,
+    filter?: string
+) {
     try {
+        // Preparar condiciones de búsqueda
+        const whereCondition: any = { clientId };
+
+        // Agregar filtro si está presente
+        if (filter && filter.trim() !== '') {
+            whereCondition.OR = [
+                { compradorNombre: { contains: filter, mode: 'insensitive' } },
+                { compradorTelefono: { contains: filter, mode: 'insensitive' } },
+                { externalId: { contains: filter, mode: 'insensitive' } }
+            ];
+        }
+        
+        // Calcular el índice de inicio para la paginación
+        const skip = (page - 1) * limit;
+        
+        // Obtener el total de órdenes para la paginación
+        const totalCount = await prisma.abandonedOrder.count({
+            where: whereCondition
+        });
+        
+        // Obtener las órdenes con paginación
         const orders = await prisma.abandonedOrder.findMany({
-            where: {
-                clientId
-            },
-            orderBy: {
-                fechaAbandono: 'desc'
-            },
+            where: whereCondition,
+            orderBy: { fechaAbandono: 'desc' },
+            skip,
+            take: limit,
             select: {
                 id: true,
                 externalId: true,
@@ -451,13 +478,24 @@ export async function getAbandonedOrdersByClientId(clientId: string) {
             }
         });
 
-        // Convertir valores Decimal a números regulares para evitar el error
-        // "Only plain objects can be passed to Client Components from Server Components"
-        return orders.map(order => ({
+        // Convertir valores Decimal a números regulares
+        const formattedOrders = orders.map(order => ({
             ...order,
             importeTotal: Number(order.importeTotal),
             impuestos: order.impuestos ? Number(order.impuestos) : null,
         }));
+
+        // Devolver datos paginados con metadatos
+        return {
+            data: formattedOrders,
+            meta: {
+                totalItems: totalCount,
+                itemsPerPage: limit,
+                currentPage: page,
+                totalPages: Math.ceil(totalCount / limit),
+                filter: filter || null
+            }
+        };
     } catch (error: any) {
         console.error(`❌ Error al obtener órdenes abandonadas: ${error.message}`);
         throw error;

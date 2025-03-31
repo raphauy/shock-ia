@@ -38,6 +38,8 @@ export default function Pagination({
   const createPageURL = (pageNumber: number | string) => {
     const params = new URLSearchParams(searchParams)
     params.set('page', pageNumber.toString())
+    
+    // Preservar los demás parámetros, como el filtro
     return `${pathname}?${params.toString()}`
   }
   

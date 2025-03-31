@@ -13,6 +13,9 @@ import Link from "next/link"
 import SendReminderButton from './send-reminder-button'
 import { AbandonedOrderStatus } from "@prisma/client"
 import { getAbandonedOrdersByClientId } from "@/services/abandoned-orders-service"
+import Pagination from '../components/pagination'
+import SearchFilter from './search-filter'
+import { Card } from "@/components/ui/card"
 
 // Forzar que la página siempre se renderice dinámicamente
 export const dynamic = 'force-dynamic'
@@ -65,6 +68,10 @@ const formatearFecha = (fecha: Date) => {
 type Props = {
     params: {
         slug: string
+    },
+    searchParams: {
+        page?: string,
+        filter?: string
     }
 }
 
@@ -111,7 +118,7 @@ function StatusBadge({ status, fechaRecordatorio, fechaRecuperada, error }: Stat
     );
 }
 
-export default async function AbandonadasPage({ params }: Props) {
+export default async function AbandonadasPage({ params, searchParams }: Props) {
     const { slug } = params
     const client = await getClientBySlug(slug)
     
@@ -125,8 +132,26 @@ export default async function AbandonadasPage({ params }: Props) {
         )
     }
     
-    // Obtener las órdenes abandonadas utilizando la capa de servicios
-    const abandonedOrders = await getAbandonedOrdersByClientId(client.id);
+    // Obtener el número de página de los parámetros de búsqueda
+    const currentPage = searchParams.page ? parseInt(searchParams.page) : 1
+    
+    // Obtener el filtro de búsqueda
+    const filter = searchParams.filter || ""
+    
+    // Definir el número de elementos por página
+    const itemsPerPage = 20
+    
+    // Obtener las órdenes abandonadas utilizando la capa de servicios con paginación y filtro
+    const { data: abandonedOrders, meta } = await getAbandonedOrdersByClientId(
+        client.id, 
+        currentPage, 
+        itemsPerPage,
+        filter
+    );
+    
+    // Obtener todas las órdenes (sin paginación) para estadísticas
+    const allOrdersResponse = await getAbandonedOrdersByClientId(client.id, 1, 1000); // Usar un límite alto
+    const allOrders = allOrdersResponse.data;
     
     return (
         <div className="container mx-auto py-6 space-y-6">
@@ -144,75 +169,103 @@ export default async function AbandonadasPage({ params }: Props) {
             </div>
             
             {/* Estadísticas */}
-            {abandonedOrders.length > 0 && (
-                <AbandonedOrdersStats orders={abandonedOrders} />
+            {allOrders.length > 0 && (
+                <AbandonedOrdersStats orders={allOrders} />
+            )}
+            
+            {/* Filtros */}
+            <Card className="p-4">
+                <SearchFilter initialFilter={filter} />
+            </Card>
+            
+            {/* Resultados del filtro */}
+            {filter && (
+                <div className="text-sm text-muted-foreground">
+                    <span className="font-medium">{meta.totalItems}</span> resultados para la búsqueda <span className="font-medium">&ldquo;{filter}&rdquo;</span>
+                </div>
             )}
             
             {abandonedOrders.length === 0 ? (
                 <div className="bg-card p-8 rounded-md shadow text-center">
-                    <p className="text-muted-foreground">No se encontraron órdenes abandonadas</p>
+                    {filter ? (
+                        <p className="text-muted-foreground">No se encontraron órdenes abandonadas que coincidan con &ldquo;{filter}&rdquo;</p>
+                    ) : (
+                        <p className="text-muted-foreground">No se encontraron órdenes abandonadas</p>
+                    )}
                 </div>
             ) : (
-                <div className="rounded-md border">
-                    <div className="overflow-x-auto">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>ID</TableHead>
-                                    <TableHead>Cliente</TableHead>
-                                    <TableHead>Fecha de inicio</TableHead>
-                                    <TableHead>Fecha de abandono</TableHead>
-                                    <TableHead>Productos</TableHead>
-                                    <TableHead>Total</TableHead>
-                                    <TableHead>Estado</TableHead>
-                                    <TableHead className="text-center">Acciones</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {abandonedOrders.map((order) => (
-                                    <TableRow key={order.id}>
-                                        <TableCell className="font-medium">{order.externalId}</TableCell>
-                                        <TableCell>
-                                            <div className="font-medium">{order.compradorNombre}</div>
-                                            {order.compradorTelefono && (
-                                                <div className="text-xs text-muted-foreground">{order.compradorTelefono}</div>
-                                            )}
-                                        </TableCell>
-                                        <TableCell>
-                                            {formatearFecha(order.fechaInicio)}
-                                        </TableCell>
-                                        <TableCell>
-                                            {formatearFecha(order.fechaAbandono)}
-                                        </TableCell>
-                                        <TableCell className="text-center">
-                                            {order.productos?.length || 0}
-                                        </TableCell>
-                                        <TableCell>
-                                            {formatCurrency(Number(order.importeTotal))}
-                                        </TableCell>
-                                        <TableCell>
-                                            <StatusBadge
-                                                status={order.status as AbandonedOrderStatus}
-                                                fechaRecordatorio={order.fechaRecordatorio}
-                                                fechaRecuperada={
-                                                    (order.status === 'RECORDATORIO_ENVIADO' || 
-                                                     order.status === 'EXPIRADA') ? 
-                                                    order.updatedAt : null
-                                                }
-                                                error={order.error}
-                                            />
-                                        </TableCell>
-                                        <TableCell className="text-center">
-                                            {order.status === 'PENDIENTE' && (
-                                                <SendReminderButton orderId={order.id} />
-                                            )}
-                                        </TableCell>
+                <>
+                    <div className="rounded-md border">
+                        <div className="overflow-x-auto">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>ID</TableHead>
+                                        <TableHead>Cliente</TableHead>
+                                        <TableHead>Fecha de inicio</TableHead>
+                                        <TableHead>Fecha de abandono</TableHead>
+                                        <TableHead>Productos</TableHead>
+                                        <TableHead>Total</TableHead>
+                                        <TableHead>Estado</TableHead>
+                                        <TableHead className="text-center">Acciones</TableHead>
                                     </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
+                                </TableHeader>
+                                <TableBody>
+                                    {abandonedOrders.map((order) => (
+                                        <TableRow key={order.id}>
+                                            <TableCell className="font-medium">{order.externalId}</TableCell>
+                                            <TableCell>
+                                                <div className="font-medium">{order.compradorNombre}</div>
+                                                {order.compradorTelefono && (
+                                                    <div className="text-xs text-muted-foreground">{order.compradorTelefono}</div>
+                                                )}
+                                            </TableCell>
+                                            <TableCell>
+                                                {formatearFecha(order.fechaInicio)}
+                                            </TableCell>
+                                            <TableCell>
+                                                {formatearFecha(order.fechaAbandono)}
+                                            </TableCell>
+                                            <TableCell className="text-center">
+                                                {order.productos?.length || 0}
+                                            </TableCell>
+                                            <TableCell>
+                                                {formatCurrency(Number(order.importeTotal))}
+                                            </TableCell>
+                                            <TableCell>
+                                                <StatusBadge
+                                                    status={order.status as AbandonedOrderStatus}
+                                                    fechaRecordatorio={order.fechaRecordatorio}
+                                                    fechaRecuperada={
+                                                        (order.status === 'RECORDATORIO_ENVIADO' || 
+                                                        order.status === 'EXPIRADA') ? 
+                                                        order.updatedAt : null
+                                                    }
+                                                    error={order.error}
+                                                />
+                                            </TableCell>
+                                            <TableCell className="text-center">
+                                                {order.status === 'PENDIENTE' && (
+                                                    <SendReminderButton orderId={order.id} />
+                                                )}
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </div>
                     </div>
-                </div>
+                    
+                    {/* Paginación */}
+                    {meta.totalPages > 1 && (
+                        <Pagination
+                            totalItems={meta.totalItems}
+                            itemsPerPage={meta.itemsPerPage}
+                            currentPage={meta.currentPage}
+                            siblingsCount={1}
+                        />
+                    )}
+                </>
             )}
         </div>
     )
