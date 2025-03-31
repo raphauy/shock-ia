@@ -3,9 +3,8 @@ import { notFound } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import { searchClientProducts, getClientProductsCount, countClientProductsBySearch } from "@/services/product-services"
+import { searchClientProducts, getClientProductsCount, countClientProductsBySearch, getClientProductsWithEmbeddingsCount } from "@/services/product-services"
 import { Package, Database, PackageOpen, LayoutDashboard } from "lucide-react"
-import { PrismaClient } from "@prisma/client"
 import ProductList from "../components/product-list"
 import Pagination from "../components/pagination"
 import ItemsPerPage from "../components/items-per-page"
@@ -51,8 +50,7 @@ export default async function TextSearchPage({ params, searchParams }: Props) {
     )
   }
 
-  // Obtener estadísticas de productos
-  const prisma = new PrismaClient()
+  // Obtener estadísticas de productos utilizando la capa de servicios
   
   // Obtener conteos
   const totalProductCount = await getClientProductsCount(client.id)
@@ -60,12 +58,7 @@ export default async function TextSearchPage({ params, searchParams }: Props) {
     ? await countClientProductsBySearch(client.id, searchQuery)
     : totalProductCount
   
-  const productsWithEmbeddings = await prisma.product.count({
-    where: { 
-      clientId: client.id,
-      embeddingUpdatedAt: { not: null }
-    }
-  })
+  const productsWithEmbeddings = await getClientProductsWithEmbeddingsCount(client.id)
 
   // Obtener productos paginados con búsqueda
   const rawProducts = await searchClientProducts(
@@ -90,8 +83,6 @@ export default async function TextSearchPage({ params, searchParams }: Props) {
     imageUrl: product.imageUrl,
     link: product.link
   }))
- 
-  await prisma.$disconnect()
 
   return (
     <div className="container mx-auto py-6 space-y-6">

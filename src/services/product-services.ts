@@ -911,6 +911,20 @@ export async function countClientProductsBySearch(
 }
 
 /**
+ * Cuenta los productos de un cliente que tienen embeddings generados
+ * @param clientId ID del cliente
+ * @returns Número de productos que tienen embeddings
+ */
+export async function getClientProductsWithEmbeddingsCount(clientId: string): Promise<number> {
+  return prisma.product.count({
+    where: { 
+      clientId,
+      embeddingUpdatedAt: { not: null }
+    }
+  });
+}
+
+/**
  * Sincroniza solo los productos nuevos (no existentes) desde un feed
  * Optimizado para entornos serverless con límites de tiempo de ejecución
  * @param feedId ID del feed de ecommerce
