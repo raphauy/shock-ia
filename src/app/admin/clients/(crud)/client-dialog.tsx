@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
-const dontTouchFunctions= ["obtenerDisponibilidad", "cancelarReserva", "reservarParaEvento", "obtenerReservas", "reservarParaEventoDeUnicaVez"]
+const dontTouchFunctions= ["obtenerDisponibilidad", "cancelarReserva", "reservarParaEvento", "obtenerReservas", "reservarParaEventoDeUnicaVez", "buscarProducto", "buscarOrden"]
 
 interface Props{
   title: string
