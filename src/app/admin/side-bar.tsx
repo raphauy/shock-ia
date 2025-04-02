@@ -1,7 +1,7 @@
 "use client"
 
 import { cn } from "@/lib/utils";
-import { Bot, Briefcase, ChevronRightSquare, Database, FunctionSquare, LayoutDashboard, MessageCircle, Receipt, ScreenShare, Settings, Tag, User, Warehouse } from "lucide-react";
+import { Bot, Briefcase, ChevronRightSquare, Database, FunctionSquare, LayoutDashboard, MessageCircle, Receipt, ScreenShare, Settings, Tag, User, Warehouse, Banknote } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -9,6 +9,10 @@ import { getLastClientIdAction } from "./clients/(crud)/actions";
 import { useSession } from "next-auth/react";
 
 export default function SideBar() {
+  const { data: sessionData } = useSession();
+  const user = sessionData?.user;
+  const email = user?.email?.toLowerCase() || '';
+  const hasAccessToFCFee = email === 'rapha.uy@rapha.uy' || email === 'joaquin@shock.uy';
 
   const data= [
     {
@@ -76,6 +80,13 @@ export default function SideBar() {
     {
       href: "divider", icon: User
     },  
+    ...(hasAccessToFCFee ? [
+      {
+        href: `/admin/fc-fee`,
+        icon: Banknote,
+        text: "FC Fee"
+      }
+    ] : []),
   ]
 
   const [firstClientId, setFirstClientId] = useState("")
@@ -83,8 +94,6 @@ export default function SideBar() {
     getLastClientIdAction().then((id) => setFirstClientId(id || ""))
   }, [])
   
-  const user= useSession().data?.user
-
   const path= usePathname()
 
   const commonClasses= "flex gap-2 items-center py-1 mx-2 rounded hover:bg-gray-200 dark:hover:text-black"

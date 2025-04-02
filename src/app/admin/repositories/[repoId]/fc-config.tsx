@@ -62,17 +62,13 @@ export default async function FCConfig({ clientId, repoId, fullMode, haveCRM }: 
                           Información de la FC
                       </h2>
                     </div>
-                    { fullMode && (
-                      <>
-                        <TitleForm
-                          label="Nombre"
-                          initialValue={repository.name}
-                          id={repository.id}
-                          update={setNameAction}                                            
-                        />
-                        <Separator className="my-7" />
-                      </>
-                    )}
+                    <TitleForm
+                      label="Nombre"
+                      initialValue={repository.name}
+                      id={repository.id}
+                      update={setNameAction}                                            
+                    />
+                    <Separator className="my-7" />
 
 
                     <TitleForm
@@ -122,7 +118,7 @@ export default async function FCConfig({ clientId, repoId, fullMode, haveCRM }: 
                     </div>
 
                     <div className="mt-6 border bg-slate-100 rounded-md p-2 dark:bg-black">
-                      <FieldsBox initialFields={repository.fields} repoId={repository.id} fullMode={fullMode} customFields={clientCustomFields} />
+                      <FieldsBox initialFields={repository.fields} repoId={repository.id} fullMode={true} customFields={clientCustomFields} />
                     </div>
 
                     <Separator className="my-7" />
@@ -224,16 +220,15 @@ export default async function FCConfig({ clientId, repoId, fullMode, haveCRM }: 
             <div className="p-6 bg-white dark:bg-black mt-4 border rounded-lg w-full">
               <CodeBlock code={repository.function.definition!} showLineNumbers={true} />
             </div>
-            <div className="flex justify-center w-full mt-10">
-              <DeleteRepositoryDialog
-                id={repository.id} 
-                description={`Seguro que quieres eliminar el repositorio ${repository.name}?
-                Hay ${repository.function.clients.length === 1 ? "1 cliente que utiliza" : `${repository.function.clients.length} clientes que utilizan`} la función de este repositorio (${repository.function.name}).`}
-                withText={true}
-              />
-            </div>
           </>
         )}
+        <div className="flex justify-center w-full mt-10">
+          <DeleteRepositoryDialog
+            id={repository.id} 
+            description={`Seguro que quieres eliminar la FC "${repository.name}"?\n\nHay ${repository.function.clients.length === 1 ? "1 cliente que utiliza" : `${repository.function.clients.length} clientes que utilizan`} la FC "${repository.function.name}".`}
+            withText={true}
+          />
+        </div>
     </>
   )
 }

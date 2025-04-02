@@ -1233,3 +1233,88 @@ export async function getClientSlug(clientId: string) {
   })
   return client?.slug || null
 }
+
+export async function getClientsByFCImplementation() {
+  const clients = await prisma.client.findMany({
+    orderBy: {
+      createdAt: 'desc'
+    },
+    include: {
+      users: true,
+      model: true,
+      whatsappInstances: true,
+      functions: {
+        include: {
+          function: {
+            include: {
+              repositories: true
+            }
+          }
+        },
+        orderBy: {
+          function: {
+            createdAt: 'desc'
+          }
+        }
+      }
+    }
+  });
+
+  // Procesamos los clientes para añadir información sobre funciones y repositorios
+  const processedClients = clients.map(client => {
+    // Calculamos la cantidad de funciones
+    const fcCount = client.functions.length;
+    
+    // Calculamos la cantidad total de repositorios asociados a las funciones del cliente
+    const repoCount = client.functions.reduce((total, cf) => {
+      return total + (cf.function.repositories?.length || 0);
+    }, 0);
+    
+    // Obtenemos la fecha de la última función si existe
+    const lastFunctionDate = fcCount > 0 
+      ? client.functions[0].function.createdAt 
+      : null;
+    
+    // Creamos un nuevo objeto cliente con propiedades adicionales
+    return {
+      ...client,
+      fcCount,
+      repoCount,
+      lastFunctionDate
+    };
+  });
+
+  // Función para ordenar por fecha de última función (null al final)
+  const sortByLastFunctionDate = (a: any, b: any) => {
+    if (a.lastFunctionDate === null) return 1;
+    if (b.lastFunctionDate === null) return -1;
+    return new Date(b.lastFunctionDate).getTime() - new Date(a.lastFunctionDate).getTime();
+  };
+
+  // Ordenamos ambas listas por fecha de última función
+  const implementedClients = processedClients
+    .filter(client => client.fcImplemented)
+    .sort(sortByLastFunctionDate);
+    
+  const nonImplementedClients = processedClients
+    .filter(client => !client.fcImplemented)
+    .sort(sortByLastFunctionDate);
+
+  return {
+    implementedClients,
+    nonImplementedClients
+  };
+}
+
+export async function setFCImplementation(clientId: string, fcImplemented: boolean) {
+  const updated = await prisma.client.update({
+    where: {
+      id: clientId
+    },
+    data: {
+      fcImplemented
+    }
+  });
+
+  return updated;
+}

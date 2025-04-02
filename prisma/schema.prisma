@@ -88,6 +88,7 @@ model Client {
   haveAudioResponse     Boolean   @default(false)
   haveProducts          Boolean   @default(false)
   wapSendFrequency      Int       @default(30)
+  fcImplemented         Boolean   @default(false)
 
   availability          String[]  @default([])
   timezone              String    @default("America/Montevideo")

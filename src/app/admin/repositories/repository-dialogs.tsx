@@ -41,15 +41,15 @@ export function DeleteRepositoryDialog({ id, description, withText }: DeleteProp
       <DialogTrigger asChild>
       {
         withText ? 
-        <Button variant="destructive">Eliminar Repositorio</Button>         
+        <Button variant="destructive">Eliminar FC</Button>         
         :
         <Trash2 size={30} className="hover:cursor-pointer" />
       }
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete Repository</DialogTitle>
-          <DialogDescription className="py-8">{description}</DialogDescription>
+          <DialogTitle>Eliminar FC</DialogTitle>
+          <DialogDescription className="py-8 whitespace-pre-wrap">{description}</DialogDescription>
         </DialogHeader>
         <DeleteRepositoryForm closeDialog={() => setOpen(false)} id={id} redirect={withText} />
       </DialogContent>
