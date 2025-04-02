@@ -65,10 +65,20 @@ export async function getFunctionDAO(id: string) {
 }
     
 export async function createFunction(data: FunctionFormValues) {
-  const created = await prisma.function.create({
-    data
-  })
-  return created
+  try {
+    const created = await prisma.function.create({
+      data
+    })
+    return created
+  } catch (error: any) {
+    // Verificar si es un error de Prisma relacionado con la unicidad del nombre
+    if (error.code === 'P2002' && error.meta?.target?.includes('name')) {
+      throw new Error(`Ya existe una función con el nombre "${data.name}". Por favor, utiliza otro nombre.`)
+    }
+    
+    // Si es otro tipo de error, lo propagamos
+    throw error
+  }
 }
 
 export async function updateFunction(id: string, data: FunctionFormValues) {

@@ -11,11 +11,14 @@ export async function getRepositoryDAOAction(id: string): Promise<RepositoryDAO 
 }
 
 export async function createRepositoryAction(name: string): Promise<RepositoryDAO | null> {       
-    const created= await createRepository(name)
-
-    revalidatePath("/admin/repositories")
-
-    return created as RepositoryDAO
+    try {
+        const created = await createRepository(name)
+        revalidatePath("/admin/repositories")
+        return created as RepositoryDAO
+    } catch (error: any) {
+        // Propagamos el error original para que se pueda mostrar en la UI
+        throw error
+    }
 }
 
 export async function deleteRepositoryAction(id: string): Promise<RepositoryDAO | null> {    

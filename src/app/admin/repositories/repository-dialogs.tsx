@@ -31,9 +31,10 @@ type DeleteProps= {
   id: string
   description: string
   withText: boolean
+  clientCount: number
 }
 
-export function DeleteRepositoryDialog({ id, description, withText }: DeleteProps) {
+export function DeleteRepositoryDialog({ id, description, withText, clientCount }: DeleteProps) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -51,7 +52,7 @@ export function DeleteRepositoryDialog({ id, description, withText }: DeleteProp
           <DialogTitle>Eliminar FC</DialogTitle>
           <DialogDescription className="py-8 whitespace-pre-wrap">{description}</DialogDescription>
         </DialogHeader>
-        <DeleteRepositoryForm closeDialog={() => setOpen(false)} id={id} redirect={withText} />
+        <DeleteRepositoryForm closeDialog={() => setOpen(false)} id={id} redirect={withText} clientCount={clientCount} />
       </DialogContent>
     </Dialog>
   )

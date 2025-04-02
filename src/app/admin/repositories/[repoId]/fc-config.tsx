@@ -227,6 +227,7 @@ export default async function FCConfig({ clientId, repoId, fullMode, haveCRM }: 
             id={repository.id} 
             description={`Seguro que quieres eliminar la FC "${repository.name}"?\n\nHay ${repository.function.clients.length === 1 ? "1 cliente que utiliza" : `${repository.function.clients.length} clientes que utilizan`} la FC "${repository.function.name}".`}
             withText={true}
+            clientCount={repository.function.clients.length}
           />
         </div>
     </>

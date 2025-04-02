@@ -1270,10 +1270,18 @@ export async function getClientsByFCImplementation() {
       return total + (cf.function.repositories?.length || 0);
     }, 0);
     
-    // Obtenemos la fecha de la última función si existe
-    const lastFunctionDate = fcCount > 0 
-      ? client.functions[0].function.createdAt 
-      : null;
+    // Obtenemos la fecha de la última función si existe Y tiene repositorios
+    // Solo asignamos una fecha si realmente hay repositorios
+    let lastFunctionDate = null;
+    if (repoCount > 0 && fcCount > 0) {
+      // Buscamos la función más reciente que tenga al menos un repositorio
+      for (const cf of client.functions) {
+        if (cf.function.repositories && cf.function.repositories.length > 0) {
+          lastFunctionDate = cf.function.createdAt;
+          break; // Tomamos la primera función que tiene repositorios (ya están ordenadas por fecha)
+        }
+      }
+    }
     
     // Creamos un nuevo objeto cliente con propiedades adicionales
     return {

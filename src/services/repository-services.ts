@@ -65,61 +65,92 @@ export async function getRepositoryDAOByFunctionName(functionName: string) {
 }
     
 export async function createRepository(name: string) {
+  try {
+    // functionName: clean the spaces and lowercase only the first letter
+    let functionName = name.replace(/ /g, '').toLowerCase().slice(0, 1) + name.replace(/ /g, '').slice(1)
+    const isAvailable = await nameIsAvailable(functionName)
+    if (!isAvailable) functionName = `${functionName}1`
 
-  // functionName: clean the spaces and lowercase only the first letter
-  let functionName= name.replace(/ /g, '').toLowerCase().slice(0, 1) + name.replace(/ /g, '').slice(1)
-  const isAvailable= await nameIsAvailable(functionName)
-  if (!isAvailable) functionName= `${functionName}1`
-
-  const functionDescription= `Esta función se debe utilizar ...
+    const functionDescription = `Esta función se debe utilizar ...
 Instrucciones:
 - Debes ir preguntando por la información necesaria para llenar cada campo en su orden de aparición
 - Cada pregunta debe esperar su respuesta antes de hacer la siguiente pregunta.
 - Cuando obtengas toda la información debes invocar la función.`
 
-  const parameters: Parameters= {
-    type: "object",
-    properties: [],
-    required: []
+    const parameters: Parameters = {
+      type: "object",
+      properties: [],
+      required: []
+    }
+    const definition = generateFunctionDefinition(functionName, functionDescription, parameters)
+
+    const repoFunction = await createFunction({
+      name: functionName,
+      description: functionDescription,
+      definition
+    })
+    if (!repoFunction) throw new Error("Error creating repository function")
+
+    const color = colorPalette[Math.floor(Math.random() * colorPalette.length)]
+    const data = {
+      functionId: repoFunction.id,
+      name,
+      functionName,
+      functionDescription,
+      finalMessage: "Datos registrados correctamente. Un asesor te contactará a la brevedad.",
+      color
+    }
+
+    const created = await prisma.repository.create({
+      data
+    })
+    return created
+  } catch (error: any) {
+    // Verificar si es un error de Prisma relacionado con la unicidad del nombre
+    if (error.code === 'P2002' && error.meta?.target?.includes('name')) {
+      throw new Error(`Ya existe una FC con el nombre "${name}". Por favor, utiliza otro nombre.`)
+    } else if (error.message.includes('Unique constraint failed')) {
+      throw new Error(`Ya existe una función con ese nombre. Por favor, utiliza otro nombre.`)
+    }
+    
+    // Si es otro tipo de error, lo propagamos
+    throw error
   }
-  const definition= generateFunctionDefinition(functionName, functionDescription, parameters)
-
-  const repoFunction= await createFunction({
-    name: functionName,
-    description: functionDescription,
-    definition
-  })
-  if (!repoFunction) throw new Error("Error creating repository function")
-
-  const color= colorPalette[Math.floor(Math.random() * colorPalette.length)]
-  const data= {
-    functionId: repoFunction.id,
-    name,
-    functionName,
-    functionDescription,
-    finalMessage: "Datos registrados correctamente. Un asesor te contactará a la brevedad.",
-    color
-  }
-
-  const created = await prisma.repository.create({
-    data
-  })
-  return created
 }
 
 // delete the repository and the function associated with it
 export async function deleteRepository(id: string) {
-  const repo= await getFullRepositoryDAO(id)
+  const repo = await getFullRepositoryDAO(id)
   if (!repo) throw new Error("Repository not found")
 
-  const deleted= await prisma.repository.delete({
+  // Si hay más de un cliente asociado, no permitir la eliminación
+  if (repo.function.clients.length > 1) {
+    throw new Error(`No se puede eliminar esta FC porque está siendo utilizada por ${repo.function.clients.length} clientes. Primero debes desasociarla de los clientes.`)
+  }
+
+  // Si hay un cliente asociado, eliminar la asociación
+  if (repo.function.clients.length === 1) {
+    const clientFunction = repo.function.clients[0]
+    await prisma.clientFunction.delete({
+      where: {
+        clientId_functionId: {
+          clientId: clientFunction.clientId,
+          functionId: repo.functionId
+        }
+      }
+    })
+  }
+
+  // Eliminar el repositorio
+  const deleted = await prisma.repository.delete({
     where: {
       id
     },    
   })
   if (!deleted) throw new Error("Error al eliminar el repositorio")
   
-  const functionId= repo.functionId
+  // Eliminar la función asociada
+  const functionId = repo.functionId
   if (functionId) {
     await deleteFunction(functionId)
   }
