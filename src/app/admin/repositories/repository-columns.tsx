@@ -88,7 +88,7 @@ export const columns: ColumnDef<RepositoryDAO>[] = [
               </Button>
           </Link>
 
-          <DeleteRepositoryDialog description={deleteDescription} id={data.id} withText={false} />
+          <DeleteRepositoryDialog description={deleteDescription} id={data.id} withText={false} clientCount={1} />
         </div>
 
       )
