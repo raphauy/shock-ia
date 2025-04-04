@@ -166,15 +166,6 @@ export async function createDefaultStages(clientId: string) {
         isBotEnabled: false,
         color: '#D3D3D3',
         clientId
-      },
-      {
-        name: 'Finalizado',
-        description: 'Contacto ganado, este es un estado final',
-        order: 2,
-        isFinal: true,
-        isBotEnabled: false,
-        color: '#D3D3D3',
-        clientId
       }
     ]
 
