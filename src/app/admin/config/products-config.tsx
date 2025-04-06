@@ -2,10 +2,17 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { Switch } from "@/components/ui/switch"
-import { Loader, AlertCircle, CheckCircle, Save } from "lucide-react"
+import { Loader, AlertCircle, CheckCircle, Save, ExternalLink, Info } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import Link from "next/link"
+import { 
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { 
     checkClientHasOrderFunctionAction,
     createProductFeedAction, 
@@ -31,10 +38,28 @@ export default function ProductsConfig({ clientId, haveProducts: initialHaveProd
     const [haveOrderFunction, setHaveOrderFunction] = useState(false)
     const [loadingOrderFunction, setLoadingOrderFunction] = useState(false)
     const [checkingOrderFunction, setCheckingOrderFunction] = useState(false)
+    const [validationDetails, setValidationDetails] = useState<{
+        missingRequired?: string[];
+        missingOptional?: string[];
+        unknown?: string[];
+        provider?: string;
+    } | null>(null)
+
+    // Determinar el tipo de proveedor basado en la URL
+    const detectProvider = (url: string): string => {
+        if (url.includes('docs.google.com/spreadsheets')) {
+            return "Google Sheets";
+        }
+        return "Fenicio";
+    }
 
     // Limpiar la URL cuando cambia el cliente
     useEffect(() => {
         setFeedUrl("")
+        // Reiniciar los estados de validación
+        setFeedIsValid(null)
+        setProductCount(0)
+        setValidationDetails(null)
     }, [clientId])
 
     // Carga la URL del feed si existe
@@ -159,6 +184,7 @@ export default function ProductsConfig({ clientId, haveProducts: initialHaveProd
         setLoadingFeed(true)
         setFeedIsValid(null)
         setProductCount(0)
+        setValidationDetails(null)
 
         try {
             // Obtenemos el resultado de la validación
@@ -168,15 +194,39 @@ export default function ProductsConfig({ clientId, haveProducts: initialHaveProd
             setFeedIsValid(validation.isValid)
             setProductCount(validation.productCount)
             
+            // Guardamos los detalles de validación si están disponibles
+            if (validation.validationDetails) {
+                setValidationDetails({
+                    ...validation.validationDetails,
+                    provider: detectProvider(feedUrl)
+                })
+            } else {
+                setValidationDetails({
+                    provider: detectProvider(feedUrl)
+                })
+            }
+            
             if (validation.isValid) {
                 toast({
                     title: "Validación exitosa",
                     description: `La URL contiene un feed válido con ${validation.productCount} productos`
                 })
             } else {
+                // Mensaje específico según el tipo de proveedor
+                const provider = detectProvider(feedUrl)
+                let errorMessage = ""
+                
+                if (provider === "Google Sheets") {
+                    errorMessage = validation.validationDetails?.missingRequired?.length 
+                        ? `Faltan columnas obligatorias: ${validation.validationDetails.missingRequired.join(", ")}`
+                        : "El formato de la hoja de cálculo no es válido o la hoja no es accesible"
+                } else {
+                    errorMessage = "La URL no contiene un feed válido en formato Google Shopping"
+                }
+                
                 toast({
                     title: "Feed inválido",
-                    description: "La URL no contiene un feed válido en formato Google Shopping",
+                    description: errorMessage,
                     variant: "destructive"
                 })
             }
@@ -189,6 +239,7 @@ export default function ProductsConfig({ clientId, haveProducts: initialHaveProd
             })
             setFeedIsValid(false)
             setProductCount(0)
+            setValidationDetails(null)
         } finally {
             setLoadingFeed(false)
         }
@@ -213,10 +264,34 @@ export default function ProductsConfig({ clientId, haveProducts: initialHaveProd
                 setFeedIsValid(validation.isValid)
                 setProductCount(validation.productCount)
                 
+                // Guardamos los detalles de validación si están disponibles
+                if (validation.validationDetails) {
+                    setValidationDetails({
+                        ...validation.validationDetails,
+                        provider: detectProvider(feedUrl)
+                    })
+                } else {
+                    setValidationDetails({
+                        provider: detectProvider(feedUrl)
+                    })
+                }
+                
                 if (!validation.isValid) {
+                    // Mensaje específico según el tipo de proveedor
+                    const provider = detectProvider(feedUrl)
+                    let errorMessage = ""
+                    
+                    if (provider === "Google Sheets") {
+                        errorMessage = validation.validationDetails?.missingRequired?.length 
+                            ? `Faltan columnas obligatorias: ${validation.validationDetails.missingRequired.join(", ")}`
+                            : "El formato de la hoja de cálculo no es válido o la hoja no es accesible"
+                    } else {
+                        errorMessage = "La URL no contiene un feed válido en formato Google Shopping"
+                    }
+                    
                     toast({
                         title: "Feed inválido",
-                        description: "La URL no contiene un feed válido en formato Google Shopping",
+                        description: errorMessage,
                         variant: "destructive"
                     })
                     setLoadingFeed(false)
@@ -271,6 +346,38 @@ export default function ProductsConfig({ clientId, haveProducts: initialHaveProd
         }
     }
 
+    // Renderiza los detalles de validación para Google Sheets
+    const renderValidationDetails = () => {
+        if (!validationDetails || validationDetails.provider !== "Google Sheets") return null;
+        
+        return (
+            <div className="text-xs space-y-1 mt-2 p-2 border rounded-md bg-muted/30">
+                <p className="font-medium">Detalles de validación:</p>
+                {validationDetails.missingRequired && validationDetails.missingRequired.length > 0 && (
+                    <p className="text-destructive">
+                        <span className="font-medium">Columnas obligatorias faltantes:</span> {validationDetails.missingRequired.join(", ")}
+                    </p>
+                )}
+                {validationDetails.missingOptional && validationDetails.missingOptional.length > 0 && (
+                    <p className="text-amber-500">
+                        <span className="font-medium">Columnas opcionales faltantes:</span> {validationDetails.missingOptional.join(", ")}
+                    </p>
+                )}
+                <p className="text-xs italic mt-1">
+                    Las columnas obligatorias son: id, title, description, price
+                </p>
+                <p className="text-xs mt-1">
+                    <Link href="https://docs.google.com/spreadsheets/d/14VbmY-Y1Tg6U1Unrz2UBdAoSx3gUg0uptPDun-Bw03E/edit?gid=0" target="_blank" rel="noopener noreferrer">
+                        <Button variant="link" className="h-auto p-0 text-xs">
+                            Ver ejemplo de hoja de cálculo
+                            <ExternalLink className="ml-1 h-3 w-3" />
+                        </Button>
+                    </Link>
+                </p>
+            </div>
+        );
+    };
+
     return (
         <div className="w-full p-4 border rounded-lg space-y-4">
             <p className="text-lg font-bold mb-4">Configuración de Productos:</p>
@@ -290,17 +397,62 @@ export default function ProductsConfig({ clientId, haveProducts: initialHaveProd
                     <div className="space-y-2">
                         <h3 className="text-sm font-medium">Feed de productos</h3>
                         <p className="text-xs text-muted-foreground">
-                            Ingresa la URL del feed de productos en formato Google Shopping
+                            Ingresa la URL del feed de productos (Google Shopping XML o Google Sheets)
                         </p>
+                        
+                        <div className="flex items-center gap-2 mt-1 mb-2">
+                            <Link href="https://docs.google.com/spreadsheets/d/14VbmY-Y1Tg6U1Unrz2UBdAoSx3gUg0uptPDun-Bw03E/edit?gid=0" target="_blank" rel="noopener noreferrer">
+                                <Button variant="link" className="h-auto p-0 text-xs">
+                                    Ver planilla de ejemplo de Google Sheets con el formato requerido
+                                    <ExternalLink className="ml-1 h-3 w-3" />
+                                </Button>
+                            </Link>
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger>
+                                        <Info className="h-4 w-4 text-muted-foreground hover:text-primary cursor-help" />
+                                    </TooltipTrigger>
+                                    <TooltipContent side="right" align="start" className="max-w-[450px]">
+                                        <div className="space-y-2 p-1">
+                                            <p className="font-semibold">Columnas de la plantilla:</p>
+                                            <div>
+                                                <p className="font-medium text-destructive text-sm">Obligatorias:</p>
+                                                <ul className="list-disc pl-5 text-xs">
+                                                    <li><strong>id</strong>: Identificador único del producto</li>
+                                                    <li><strong>title</strong>: Título o nombre del producto</li>
+                                                    <li><strong>description</strong>: Descripción del producto</li>
+                                                    <li><strong>price</strong>: Precio (solo números)</li>
+                                                </ul>
+                                            </div>
+                                            <div>
+                                                <p className="font-medium text-amber-500 text-sm">Opcionales:</p>
+                                                <ul className="list-disc pl-5 text-xs">
+                                                    <li><strong>image_link</strong>: URL de la imagen principal</li>
+                                                    <li><strong>currency</strong>: Moneda (ej. UYU, USD)</li>
+                                                    <li><strong>availability</strong>: Disponibilidad (ej. in stock)</li>
+                                                    <li><strong>brand</strong>: Marca del producto</li>
+                                                    <li><strong>condition</strong>: Condición (ej. new, used)</li>
+                                                    <li><strong>link</strong>: URL de la página del producto</li>
+                                                    <li><strong>additional_image_links</strong>: URLs de imágenes adicionales (separadas por | )</li>
+                                                    <li><strong>size</strong>: Talla o tamaño</li>
+                                                    <li><strong>category</strong>: Categoría del producto</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                        </div>
                         
                         <div className="flex flex-col gap-2">
                             <div className="flex items-center gap-2">
                                 <Input
-                                    placeholder="https://ejemplo.com/feed.xml"
+                                    placeholder="https://ejemplo.com/feed.xml o https://docs.google.com/spreadsheets/..."
                                     value={feedUrl}
                                     onChange={(e) => {
                                         setFeedUrl(e.target.value)
                                         setFeedIsValid(null)
+                                        setValidationDetails(null)
                                     }}
                                     className="flex-grow"
                                     disabled={fetchingUrl}
@@ -330,14 +482,22 @@ export default function ProductsConfig({ clientId, haveProducts: initialHaveProd
                                         <>
                                             <CheckCircle className="w-4 h-4 mr-1" /> 
                                             Feed válido - {productCount} productos detectados
+                                            {validationDetails?.provider && ` (Proveedor: ${validationDetails.provider})`}
                                         </> : 
-                                        <><AlertCircle className="w-4 h-4 mr-1" /> Feed inválido</>
+                                        <>
+                                            <AlertCircle className="w-4 h-4 mr-1" /> 
+                                            Feed inválido 
+                                            {validationDetails?.provider && ` (Proveedor: ${validationDetails.provider})`}
+                                        </>
                                     }
                                 </div>
                             )}
                             
+                            {/* Mostrar detalles de validación para Google Sheets */}
+                            {!feedIsValid && renderValidationDetails()}
+                            
                             <p className="text-xs text-muted-foreground">
-                                <strong>Formato esperado:</strong> Google Shopping (XML)
+                                <strong>Formatos soportados:</strong> Google Shopping (XML) y Google Sheets
                             </p>
                         </div>
                     </div>

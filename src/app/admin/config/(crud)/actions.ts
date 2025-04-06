@@ -2,10 +2,30 @@
 
 import { setHaveAgents, setHaveAudioResponse, setHaveCRM, setHaveEvents, setHaveOrderFunction, setHaveProducts, setTokensPrice, setWapSendFrequency, clientHasOrderFunction } from "@/services/clientService"
 import { createOrUpdateEcommerceFeed, getProductsGoogleFormat } from "@/services/product-services"
+import { getProductsGoogleSheetFormat } from "@/services/google-sheets-service"
 import { addTagToFunction, removeTagFromFunction } from "@/services/function-services"
 import { revalidatePath } from "next/cache"
 import { EcommerceProvider } from "@prisma/client"
 
+// Función para determinar qué tipo de proveedor es según la URL
+function detectProviderType(url: string): {
+  provider: EcommerceProvider,
+  format: string
+} {
+  // Verificamos si es una URL de Google Sheets
+  if (url.includes('docs.google.com/spreadsheets')) {
+    return {
+      provider: 'GOOGLE_SHEETS',
+      format: 'custom'
+    };
+  }
+  
+  // Por defecto asumimos que es Fenicio
+  return {
+    provider: 'FENICIO',
+    format: 'google'
+  };
+}
 
 export async function setTokensPriceAction(clientId: string, promptTokensPrice: number, completionTokensPrice: number) {
     const client= await setTokensPrice(clientId, promptTokensPrice,completionTokensPrice)
@@ -101,27 +121,58 @@ export async function checkClientHasOrderFunctionAction(clientId: string): Promi
 }
 
 /**
- * Valida si una URL contiene un feed de productos válido en formato Google Shopping
+ * Valida si una URL contiene un feed de productos válido
  * @param url URL del feed a validar
  * @returns Objeto con información de validación y cantidad de productos
  */
-export async function validateProductFeedAction(url: string): Promise<{ isValid: boolean, productCount: number }> {
+export async function validateProductFeedAction(url: string): Promise<{ 
+  isValid: boolean, 
+  productCount: number,
+  validationDetails?: {
+    missingRequired?: string[];
+    missingOptional?: string[];
+    unknown?: string[];
+  }
+}> {
   try {
-    // Validamos con un límite de 1 producto para ser eficientes
-    // pero obtenemos el conteo total de productos
-    const result = await getProductsGoogleFormat(url, 1)
+    // Detectar el tipo de proveedor basado en la URL
+    const { provider } = detectProviderType(url);
     
-    // Devolvemos si es válido y la cantidad de productos
-    return {
-      isValid: result.products.length > 0,
-      productCount: result.totalCount
+    // Si es Google Sheets, usamos la validación específica
+    if (provider === 'GOOGLE_SHEETS') {
+      const result = await getProductsGoogleSheetFormat(url, 1);
+      
+      return {
+        isValid: result.validation.isValid,
+        productCount: result.totalCount,
+        validationDetails: {
+          missingRequired: result.validation.missingRequired,
+          missingOptional: result.validation.missingOptional,
+          unknown: result.validation.unknown
+        }
+      };
+    } 
+    // Si es Fenicio u otro proveedor que use el formato Google Shopping
+    else {
+      // Validamos con un límite de 1 producto para ser eficientes
+      // pero obtenemos el conteo total de productos
+      const result = await getProductsGoogleFormat(url, 1);
+      
+      // Devolvemos si es válido y la cantidad de productos
+      return {
+        isValid: result.products.length > 0,
+        productCount: result.totalCount
+      };
     }
   } catch (error) {
-    console.error('Error al validar el feed de productos:', error)
+    console.error('Error al validar el feed de productos:', error);
     return {
       isValid: false,
-      productCount: 0
-    }
+      productCount: 0,
+      validationDetails: {
+        missingRequired: []
+      }
+    };
   }
 }
 
@@ -134,27 +185,30 @@ export async function validateProductFeedAction(url: string): Promise<{ isValid:
 export async function createProductFeedAction(clientId: string, url: string): Promise<boolean> {
   try {
     // Primero validamos que el feed sea válido
-    const validation = await validateProductFeedAction(url)
+    const validation = await validateProductFeedAction(url);
     
     if (!validation.isValid) {
-      return false
+      return false;
     }
+    
+    // Detectamos el tipo de proveedor y formato
+    const { provider, format } = detectProviderType(url);
     
     // Si es válido, creamos o actualizamos el feed, incluyendo el conteo de productos
     await createOrUpdateEcommerceFeed(
       clientId,
-      "Feed de productos",
+      provider === 'GOOGLE_SHEETS' ? "Feed de productos (Google Sheets)" : "Feed de productos",
       url,
-      "FENICIO", // Por defecto asumimos Fenicio
-      "google",
+      provider,
+      format,
       validation.productCount > 0 ? validation.productCount : 0
-    )
+    );
     
-    revalidatePath('/admin/config')
-    return true
+    revalidatePath('/admin/config');
+    return true;
   } catch (error) {
-    console.error('Error al crear el feed de productos:', error)
-    return false
+    console.error('Error al crear el feed de productos:', error);
+    return false;
   }
 }
 

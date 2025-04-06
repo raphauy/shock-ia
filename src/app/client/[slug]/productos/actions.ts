@@ -51,6 +51,7 @@ export async function syncProductsAction(feedId: string, maxProducts: number = 0
       newProducts: result.newProducts,
       updatedProducts: result.updatedProducts, 
       unchangedProducts: result.unchangedProducts,
+      deletedProducts: result.deletedProducts,
       executionTime: result.executionTime
     }
   } catch (error) {

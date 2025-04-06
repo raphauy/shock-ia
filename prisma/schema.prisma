@@ -871,6 +871,7 @@ model PromptVersion {
 
 enum EcommerceProvider {
   FENICIO
+  GOOGLE_SHEETS
   SHOPIFY
   WIX
   WOOCOMMERCE

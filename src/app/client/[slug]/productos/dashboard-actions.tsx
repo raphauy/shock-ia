@@ -51,19 +51,22 @@ export default function DashboardActions({ feed, clientId }: DashboardActionsPro
     newProducts: number, 
     updatedProducts: number, 
     unchangedProducts: number, 
+    deletedProducts: number,
     executionTime: number 
   } | null>(null)
   const [fastSyncResults, setFastSyncResults] = useState<{ 
     newProducts: number, 
+    totalProcessed: number,
+    deletedProducts: number,
     executionTime: number 
   } | null>(null)
   const [embeddingResults, setEmbeddingResults] = useState<{ 
     updatedCount: number,
     executionTime: number
   } | null>(null)
-  const [maxProducts, setMaxProducts] = useState<number>(10)
-  const [maxNewProducts, setMaxNewProducts] = useState<number>(10)
-  const [maxEmbeddings, setMaxEmbeddings] = useState<number>(10)
+  const [maxProducts, setMaxProducts] = useState<number>(1000)
+  const [maxNewProducts, setMaxNewProducts] = useState<number>(100)
+  const [maxEmbeddings, setMaxEmbeddings] = useState<number>(50)
 
   const handleMaxProductsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value, 10)
@@ -99,7 +102,7 @@ export default function DashboardActions({ feed, clientId }: DashboardActionsPro
       
       toast({
         title: "Sincronización completa finalizada",
-        description: `Se sincronizaron ${result.syncCount} productos en ${formatExecutionTime(result.executionTime)}: ${result.newProducts} nuevos, ${result.updatedProducts} actualizados, ${result.unchangedProducts} sin cambios`,
+        description: `Se sincronizaron ${result.syncCount} productos en ${formatExecutionTime(result.executionTime)}: ${result.newProducts} nuevos, ${result.updatedProducts} actualizados, ${result.unchangedProducts} sin cambios, ${result.deletedProducts} eliminados`,
       })
     } catch (error) {
       console.error("Error sincronizando productos:", error)
@@ -132,7 +135,7 @@ export default function DashboardActions({ feed, clientId }: DashboardActionsPro
       
       toast({
         title: "Sincronización rápida completada",
-        description: `Se crearon ${result.newProducts} productos nuevos en ${formatExecutionTime(result.executionTime)}`,
+        description: `Se crearon ${result.newProducts} productos nuevos y se eliminaron ${result.deletedProducts} productos en ${formatExecutionTime(result.executionTime)}`,
       })
     } catch (error) {
       console.error("Error en sincronización rápida:", error)
@@ -244,6 +247,7 @@ export default function DashboardActions({ feed, clientId }: DashboardActionsPro
                     <p>• {syncResults.newProducts} productos nuevos</p>
                     <p>• {syncResults.updatedProducts} productos actualizados</p>
                     <p>• {syncResults.unchangedProducts} sin cambios</p>
+                    <p>• {syncResults.deletedProducts} productos eliminados</p>
                     <p>• Tiempo: {formatExecutionTime(syncResults.executionTime)}</p>
                   </div>
                 </div>
@@ -311,6 +315,7 @@ export default function DashboardActions({ feed, clientId }: DashboardActionsPro
                 <div className="bg-muted p-3 rounded-md">
                   <p className="text-sm font-medium">Resultado de la sincronización rápida:</p>
                   <p className="text-sm">{fastSyncResults.newProducts} productos nuevos creados</p>
+                  <p className="text-sm">{fastSyncResults.deletedProducts} productos eliminados</p>
                   <p className="text-sm">Tiempo: {formatExecutionTime(fastSyncResults.executionTime)}</p>
                 </div>
               )}

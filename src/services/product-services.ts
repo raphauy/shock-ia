@@ -3,6 +3,7 @@ import { parseStringPromise } from 'xml2js';
 import { PrismaClient, Prisma, EcommerceProvider } from '@prisma/client';
 import OpenAI from 'openai';
 import crypto from 'crypto';
+import { GoogleProductItem, getProductsGoogleSheetFormat } from './google-sheets-service';
 
 const prisma = new PrismaClient();
 
@@ -24,32 +25,6 @@ function formatExecutionTime(seconds: number): string {
   }
   
   return `${minutes} ${minutes === 1 ? 'minuto' : 'minutos'} ${remainingSeconds} ${remainingSeconds === 1 ? 'segundo' : 'segundos'}`;
-}
-
-// Definición de tipos para los productos
-export interface GoogleProductItem {
-  id: string;
-  itemGroupId?: string;
-  title: string;
-  description: string;
-  link: string;
-  availability: string;
-  price: {
-    value: number;
-    currency: string;
-  };
-  sale_price?: {
-    value: number;
-    currency: string;
-  };
-  brand: string;
-  condition: string;
-  adult?: string;
-  productType?: string;
-  size?: string;
-  image_link: string;
-  additional_image_links?: string[];
-  custom_labels?: string[];
 }
 
 /**
@@ -306,6 +281,7 @@ export async function syncProductsFromFeed(feedId: string, maxProducts: number =
   newProducts: number,
   updatedProducts: number,
   unchangedProducts: number,
+  deletedProducts: number,
   executionTime: number
 }> {
   // Iniciamos el cronómetro
@@ -330,6 +306,14 @@ export async function syncProductsFromFeed(feedId: string, maxProducts: number =
     const result = await getProductsGoogleFormat(feed.url, maxProducts > 0 ? maxProducts : undefined);
     products = result.products;
     totalProductsInFeed = result.totalCount;
+  } else if (feed.format === "custom" && feed.provider === "GOOGLE_SHEETS") {
+    // Para Google Sheets usamos el formato personalizado
+    const result = await getProductsGoogleSheetFormat(feed.url, maxProducts > 0 ? maxProducts : undefined);
+    if (!result.validation.isValid) {
+      throw new Error(`Feed de Google Sheets inválido: faltan columnas obligatorias ${result.validation.missingRequired.join(', ')}`);
+    }
+    products = result.products;
+    totalProductsInFeed = result.totalCount;
   } else {
     throw new Error(`Formato de feed no soportado: ${feed.format}`);
   }
@@ -346,7 +330,48 @@ export async function syncProductsFromFeed(feedId: string, maxProducts: number =
   let updatedCount = 0;
   let unchangedCount = 0;
   let newCount = 0;
+  let deletedCount = 0;
 
+  // Obtener todos los IDs de productos en el feed actual
+  const feedProductIds = products.map(product => product.id);
+  console.log(`Identificados ${feedProductIds.length} productos en el feed actual`);
+
+  // Obtener todos los productos existentes para este cliente en la base de datos
+  const existingProducts = await prisma.product.findMany({
+    where: {
+      clientId: feed.clientId,
+      feedId: feed.id
+    },
+    select: {
+      id: true,
+      externalId: true,
+      title: true
+    }
+  });
+  console.log(`Encontrados ${existingProducts.length} productos en la base de datos para este feed`);
+
+  // Identificar productos que ya no existen en el feed
+  const productsToDelete = existingProducts.filter(
+    product => !feedProductIds.includes(product.externalId)
+  );
+  console.log(`Se eliminarán ${productsToDelete.length} productos que ya no existen en el feed`);
+
+  // Eliminar productos que ya no existen en el feed
+  if (productsToDelete.length > 0) {
+    for (const product of productsToDelete) {
+      try {
+        await prisma.product.delete({
+          where: { id: product.id }
+        });
+        deletedCount++;
+        console.log(`Producto eliminado: ${product.externalId} - ${product.title}`);
+      } catch (error) {
+        console.error(`Error eliminando producto ${product.externalId}:`, error);
+      }
+    }
+  }
+
+  // Ahora procesamos los productos del feed (creación y actualización)
   for (const product of products) {
     try {
       const existingProduct = await prisma.product.findFirst({
@@ -371,7 +396,7 @@ export async function syncProductsFromFeed(feedId: string, maxProducts: number =
         adult: product.adult === "yes" || product.adult === "true",
         category: product.productType,
         size: product.size,
-        imageUrl: product.image_link,
+        imageUrl: product.image_link || "",
         additionalImages: product.additional_image_links || [],
         tags: product.custom_labels || [],
         feed: {
@@ -461,7 +486,7 @@ export async function syncProductsFromFeed(feedId: string, maxProducts: number =
   const executionTime = (endTime - startTime) / 1000; // en segundos
 
   console.log(`Productos sincronizados: ${syncCount}, Embeddings pendientes: ${embedsToUpdateCount}`);
-  console.log(`Detalles: ${newCount} nuevos, ${updatedCount} actualizados, ${unchangedCount} sin cambios`);
+  console.log(`Detalles: ${newCount} nuevos, ${updatedCount} actualizados, ${unchangedCount} sin cambios, ${deletedCount} eliminados`);
   console.log(`Tiempo total de ejecución: ${formatExecutionTime(executionTime)}`);
   
   // Log adicional para diagnóstico
@@ -470,6 +495,7 @@ export async function syncProductsFromFeed(feedId: string, maxProducts: number =
   - Productos nuevos creados: ${newCount}
   - Productos actualizados: ${updatedCount}
   - Productos sin cambios: ${unchangedCount}
+  - Productos eliminados: ${deletedCount}
   - Total sincronizados: ${syncCount}
   - Embeddings pendientes: ${embedsToUpdateCount}
   - Tiempo total: ${formatExecutionTime(executionTime)}
@@ -480,6 +506,7 @@ export async function syncProductsFromFeed(feedId: string, maxProducts: number =
     newProducts: newCount,
     updatedProducts: updatedCount,
     unchangedProducts: unchangedCount,
+    deletedProducts: deletedCount,
     executionTime: executionTime
   };
 }
@@ -937,6 +964,7 @@ export async function syncOnlyNewProducts(
 ): Promise<{ 
   newProducts: number, 
   totalProcessed: number,
+  deletedProducts: number,
   executionTime: number 
 }> {
   // Iniciamos el cronómetro
@@ -954,13 +982,20 @@ export async function syncOnlyNewProducts(
 
   // Obtenemos los ids de productos existentes para este cliente
   console.log(`Obteniendo IDs de productos existentes para cliente ${feed.clientId}...`);
-  const existingProductIds = await prisma.product.findMany({
-    where: { clientId: feed.clientId },
-    select: { externalId: true }
+  const existingProducts = await prisma.product.findMany({
+    where: { 
+      clientId: feed.clientId,
+      feedId: feed.id
+    },
+    select: { 
+      id: true,
+      externalId: true,
+      title: true
+    }
   });
   
   // Creamos un set con los IDs existentes para búsqueda rápida
-  const existingIdsSet = new Set(existingProductIds.map(p => p.externalId));
+  const existingIdsSet = new Set(existingProducts.map(p => p.externalId));
   console.log(`${existingIdsSet.size} productos existentes encontrados en la base de datos`);
 
   // Obtenemos todos los productos del feed de una sola vez
@@ -968,10 +1003,19 @@ export async function syncOnlyNewProducts(
   
   let allFeedProducts: GoogleProductItem[] = [];
   let totalProductsInFeed = 0;
+  let deletedCount = 0;
   
   if (feed.format === "google") {
     // Intentamos obtener todos los productos del feed (sin límite)
     const result = await getProductsGoogleFormat(feed.url);
+    allFeedProducts = result.products;
+    totalProductsInFeed = result.totalCount;
+  } else if (feed.format === "custom" && feed.provider === "GOOGLE_SHEETS") {
+    // Para Google Sheets usamos el formato personalizado
+    const result = await getProductsGoogleSheetFormat(feed.url);
+    if (!result.validation.isValid) {
+      throw new Error(`Feed de Google Sheets inválido: faltan columnas obligatorias ${result.validation.missingRequired.join(', ')}`);
+    }
     allFeedProducts = result.products;
     totalProductsInFeed = result.totalCount;
   } else {
@@ -983,6 +1027,33 @@ export async function syncOnlyNewProducts(
   }
   
   console.log(`Feed contiene ${totalProductsInFeed} productos en total. Se obtuvieron ${allFeedProducts.length} productos.`);
+  
+  // Obtener todos los IDs de productos en el feed actual
+  const feedProductIds = allFeedProducts.map(product => product.id);
+  console.log(`Identificados ${feedProductIds.length} productos en el feed actual`);
+
+  // Identificar productos que ya no existen en el feed
+  const productsToDelete = existingProducts.filter(
+    product => !feedProductIds.includes(product.externalId)
+  );
+  console.log(`Se eliminarán ${productsToDelete.length} productos que ya no existen en el feed`);
+
+  // Eliminar productos que ya no existen en el feed (hasta un máximo de 100 por ejecución para evitar timeouts)
+  const maxDeletions = 100;
+  if (productsToDelete.length > 0) {
+    const productsToDeleteBatch = productsToDelete.slice(0, maxDeletions);
+    for (const product of productsToDeleteBatch) {
+      try {
+        await prisma.product.delete({
+          where: { id: product.id }
+        });
+        deletedCount++;
+        console.log(`Producto eliminado: ${product.externalId} - ${product.title}`);
+      } catch (error) {
+        console.error(`Error eliminando producto ${product.externalId}:`, error);
+      }
+    }
+  }
   
   // Procesamos los productos localmente
   const productsToCreate: GoogleProductItem[] = [];
@@ -1035,7 +1106,7 @@ export async function syncOnlyNewProducts(
         adult: product.adult === "yes" || product.adult === "true",
         category: product.productType,
         size: product.size,
-        imageUrl: product.image_link,
+        imageUrl: product.image_link || "",
         additionalImages: product.additional_image_links || [],
         tags: product.custom_labels || [],
         feed: {
@@ -1095,12 +1166,14 @@ export async function syncOnlyNewProducts(
   - Productos procesados: ${processedProducts}
   - Productos nuevos encontrados: ${newProductsFound}
   - Productos nuevos creados: ${newCount}
+  - Productos eliminados: ${deletedCount}
   - Tiempo total: ${formatExecutionTime(executionTime)}
   `);
   
   return {
     newProducts: newCount,
     totalProcessed: processedProducts,
+    deletedProducts: deletedCount,
     executionTime
   };
 }

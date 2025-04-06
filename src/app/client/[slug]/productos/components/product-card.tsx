@@ -11,7 +11,7 @@ export type ProductCardProps = {
   id: string
   title: string
   description?: string | null
-  imageUrl: string
+  imageUrl?: string | null
   brand?: string | null
   category?: string | null
   price: string
@@ -77,13 +77,14 @@ export default function ProductCard({
           {/* Imagen cuadrada a la izquierda con zoom aumentado */}
           <div className="relative w-28 h-28 md:w-36 md:h-36 rounded-md overflow-hidden flex-shrink-0 border shadow-sm">
             <Image
-              src={imageUrl}
+              src={imageUrl || "/images/placeholder-product.jpg"}
               alt={title}
               fill
               sizes="(max-width: 768px) 112px, 144px"
               className="object-cover scale-[1.4] hover:scale-110 transition-transform duration-300"
               style={{ objectPosition: 'center' }}
               loading="eager"
+              unoptimized={true}
             />
             {similarity !== undefined && !isRelevant && (
               <TooltipProvider>
@@ -115,25 +116,27 @@ export default function ProductCard({
                   {category}
                 </Badge>
               )}
-              <Badge 
-                variant="outline" 
-                className={cn(
-                  "text-xs",
-                  availability.includes('in stock') 
-                    ? "bg-green-50 text-green-700 border-green-200" 
-                    : "bg-red-50 text-red-700 border-red-200"
-                )}
-              >
-                {availability}
-              </Badge>
+              {availability && (
+                <Badge 
+                  variant="outline" 
+                  className={cn(
+                    "text-xs",
+                    availability.includes('in stock') 
+                      ? "bg-green-50 text-green-700 border-green-200" 
+                      : "bg-red-50 text-red-700 border-red-200"
+                  )}
+                >
+                  {availability}
+                </Badge>
+              )}
             </div>
             
             <div className="flex justify-between items-center pt-2 mt-auto">
               <div>
                 <span className="font-bold text-primary">
-                  {price} {currency}
+                  {price} {currency && currency}
                 </span>
-                {salePrice && (
+                {salePrice && currency && (
                   <span className="ml-2 text-sm line-through text-muted-foreground">
                     {salePrice} {currency}
                   </span>
