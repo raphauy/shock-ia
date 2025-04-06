@@ -260,7 +260,7 @@ export default async function ClientProducts({ params }: Props) {
                                         <div key={product.id} className="flex items-center gap-4">
                                             <div className="relative w-12 h-12 rounded-md overflow-hidden flex-shrink-0">
                                                 <Image 
-                                                    src={product.imageUrl || "/images/placeholder-product.jpg"} 
+                                                    src={product.imageUrl || "/images/placeholder-product.png"} 
                                                     alt={product.title}
                                                     fill
                                                     sizes="48px"

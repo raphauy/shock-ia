@@ -77,7 +77,7 @@ export default function ProductCard({
           {/* Imagen cuadrada a la izquierda con zoom aumentado */}
           <div className="relative w-28 h-28 md:w-36 md:h-36 rounded-md overflow-hidden flex-shrink-0 border shadow-sm">
             <Image
-              src={imageUrl || "/images/placeholder-product.jpg"}
+              src={imageUrl || "/images/placeholder-product.png"}
               alt={title}
               fill
               sizes="(max-width: 768px) 112px, 144px"
