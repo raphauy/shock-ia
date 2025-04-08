@@ -1,7 +1,7 @@
 import { getCurrentUser } from "@/lib/auth"
 import { removeSectionTexts } from "@/lib/utils"
 import { getClient } from "@/services/clientService"
-import { getSystemMessage, messageArrived, saveFunction } from "@/services/conversationService"
+import { getActiveMessages, getSystemMessage, messageArrived, saveFunction } from "@/services/conversationService"
 import { getContext } from "@/services/function-call-services"
 import { getFunctionsDefinitions } from "@/services/function-services"
 import { processFunctionCall } from "@/services/functions"
@@ -12,12 +12,17 @@ import { OpenAIStream, StreamingTextResponse } from "ai"
 import { NextResponse } from "next/server"
 import { OpenAI } from "openai"
 import openaiTokenCounter from 'openai-gpt-token-counter'
+import { ChatCompletionMessageParam } from "openai/resources/chat/completions.mjs"
 
 export const maxDuration = 299
 export const dynamic = 'force-dynamic'
 
 
 export async function POST(req: Request) {
+
+  const currentUser= await getCurrentUser()
+  const phone= currentUser?.email || "web-chat"
+
 
   const { messages: origMessages, clientId, modelName } = await req.json()
   
@@ -26,13 +31,48 @@ export async function POST(req: Request) {
     return new Response("Client ID is required", { status: 400 })
   }
   
-  const messages= origMessages.filter((message: any) => message.role !== "system")
-  // replace role function by system
-  for (let i = 0; i < messages.length; i++) {
-    if (messages[i].role === "function") {
-      messages[i].role = "system"
+  //const messages= origMessages.filter((message: any) => message.role !== "system")
+  let messages= await getActiveMessages(phone, clientId)
+  if (!messages) messages= []
+  messages= messages.filter((message: any) => message.role !== "system")
+  // for (let i = 0; i < messages.length; i++) {
+  //   if (messages[i].role === "function") {
+  //     console.log("raw gptData: " + messages[i].gptData)
+  //     const gptData= messages[i].gptData ? JSON.parse(messages[i].gptData || "{}") : null
+  //     const isDocumentFunction= gptData && gptData.functionName ? gptData.functionName === "getDocument" : false
+  //     console.log("gptData: " + JSON.stringify(gptData))
+  //     if (!isDocumentFunction) {
+  //       messages[i].role = "system"
+  //     } else {
+        
+  //       messages[i].name= gptData.functionName
+  //     }
+  //   }
+  // }
+
+  // filter messages with role function and functionName getDocument
+  messages= messages.filter((message: any) => message.role !== "system")
+  // get rid of messages with role function and functionName getDocument
+  messages= messages.filter((message: any) => message.role !== "function" || (message.content !== "getDocument" && message.content !== "getSection"))
+  console.log("messages: " + JSON.stringify(messages))
+
+  const apiMessages= messages.map((message: any) => {
+    const role= message.role
+    if (role === "function") 
+      return {
+        role: message.role,
+        content: message.content,
+        name: message.gptData ? JSON.parse(message.gptData).functionName : null
+      }
+  
+    return {
+      role: message.role,
+      content: message.content,
     }
-  }
+  })
+  
+
+  console.log("apiMessages: " + JSON.stringify(apiMessages))
 
   const client= await getClient(clientId)
   if (!client) {
@@ -43,17 +83,17 @@ export async function POST(req: Request) {
   }
 
 
-  const currentUser= await getCurrentUser()
-  const phone= currentUser?.email || "web-chat"
-
   const stage= await getStageByChatwootId(phone, clientId)
   if (stage && !stage.isBotEnabled) {
     return new Response("Bot disabled", { status: 404 })
   }
 
   // get rid of messages of type system
-  const input= messages[messages.length - 1].content
+  //const input= messages[messages.length - 1].content
+  const input= origMessages[origMessages.length - 1].content
   console.log("input: " + input)
+  // attach the input to the messages
+  apiMessages.push({ role: "user", content: input } as any)
 
   if (!client.modelId) return NextResponse.json({ message: "Este cliente no tiene modelo asignado" }, { status: 502 })
 
@@ -66,14 +106,14 @@ export async function POST(req: Request) {
   if (!provider.streaming || !model.streaming) return NextResponse.json({ error: "Proveedor o modelo no soporta streaming" }, { status: 502 })
 
   const contextResponse= await getContext(clientId, phone, input)
-  console.log("contextContent: " + removeSectionTexts(contextResponse.contextString))
+  //console.log("contextContent: " + removeSectionTexts(contextResponse.contextString))
 
   const systemMessage= getSystemMessage(client.prompt, contextResponse.contextString)
-  messages.unshift(systemMessage)
+  apiMessages.unshift(systemMessage as any)
   const created= await messageArrived(phone, systemMessage.content, client.id, "system", "")
   await setSectionsToMessage(created.id, contextResponse.sectionsIds)
 
-  console.log("messages.count: " + messages.length)
+  console.log("apiMessages.count: " + apiMessages.length)
 
   const functions= await getFunctionsDefinitions(clientId)
 
@@ -98,7 +138,7 @@ export async function POST(req: Request) {
   let completionTokens= 0
 
   // @ts-ignore
-  baseArgs = { ...baseArgs, messages: messages }
+  baseArgs = { ...baseArgs, messages: apiMessages }
 
   // Si el array de functions tiene al menos un elemento, añade el parámetro functions
   const args = functions.length > 0 ? { ...baseArgs, functions: functions, function_call: "auto" } : baseArgs;
@@ -117,13 +157,12 @@ export async function POST(req: Request) {
       const newMessages = createFunctionCallMessages(result);
 
       let baseArgs = {
-        // model: "gpt-4-1106-preview",
-        model: "gpt-4-turbo",
+        model: "gpt-4o",
         stream: true,
       };
     
       // @ts-ignore
-      baseArgs = { ...baseArgs, messages: [...messages, ...newMessages] };
+      baseArgs = { ...baseArgs, messages: [...apiMessages, ...newMessages] };
       const recursiveArgs = functions.length > 0 ? { ...baseArgs, functions: functions, function_call: "auto" } : baseArgs;
 
       return openai.chat.completions.create(recursiveArgs as any);
@@ -131,7 +170,7 @@ export async function POST(req: Request) {
     },
     onStart: async () => {
       console.log("start")
-      const text= messages[messages.length - 1].content
+      const text= apiMessages[apiMessages.length - 1].content
       console.log("text: " + text)
       
       const messageStored= await messageArrived(phone, text, client.id, "user", "")
@@ -141,7 +180,7 @@ export async function POST(req: Request) {
     onCompletion: async (completion) => {
       console.log("completion: ", completion)
 
-      const partialPromptToken = openaiTokenCounter.chat(messages, "gpt-4") + 1
+      const partialPromptToken = openaiTokenCounter.chat(apiMessages, "gpt-4") + 1
       console.log(`\tPartial prompt token count: ${partialPromptToken}`)      
       promptTokens += partialPromptToken
 

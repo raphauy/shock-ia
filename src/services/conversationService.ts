@@ -2,22 +2,21 @@ import { prisma } from "@/lib/db";
 
 import { BillingData, CompleteData } from "@/app/admin/billing/actions";
 import { removeSectionTexts } from "@/lib/utils";
+import { ChatCompletion } from "groq-sdk/resources/chat/completions.mjs";
 import { ChatCompletionMessageParam, ChatCompletionSystemMessageParam, ChatCompletionUserMessageParam } from "openai/resources/index.mjs";
+import { sendAudioToConversation, sendTextToConversation } from "./chatwoot";
+import { getChatwootAccountId } from "./clientService";
+import { ContactFormValues, createContact, getContactByChatwootId } from "./contact-services";
+import { completionInit, getContext } from "./function-call-services";
 import { getFunctionsDefinitions } from "./function-services";
+import { getDocument } from "./functions";
+import { googleCompletionInit } from "./google-function-call-services";
+import { groqCompletionInit } from "./groq-function-call-services";
+import { generateAudio, getFullModelDAO, getFullModelDAOByName } from "./model-services";
 import { sendWapMessage } from "./osomService";
 import { setSectionsToMessage } from "./section-services";
-import { getContext } from "./function-call-services";
-import { googleCompletionInit } from "./google-function-call-services";
-import { ChatCompletion } from "groq-sdk/resources/chat/completions.mjs";
-import { generateAudio, getFullModelDAO, getFullModelDAOByName } from "./model-services";
-import { completionInit } from "./function-call-services";
-import { groqCompletionInit } from "./groq-function-call-services";
-import { getChatwootAccountId, getClient } from "./clientService";
-import { getDocument } from "./functions";
-import { sendText } from "./wrc-sdk";
-import { sendAudioToConversation, sendTextToConversation } from "./chatwoot";
-import { ContactFormValues, createContact, getContactByChatwootId } from "./contact-services";
 import { getUserByEmail } from "./user-service";
+import { sendText } from "./wrc-sdk";
 
 
 export default async function getConversations() {
@@ -359,14 +358,28 @@ export async function processMessage(id: string, modelName?: string) {
 
   const systemMessage= getSystemMessage(client.prompt, contextResponse.contextString)
 
-  const filteredMessages= conversation.messages.filter((message) => message.role !== "system")
-  const messages: ChatCompletionMessageParam[]= getGPTMessages(filteredMessages as ChatCompletionUserOrSystem[], systemMessage)
-  // replace role function by system
-  for (let i = 0; i < messages.length; i++) {
-    if (messages[i].role === "function") {
-      messages[i].role = "system"
+  let filteredMessages= conversation.messages.filter((message: any) => message.role !== "system")
+  // get rid of messages with role function and functionName getDocument
+  filteredMessages= filteredMessages.filter((message: any) => message.role !== "function" || (message.content !== "getDocument" && message.content !== "getSection"))
+  
+  const messages= filteredMessages.map((message: any) => {
+    const role= message.role
+    if (role === "function") 
+      return {
+        role: message.role,
+        content: message.content,
+        name: message.gptData ? JSON.parse(message.gptData).functionName : null
+      }
+  
+    return {
+      role: message.role,
+      content: message.content,
     }
-  }  
+  })
+  // append system message to messages
+  messages.unshift(systemMessage)
+  
+  console.log("messages: " + JSON.stringify(messages))
 
   const created= await messageArrived(conversation.phone, systemMessage.content, client.id, "system", "")
   await setSectionsToMessage(created.id, contextResponse.sectionsIds)
@@ -786,6 +799,7 @@ export async function saveFunction(phone: string, completion: string, clientId: 
 
   let gptData
   if (name === "getDocument" || name === "getSection") {
+    text= `${name}`
     const document = await getDocument(JSON.parse(args).docId)
     if (typeof document !== "string") {
       gptData = {

@@ -58,7 +58,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ data: "ACK" }, { status: 200 })
         }
 
-        if ((accountId === 16 || accountId === 1) && (senderPhone !== "+59892265737")) {
+        if ((accountId === 16 || accountId === 1) && (senderPhone !== "+59892265737" && senderPhone !== "+59892045358")) {
             console.log("phone is not allowed for this account")
             return NextResponse.json({ data: "ACK" }, { status: 200 })
         }

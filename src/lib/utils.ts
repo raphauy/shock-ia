@@ -1,9 +1,7 @@
 import { EventType } from "@prisma/client";
 import { type ClassValue, clsx } from "clsx";
-import { isThisWeek } from "date-fns";
-import { isToday, isYesterday } from "date-fns";
-import { parseISO } from "date-fns";
-import { format, format as formatTZ, fromZonedTime, toDate, toZonedTime } from "date-fns-tz";
+import { isThisWeek, isToday, isYesterday, parseISO } from "date-fns";
+import { format, format as formatTZ, fromZonedTime, toZonedTime } from "date-fns-tz";
 import { es } from "date-fns/locale";
 import he from 'he';
 import { twMerge } from "tailwind-merge";
