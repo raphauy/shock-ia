@@ -78,42 +78,65 @@ export function convertToExportUrl(url: string, sheetId: number = 0): string | n
  * @returns Array de arrays con los datos parseados
  */
 export function parseCSV(csvText: string): string[][] {
-  // Separar las líneas
-  const lines = csvText.split('\n');
+  const result: string[][] = [];
+  let row: string[] = [];
+  let currentField = '';
+  let insideQuotes = false;
   
-  // Procesar cada línea para manejar comas dentro de comillas
-  return lines.map(line => {
-    const row: string[] = [];
-    let insideQuotes = false;
-    let currentValue = '';
+  // Procesar el CSV carácter por carácter
+  for (let i = 0; i < csvText.length; i++) {
+    const char = csvText[i];
+    const nextChar = i < csvText.length - 1 ? csvText[i + 1] : '';
     
-    for (let i = 0; i < line.length; i++) {
-      const char = line[i];
-      
-      // Manejar comillas
-      if (char === '"') {
+    // Manejar comillas
+    if (char === '"') {
+      // Comilla escapada (doble comilla)
+      if (insideQuotes && nextChar === '"') {
+        currentField += '"';
+        i++; // Saltar la siguiente comilla
+      } else {
+        // Inicio o fin de campo con comillas
         insideQuotes = !insideQuotes;
-        continue;
       }
-      
-      // Si encontramos una coma fuera de comillas, terminamos el valor actual
-      if (char === ',' && !insideQuotes) {
-        row.push(currentValue.trim());
-        currentValue = '';
-        continue;
-      }
-      
-      // Agregar el carácter al valor actual
-      currentValue += char;
+      continue;
     }
     
-    // Agregar el último valor
-    if (currentValue.trim() !== '') {
-      row.push(currentValue.trim());
+    // Manejar comas (separadores de campo)
+    if (char === ',' && !insideQuotes) {
+      row.push(currentField.trim());
+      currentField = '';
+      continue;
     }
     
-    return row;
-  }).filter(row => row.length > 0); // Eliminar filas vacías
+    // Manejar saltos de línea
+    if (char === '\n' && !insideQuotes) {
+      // Fin de línea, añadir el último campo y la fila completa
+      if (currentField.trim() !== '' || row.length > 0) {
+        row.push(currentField.trim());
+        result.push(row);
+        row = [];
+        currentField = '';
+      }
+      continue;
+    }
+    
+    // Manejar retorno de carro seguido de salto de línea (Windows)
+    if (char === '\r' && nextChar === '\n' && !insideQuotes) {
+      // Ignorar el retorno de carro, el salto de línea se procesará en la siguiente iteración
+      continue;
+    }
+    
+    // Cualquier otro carácter se agrega al campo actual
+    currentField += char;
+  }
+  
+  // Procesar el último campo y fila si existen
+  if (currentField.trim() !== '' || row.length > 0) {
+    row.push(currentField.trim());
+    result.push(row);
+  }
+  
+  return result.filter(row => row.length > 0);
 }
 
 /**
