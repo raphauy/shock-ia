@@ -136,7 +136,7 @@ export async function getContext(clientId: string, phone: string, userInput: str
     contextString+= `Nombre: ${contact.name}\n`
     contextString+= `Teléfono: ${contact.phone}\n`
     //contextString+= `Etiquetas: ${contact.tags}\n`
-    //contextString+= `Estado CRM: ${contact.stage?.name}\n`
+    contextString+= `Estado CRM: ${contact.stage?.name}\n`
 
     const customFields= await getClientCustomFields(clientId)
     const customFieldsValues= await getFieldValuesByContactId(contact.id)
