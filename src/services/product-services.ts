@@ -301,19 +301,32 @@ export async function syncProductsFromFeed(feedId: string, maxProducts: number =
   // También obtenemos el conteo total de productos en el feed
   let products: GoogleProductItem[] = [];
   let totalProductsInFeed = 0;
+  let allFeedProductIds: string[] = [];
 
   if (feed.format === "google") {
+    // Primero obtenemos todos los IDs del feed sin límite
+    const allProductsResult = await getProductsGoogleFormat(feed.url);
+    allFeedProductIds = allProductsResult.products.map(p => p.id);
+    totalProductsInFeed = allProductsResult.totalCount;
+    
+    // Luego obtenemos los productos con el límite para procesar
     const result = await getProductsGoogleFormat(feed.url, maxProducts > 0 ? maxProducts : undefined);
     products = result.products;
-    totalProductsInFeed = result.totalCount;
   } else if (feed.format === "custom" && feed.provider === "GOOGLE_SHEETS") {
     // Para Google Sheets usamos el formato personalizado
+    const allProductsResult = await getProductsGoogleSheetFormat(feed.url);
+    if (!allProductsResult.validation.isValid) {
+      throw new Error(`Feed de Google Sheets inválido: faltan columnas obligatorias ${allProductsResult.validation.missingRequired.join(', ')}`);
+    }
+    allFeedProductIds = allProductsResult.products.map(p => p.id);
+    totalProductsInFeed = allProductsResult.totalCount;
+    
+    // Luego obtenemos los productos con el límite para procesar
     const result = await getProductsGoogleSheetFormat(feed.url, maxProducts > 0 ? maxProducts : undefined);
     if (!result.validation.isValid) {
       throw new Error(`Feed de Google Sheets inválido: faltan columnas obligatorias ${result.validation.missingRequired.join(', ')}`);
     }
     products = result.products;
-    totalProductsInFeed = result.totalCount;
   } else {
     throw new Error(`Formato de feed no soportado: ${feed.format}`);
   }
@@ -332,10 +345,6 @@ export async function syncProductsFromFeed(feedId: string, maxProducts: number =
   let newCount = 0;
   let deletedCount = 0;
 
-  // Obtener todos los IDs de productos en el feed actual
-  const feedProductIds = products.map(product => product.id);
-  console.log(`Identificados ${feedProductIds.length} productos en el feed actual`);
-
   // Obtener todos los productos existentes para este cliente en la base de datos
   const existingProducts = await prisma.product.findMany({
     where: {
@@ -350,9 +359,9 @@ export async function syncProductsFromFeed(feedId: string, maxProducts: number =
   });
   console.log(`Encontrados ${existingProducts.length} productos en la base de datos para este feed`);
 
-  // Identificar productos que ya no existen en el feed
+  // Identificar productos que ya no existen en el feed usando todos los IDs del feed
   const productsToDelete = existingProducts.filter(
-    product => !feedProductIds.includes(product.externalId)
+    product => !allFeedProductIds.includes(product.externalId)
   );
   console.log(`Se eliminarán ${productsToDelete.length} productos que ya no existen en el feed`);
 
