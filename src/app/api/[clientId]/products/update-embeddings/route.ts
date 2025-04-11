@@ -2,6 +2,7 @@ import { getClient } from "@/services/clientService"
 import { generateProductEmbeddings } from "@/services/product-services"
 import { NextResponse } from "next/server"
 
+export const maxDuration = 800;
 type Props = {
     params: {
         clientId: string
