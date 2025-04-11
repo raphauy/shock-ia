@@ -8,8 +8,7 @@ type Props = {
     }
 }
 
-export async function POST(request: Request, { params }: Props) {
-    const clientId = params.clientId
+async function updateEmbeddings(clientId: string, forceUpdate: boolean, batchSize: number) {
     const client = await getClient(clientId)
     if (!client) {
         return NextResponse.json({ error: "Cliente no encontrado" }, { status: 404 })
@@ -17,11 +16,6 @@ export async function POST(request: Request, { params }: Props) {
 
     try {
         console.log("🔄 Iniciando actualización de embeddings para el cliente:", client.name)
-        
-        // Obtener parámetros opcionales de la solicitud
-        const body = await request.json()
-        const forceUpdate = body.forceUpdate || false
-        const batchSize = body.batchSize || 0 // 0 = sin límite
         
         // Actualizar embeddings
         const result = await generateProductEmbeddings(clientId, forceUpdate, batchSize)
@@ -44,4 +38,16 @@ export async function POST(request: Request, { params }: Props) {
             mensaje: `Error al actualizar embeddings: ${error.message}`
         }, { status: 500 })
     }
+}
+
+export async function GET(request: Request, { params }: Props) {
+    return updateEmbeddings(params.clientId, false, 250)
+}
+
+export async function POST(request: Request, { params }: Props) {
+    const body = await request.json()
+    const forceUpdate = body.forceUpdate || false
+    const batchSize = body.batchSize || 50
+    
+    return updateEmbeddings(params.clientId, forceUpdate, batchSize)
 }
