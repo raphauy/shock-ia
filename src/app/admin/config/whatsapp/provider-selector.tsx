@@ -1,7 +1,7 @@
 "use client"
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { InboxProvider } from "@prisma/client"
+import { InboxProvider } from "@/lib/generated/prisma"
 import { useEffect, useState } from "react"
 import { DataClient } from "../../clients/(crud)/actions"
 import { setInboxProvidersAction } from "./actions"

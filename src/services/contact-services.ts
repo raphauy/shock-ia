@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db"
-import { ContactEventType } from "@prisma/client"
+import { ContactEventType } from "@/lib/generated/prisma"
 import * as z from "zod"
 import { assignConversationToAgent, createChatwootConversation, createContactInChatwoot, deleteContactInChatwoot } from "./chatwoot"
 import { getChatwootAccountId, getClient, getClientSlug, getWhatsappInstance } from "./clientService"

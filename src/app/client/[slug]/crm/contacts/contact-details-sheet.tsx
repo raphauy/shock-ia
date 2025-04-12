@@ -12,7 +12,7 @@ import { ContactEventDAO } from '@/services/contact-event-services'
 import { ContactDAO } from "@/services/contact-services"
 import { CustomFieldDAO } from '@/services/customfield-services'
 import { FieldValueDAO } from '@/services/fieldvalue-services'
-import { ContactEventType, FieldType } from '@prisma/client'
+import { ContactEventType, FieldType } from '@/lib/generated/prisma'
 import { DatabaseZapIcon } from 'lucide-react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'

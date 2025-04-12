@@ -3,7 +3,7 @@
 import { getClientBySlug } from "@/services/clientService"
 import { searchProductsWithEmbeddings } from "@/services/product-services"
 import { revalidatePath } from "next/cache"
-import { Prisma } from "@prisma/client"
+import { Prisma } from "@/lib/generated/prisma"
 
 /**
  * Realiza una búsqueda semántica de productos para un cliente.

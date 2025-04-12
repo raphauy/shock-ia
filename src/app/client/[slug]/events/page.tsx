@@ -8,7 +8,7 @@ import { CalendarEvent } from "./big-calendar"
 import { EventCard } from "./event-card"
 import { EventDialog } from "./event-dialogs"
 import { EventCreator } from "@/app/client/[slug]/events/event-creator"
-import { EventType } from "@prisma/client"
+import { EventType } from "@/lib/generated/prisma"
 
 type Props = {
   params: {

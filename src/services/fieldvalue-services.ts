@@ -2,7 +2,7 @@ import { prisma } from "@/lib/db"
 import * as z from "zod"
 import { CustomFieldDAO, getClientCustomFieldByName } from "./customfield-services"
 import { createContactEvent } from "./contact-event-services"
-import { ContactEventType } from "@prisma/client"
+import { ContactEventType } from "@/lib/generated/prisma"
 
 export type FieldValueDAO = {
 	id: string

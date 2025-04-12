@@ -1,5 +1,5 @@
 import { checkDateTimeFormatForSlot, decodeAndCorrectText } from "@/lib/utils";
-import { ContactEventType, EventType, ReminderType } from "@prisma/client";
+import { ContactEventType, EventType, ReminderType } from "@/lib/generated/prisma";
 import { addMinutes, format, parse } from "date-fns";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import moment from 'moment-timezone';

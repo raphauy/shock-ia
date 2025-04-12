@@ -5,7 +5,7 @@ import { createOrUpdateEcommerceFeed, getProductsGoogleFormat } from "@/services
 import { getProductsGoogleSheetFormat } from "@/services/google-sheets-service"
 import { addTagToFunction, removeTagFromFunction } from "@/services/function-services"
 import { revalidatePath } from "next/cache"
-import { EcommerceProvider } from "@prisma/client"
+import { EcommerceProvider } from "@/lib/generated/prisma"
 
 // Función para determinar qué tipo de proveedor es según la URL
 function detectProviderType(url: string): {
@@ -215,7 +215,7 @@ export async function createProductFeedAction(clientId: string, url: string): Pr
 export async function getProductFeedAction(clientId: string) {
     try {
         // Importamos la función necesaria desde Prisma
-        const { PrismaClient } = require('@prisma/client')
+        const { PrismaClient } = require('@/lib/generated/prisma')
         const prisma = new PrismaClient()
         
         // Buscamos el feed activo para este cliente

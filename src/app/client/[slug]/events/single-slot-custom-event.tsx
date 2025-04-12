@@ -2,7 +2,7 @@ import { format } from "date-fns";
 import { BlockSlotDialog, BookingDialog, CancelBookingDialog } from "../bookings/booking-dialogs";
 import { CalendarEvent } from "./big-calendar";
 import { PersonStanding } from "lucide-react";
-import { EventType } from "@prisma/client";
+import { EventType } from "@/lib/generated/prisma";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 

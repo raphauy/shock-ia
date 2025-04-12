@@ -1,4 +1,4 @@
-import { Client, User } from "@prisma/client";
+import { Client, User } from "@/lib/generated/prisma";
 import {
   Table,
   TableBody,

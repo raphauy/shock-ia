@@ -8,7 +8,7 @@ import { format } from "date-fns"
 import { DeleteReminderDialog, ReminderDialog } from "./reminder-dialogs"
 import { Badge } from "@/components/ui/badge"
 import { formatMinutesDelay } from "@/lib/utils"
-import { ReminderStatus } from "@prisma/client"
+import { ReminderStatus } from "@/lib/generated/prisma"
 import { ConversationLink } from "../campaigns/[campaignId]/conversation-link"
 import { CancelReminderButton } from "./cancel-reminder-button"
 

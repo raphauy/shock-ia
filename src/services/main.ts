@@ -1,4 +1,4 @@
-import { EcommerceProvider } from '@prisma/client'
+import { EcommerceProvider } from "@/lib/generated/prisma"
 import { config } from "dotenv"
 import {
     createOrUpdateEcommerceFeed,

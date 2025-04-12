@@ -4,7 +4,7 @@ import { getInboxId } from "@/services/chatwoot"
 import { deleteWhatsappInstance, getClient, getClientBySlug, getWhatsappInstance, setChatwootData, setInboxProvider, setWhatsappInboxId, setWhatsappInstance } from "@/services/clientService"
 import { connectInstance, connectionState, createInstanceBasic, deleteInstance, logoutInstance, restartInstance, enableChatwoot, disableChatwoot } from "@/services/wrc-sdk"
 import { ChatwootParams, WhatsappInstanceDAO } from "@/services/wrc-sdk-types"
-import { InboxProvider } from "@prisma/client"
+import { InboxProvider } from "@/lib/generated/prisma"
 import { revalidatePath } from "next/cache"
 
 export async function createInstanceAction(instanceName: string) {

@@ -1,7 +1,7 @@
 import * as z from "zod"
 import { prisma } from "@/lib/db"
 import { ChatCompletionCreateParams } from "openai/resources/index.mjs"
-import { Client } from "@prisma/client"
+import { Client } from "@/lib/generated/prisma"
 import { RepositoryDAO } from "./repository-services"
 import { getClient } from "./clientService"
 

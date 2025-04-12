@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Send, Settings } from "lucide-react"
 import Link from "next/link"
 import SendReminderButton from './send-reminder-button'
-import { AbandonedOrderStatus } from "@prisma/client"
+import { AbandonedOrderStatus } from "@/lib/generated/prisma"
 import { getAbandonedOrdersByClientId } from "@/services/abandoned-orders-service"
 import Pagination from '../components/pagination'
 import SearchFilter from './search-filter'

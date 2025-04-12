@@ -3,7 +3,7 @@
 import { checkValidPhone } from "@/lib/utils"
 import { getClientBySlug } from "@/services/clientService"
 import { EventDAO, addReminderDefinitionToEvent, createEvent, deleteEvent, removeReminderDefinitionFromEvent, setAvailability, setEventDateTime, setEventNotifyPhones, setMoveToStageIdEvent, setSeatsPerTimeSlot, setTagsOfEvent, updateEventBooleanField, updateEventField, updateEventNumberField } from "@/services/event-services"
-import { EventType } from "@prisma/client"
+import { EventType } from "@/lib/generated/prisma"
 import { revalidatePath } from "next/cache"
 
 

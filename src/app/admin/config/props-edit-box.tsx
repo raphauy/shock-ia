@@ -5,7 +5,7 @@ import { setHaveAgentsAction, setHaveAudioResponseAction, setHaveCRMAction, setH
 import { use, useEffect, useState } from "react"
 import { Loader } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
-import { InboxProvider } from "@prisma/client"
+import { InboxProvider } from "@/lib/generated/prisma"
 
 interface Props {
     clientId: string

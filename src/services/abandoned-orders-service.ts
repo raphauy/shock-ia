@@ -1,6 +1,6 @@
 import { Orden } from "@/app/client/[slug]/productos/ordenes/types";
 import { prisma } from "@/lib/db";
-import { AbandonedOrderStatus, ReminderType } from "@prisma/client";
+import { AbandonedOrderStatus, ReminderType } from "@/lib/generated/prisma";
 import { createReminder, ReminderSchema, ReminderFormValues } from "./reminder-services";
 import { Client } from "@upstash/qstash";
 import { format } from "date-fns";

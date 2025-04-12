@@ -1,7 +1,7 @@
 import { ClientFormValues } from "@/app/admin/clients/(crud)/clientForm";
 import { prisma } from "@/lib/db";
 import { FunctionDAO, getFunctionIdByFunctionName } from "./function-services";
-import { InboxProvider } from "@prisma/client";
+import { InboxProvider } from "@/lib/generated/prisma";
 import { WhatsappInstanceDAO } from "./wrc-sdk-types";
 import { createDefaultStages, getFirstStageOfClient } from "./stage-services";
 import { toZonedTime, formatInTimeZone } from 'date-fns-tz'
@@ -69,6 +69,19 @@ export async function getClient(id: string) {
     where: {
       id
     },
+  })
+
+  return found
+}
+
+export async function getClientWithUsers(id: string) {
+  const found = await prisma.client.findUnique({
+    where: {
+      id
+    },
+    include: {
+      users: true
+    }
   })
 
   return found

@@ -9,7 +9,7 @@ import { X, Search } from "lucide-react"
 import { ColumnDef, ColumnFiltersState, SortingState, VisibilityState, flexRender, getCoreRowModel, getFacetedRowModel, getFacetedUniqueValues, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table"
 import { DataTablePagination } from "@/components/data-table/data-table-pagination"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { ReminderStatus } from "@prisma/client"
+import { ReminderStatus } from "@/lib/generated/prisma"
 import { DataTableFacetedFilter } from "@/components/data-table/data-table-faceted-filter"
 
 const statuses= Object.values(ReminderStatus)

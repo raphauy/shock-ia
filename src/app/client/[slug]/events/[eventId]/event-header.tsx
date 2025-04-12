@@ -6,7 +6,7 @@ import { EventDAO } from "@/services/event-services"
 import { Calendar, Clock, Edit, MapPin, PersonStanding } from "lucide-react"
 import Link from "next/link"
 import { DeleteEventDialog } from "../event-dialogs"
-import { EventType } from "@prisma/client"
+import { EventType } from "@/lib/generated/prisma"
 import { format, isAfter, isSameDay } from "date-fns"
 import { toZonedTime } from "date-fns-tz"
 

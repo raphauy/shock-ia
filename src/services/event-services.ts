@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db"
 import { generateSlug } from "@/lib/utils"
-import { EventType, FieldType } from "@prisma/client"
+import { EventType, FieldType } from "@/lib/generated/prisma"
 import * as z from "zod"
 import { getClient } from "./clientService"
 import { getBookingsDAO } from "./booking-services"

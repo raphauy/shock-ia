@@ -1,6 +1,6 @@
 import { UserFormValues } from "@/app/admin/users/(crud)/userForm";
 import { prisma } from "@/lib/db";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@/lib/generated/prisma";
 import { z } from "zod";
 
 export type UserDAO = {

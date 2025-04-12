@@ -10,7 +10,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "@/components/ui/use-toast"
-import { User } from "@prisma/client"
+import { User } from "@/lib/generated/prisma"
 import { useEffect, useState } from "react"
 import { getDataUser } from "./actions"
 import { DataClient, getDataClients } from "../../clients/(crud)/actions"

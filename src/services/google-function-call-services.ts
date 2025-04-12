@@ -1,4 +1,4 @@
-import { Client } from "@prisma/client"
+import { Client } from "@/lib/generated/prisma"
 import { GoogleGenerativeAI, Content, FunctionDeclarationsTool, FunctionDeclaration } from "@google/generative-ai"
 import { ChatCompletionCreateParams, ChatCompletionMessageParam } from "openai/resources/index.mjs"
 import { CompletionInitResponse, getAgentes, processFunctionCall } from "./functions"

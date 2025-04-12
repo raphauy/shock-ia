@@ -1,7 +1,7 @@
 import { processCampaignContact, setCampaignContactStatus } from "@/services/campaign-services"
 import { NextResponse } from "next/server"
 import { Receiver } from "@upstash/qstash"
-import { CampaignContactStatus, ReminderStatus } from "@prisma/client";
+import { CampaignContactStatus, ReminderStatus } from "@/lib/generated/prisma";
 import { processReminder, setReminderStatus } from "@/services/reminder-services";
 
 export const maxDuration = 299

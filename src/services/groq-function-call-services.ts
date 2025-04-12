@@ -1,4 +1,4 @@
-import { Client } from "@prisma/client";
+import { Client } from "@/lib/generated/prisma";
 import { Groq } from "groq-sdk";
 import { ChatCompletion } from "groq-sdk/resources/chat/completions.mjs";
 import { ChatCompletionCreateParams } from "openai/resources/index.mjs";

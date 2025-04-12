@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db";
 import { messageArrived, processMessage } from "./conversationService";
-import { Message } from "@prisma/client";
+import { Message } from "@/lib/generated/prisma";
 import { getValue } from "./config-services";
 import { addMilliseconds } from "date-fns";
 import { toZonedTime } from "date-fns-tz";

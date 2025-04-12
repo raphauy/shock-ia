@@ -3,7 +3,7 @@
 import { LoadingSpinnerChico } from "@/components/loadingSpinner";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
-import { User } from "@prisma/client";
+import { User } from "@/lib/generated/prisma";
 import { useState } from "react";
 
 interface Props {

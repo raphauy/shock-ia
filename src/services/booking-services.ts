@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db"
-import { Booking, BookingStatus } from "@prisma/client"
+import { Booking, BookingStatus } from "@/lib/generated/prisma"
 import { addMinutes, format, isAfter } from "date-fns"
 import { toZonedTime } from "date-fns-tz"
 import * as z from "zod"

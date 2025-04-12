@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Availability, Schedule } from "@/services/calcom-sdk-v2";
 import { EventDAO } from "@/services/event-services";
-import { EventType } from "@prisma/client";
+import { EventType } from "@/lib/generated/prisma";
 import { Calendar, Eye, Globe } from "lucide-react";
 import Link from "next/link";
 

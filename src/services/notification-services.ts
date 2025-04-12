@@ -1,6 +1,6 @@
 import * as z from "zod"
 import { prisma } from "@/lib/db"
-import { NotificationType } from "@prisma/client"
+import { NotificationType } from "@/lib/generated/prisma"
 
 export type NotificationDAO = {
 	id: string

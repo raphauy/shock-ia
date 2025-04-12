@@ -2,7 +2,7 @@
 
 import { getFormat } from "@/lib/utils"
 import { deleteConversation, getConversation, getConversationsShortOfClient, getLastConversation } from "@/services/conversationService"
-import { Client, Conversation, Message } from "@prisma/client"
+import { Client, Conversation, Message } from "@/lib/generated/prisma"
 import { revalidatePath } from "next/cache"
 
 

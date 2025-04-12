@@ -1,7 +1,7 @@
 "use user"
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { User } from "@prisma/client"
+import { User } from "@/lib/generated/prisma"
 import { DialogDescription } from "@radix-ui/react-dialog"
 import { useState } from "react"
 import DeleteForm from "./deleteForm"

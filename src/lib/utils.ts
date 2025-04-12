@@ -1,4 +1,4 @@
-import { EventType } from "@prisma/client";
+import { EventType } from "@/lib/generated/prisma";
 import { type ClassValue, clsx } from "clsx";
 import { isThisWeek, isToday, isYesterday, parseISO } from "date-fns";
 import { format, format as formatTZ, fromZonedTime, toZonedTime } from "date-fns-tz";

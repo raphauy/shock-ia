@@ -9,7 +9,7 @@ import { DeleteCampaignDialog, CampaignDialog } from "./campaign-dialogs"
 import Link from "next/link"
 import { CampaignLink } from "./campaign-link"
 import { cn, formatWhatsAppStyle } from "@/lib/utils"
-import { CampaignStatus } from "@prisma/client"
+import { CampaignStatus } from "@/lib/generated/prisma"
 
 
 export const columns: ColumnDef<CampaignDAO>[] = [

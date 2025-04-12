@@ -3,7 +3,7 @@
 import { LoadingSpinnerChico } from "@/components/loadingSpinner";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
-import { Client } from "@prisma/client";
+import { Client } from "@/lib/generated/prisma";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 

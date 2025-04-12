@@ -2,7 +2,7 @@ import { BookingDAO, getFutureBookingsDAOByEventId } from "@/services/booking-se
 import { getClientHaveCRMBySlug } from "@/services/clientService";
 import { EventDAO, getEventDAO } from "@/services/event-services";
 import { getSlots } from "@/services/slots-service";
-import { EventType } from "@prisma/client";
+import { EventType } from "@/lib/generated/prisma";
 import { addDays, format } from "date-fns";
 import { toZonedTime, } from "date-fns-tz";
 import { CalendarEvent } from "../big-calendar";

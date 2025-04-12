@@ -1,7 +1,7 @@
 "use client"
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { User } from "@prisma/client"
+import { User } from "@/lib/generated/prisma"
 import { useState } from "react"
 import { UserForm, UserFormValues } from "./userForm"
 

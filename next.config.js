@@ -7,7 +7,12 @@ const nextConfig = {
     },
     reactStrictMode: false,
     images: {
-        domains: ['f.fcdn.app'],
+        remotePatterns: [
+            {
+                protocol: 'https',
+                hostname: 'f.fcdn.app',
+            },
+        ],
     },
 }
 

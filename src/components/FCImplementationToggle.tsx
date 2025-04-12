@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/components/ui/use-toast";
-import { Client } from "@prisma/client";
+import { Client } from "@/lib/generated/prisma";
 import { toggleFCImplementationAction } from "@/app/admin/fc-fee/actions";
 
 interface FCImplementationToggleProps {

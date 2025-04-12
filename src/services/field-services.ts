@@ -1,7 +1,7 @@
 import * as z from "zod"
 import { prisma } from "@/lib/db"
 import { Parameters, RepositoryDAO, generateFunctionDefinition, getFullRepositoryDAO, updateFunctionDefinition } from "./repository-services"
-import { FieldType } from "@prisma/client"
+import { FieldType } from "@/lib/generated/prisma"
 import { updateEventMetadata } from "./event-services"
 import { JsonValue } from "@prisma/client/runtime/library"
 

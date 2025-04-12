@@ -1,4 +1,4 @@
-import { Client, EventType } from "@prisma/client";
+import { Client, EventType } from "@/lib/generated/prisma";
 import { format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import { es } from "date-fns/locale";

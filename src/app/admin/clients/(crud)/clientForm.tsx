@@ -10,7 +10,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/use-toast"
-import { Client } from "@prisma/client"
+import { Client } from "@/lib/generated/prisma"
 import { useEffect, useState } from "react"
 import { getDataClient } from "./actions"
 import { ModelDAO } from "@/services/model-services"

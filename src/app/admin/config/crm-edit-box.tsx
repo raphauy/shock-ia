@@ -5,7 +5,7 @@ import { setHaveAgentsAction, setHaveCRMAction, setHaveEventsAction, setWapSendF
 import { use, useEffect, useState } from "react"
 import { Loader, PersonStanding } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
-import { InboxProvider } from "@prisma/client"
+import { InboxProvider } from "@/lib/generated/prisma"
 import { NumberForm } from "@/components/number-form"
 
 interface Props {

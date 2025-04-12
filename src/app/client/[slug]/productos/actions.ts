@@ -1,11 +1,9 @@
 "use server"
 
-import { syncProductsFromFeed, generateProductEmbeddings, syncOnlyNewProducts } from "@/services/product-services"
 import { getCurrentUser } from "@/lib/auth"
-import { PrismaClient } from "@prisma/client"
+import { getClientWithUsers } from "@/services/clientService"
+import { generateProductEmbeddings, getFeed, syncOnlyNewProducts, syncProductsFromFeed } from "@/services/product-services"
 import { revalidatePath } from "next/cache"
-
-const prisma = new PrismaClient()
 
 /**
  * Acción del servidor para sincronizar productos desde un feed
@@ -22,10 +20,7 @@ export async function syncProductsAction(feedId: string, maxProducts: number = 0
     }
 
     // Verificar que el feed pertenece a un cliente del usuario
-    const feed = await prisma.ecommerceFeed.findUnique({
-      where: { id: feedId },
-      include: { client: { include: { users: true } } }
-    })
+    const feed= await getFeed(feedId)
 
     if (!feed) {
       throw new Error("Feed no encontrado")
@@ -57,8 +52,6 @@ export async function syncProductsAction(feedId: string, maxProducts: number = 0
   } catch (error) {
     console.error("Error en sincronización de productos:", error)
     throw error
-  } finally {
-    await prisma.$disconnect()
   }
 }
 
@@ -77,10 +70,7 @@ export async function generateEmbeddingsAction(clientId: string, maxEmbeddings: 
     }
 
     // Verificar que el cliente existe y el usuario tiene acceso
-    const client = await prisma.client.findUnique({
-      where: { id: clientId },
-      include: { users: true }
-    })
+    const client = await getClientWithUsers(clientId)
 
     if (!client) {
       throw new Error("Cliente no encontrado")
@@ -113,8 +103,6 @@ export async function generateEmbeddingsAction(clientId: string, maxEmbeddings: 
   } catch (error) {
     console.error("Error en generación de embeddings:", error)
     throw error
-  } finally {
-    await prisma.$disconnect()
   }
 }
 
@@ -134,10 +122,7 @@ export async function syncOnlyNewProductsAction(feedId: string, maxProducts: num
     }
 
     // Verificar que el feed pertenece a un cliente del usuario
-    const feed = await prisma.ecommerceFeed.findUnique({
-      where: { id: feedId },
-      include: { client: { include: { users: true } } }
-    })
+    const feed= await getFeed(feedId)
 
     if (!feed) {
       throw new Error("Feed no encontrado")
@@ -162,7 +147,5 @@ export async function syncOnlyNewProductsAction(feedId: string, maxProducts: num
   } catch (error) {
     console.error("Error en sincronización rápida de productos:", error)
     throw error
-  } finally {
-    await prisma.$disconnect()
   }
 } 

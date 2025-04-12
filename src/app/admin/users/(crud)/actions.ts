@@ -2,7 +2,7 @@
 
 import getUsers, { createUser, deleteUser, editUser, getUser, getUsersOfClient } from "@/services/user-service";
 import { revalidatePath } from "next/cache";
-import { User } from "@prisma/client";
+import { User } from "@/lib/generated/prisma";
 import { UserFormValues } from "./userForm";
 
 export type DataUser = {

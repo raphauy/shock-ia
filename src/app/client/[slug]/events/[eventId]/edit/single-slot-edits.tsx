@@ -2,7 +2,7 @@ import { IconBadge } from "@/components/icon-badge";
 import { SelectNumberForm } from "@/components/select-number-form";
 import { cn } from "@/lib/utils";
 import { EventDAO } from "@/services/event-services";
-import { EventType } from "@prisma/client";
+import { EventType } from "@/lib/generated/prisma";
 import { Calendar, PersonStanding } from "lucide-react";
 import { seEventNumberFieldAction } from "../../event-actions";
 import AvailabilitySelector from "../availability-selector";

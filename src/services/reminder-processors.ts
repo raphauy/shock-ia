@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db"
-import { AbandonedOrderStatus, ReminderStatus, ReminderType } from "@prisma/client"
+import { AbandonedOrderStatus, ReminderStatus, ReminderType } from "@/lib/generated/prisma"
 import { ReminderDAO } from "./reminder-services";
 import { sendMessageToContact } from "./campaign-services"
 import { getOrderStatus } from "./fenicio-services"

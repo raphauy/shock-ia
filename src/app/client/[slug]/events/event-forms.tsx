@@ -11,7 +11,7 @@ import { useParams, useRouter } from "next/navigation"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { createEventAction, deleteEventAction } from "./event-actions"
-import { EventType } from "@prisma/client"
+import { EventType } from "@/lib/generated/prisma"
 
 type Props= {
   eventType: EventType

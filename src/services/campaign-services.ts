@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db"
-import { CampaignContactStatus, CampaignStatus, CampaignType } from "@prisma/client"
+import { CampaignContactStatus, CampaignStatus, CampaignType } from "@/lib/generated/prisma"
 import { Client } from "@upstash/qstash"
 import { format } from "date-fns"
 import * as z from "zod"

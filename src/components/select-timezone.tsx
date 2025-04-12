@@ -2,7 +2,7 @@
 
 import { toast } from "@/components/ui/use-toast"
 import { getEventTypeLabel } from "@/lib/utils"
-import { EventType } from "@prisma/client"
+import { EventType } from "@/lib/generated/prisma"
 import { Loader } from "lucide-react"
 import { useEffect, useState } from "react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"

@@ -2,7 +2,7 @@
 
 import getClients, { addFunctionToClient, clientHaveCRM, clientHaveEvents, clientHaveProducts, createClient, deleteClient, editClient, getClient, getClientBySlug, getComplementaryFunctionsOfClient, getFunctionsOfClient, getLastClient, removeFunctionFromClient, setFunctions, setPrompt, setWhatsAppEndpoing, setWhatsAppNumbers } from "@/services/clientService";
 import { getUser } from "@/services/user-service";
-import { Client, InboxProvider } from "@prisma/client";
+import { Client, InboxProvider } from "@/lib/generated/prisma";
 import { revalidatePath } from "next/cache";
 import { EndpointFormValues } from "../../config/(crud)/endpoint-form";
 import { PromptFormValues } from "../../prompts/prompt-form";

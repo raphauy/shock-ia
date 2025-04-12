@@ -12,7 +12,7 @@ import { getClientCustomFields } from "@/services/customfield-services";
 import { getFullEventDAO } from "@/services/event-services";
 import { getReminderDefinitionsDAO } from "@/services/reminder-definition-services";
 import { getStagesDAO } from "@/services/stage-services";
-import { EventType } from "@prisma/client";
+import { EventType } from "@/lib/generated/prisma";
 import { isAfter } from "date-fns";
 import { Archive, Bell, CalendarCheck, ExternalLink, Globe, LayoutDashboard, ListChecks, ListCollapse, Palette, Settings, Tag } from "lucide-react";
 import Link from "next/link";

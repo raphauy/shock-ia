@@ -117,5 +117,10 @@
     "@tailwindcss/typography": "^0.5.15",
     "@types/moment-timezone": "^0.5.30",
     "@types/react-big-calendar": "^1.15.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/client"
+    ]
   }
 }

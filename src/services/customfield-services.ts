@@ -1,6 +1,6 @@
 import * as z from "zod"
 import { prisma } from "@/lib/db"
-import { FieldType } from "@prisma/client"
+import { FieldType } from "@/lib/generated/prisma"
 
 export type CustomFieldDAO = {
 	id: string

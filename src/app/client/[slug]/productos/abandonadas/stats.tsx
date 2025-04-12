@@ -1,4 +1,4 @@
-import { AbandonedOrderStatus } from "@prisma/client";
+import { AbandonedOrderStatus } from "@/lib/generated/prisma";
 import { formatCurrency } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ShoppingBag, Clock, CheckCircle, AlertTriangle, Banknote, Calendar } from "lucide-react";

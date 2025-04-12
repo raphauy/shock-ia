@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Pencil, PlusCircle, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { DeleteEventForm, EventForm } from "./event-forms";
-import { EventType } from "@prisma/client";
+import { EventType } from "@/lib/generated/prisma";
 import { getEventTypeLabel } from "@/lib/utils";
 
 type Props = {

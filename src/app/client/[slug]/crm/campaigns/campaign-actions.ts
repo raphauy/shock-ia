@@ -1,7 +1,7 @@
 "use server"
   
 import { addContactsToCampaign, addTagToCampaign, CampaignDAO, CampaignFormValues, cancelCampaign, createCampaign, deleteCampaign, deleteScheduledCampaignContact, getCampaignDAO, getRemainingCount, processCampaign, processCampaignContact, removeAllContactsFromCampaign, removeTagFromCampaign, setCampaignContactStatus, setMessageToCampaign, setMoveToStageIdOfCampaign, updateCampaign } from "@/services/campaign-services"
-import { CampaignContactStatus } from "@prisma/client"
+import { CampaignContactStatus } from "@/lib/generated/prisma"
 import { revalidatePath } from "next/cache"
 
 
