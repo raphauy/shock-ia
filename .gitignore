@@ -11,9 +11,6 @@ borrar*.txt
 /prisma/seed-models.ts
 /prisma/seed-tokens-price.ts
 
-/prisma/seed-models.ts
-/prisma/seed-tokens-price.ts
-
 # dependencies
 /node_modules
 /.pnp
