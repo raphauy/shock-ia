@@ -54,3 +54,5 @@ next-env.d.ts
 /memory-bank/
 .cursorrules
 .cursor
+
+/src/lib/generated/
