@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { parseStringPromise } from 'xml2js';
-import { PrismaClient, Prisma, EcommerceProvider } from "@/lib/generated/prisma"
+import { PrismaClient, Prisma, EcommerceProvider, Product } from "@/lib/generated/prisma"
 import OpenAI from 'openai';
 import crypto from 'crypto';
 import { GoogleProductItem, getProductsGoogleSheetFormat } from './google-sheets-service';
@@ -1210,4 +1210,13 @@ export async function getFeedByClientId(clientId: string) {
     where: { clientId },
   });
   return feed;
+}
+
+export async function getFeedsToSync() {
+  const feeds = await prisma.ecommerceFeed.findMany({
+    where: {
+      automateSync: true
+    }
+  });
+  return feeds;
 }

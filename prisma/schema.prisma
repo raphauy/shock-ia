@@ -887,7 +887,8 @@ model EcommerceFeed {
   format              String       @default("google")    // Formato del feed (google, facebook, etc)
   active              Boolean      @default(true)        // Si el feed está activo
   lastSync            DateTime?                          // Última sincronización exitosa
-    syncFrequency       Int          @default(1440)        // Frecuencia de sincronización en minutos (por defecto 24h)
+  automateSync        Boolean      @default(false)       // Si el feed debe sincronizarse automáticamente
+  syncFrequency       Int          @default(1440)        // Frecuencia de sincronización en minutos (por defecto 24h)
   totalProductsInFeed Int          @default(0)           // Total de productos disponibles en el feed
 
   abandonedOrdersTemplateId String?

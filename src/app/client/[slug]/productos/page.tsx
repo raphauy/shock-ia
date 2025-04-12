@@ -1,17 +1,16 @@
-import { getClientBySlug } from "@/services/clientService"
-import { notFound } from "next/navigation"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { getClientProducts } from "@/services/product-services"
-import { PrismaClient } from "@/lib/generated/prisma"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { getClientBySlug } from "@/services/clientService"
+import { getClientProducts, getClientProductsCount, getClientProductsWithEmbeddingsCount, getFeedByClientId } from "@/services/product-services"
 import { formatDistanceToNow } from "date-fns"
 import { es } from "date-fns/locale"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Database, RotateCw, Package, Clock, Tag, ExternalLink, Search, List, ShoppingCart } from "lucide-react"
-import DashboardActions from "./dashboard-actions"
-import { Separator } from "@/components/ui/separator"
+import { Clock, Database, ExternalLink, Package, Search, ShoppingCart, Tag } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+import { notFound } from "next/navigation"
+import DashboardActions from "./dashboard-actions"
 
 // Configuración para extender el tiempo máximo de ejecución
 export const maxDuration = 800; // 800 segundos (máximo para plan Pro con Fluid Compute)
@@ -45,25 +44,12 @@ export default async function ClientProducts({ params }: Props) {
     }
 
     // Obtener información del feed
-    const prisma = new PrismaClient()
-    const feed = await prisma.ecommerceFeed.findFirst({
-        where: {
-            clientId: client.id,
-            active: true
-        }
-    })
+    const feed = await getFeedByClientId(client.id)
 
     // Obtener estadísticas de productos
-    const productCount = await prisma.product.count({
-        where: { clientId: client.id }
-    })
+    const productCount = await getClientProductsCount(client.id)
 
-    const productsWithEmbeddings = await prisma.product.count({
-        where: { 
-            clientId: client.id,
-            embeddingUpdatedAt: { not: null }
-        }
-    })
+    const productsWithEmbeddings = await getClientProductsWithEmbeddingsCount(client.id)
 
     const lastSyncFormatted = feed?.lastSync ? 
         formatDistanceToNow(new Date(feed.lastSync), { 
@@ -81,8 +67,6 @@ export default async function ClientProducts({ params }: Props) {
         salePrice: product.salePrice?.toString() || null
     }))
     
-    await prisma.$disconnect()
-
     return (
         <div className="container mx-auto py-6 space-y-6">
             <div className="flex flex-col md:flex-row justify-between space-y-2 md:space-y-0 md:items-end">
