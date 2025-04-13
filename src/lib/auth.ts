@@ -26,7 +26,7 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   },
-  // @ts-expect-error - Error de compatibilidad entre tipos de Prisma y NextAuth
+  // @ts-ignore - Error de compatibilidad entre tipos de Prisma y NextAuth
   adapter: PrismaAdapter(prisma),
   providers: [
     EmailProvider({
