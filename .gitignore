@@ -53,3 +53,8 @@ next-env.d.ts
 .cursor
 
 /src/lib/generated/
+
+# Scripts y logs
+/scripts/
+/var/log/shock-ia/
+/logs/
