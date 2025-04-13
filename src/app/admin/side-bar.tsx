@@ -1,7 +1,7 @@
 "use client"
 
 import { cn } from "@/lib/utils";
-import { Bot, Briefcase, ChevronRightSquare, Database, FunctionSquare, LayoutDashboard, MessageCircle, Receipt, ScreenShare, Settings, Tag, User, Warehouse, Banknote } from "lucide-react";
+import { Bot, Briefcase, ChevronRightSquare, Database, FunctionSquare, LayoutDashboard, MessageCircle, Receipt, ScreenShare, Settings, Tag, User, Warehouse, Banknote, FolderSync } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -77,6 +77,14 @@ export default function SideBar() {
     //   icon: Database, 
     //   text: "Repositorios"
     // },
+    {
+      href: "divider", icon: User
+    },  
+    {
+      href: `/admin/product-feeds`,
+      icon: FolderSync,
+      text: "Sinc. Productos"
+    },
     {
       href: "divider", icon: User
     },  

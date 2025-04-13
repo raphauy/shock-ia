@@ -1,8 +1,0 @@
-{
-  "crons": [
-    {
-      "path": "/api/cm8py4y0c0001fvbol5vrkmjc/products/update-embeddings",
-      "schedule": "0 * * * *"
-    }
-  ]
-}

@@ -14,7 +14,8 @@
     "main": "tsx src/services/main.ts",
     "test-update": "tsx src/services/propertyUpdateService.ts",
     "test": "tsx src/services/test.ts",
-    "seed": "tsx prisma/seed.ts"
+    "seed": "tsx prisma/seed.ts",
+    "update-products": "tsx src/services/products-updater.ts"
   },
   "dependencies": {
     "@figuro/chatwoot-sdk": "^1.1.16",

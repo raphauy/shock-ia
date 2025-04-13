@@ -1216,7 +1216,53 @@ export async function getFeedsToSync() {
   const feeds = await prisma.ecommerceFeed.findMany({
     where: {
       automateSync: true
+    },
+    include: {
+      client: {
+        select: {
+          id: true,
+          name: true,
+          slug: true
+        }
+      }
     }
   });
   return feeds;
 }
+
+export async function getAllFeeds() {
+  return prisma.ecommerceFeed.findMany({
+    include: {
+      client: {
+        select: {
+          id: true,
+          name: true,
+          slug: true
+        }
+      }
+    },
+    orderBy: [
+      {
+        automateSync: 'desc'
+      },
+      {
+        lastSync: 'desc'
+      }
+    ]
+  });
+}
+
+export async function updateFeedAutomation(feedId: string, automateSync: boolean) {
+  try {
+    await prisma.ecommerceFeed.update({
+      where: { id: feedId },
+      data: { automateSync },
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating feed automation:", error);
+    return { success: false, error: "Error al actualizar la sincronización automática" };
+  }
+}
+
+
