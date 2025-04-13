@@ -126,6 +126,7 @@ export function DataTable<TData, TValue>({
     getFacetedUniqueValues: getFacetedUniqueValues(),
   });
   React.useEffect(() => {
+    table.setPageSize(30)
     columnsOff &&
       columnsOff.forEach((colName) => {
         table.getColumn(colName)?.toggleVisibility(false);

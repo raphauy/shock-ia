@@ -24,6 +24,16 @@ export async function updateFeedAutomationAction(feedId: string, automateSync: b
 export async function syncProductsAction() {
   try {
     const result = await updateAllFeeds();
+    
+    // Si no hay feeds procesados y hay errores, podría ser por restricción de horario
+    if (result.processedFeeds === 0 && result.errors.length > 0) {
+      return {
+        success: false,
+        error: result.errors[0],
+        data: result
+      };
+    }
+    
     revalidatePath("/admin/product-feeds");
     return { 
       success: true,
