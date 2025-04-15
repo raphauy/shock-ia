@@ -149,13 +149,25 @@ export async function readGoogleSheet(url: string, sheetId?: number): Promise<{
   columns: string[];
   rows: Record<string, string>[];
   rawData: string[][];
+  error?: {
+    code: number;
+    message: string;
+  }
 } | null> {
   try {
     // Convertir URL a formato de exportación CSV
     const exportUrl = convertToExportUrl(url, sheetId);
     if (!exportUrl) {
       console.error('❌ URL de Google Sheets inválida:', url);
-      return null;
+      return {
+        columns: [],
+        rows: [],
+        rawData: [],
+        error: {
+          code: 400,
+          message: "URL de Google Sheets inválida o mal formateada"
+        }
+      };
     }
     
     console.log('📊 Obteniendo datos de Google Sheet...');
@@ -173,7 +185,15 @@ export async function readGoogleSheet(url: string, sheetId?: number): Promise<{
     // Verificar que hay datos
     if (!records || records.length === 0) {
       console.warn('⚠️ No se encontraron datos en la hoja de cálculo');
-      return null;
+      return {
+        columns: [],
+        rows: [],
+        rawData: [],
+        error: {
+          code: 204,
+          message: "La hoja de cálculo está vacía o no contiene datos"
+        }
+      };
     }
     
     // Extraer nombres de columnas (primera fila)
@@ -198,7 +218,47 @@ export async function readGoogleSheet(url: string, sheetId?: number): Promise<{
     };
   } catch (error: any) {
     console.error('❌ Error al leer la Google Sheet:', error.message);
-    return null;
+    
+    // Extraer el código de error HTTP si está disponible
+    const statusCode = error.response?.status || 500;
+    let errorMessage = "Error desconocido al acceder a la hoja de cálculo";
+    
+    // Proporcionar mensajes específicos según el código de error
+    switch (statusCode) {
+      case 401:
+        errorMessage = "La hoja de cálculo requiere autenticación. Verifica que sea pública o que tengas permisos de acceso";
+        break;
+      case 403:
+        errorMessage = "No tienes permisos para acceder a esta hoja de cálculo. Verifica que sea pública o que tengas permisos de acceso";
+        break;
+      case 404:
+        errorMessage = "La hoja de cálculo no existe o ha sido eliminada";
+        break;
+      case 429:
+        errorMessage = "Demasiadas solicitudes a Google Sheets. Inténtalo de nuevo más tarde";
+        break;
+      case 500:
+      case 502:
+      case 503:
+      case 504:
+        errorMessage = "Error en el servidor de Google Sheets. Inténtalo de nuevo más tarde";
+        break;
+      default:
+        // Si hay un mensaje de error específico, lo usamos
+        if (error.message) {
+          errorMessage = `Error al acceder a la hoja de cálculo: ${error.message}`;
+        }
+    }
+    
+    return {
+      columns: [],
+      rows: [],
+      rawData: [],
+      error: {
+        code: statusCode,
+        message: errorMessage
+      }
+    };
   }
 }
 
@@ -316,6 +376,8 @@ export async function getProductsGoogleSheetFormat(
     missingRequired: string[]; 
     missingOptional: string[];
     unknown: string[];
+    errorMessage?: string;
+    errorCode?: number;
   };
 }> {
   try {
@@ -326,7 +388,23 @@ export async function getProductsGoogleSheetFormat(
       return { 
         products: [], 
         totalCount: 0, 
-        validation: { isValid: false, missingRequired: [], missingOptional: [], unknown: [] }
+        validation: { isValid: false, missingRequired: [], missingOptional: [], unknown: [], errorMessage: "Error desconocido al acceder a la hoja de cálculo" }
+      };
+    }
+    
+    // Si hay un error específico, lo incluimos en la validación
+    if (sheetData.error) {
+      return { 
+        products: [], 
+        totalCount: 0, 
+        validation: { 
+          isValid: false, 
+          missingRequired: [], 
+          missingOptional: [], 
+          unknown: [],
+          errorMessage: sheetData.error.message,
+          errorCode: sheetData.error.code
+        }
       };
     }
     
@@ -357,10 +435,23 @@ export async function getProductsGoogleSheetFormat(
     };
   } catch (error) {
     console.error('Error al obtener productos de Google Sheets:', error);
+    
+    // Capturar información del error para mostrarla al usuario
+    let errorMessage = "Error desconocido al procesar la hoja de cálculo";
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    
     return { 
       products: [], 
       totalCount: 0, 
-      validation: { isValid: false, missingRequired: [], missingOptional: [], unknown: [] }
+      validation: { 
+        isValid: false, 
+        missingRequired: [], 
+        missingOptional: [], 
+        unknown: [],
+        errorMessage: errorMessage
+      }
     };
   }
 }

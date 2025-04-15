@@ -132,6 +132,8 @@ export async function validateProductFeedAction(url: string): Promise<{
     missingRequired?: string[];
     missingOptional?: string[];
     unknown?: string[];
+    errorMessage?: string;
+    errorCode?: number;
   }
 }> {
   try {
@@ -148,29 +150,54 @@ export async function validateProductFeedAction(url: string): Promise<{
         validationDetails: {
           missingRequired: result.validation.missingRequired,
           missingOptional: result.validation.missingOptional,
-          unknown: result.validation.unknown
+          unknown: result.validation.unknown,
+          errorMessage: result.validation.errorMessage,
+          errorCode: result.validation.errorCode
         }
       };
     } 
     // Si es Fenicio u otro proveedor que use el formato Google Shopping
     else {
-      // Validamos con un límite de 1 producto para ser eficientes
-      // pero obtenemos el conteo total de productos
-      const result = await getProductsGoogleFormat(url, 1);
-      
-      // Devolvemos si es válido y la cantidad de productos
-      return {
-        isValid: result.products.length > 0,
-        productCount: result.totalCount
-      };
+      try {
+        // Validamos con un límite de 1 producto para ser eficientes
+        // pero obtenemos el conteo total de productos
+        const result = await getProductsGoogleFormat(url, 1);
+        
+        // Devolvemos si es válido y la cantidad de productos
+        return {
+          isValid: result.products.length > 0,
+          productCount: result.totalCount
+        };
+      } catch (xmlError) {
+        console.error('Error específico al validar feed XML:', xmlError);
+        let errorMessage = "Error al procesar el feed XML";
+        if (xmlError instanceof Error) {
+          errorMessage = xmlError.message;
+        }
+        
+        return {
+          isValid: false,
+          productCount: 0,
+          validationDetails: {
+            missingRequired: [],
+            errorMessage: errorMessage
+          }
+        };
+      }
     }
   } catch (error) {
     console.error('Error al validar el feed de productos:', error);
+    let errorMessage = "Error desconocido al validar el feed";
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    
     return {
       isValid: false,
       productCount: 0,
       validationDetails: {
-        missingRequired: []
+        missingRequired: [],
+        errorMessage: errorMessage
       }
     };
   }

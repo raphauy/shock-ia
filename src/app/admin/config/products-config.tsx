@@ -43,6 +43,7 @@ export default function ProductsConfig({ clientId, haveProducts: initialHaveProd
         missingOptional?: string[];
         unknown?: string[];
         provider?: string;
+        errorMessage?: string;
     } | null>(null)
 
     // Determinar el tipo de proveedor basado en la URL
@@ -216,7 +217,10 @@ export default function ProductsConfig({ clientId, haveProducts: initialHaveProd
                 const provider = detectProvider(feedUrl)
                 let errorMessage = ""
                 
-                if (provider === "Google Sheets") {
+                if (validation.validationDetails?.errorMessage) {
+                    // Si hay un mensaje de error específico, lo usamos
+                    errorMessage = validation.validationDetails.errorMessage
+                } else if (provider === "Google Sheets") {
                     errorMessage = validation.validationDetails?.missingRequired?.length 
                         ? `Faltan columnas obligatorias: ${validation.validationDetails.missingRequired.join(", ")}`
                         : "El formato de la hoja de cálculo no es válido o la hoja no es accesible"
@@ -232,9 +236,15 @@ export default function ProductsConfig({ clientId, haveProducts: initialHaveProd
             }
         } catch (error) {
             console.error("Error al validar feed:", error)
+            let errorMessage = "Error al validar la URL del feed"
+            
+            if (error instanceof Error) {
+                errorMessage += `: ${error.message}`
+            }
+            
             toast({
                 title: "Error",
-                description: "Error al validar la URL del feed",
+                description: errorMessage,
                 variant: "destructive"
             })
             setFeedIsValid(false)
@@ -281,7 +291,10 @@ export default function ProductsConfig({ clientId, haveProducts: initialHaveProd
                     const provider = detectProvider(feedUrl)
                     let errorMessage = ""
                     
-                    if (provider === "Google Sheets") {
+                    if (validation.validationDetails?.errorMessage) {
+                        // Si hay un mensaje de error específico, lo usamos
+                        errorMessage = validation.validationDetails.errorMessage
+                    } else if (provider === "Google Sheets") {
                         errorMessage = validation.validationDetails?.missingRequired?.length 
                             ? `Faltan columnas obligatorias: ${validation.validationDetails.missingRequired.join(", ")}`
                             : "El formato de la hoja de cálculo no es válido o la hoja no es accesible"
@@ -299,9 +312,15 @@ export default function ProductsConfig({ clientId, haveProducts: initialHaveProd
                 }
             } catch (error) {
                 console.error("Error al validar feed:", error)
+                let errorMessage = "Error al validar la URL del feed"
+                
+                if (error instanceof Error) {
+                    errorMessage += `: ${error.message}`
+                }
+                
                 toast({
                     title: "Error",
-                    description: "Error al validar la URL del feed",
+                    description: errorMessage,
                     variant: "destructive"
                 })
                 setLoadingFeed(false)
@@ -336,9 +355,15 @@ export default function ProductsConfig({ clientId, haveProducts: initialHaveProd
             }
         } catch (error) {
             console.error("Error al crear feed:", error)
+            let errorMessage = "Error al crear el feed de productos"
+            
+            if (error instanceof Error) {
+                errorMessage += `: ${error.message}`
+            }
+            
             toast({
                 title: "Error",
-                description: "Error al crear el feed de productos",
+                description: errorMessage,
                 variant: "destructive"
             })
         } finally {
@@ -353,6 +378,11 @@ export default function ProductsConfig({ clientId, haveProducts: initialHaveProd
         return (
             <div className="text-xs space-y-1 mt-2 p-2 border rounded-md bg-muted/30">
                 <p className="font-medium">Detalles de validación:</p>
+                {validationDetails.errorMessage && (
+                    <p className="text-destructive">
+                        <span className="font-medium">Error:</span> {validationDetails.errorMessage}
+                    </p>
+                )}
                 {validationDetails.missingRequired && validationDetails.missingRequired.length > 0 && (
                     <p className="text-destructive">
                         <span className="font-medium">Columnas obligatorias faltantes:</span> {validationDetails.missingRequired.join(", ")}
