@@ -126,6 +126,8 @@ model Client {
   ecommerceFeeds        EcommerceFeed[]
   products              Product[]
   abandonedOrders       AbandonedOrder[]
+
+  eventLogs             EventLog[]                        // gennext: skip.list
 }
 
 model Document {
@@ -521,6 +523,7 @@ model WhatsappInstance {
   chatwootAccessToken String?
 
   whatsappInboxId     String?
+  autoUpdateInactiveConversations Boolean @default(false)
 
   client              Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
   clientId            String
@@ -974,4 +977,20 @@ model AbandonedOrder {
 
   createdAt          DateTime  @default(now())                     // gennext: skip.zod
   updatedAt          DateTime  @updatedAt                          // gennext: skip.zod
+}
+
+model EventLog {
+  id                  String       @id @default(cuid())
+  clientName          String                                          // gennext: show.column
+  eventType           String                                          // gennext: show.column
+  metadata            String                                          // gennext: show.column  
+  
+  client              Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId            String
+  
+  createdAt           DateTime  @default(now())                       // gennext: skip.zod
+  
+  @@index([clientId])
+  @@index([eventType])
+  @@index([createdAt])
 }

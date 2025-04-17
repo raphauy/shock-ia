@@ -1,5 +1,4 @@
 import { getCurrentUser } from "@/lib/auth"
-import { removeSectionTexts } from "@/lib/utils"
 import { getClient } from "@/services/clientService"
 import { getActiveMessages, getSystemMessage, messageArrived, saveFunction } from "@/services/conversationService"
 import { getContext } from "@/services/function-call-services"
@@ -12,7 +11,6 @@ import { OpenAIStream, StreamingTextResponse } from "ai"
 import { NextResponse } from "next/server"
 import { OpenAI } from "openai"
 import openaiTokenCounter from 'openai-gpt-token-counter'
-import { ChatCompletionMessageParam } from "openai/resources/chat/completions.mjs"
 
 export const maxDuration = 299
 export const dynamic = 'force-dynamic'

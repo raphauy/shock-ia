@@ -1339,3 +1339,26 @@ export async function setFCImplementation(clientId: string, fcImplemented: boole
 
   return updated;
 }
+
+export async function setAutoUpdateInactiveConversations(clientId: string, autoUpdateInactiveConversations: boolean) {
+  const whatsappInstance = await prisma.whatsappInstance.findFirst({
+    where: {
+      clientId
+    }
+  });
+  
+  if (!whatsappInstance) {
+    throw new Error('Whatsapp instance not found');
+  }
+  
+  const updatedInstance = await prisma.whatsappInstance.update({
+    where: {
+      id: whatsappInstance.id
+    },
+    data: {
+      autoUpdateInactiveConversations
+    }
+  });
+  
+  return updatedInstance;
+}

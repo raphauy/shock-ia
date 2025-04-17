@@ -1,7 +1,7 @@
 "use client"
 
 import { cn } from "@/lib/utils";
-import { Bot, Briefcase, ChevronRightSquare, Database, FunctionSquare, LayoutDashboard, MessageCircle, Receipt, ScreenShare, Settings, Tag, User, Warehouse, Banknote, FolderSync } from "lucide-react";
+import { Bot, Briefcase, ChevronRightSquare, Database, FunctionSquare, LayoutDashboard, MessageCircle, Receipt, ScreenShare, Settings, Tag, User, Warehouse, Banknote, FolderSync, CloudCog } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -84,6 +84,11 @@ export default function SideBar() {
       href: `/admin/product-feeds`,
       icon: FolderSync,
       text: "Sinc. Productos"
+    },
+    {
+      href: `/admin/event-logs?last=7D`,
+      icon: CloudCog,
+      text: "Logs"
     },
     {
       href: "divider", icon: User

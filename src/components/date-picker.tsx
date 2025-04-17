@@ -38,7 +38,7 @@ export function DatePicker({ label, date, setDate, disabled = false }: Props) {
         >
           <div className="flex items-center gap-2">
             <CalendarIcon className="w-4 h-4" />
-            <p className="text-sm whitespace-nowrap">{date ? format(date, "PP", { locale: es }) : <span>{label}</span>}</p>
+            <p className="text-sm whitespace-nowrap">{date instanceof Date && !isNaN(date.getTime()) ? format(date, "PP", { locale: es }) : <span>{label}</span>}</p>
           </div>
         </Button>
       </PopoverTrigger>

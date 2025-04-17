@@ -1,6 +1,6 @@
 "use server"
 
-import { setHaveAgents, setHaveAudioResponse, setHaveCRM, setHaveEvents, setHaveOrderFunction, setHaveProducts, setTokensPrice, setWapSendFrequency, clientHasOrderFunction } from "@/services/clientService"
+import { setHaveAgents, setHaveAudioResponse, setHaveCRM, setHaveEvents, setHaveOrderFunction, setHaveProducts, setTokensPrice, setWapSendFrequency, clientHasOrderFunction, setAutoUpdateInactiveConversations } from "@/services/clientService"
 import { createOrUpdateEcommerceFeed, getProductsGoogleFormat } from "@/services/product-services"
 import { getProductsGoogleSheetFormat } from "@/services/google-sheets-service"
 import { addTagToFunction, removeTagFromFunction } from "@/services/function-services"
@@ -262,4 +262,15 @@ export async function getProductFeedAction(clientId: string) {
         console.error("Error al obtener el feed de productos:", error)
         return null
     }
+}
+
+export async function setAutoUpdateInactiveConversationsAction(clientId: string, autoUpdateInactiveConversations: boolean) {
+  try {
+    const updatedInstance = await setAutoUpdateInactiveConversations(clientId, autoUpdateInactiveConversations);
+    revalidatePath('/admin/config');
+    return true;
+  } catch (error) {
+    console.error('Error setting autoUpdateInactiveConversations:', error);
+    return false;
+  }
 }

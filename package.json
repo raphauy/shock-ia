@@ -13,9 +13,10 @@
     "xlsx": "tsx src/services/properties-xlsx-script.ts",
     "main": "tsx src/services/main.ts",
     "test-update": "tsx src/services/propertyUpdateService.ts",
-    "test": "tsx src/services/test.ts",
+    "manual-test": "tsx src/services/test.ts",
     "seed": "tsx prisma/seed.ts",
-    "update-products": "tsx src/services/products-updater.ts"
+    "update-products": "tsx src/services/products-updater.ts",
+    "update-conversations": "tsx src/services/chatwoot-conversation-updater.ts"
   },
   "dependencies": {
     "@figuro/chatwoot-sdk": "^1.1.16",
@@ -28,6 +29,7 @@
     "@radix-ui/react-alert-dialog": "^1.1.2",
     "@radix-ui/react-avatar": "^1.1.1",
     "@radix-ui/react-checkbox": "^1.1.4",
+    "@radix-ui/react-collapsible": "^1.1.4",
     "@radix-ui/react-dialog": "^1.1.2",
     "@radix-ui/react-dropdown-menu": "^2.1.2",
     "@radix-ui/react-hover-card": "^1.1.2",
@@ -115,13 +117,19 @@
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.15",
+    "@types/jest": "^29.5.14",
     "@types/moment-timezone": "^0.5.30",
     "@types/react-big-calendar": "^1.15.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.3.2",
     "typescript": "5.2.2"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
       "@prisma/client"
     ]
+  },
+  "paths": {
+    "@/*": ["src/*"]
   }
 }

@@ -251,7 +251,7 @@ function getChatwootConfig(chatwootToken: string | undefined) {
     return { chatwootUrl, chatwootToken }
 }
 
-async function getChatwootClient(token: string | undefined) {
+export async function getChatwootClient(token: string | undefined) {
     if (!token) {
         console.error("CHATWOOT_ACCESS_TOKEN is not set")
         throw new Error("CHATWOOT_ACCESS_TOKEN is not set")
@@ -445,4 +445,142 @@ export async function assignConversationToAgent(accountId: number, conversationI
 
     const response = await client.conversationAssignment.assign({ accountId: accountId, conversationId: conversationId, data: { assignee_id: agentId } })
     return response
+}
+
+/**
+ * Busca conversaciones en estado 'open' e inactivas por más de 24 horas para un cliente dado (accountId)
+ * @param accountId ID de la cuenta de Chatwoot
+ * @param page Página de resultados (opcional, por defecto 1)
+ * @param perPage Cantidad de resultados por página (opcional, por defecto 20)
+ * @returns Lista de objetos con información de conversaciones inactivas abiertas
+ */
+export async function getInactiveOpenConversations(accountId: number, page: number = 1, perPage: number = 20): Promise<Array<{
+    id: number;
+    contactName: string;
+    phoneNumber: string;
+}>> {
+    const chatwootUrl = process.env.CHATWOOT_URL!;
+    const chatwootToken = process.env.CHATWOOT_ACCESS_TOKEN!;
+    if (!chatwootUrl || !chatwootToken) {
+        console.error("CHATWOOT_URL or CHATWOOT_ACCESS_TOKEN is not set");
+        throw new Error("CHATWOOT_URL or CHATWOOT_ACCESS_TOKEN is not set");
+    }
+
+    const url = `${chatwootUrl}/api/v1/accounts/${accountId}/conversations/filter`;
+
+    const payload = [
+        {
+            attribute_key: "status",
+            filter_operator: "equal_to",
+            values: ["open"],
+            query_operator: "AND"
+        },
+        {
+            attribute_key: "last_activity_at",
+            filter_operator: "days_before",
+            values: [1]
+        }
+    ];
+
+    try {
+        const response = await axios.post(url,
+            { payload },
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'api_access_token': chatwootToken
+                },
+                params: {
+                    page,
+                    per_page: perPage
+                }
+            }
+        );
+        const conversations = response.data?.payload || [];
+        const filteredConversations = conversations.filter((conv: any) => conv.meta.sender.phone_number !== "+123456");
+        
+        // Extraer información detallada de cada conversación
+        const conversationDetails = filteredConversations.map((conv: any) => {
+            return {
+                id: conv.id,
+                contactName: conv.meta?.sender?.name || "Sin nombre",
+                phoneNumber: conv.meta?.sender?.phone_number || "Sin teléfono"
+            };
+        });
+        
+        console.log(`Se encontraron ${conversationDetails.length} conversaciones inactivas abiertas`);
+        return conversationDetails;
+    } catch (error) {
+        console.error('Error buscando conversaciones inactivas abiertas:', error);
+        throw error;
+    }
+}
+
+/**
+ * Busca conversaciones inactivas y abiertas y cambia su estado a 'pending'
+ * @param accountId ID de la cuenta de Chatwoot
+ * @returns Array de objetos con información de las conversaciones actualizadas
+ */
+export async function setInactiveOpenConversationsAsPending(accountId: number): Promise<Array<{
+    conversationId: number;
+    contactName: string;
+    contactPhone: string;
+}>> {
+    try {
+        // Obtener todas las conversaciones inactivas en estado "open"
+        const inactiveConversations = await getInactiveOpenConversations(accountId);
+        
+        if (inactiveConversations.length === 0) {
+            console.log('No se encontraron conversaciones inactivas abiertas para actualizar');
+            return [];
+        }
+        
+        console.log(`Se encontraron ${inactiveConversations.length} conversaciones inactivas abiertas para actualizar`);
+        
+        // Cambiar el estado de cada conversación a "pending"
+        const updatedConversations: Array<{
+            conversationId: number;
+            contactName: string;
+            contactPhone: string;
+        }> = [];
+        
+        const chatwootUrl = process.env.CHATWOOT_URL!;
+        const chatwootToken = process.env.CHATWOOT_ACCESS_TOKEN!;
+        
+        if (!chatwootUrl || !chatwootToken) {
+            console.error("CHATWOOT_URL or CHATWOOT_ACCESS_TOKEN is not set");
+            throw new Error("CHATWOOT_URL or CHATWOOT_ACCESS_TOKEN is not set");
+        }
+        
+        const client = await getChatwootClient(chatwootToken);
+        
+        for (const conversation of inactiveConversations) {
+            try {
+                await client.conversations.toggleStatus({
+                    accountId: accountId,
+                    conversationId: conversation.id,
+                    data: {
+                        status: "pending"
+                    }
+                });
+                
+                updatedConversations.push({
+                    conversationId: conversation.id,
+                    contactName: conversation.contactName,
+                    contactPhone: conversation.phoneNumber
+                });
+                
+                console.log(`Conversación ${conversation.id} actualizada a estado 'pending' - Contacto: ${conversation.contactName} (${conversation.phoneNumber})`);
+            } catch (error) {
+                console.error(`Error al actualizar conversación ${conversation.id}:`, error);
+                // Continuamos con las siguientes conversaciones a pesar del error
+            }
+        }
+        
+        console.log(`Se actualizaron ${updatedConversations.length} de ${inactiveConversations.length} conversaciones a 'pending'`);
+        return updatedConversations;
+    } catch (error) {
+        console.error('Error al procesar conversaciones inactivas:', error);
+        throw error;
+    }
 }
