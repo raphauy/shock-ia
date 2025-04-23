@@ -83,7 +83,7 @@ export default function MenuAdmin() {
                     {
                         haveCRM &&
                         <li className={`flex items-center border-b-shock-color hover:border-b-shock-color hover:border-b-2 h-11 ${path.includes("crm") && "border-b-2"}`}>
-                            <Link href={`/client/${slug}/crm`}><Button className="text-lg" variant="ghost">CRM</Button></Link>
+                            <Link href={`/client/${slug}/crm?last=30D`}><Button className="text-lg" variant="ghost">CRM</Button></Link>
                         </li>
                     }
                     {

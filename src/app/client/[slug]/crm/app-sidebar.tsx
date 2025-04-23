@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 const items = [
   {
     title: "Kanban",
-    url: `crm`,
+    url: `crm?last=30D`,
     icon: Kanban,
     group: "kanban",
   },

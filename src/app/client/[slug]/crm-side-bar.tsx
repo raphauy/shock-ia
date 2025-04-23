@@ -12,7 +12,7 @@ export default function CRMSideBar({ slug }: Props) {
 
   const data= [
     {
-      href: `/client/${slug}/crm`,
+      href: `/client/${slug}/crm?last=30D`,
       icon: LayoutDashboard,
       text: "Dashboard"
     },
