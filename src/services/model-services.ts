@@ -156,9 +156,10 @@ export async function generateAudio(text: string): Promise<string> {
       apiKey: process.env.OPENAI_API_KEY_FOR_EMBEDDINGS,
   })
   const response = await client.audio.speech.create({
-      model: "tts-1",
+      model: "gpt-4o-mini-tts",
       input: text,
-      voice: "echo"
+      // @ts-ignore
+      voice: "ash"
   })
 
   // return the base64 of the audio
