@@ -6,6 +6,7 @@ export type WhatsappInstanceDAO = {
   chatwootAccountId: string | null
   chatwootUrl: string | null
   chatwootAccessToken: string | null
+  chatwootWidgetToken: string | null
   autoUpdateInactiveConversations?: boolean
   clientId: string
 }

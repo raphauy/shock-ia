@@ -54,6 +54,7 @@ export default async function ConfigPage({ searchParams }: Props) {
 
     const genericFunctions= await getGenericFunctions()
     const BASE_PATH= process.env.NEXTAUTH_URL || "NOT-CONFIGURED"
+    const WIDGET_URL= BASE_PATH + "/widget/" + client.slug
 
     const versions= await getPromptVersionsDAO(clientId)
 
@@ -86,7 +87,7 @@ export default async function ConfigPage({ searchParams }: Props) {
                 </TabsContent>
                 <TabsContent value="props" className="space-y-6">
                     <PropsEdit clientId={client.id} haveEvents={client.haveEvents} haveAgents={client.haveAgents} haveAudioResponse={client.haveAudioResponse} inboxProvider={client.inboxProvider} />
-                    <CRMPropsEdit clientId={client.id} haveCRM={client.haveCRM} inboxProvider={client.inboxProvider} wapSendFrequency={client.wapSendFrequency} autoUpdateInactiveConversations={client.whatsappInstance?.autoUpdateInactiveConversations || false} />
+                    <CRMPropsEdit clientId={client.id} haveCRM={client.haveCRM} inboxProvider={client.inboxProvider} wapSendFrequency={client.wapSendFrequency} autoUpdateInactiveConversations={client.whatsappInstance?.autoUpdateInactiveConversations || false} chatwootWidgetToken={client.whatsappInstance?.chatwootWidgetToken || ""} widgetUrl={WIDGET_URL} />
                     <ProductsConfig clientId={client.id} haveProducts={client.haveProducts} />
                     <WhatsappNumbersForm id={client.id} update={updateWhatsAppNumbersAction} whatsappNumbers={client.whatsappNumbers} />
                     <TokensPrice clientId={client.id} promptTokensPrice={client.promptTokensPrice} completionTokensPrice={client.completionTokensPrice} />

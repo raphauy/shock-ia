@@ -521,6 +521,7 @@ model WhatsappInstance {
   chatwootAccountId   String?
   chatwootUrl         String?
   chatwootAccessToken String?
+  chatwootWidgetToken String?
 
   whatsappInboxId     String?
   autoUpdateInactiveConversations Boolean @default(false)

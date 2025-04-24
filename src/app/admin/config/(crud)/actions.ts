@@ -1,6 +1,6 @@
 "use server"
 
-import { setHaveAgents, setHaveAudioResponse, setHaveCRM, setHaveEvents, setHaveOrderFunction, setHaveProducts, setTokensPrice, setWapSendFrequency, clientHasOrderFunction, setAutoUpdateInactiveConversations } from "@/services/clientService"
+import { setHaveAgents, setHaveAudioResponse, setHaveCRM, setHaveEvents, setHaveOrderFunction, setHaveProducts, setTokensPrice, setWapSendFrequency, clientHasOrderFunction, setAutoUpdateInactiveConversations, setChatwootWidgetToken } from "@/services/clientService"
 import { createOrUpdateEcommerceFeed, getProductsGoogleFormat } from "@/services/product-services"
 import { getProductsGoogleSheetFormat } from "@/services/google-sheets-service"
 import { addTagToFunction, removeTagFromFunction } from "@/services/function-services"
@@ -271,6 +271,17 @@ export async function setAutoUpdateInactiveConversationsAction(clientId: string,
     return true;
   } catch (error) {
     console.error('Error setting autoUpdateInactiveConversations:', error);
+    return false;
+  }
+}
+
+export async function setChatwootWidgetTokenAction(clientId: string, chatwootWidgetToken: string) {
+  try {
+    await setChatwootWidgetToken(clientId, chatwootWidgetToken);
+    revalidatePath('/admin/config');
+    return true;
+  } catch (error) {
+    console.error('Error setting chatwootWidgetToken:', error);
     return false;
   }
 }

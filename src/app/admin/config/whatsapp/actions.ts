@@ -22,6 +22,7 @@ export async function createInstanceAction(instanceName: string) {
         chatwootUrl: null,
         chatwootAccountId: null,
         chatwootAccessToken: null,
+        chatwootWidgetToken: null,
         clientId: client.id,
     }
     const instance = await setWhatsappInstance(instanceData)

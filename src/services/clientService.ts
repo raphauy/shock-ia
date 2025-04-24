@@ -1362,3 +1362,26 @@ export async function setAutoUpdateInactiveConversations(clientId: string, autoU
   
   return updatedInstance;
 }
+
+export async function setChatwootWidgetToken(clientId: string, chatwootWidgetToken: string) {
+  const whatsappInstance = await prisma.whatsappInstance.findFirst({
+    where: {
+      clientId
+    }
+  });
+  
+  if (!whatsappInstance) {
+    throw new Error('Whatsapp instance not found');
+  }
+  
+  const updatedInstance = await prisma.whatsappInstance.update({
+    where: {
+      id: whatsappInstance.id
+    },
+    data: {
+      chatwootWidgetToken
+    }
+  });
+  
+  return updatedInstance;
+}
