@@ -7,6 +7,7 @@ import { format } from "date-fns";
 import { getValue } from "./config-services";
 import { getOrCreateContact } from "./contact-services";
 import { checkValidPhone } from "@/lib/utils";
+import { getTodayAbandonedOrders } from "./fenicio-services";
 
 // QStash setup
 const baseUrl = process.env.NEXTAUTH_URL === "http://localhost:3000" ? "https://local.rctracker.dev" : process.env.NEXTAUTH_URL;
@@ -15,7 +16,7 @@ const qstashClient = new Client({ token: process.env.QSTASH_TOKEN! });
 export async function createAbandonedOrder(clientId: string, order: Orden) {
 
     if (!order.idOrden || !order.fechaInicio || !order.fechaAbandono || !order.comprador?.nombre || !order.comprador?.telefono || !order.lineas || !order.importeTotal) {
-        throw new Error("Faltan campos requeridos, order: " + JSON.stringify(order));
+        throw new Error("Faltan campos requeridos, probablemente un teléfono");
     }
 
     if (await externalIdExists(clientId, order.idOrden)) {
@@ -502,4 +503,85 @@ export async function getAbandonedOrdersByClientId(
         console.error(`❌ Error al obtener órdenes abandonadas: ${error.message}`);
         throw error;
     }
+}
+
+export async function checkAbandonedOrders(clientId: string) {
+    try {
+        // Obtener las órdenes abandonadas de las últimas 24 horas
+        const ordenesResponse = await getTodayAbandonedOrders(clientId);
+        
+        if (ordenesResponse.error) {
+            console.error("❌ Error al obtener órdenes abandonadas:", ordenesResponse.msj);
+            return { 
+                error: true, 
+                mensaje: ordenesResponse.msj
+            };
+        }
+        
+        if (!ordenesResponse.ordenes || ordenesResponse.ordenes.length === 0) {
+            console.log("ℹ️ No se encontraron órdenes abandonadas en las últimas 24 horas");
+            return { 
+                error: false, 
+                mensaje: "No se encontraron órdenes abandonadas en las últimas 24 horas",
+                totalOrdenes: 0,
+                ordenesProcesadas: 0
+            };
+        }
+        
+        console.log(`✅ Se encontraron ${ordenesResponse.ordenes.length} órdenes abandonadas`);
+        
+        // Guardar las órdenes abandonadas en la base de datos
+        let ordenesProcesadas = 0;
+        let ordenesExistentes = 0;
+        let errores = 0;
+        
+        for (const orden of ordenesResponse.ordenes) {
+            try {
+                // Verificar si la orden ya existe en la base de datos
+                if (await externalIdExists(clientId, orden.idOrden)) {
+                    console.log(`⚠️ La orden ${orden.idOrden} ya existe en la base de datos`);
+                    ordenesExistentes++;
+                    continue;
+                }
+                
+                // Guardar la orden abandonada
+                await createAbandonedOrder(clientId, orden);
+                console.log(`✅ Orden abandonada ${orden.idOrden} guardada correctamente`);
+                ordenesProcesadas++;
+            } catch (error: any) {
+                console.error(`❌ Error al guardar la orden abandonada ${orden.idOrden}:`, error.message);
+                errores++;
+            }
+        }
+        
+        return {
+            error: false,
+            mensaje: "Proceso completado",
+            totalOrdenes: ordenesResponse.ordenes.length,
+            ordenesProcesadas,
+            ordenesExistentes,
+            errores
+        };
+        
+    } catch (error: any) {
+        console.error("❌ Error durante el procesamiento de órdenes abandonadas:", error.message);
+        return { 
+            error: true, 
+            mensaje: `Error al procesar órdenes abandonadas: ${error.message}`
+        };
+    }
+}
+
+export async function processPendingAbandonedOrders() {
+    const pendingOrders = await prisma.abandonedOrder.findMany({
+        where: {
+            status: AbandonedOrderStatus.PENDIENTE
+        }
+    });
+    console.log(`✅ Se encontraron ${pendingOrders.length} órdenes pendientes`);
+
+    for (const order of pendingOrders) {
+        await processAbandonedOrder(order.id);
+    }    
+    
 }

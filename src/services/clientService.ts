@@ -1385,3 +1385,16 @@ export async function setChatwootWidgetToken(clientId: string, chatwootWidgetTok
   
   return updatedInstance;
 }
+
+export async function getClientsWithAbandonedOrders() {
+  const clients = await prisma.client.findMany({
+    where: {
+      abandonedOrders: {
+        some: {}
+      }
+    }
+  });
+
+  return clients;
+}
+

@@ -356,3 +356,38 @@ export function formatMinutesDelay(minutes: number | null, past: boolean) {
     return `${minutes} minuto${minutes > 1 ? "s" : ""} ${direction}`;
   }
 }
+
+/**
+ * Obtiene la hora actual en la zona horaria de Montevideo
+ * @returns Un objeto con la hora y minutos actuales en la zona horaria de Montevideo
+ */
+export function getCurrentTimeInMontevideo(): { hour: number; minute: number; formatted: string } {
+  // Crear objeto Date con la hora actual
+  const now = new Date();
+  
+  // Convertir a string en la zona horaria de Montevideo para hora
+  const hourOptions: Intl.DateTimeFormatOptions = { 
+    timeZone: "America/Montevideo",
+    hour: 'numeric',
+    hour12: false
+  };
+  
+  // Convertir a string en la zona horaria de Montevideo para minutos
+  const minuteOptions: Intl.DateTimeFormatOptions = { 
+    timeZone: "America/Montevideo",
+    minute: 'numeric',
+  };
+  
+  // Obtener la hora y minutos como strings
+  const hourString = new Intl.DateTimeFormat('es-UY', hourOptions).format(now);
+  const minuteString = new Intl.DateTimeFormat('es-UY', minuteOptions).format(now);
+  
+  // Convertir a números
+  const hour = parseInt(hourString, 10);
+  const minute = parseInt(minuteString, 10);
+  
+  // Formato hora:minuto
+  const formatted = `${hour}:${minute.toString().padStart(2, '0')}`;
+  
+  return { hour, minute, formatted };
+}

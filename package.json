@@ -16,7 +16,8 @@
     "manual-test": "tsx src/services/test.ts",
     "seed": "tsx prisma/seed.ts",
     "update-products": "tsx src/services/products-updater.ts",
-    "update-conversations": "tsx src/services/chatwoot-conversation-updater.ts"
+    "update-conversations": "tsx src/services/chatwoot-conversation-updater.ts",
+    "abandoned-orders-updater": "tsx src/services/abandoned-orders-updater.ts"
   },
   "dependencies": {
     "@figuro/chatwoot-sdk": "^1.1.16",
