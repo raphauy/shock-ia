@@ -150,7 +150,7 @@ export async function getFullModelDAOByName(name: string) {
   return found as ModelDAO
 }
 
-export async function generateAudioFromOpenAI(text: string): Promise<string> {
+export async function generateAudioFromOpenAI(text: string, voice: string): Promise<string> {
   console.log("generating audio")
   console.log("text: ", text)
   const client = new OpenAI({
@@ -160,7 +160,7 @@ export async function generateAudioFromOpenAI(text: string): Promise<string> {
       model: "gpt-4o-mini-tts",
       input: text,
       // @ts-ignore
-      voice: "ash"
+      voice: voice
   })
 
   // return the base64 of the audio
@@ -169,13 +169,13 @@ export async function generateAudioFromOpenAI(text: string): Promise<string> {
   return audioBase64
 }
 
-export async function generateAudioFromElevenLabs(text: string): Promise<string> {
+export async function generateAudioFromElevenLabs(text: string, voice: string): Promise<string> {
   const elevenlabs = new ElevenLabsClient({
     apiKey: process.env.ELEVENLABS_API_KEY,
   });
 
   const audio: Readable = await elevenlabs.generate({
-    voice: "gbTn1bmCvNgk0QEAVyfM",
+    voice,
     text: text,
     model_id: "eleven_multilingual_v2",
     output_format: "mp3_44100_128"
