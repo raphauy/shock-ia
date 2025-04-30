@@ -13,7 +13,7 @@ async function main() {
 
     const text= "Hola, ¿cómo estás? Esto es una prueba de audio con ElevenLabs, para ver si funciona correctamente. Estoy con Gabi Zimmer que es una persona muy especial para mi."
 
-    const audioBase64 = await generateAudioFromElevenLabs(text, "gbTn1bmCvNgk0QEAVyfM")
+    const audioBase64 = await generateAudioFromElevenLabs(text, "KXQbcKbroGSUf9Q5Crjd")
     console.log("audioBase64: ", audioBase64)
 
     const audioBuffer = Buffer.from(audioBase64, 'base64')

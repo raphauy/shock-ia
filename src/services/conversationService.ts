@@ -451,8 +451,8 @@ export async function processMessage(id: string, modelName?: string) {
       
       const lastMessageWasAudio= conversation.lastMessageWasAudio
       if (lastMessageWasAudio && client.haveAudioResponse) {
-        const audioBase64 = await generateAudioFromOpenAI(assistantResponse, "ash")
-        //const audioBase64 = await generateAudioFromElevenLabs(assistantResponse, "gbTn1bmCvNgk0QEAVyfM")
+        //const audioBase64 = await generateAudioFromOpenAI(assistantResponse, "ash")
+        const audioBase64 = await generateAudioFromElevenLabs(assistantResponse, "KXQbcKbroGSUf9Q5Crjd")
         await sendAudioToConversation(parseInt(chatwootAccountId), chatwootConversationId, audioBase64)
       } else {
         await sendTextToConversation(parseInt(chatwootAccountId), chatwootConversationId, assistantResponse)
