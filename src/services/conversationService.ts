@@ -452,7 +452,7 @@ export async function processMessage(id: string, modelName?: string) {
       const lastMessageWasAudio= conversation.lastMessageWasAudio
       if (lastMessageWasAudio && client.haveAudioResponse) {
         let audioBase64 = undefined
-        if (client.id === "clsnvcntc003okaqc2gfrme4b") {
+        if (client.id === "cm0qwd8z00001nsn6wa49hty1") {
           audioBase64 = await generateAudioFromElevenLabs(assistantResponse)
         } else {
           audioBase64 = await generateAudioFromOpenAI(assistantResponse)
