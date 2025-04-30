@@ -12,7 +12,7 @@ import { getFunctionsDefinitions } from "./function-services";
 import { getDocument } from "./functions";
 import { googleCompletionInit } from "./google-function-call-services";
 import { groqCompletionInit } from "./groq-function-call-services";
-import { generateAudio, getFullModelDAO, getFullModelDAOByName } from "./model-services";
+import { generateAudioFromElevenLabs, generateAudioFromOpenAI, getFullModelDAO, getFullModelDAOByName } from "./model-services";
 import { sendWapMessage } from "./osomService";
 import { setSectionsToMessage } from "./section-services";
 import { getUserByEmail } from "./user-service";
@@ -451,7 +451,12 @@ export async function processMessage(id: string, modelName?: string) {
       
       const lastMessageWasAudio= conversation.lastMessageWasAudio
       if (lastMessageWasAudio && client.haveAudioResponse) {
-        const audioBase64 = await generateAudio(assistantResponse)    
+        let audioBase64 = undefined
+        if (client.id === "clsnvcntc003okaqc2gfrme4b") {
+          audioBase64 = await generateAudioFromElevenLabs(assistantResponse)
+        } else {
+          audioBase64 = await generateAudioFromOpenAI(assistantResponse)
+        }
         await sendAudioToConversation(parseInt(chatwootAccountId), chatwootConversationId, audioBase64)
       } else {
         await sendTextToConversation(parseInt(chatwootAccountId), chatwootConversationId, assistantResponse)

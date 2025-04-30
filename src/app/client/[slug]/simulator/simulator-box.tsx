@@ -20,7 +20,7 @@ import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import Textarea from "react-textarea-autosize";
 import remarkGfm from "remark-gfm";
-import GPTData from "../chats/gpt-data";
+import GPTData from "../chats/gpt-data"
 
 export default function SimulatorBox() {
   const params= useParams()

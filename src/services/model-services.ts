@@ -2,7 +2,8 @@ import * as z from "zod"
 import { prisma } from "@/lib/db"
 import { ProviderDAO, getProviderDAO } from "./provider-services"
 import OpenAI from "openai"
-
+import { ElevenLabsClient } from "elevenlabs"
+import { Readable, Writable } from "stream"
 export type ModelDAO = {
 	id: string
 	name: string
@@ -149,7 +150,7 @@ export async function getFullModelDAOByName(name: string) {
   return found as ModelDAO
 }
 
-export async function generateAudio(text: string): Promise<string> {
+export async function generateAudioFromOpenAI(text: string): Promise<string> {
   console.log("generating audio")
   console.log("text: ", text)
   const client = new OpenAI({
@@ -166,4 +167,29 @@ export async function generateAudio(text: string): Promise<string> {
   const audioBuffer= await response.arrayBuffer()
   const audioBase64= Buffer.from(audioBuffer).toString('base64')
   return audioBase64
+}
+
+export async function generateAudioFromElevenLabs(text: string): Promise<string> {
+  const elevenlabs = new ElevenLabsClient({
+    apiKey: process.env.ELEVENLABS_API_KEY,
+  });
+
+  const audio: Readable = await elevenlabs.generate({
+    voice: "gbTn1bmCvNgk0QEAVyfM",
+    text: text,
+    model_id: "eleven_multilingual_v2",
+    output_format: "mp3_44100_128"
+  })
+
+  const chunks: Buffer[] = [];
+
+  for await (const chunk of audio) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  }
+
+  // @ts-ignore
+  const audioBuffer = Buffer.concat(chunks);
+  const audioBase64 = audioBuffer.toString('base64');
+
+  return audioBase64;
 }
