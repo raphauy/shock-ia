@@ -18,7 +18,6 @@ import { get } from "http"
 
 export const roles= [
   "admin",
-  "osom",
   "cliente",
 ]
 

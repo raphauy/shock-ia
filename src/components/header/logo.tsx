@@ -9,7 +9,7 @@ export default function Logo() {
   return (
     <Link href="/">
       <div className="text-3xl font-bold mt-1">
-        <Image src="/logo.png" width={200} height={50} alt="Shock logo" className="rounded-md" />
+        <Image src="/asistime_logo.png" width={200} height={50} alt="Shock logo" className="rounded-md" />
       </div>
     </Link>
 

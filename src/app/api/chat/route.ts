@@ -155,7 +155,7 @@ export async function POST(req: Request) {
       const newMessages = createFunctionCallMessages(result);
 
       let baseArgs = {
-        model: "gpt-4o",
+        model: model.name,
         stream: true,
       };
     

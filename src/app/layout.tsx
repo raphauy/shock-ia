@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     url: "https://shock.uy",
     images: [
       {
-        url: "https://ia.shock.uy/logo.png",
+        url: "https://ia.shock.uy/asistime_logo.png",
         width: 611,
         height: 134,
         alt: "ShockIA",
