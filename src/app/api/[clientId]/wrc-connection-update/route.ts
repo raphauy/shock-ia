@@ -1,10 +1,7 @@
 import { getClient } from "@/services/clientService";
-import { MessageDelayResponse, onMessageReceived, processDelayedMessage } from "@/services/messageDelayService";
-import { log } from "console";
-import { format } from "date-fns";
-import { NextResponse } from "next/server";
-import { connectionState } from "@/services/wrc-sdk";
 import { sendWhatsappDisconnectNotification } from "@/services/notifications-service";
+import { connectionState } from "@/services/wrc-sdk";
+import { NextResponse } from "next/server";
 
 
 export const maxDuration = 299
@@ -40,7 +37,7 @@ export async function POST(request: Request, { params }: Props) {
         const event= json.event
         console.log("event: ", event)
         if (event === "connection.update") {
-            processConnectionUpdate(clientId, instanceName, state, dateTimeInMontevideo)
+            await processConnectionUpdate(clientId, instanceName, state)
             return NextResponse.json({ data: "ACK" }, { status: 200 })
         }
 
@@ -63,7 +60,7 @@ export async function GET(request: Request, { params }: { params: { clientId: st
 }
 
 
-function processConnectionUpdate(clientId: string, instanceName: string, state: string, dateTime: Date) {
+async function processConnectionUpdate(clientId: string, instanceName: string, state: string) {
     console.log("processing connection update")
 
     console.log("clientId: ", clientId)
@@ -74,7 +71,7 @@ function processConnectionUpdate(clientId: string, instanceName: string, state: 
     if (state !== "open") {
         console.log(`La instancia ${instanceName} se ha desconectado. Verificando reconexión...`)
         
-        const LOOPS_LIMIT = 3; // segundos
+        const LOOPS_LIMIT = state === "close" ? 6 : 3;
         const LOOP_TIME = 10; // segundos
         let contador = 0;
         
@@ -95,7 +92,7 @@ function processConnectionUpdate(clientId: string, instanceName: string, state: 
                 if (contador >= LOOPS_LIMIT) {
                     clearInterval(intervalo);
                     console.log(`¡ALERTA! La instancia ${instanceName} sigue desconectada después de ${LOOPS_LIMIT * LOOP_TIME} segundos.`);
-                    await sendWhatsappDisconnectNotification(clientId, "close")
+                    await sendWhatsappDisconnectNotification(clientId, state)
                 }
                 
             } catch (error) {
