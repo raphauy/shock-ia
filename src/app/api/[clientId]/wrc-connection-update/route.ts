@@ -68,10 +68,10 @@ async function processConnectionUpdate(clientId: string, instanceName: string, s
     console.log(instanceName + ": " + state)
     
     // Verificar si la instancia está desconectada
-    if (state !== "open") {
+    if (state === "close") {
         console.log(`La instancia ${instanceName} se ha desconectado. Verificando reconexión...`)
         
-        const LOOPS_LIMIT = state === "close" ? 6 : 3;
+        const LOOPS_LIMIT = 3;
         const LOOP_TIME = 10; // segundos
         let contador = 0;
         
