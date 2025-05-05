@@ -76,7 +76,7 @@ function processConnectionUpdate(clientId: string, instanceName: string, state: 
     if (state === "close") {
         console.log(`La instancia ${instanceName} se ha desconectado. Verificando reconexión...`)
         
-        const LIMIT_TIME = 15; // segundos
+        const LOOPS_LIMIT = 3; // segundos
         const LOOP_TIME = 10; // segundos
         let contador = 0;
         
@@ -94,9 +94,9 @@ function processConnectionUpdate(clientId: string, instanceName: string, state: 
                     console.log(`La instancia ${instanceName} sigue desconectada después de ${contador * LOOP_TIME} segundos. Status: ${estadoConexion.state}`);
                 }
                 
-                if (contador >= LIMIT_TIME) {
+                if (contador >= LOOPS_LIMIT) {
                     clearInterval(intervalo);
-                    console.log(`¡ALERTA! La instancia ${instanceName} sigue desconectada después de ${LIMIT_TIME * LOOP_TIME} segundos.`);
+                    console.log(`¡ALERTA! La instancia ${instanceName} sigue desconectada después de ${LOOPS_LIMIT * LOOP_TIME} segundos.`);
                     await sendWhatsappDisconnectNotification(clientId)
                 }
                 
