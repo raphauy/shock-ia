@@ -69,8 +69,6 @@ function processConnectionUpdate(clientId: string, instanceName: string, state: 
     console.log("clientId: ", clientId)
     console.log("instanceName: ", instanceName)
     console.log("state: ", state)
-    const formattedDate= format(dateTime, "yyyy-MM-dd HH:mm:ss")
-    console.log("dateTime: ", formattedDate)
     
     // Verificar si la instancia está desconectada
     if (state !== "open") {
@@ -88,7 +86,7 @@ function processConnectionUpdate(clientId: string, instanceName: string, state: 
                 
                 if (estadoConexion.state === "open") {
                     clearInterval(intervalo);
-                    console.log(`La instancia ${instanceName} se ha reconectado después de ${contador} segundos.`);
+                    console.log(`La instancia ${instanceName} se ha reconectado después de ${contador * LOOP_TIME} segundos.`);
                     return;
                 } else {
                     console.log(`La instancia ${instanceName} sigue desconectada después de ${contador * LOOP_TIME} segundos. Status: ${estadoConexion.state}`);
@@ -108,36 +106,3 @@ function processConnectionUpdate(clientId: string, instanceName: string, state: 
         }, LOOP_TIME * 1000); // Verificar cada 10 segundos
     }
 }
-
-// ejemplo 1:
-// json:  {                                                                                                                                    
-//   event: 'connection.update',                                                                                                               
-//   instance: 'dev-cantinabarreiro',                                                                                                          
-//   data: {                                                                                                                                   
-//     instance: 'dev-cantinabarreiro',                                                                                                        
-//     state: 'connecting',                                                                                                                    
-//     statusReason: 200                                                                                                                       
-//   },                                                                                                                                        
-//   destination: 'https://local.rctracker.dev/api/clsnvcntc003okaqc2gfrme4b/wrc-connection-update',                                           
-//   date_time: '2025-05-05T03:55:22.229Z',                                                                                                    
-//   sender: '59898353507@s.whatsapp.net',                                                                                                     
-//   server_url: 'https://wrc.raphauy.dev',                                                                                                    
-// }
-
-// ejemplo 2:
-// json:  {
-//   event: 'connection.update',
-//   instance: 'dev-cantinabarreiro',
-//   data: {
-//     instance: 'dev-cantinabarreiro',
-//     wuid: '59898353507@s.whatsapp.net',
-//     profilePictureUrl: 'https://pps.whatsapp.net/v/t61.24694-24/321265217_5780002138795077_789561094804400244_n.jpg?ccb=11-4&oh=01_Q5Aa1QHiO
-// hmpUPLTUQiab2usBApmjds505boePU5BPTN46Jwqw&oe=682562DD&_nc_sid=5e03e0&_nc_cat=111',
-//     state: 'open',
-//     statusReason: 200
-//   },
-//   destination: 'https://local.rctracker.dev/api/clsnvcntc003okaqc2gfrme4b/wrc-connection-update',
-//   date_time: '2025-05-05T03:55:24.451Z',
-//   sender: '59898353507@s.whatsapp.net',
-//   server_url: 'https://wrc.raphauy.dev',
-// }
