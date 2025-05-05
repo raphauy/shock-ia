@@ -209,7 +209,7 @@ ${name ? `**Nombre:** ${name}` : ""}
 }
 
 //WHATSAPP_DISCONNECT_NOTIFICATIONS
-export async function  sendWhatsappDisconnectNotification(clientId: string, state: string) {
+export async function  sendWhatsappDisconnectNotification(clientId: string) {
     const notifyPhonesValue= await getValue("WHATSAPP_DISCONNECT_NOTIFICATIONS")
     const notifyPhones= notifyPhonesValue?.split(",") || []
     if (notifyPhones.length === 0) {
@@ -241,12 +241,9 @@ export async function  sendWhatsappDisconnectNotification(clientId: string, stat
     const appURL= process.env.NEXTAUTH_URL
     if (!appURL) throw new Error("NEXTAUTH_URL is not set")
 
-    const estado= state === "close" ? "Desconectado" : state === "open" ? "Conectado" : state === "connecting" ? "Conectando" : "Desconocido"
-
     const text= `**WhatsApp desconectado**
 
 Cliente: **${client.name}**
-Estado: **${estado}**
 Conectar: ${appURL}/client/${client.slug}/crm/whatsapp
 `
 

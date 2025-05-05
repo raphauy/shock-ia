@@ -92,7 +92,7 @@ async function processConnectionUpdate(clientId: string, instanceName: string, s
                 if (contador >= LOOPS_LIMIT) {
                     clearInterval(intervalo);
                     console.log(`¡ALERTA! La instancia ${instanceName} sigue desconectada después de ${LOOPS_LIMIT * LOOP_TIME} segundos.`);
-                    await sendWhatsappDisconnectNotification(clientId, state)
+                    await sendWhatsappDisconnectNotification(clientId)
                 }
                 
             } catch (error) {
