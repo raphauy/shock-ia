@@ -2,6 +2,19 @@ import { getCurrentTimeInMontevideo } from "@/lib/utils";
 import { checkAbandonedOrders, processPendingAbandonedOrders } from "./abandoned-orders-service";
 import { getClientsWithAbandonedOrders } from "./clientService";
 
+// Configuración de rango horario permitido
+const START_HOUR = 7;
+const END_HOUR = 22;
+
+/**
+ * Verifica si la hora actual está dentro del rango horario permitido
+ * @returns true si la hora actual está dentro del rango permitido
+ */
+function isWithinAllowedTimeRange(): boolean {
+  const currentTime = getCurrentTimeInMontevideo();
+  return currentTime.hour >= START_HOUR && currentTime.hour < END_HOUR;
+}
+
 /**
  * Función principal para ejecutar el updater como script
  */
@@ -11,6 +24,13 @@ async function main() {
     // Mostrar información de la zona horaria
     const currentTime = getCurrentTimeInMontevideo();
     console.log(`Hora actual: ${currentTime.formatted} (Montevideo)`);
+    console.log(`Rango horario configurado: ${START_HOUR}:00 - ${END_HOUR}:00 (Montevideo)`);
+    
+    // Verificar si estamos dentro del rango horario permitido
+    if (!isWithinAllowedTimeRange()) {
+        console.log(`Hora actual fuera del rango permitido. No se accederá a la base de datos. Finalizando...`);
+        process.exit(0);
+    }
 
     try {
         const clientsToProcess = await getClientsWithAbandonedOrders();
