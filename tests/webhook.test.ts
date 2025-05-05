@@ -24,7 +24,7 @@ async function main() {
         // console.log(`- URL: ${estadoActual.url}`);
         // console.log(`- Eventos: ${estadoActual.events.join(', ')}`);
 
-        await sendWhatsappDisconnectNotification(clientId)
+        await sendWhatsappDisconnectNotification(clientId, "close")
         
         // // Activar el webhook
         // console.log(`\nActivando webhook para el cliente: ${instanceName}`);
