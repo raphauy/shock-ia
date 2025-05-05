@@ -13,6 +13,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { useEffect, useState } from "react";
 import { connectInstanceAction, deleteInstanceAction, getConnectionStatusAction, logoutInstanceAction, restartInstanceAction } from "./actions";
 import ChatwootButton from "./chatwoot-button";
+import { WebhookSwitch } from "./webhook-switch";
 
 const MAX_QR_CODE_COUNT = 10
 
@@ -36,6 +37,7 @@ export function ConnectionDetails({ clientId, instance, chatwootAccountId, whats
 
   const session= useSession()
   const userEmail= session.data?.user.email
+  const userRole= session.data?.user.role
 
   // only on status connecting, check and update status and do it every 2 seconds
   useEffect(() => {
@@ -231,6 +233,11 @@ export function ConnectionDetails({ clientId, instance, chatwootAccountId, whats
               Eliminar
             </Button>
           }
+          { userRole === "admin" &&
+            <div className="col-span-2 mt-8">
+              <WebhookSwitch clientId={clientId} instanceName={instance.name} />
+            </div>
+          }
         </div>
         <div className="flex justify-center items-center w-full">
           {qrCode && <QRCodeSVG value={qrCode} size={500} />}
@@ -241,19 +248,21 @@ export function ConnectionDetails({ clientId, instance, chatwootAccountId, whats
             <p>{qrCodeCount} / {MAX_QR_CODE_COUNT}</p>
           </div>}
 
-        <div className="col-span-2 mt-8">
-          {
-            !chatwootAccountId ? (
-              <ChatwootButton clientId={clientId} instanceName={instance.name} />
-            ) : (
-              <div className="space-y-4">
-                <div className="text-center font-bold">Chatwoot asociado a la cuenta {chatwootAccountId}</div>
-                <div className="text-center font-bold">Inbox {whatsappInboxId}</div>
-                {/* <InboxButton clientId={clientId} initialWhatsappInboxId={whatsappInboxId || ''} /> */}
-              </div>
-            )
-          }
-        </div>
+        {userRole === "admin" &&
+          <div className="col-span-2 mt-8">
+            {
+              !chatwootAccountId ? (
+                <ChatwootButton clientId={clientId} instanceName={instance.name} />
+              ) : (
+                <div className="space-y-4">
+                  <div className="text-center font-bold">Chatwoot asociado a la cuenta {chatwootAccountId}</div>
+                  <div className="text-center font-bold">Inbox {whatsappInboxId}</div>
+                </div>
+              )
+            }
+          </div>
+        }
+        
       </CardContent>
     </Card>
   )

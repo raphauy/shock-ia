@@ -8,7 +8,27 @@ export const maxDuration = 299
 export async function POST(request: Request) {
 
     try {
-        const json= await request.json()
+        // Comprobar que la solicitud tiene contenido
+        const contentType = request.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            console.log("Error en API Chatwoot contact: La solicitud no es de tipo JSON");
+            return NextResponse.json({ error: "Content-Type debe ser application/json" }, { status: 400 });
+        }
+
+        const text = await request.text();
+        if (!text || text.trim() === '') {
+            console.log("Error en API Chatwoot contact: Cuerpo de la solicitud vacío");
+            return NextResponse.json({ error: "El cuerpo de la solicitud está vacío" }, { status: 400 });
+        }
+
+        let json;
+        try {
+            json = JSON.parse(text);
+        } catch (error) {
+            console.log("Error en API Chatwoot contact: Error al parsear JSON:", error);
+            return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
+        }
+
         //console.log("general api json: ", json)
         const event= json.event
         console.log("event: ", event)

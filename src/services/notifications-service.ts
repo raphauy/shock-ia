@@ -6,8 +6,10 @@ import axios from "axios";
 import { BookingDAO } from "./booking-services";
 import { getLastChatwootConversationIdByPhoneNumber } from "./contact-services";
 import { sendTextToConversation } from "./chatwoot";
-import { getChatwootAccountId } from "./clientService";
+import { getChatwootAccountId, getClient, getWhatsappInstance } from "./clientService";
 import { formatInTimeZone } from "date-fns-tz";
+import { getWebhookStatus } from "./wrc-sdk";
+import { getValue } from "./config-services";
 
 type RepoDataEntryResponse = {
     id: string,
@@ -204,4 +206,59 @@ ${name ? `**Nombre:** ${name}` : ""}
             console.log(`Message sent to ${destinationPhone}`)
         }
     }
+}
+
+//WHATSAPP_DISCONNECT_NOTIFICATIONS
+export async function  sendWhatsappDisconnectNotification(clientId: string) {
+    const notifyPhonesValue= await getValue("WHATSAPP_DISCONNECT_NOTIFICATIONS")
+    const notifyPhones= notifyPhonesValue?.split(",") || []
+    if (notifyPhones.length === 0) {
+        console.log("No notify phones found for whatsapp disconnect notification")
+        return
+    }
+
+    const client= await getClient(clientId)
+    if (!client) throw new Error("Client not found")
+
+    const whatsappInstance= await getWhatsappInstance(client.id)
+    if (!whatsappInstance) throw new Error("Whatsapp instance not found for client " + client.name)
+
+    const instanceName= whatsappInstance.name
+    const webhookStatus= await getWebhookStatus(instanceName)
+    if (!webhookStatus) throw new Error("Webhook status not found for instance " + instanceName)
+
+    if (!webhookStatus.enabled) {
+        console.log("Webhook is not enabled for instance " + instanceName)
+        return
+    }
+
+    const adminClientId= await getValue("WHATSAPP_DISCONNECT_ADMIN_CLIENT_ID")
+    if (!adminClientId) throw new Error("WHATSAPP_DISCONNECT_ADMIN_CLIENT_ID is not set")
+
+    const adminChatwootAccountId= await getChatwootAccountId(adminClientId)
+    if (!adminChatwootAccountId) throw new Error("Chatwoot account not found for client " + adminClientId)
+
+    const appURL= process.env.NEXTAUTH_URL
+    if (!appURL) throw new Error("NEXTAUTH_URL is not set")
+
+    const text= `**WhatsApp desconectado**
+
+Cliente: **${client.name}**
+Conectar: ${appURL}/client/${client.slug}/crm/whatsapp
+`
+
+    for (const destinationPhone of notifyPhones) {
+        console.log("destinationPhone: ", destinationPhone)
+        console.log("adminClientId: ", adminClientId)
+        const chatwootConversationId= await getLastChatwootConversationIdByPhoneNumber(destinationPhone, adminClientId)
+        if (!chatwootConversationId) {
+            console.log(`Chatwoot conversation not found for phone ${destinationPhone}`)
+            continue
+        } else {
+            await sendTextToConversation(Number(adminChatwootAccountId), chatwootConversationId, text)
+        }
+    }
+
+    console.log("Whatsapp disconnect notification sent to " + notifyPhones.length + " phones")
+    return true
 }

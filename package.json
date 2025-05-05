@@ -14,6 +14,7 @@
     "main": "tsx src/services/main.ts",
     "test-update": "tsx src/services/propertyUpdateService.ts",
     "test-custom": "tsx tests/elevenlabs.test.ts",
+    "test-webhook": "tsx tests/webhook.test.ts",
     "manual-test": "tsx src/services/test.ts",
     "seed": "tsx prisma/seed.ts",
     "update-products": "tsx src/services/products-updater.ts",

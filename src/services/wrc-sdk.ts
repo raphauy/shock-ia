@@ -1,6 +1,7 @@
 import axios from 'axios'
 //import { config } from 'dotenv'
 import { ChatwootParams, ConnectInstance, ConnectionStatus, CreateInstanceResponse, events, WRCInstance } from './wrc-sdk-types'
+import { getClient, getWhatsappInstance } from './clientService'
 
 //config()
 
@@ -75,6 +76,13 @@ export async function createInstanceBasic(instanceName: string): Promise<CreateI
     }
 
     console.log("baseURL", baseURL)
+
+    const baseAppUrl= process.env.NEXTAUTH_URL
+    if (!baseAppUrl) {
+        throw new Error('NEXTAUTH_URL is not set')
+    }
+
+    const webhookUrl = `${baseAppUrl}/api/${instanceName}/wrc-connection-update`
 
     try {
         const response = await axios.post<CreateInstanceResponse>(`${baseURL}/instance/create`, 
@@ -276,3 +284,93 @@ export async function sendText(instanceName: string, phone: string, text: string
 
 }
 
+export async function setWebhook(clientId: string, enabled: boolean): Promise<boolean> {
+    if (!baseURL || !apiKey) {
+        throw new Error('WRC_BASE_URL or WRC_API_KEY is not set')
+    }
+
+    try {
+    
+        const whatsappInstance= await getWhatsappInstance(clientId)
+        if (!whatsappInstance) {
+            throw new Error('Whatsapp instance not found')
+        }
+    
+        const instanceName= whatsappInstance.name
+        const baseAppUrl= process.env.NEXTAUTH_URL
+        const webhookUrl= `${baseAppUrl}/api/${clientId}/wrc-connection-update`
+    
+        const response= await axios.post(`${baseURL}/webhook/set/${instanceName}`, {
+            webhook: {
+                enabled,
+                url: webhookUrl,
+                webhookByEvents: false,
+                webhookBase64: false,
+                events: ["CONNECTION_UPDATE"],
+            },
+        }, {
+            headers: {
+                'apiKey': `${apiKey}`,
+            },
+        })
+
+        const data= response.data
+        console.log("responseWebhook", data)
+        if (data.enabled !== enabled) {
+            return false
+        }
+
+        return true
+    } catch (error: unknown) {
+        throw error
+    }
+
+    
+    
+}
+
+/**
+ * Verifica si el webhook está habilitado para una instancia específica
+ * @param clientId ID del cliente
+ * @returns Objeto con el estado del webhook (enabled, url, events)
+ */
+export async function getWebhookStatus(instanceName: string): Promise<{enabled: boolean, url: string, events: string[]}> {
+    if (!baseURL || !apiKey) {
+        throw new Error('WRC_BASE_URL or WRC_API_KEY is not set')
+    }
+
+    try {
+        
+        // Utilizamos el endpoint /webhook/find/{instance} según la documentación
+        const response = await axios.get(`${baseURL}/webhook/find/${instanceName}`, {
+            headers: {
+                'apiKey': `${apiKey}`,
+            },
+        })
+
+        const data = response.data
+        console.log("Webhook status:", data)
+
+        if (!data) {
+            return {
+                enabled: false,
+                url: "",
+                events: []
+            }
+        }
+
+        return {
+            enabled: data.enabled || false,
+            url: data.url || "",
+            events: data.events || []
+        }
+    } catch (error: unknown) {
+        console.error("Error al obtener estado del webhook:", error)
+        // Si hay error, asumimos que no está habilitado
+        return {
+            enabled: false,
+            url: "",
+            events: []
+        }
+    }
+}

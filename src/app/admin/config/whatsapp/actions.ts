@@ -2,7 +2,7 @@
 
 import { getInboxId } from "@/services/chatwoot"
 import { deleteWhatsappInstance, getClient, getClientBySlug, getWhatsappInstance, setChatwootData, setInboxProvider, setWhatsappInboxId, setWhatsappInstance } from "@/services/clientService"
-import { connectInstance, connectionState, createInstanceBasic, deleteInstance, logoutInstance, restartInstance, enableChatwoot, disableChatwoot } from "@/services/wrc-sdk"
+import { connectInstance, connectionState, createInstanceBasic, deleteInstance, logoutInstance, restartInstance, enableChatwoot, disableChatwoot, getWebhookStatus, setWebhook } from "@/services/wrc-sdk"
 import { ChatwootParams, WhatsappInstanceDAO } from "@/services/wrc-sdk-types"
 import { InboxProvider } from "@/lib/generated/prisma"
 import { revalidatePath } from "next/cache"
@@ -26,12 +26,31 @@ export async function createInstanceAction(instanceName: string) {
         clientId: client.id,
     }
     const instance = await setWhatsappInstance(instanceData)
+    if (instance) {
+        try {
+            await setWebhook(client.id, true)
+        } catch (error) {
+            console.error('Error setting webhook:', error)
+        }
+    }
+
     revalidatePath('/admin/config')
     return instance
 }
 
 export async function getConnectionStatusAction(instanceName: string) {
     const status = await connectionState(instanceName)
+    console.log("status", status)
+    return status
+}
+
+export async function getWebhookStatusAction(instanceName: string) {
+    const status = await getWebhookStatus(instanceName)
+    return status
+}
+
+export async function setWebhookAction(clientId: string, enabled: boolean) {
+    const status = await setWebhook(clientId, enabled)
     return status
 }
 
