@@ -65,7 +65,7 @@ async function processConnectionUpdate(clientId: string, instanceName: string, s
 
     console.log("clientId: ", clientId)
     console.log("instanceName: ", instanceName)
-    console.log("state: ", state)
+    console.log(instanceName + ": " + state)
     
     // Verificar si la instancia está desconectada
     if (state !== "open") {
