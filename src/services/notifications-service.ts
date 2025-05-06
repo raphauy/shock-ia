@@ -247,18 +247,26 @@ Cliente: **${client.name}**
 Conectar: ${appURL}/client/${client.slug}/crm/whatsapp
 `
 
+    let notificacionesEnviadas = 0
     for (const destinationPhone of notifyPhones) {
-        console.log("destinationPhone: ", destinationPhone)
-        console.log("adminClientId: ", adminClientId)
-        const chatwootConversationId= await getLastChatwootConversationIdByPhoneNumber(destinationPhone, adminClientId)
-        if (!chatwootConversationId) {
-            console.log(`Chatwoot conversation not found for phone ${destinationPhone}`)
-            continue
-        } else {
-            await sendTextToConversation(Number(adminChatwootAccountId), chatwootConversationId, text)
+        console.log("Enviando notificación a:", destinationPhone)
+        
+        try {
+            // Intentar obtener o crear una conversación para este número
+            const chatwootConversationId = await getLastChatwootConversationIdByPhoneNumber(destinationPhone, adminClientId)
+            
+            if (chatwootConversationId) {
+                await sendTextToConversation(Number(adminChatwootAccountId), chatwootConversationId, text)
+                console.log(`Notificación enviada a ${destinationPhone}`)
+                notificacionesEnviadas++
+            } else {
+                console.log(`No se pudo obtener/crear conversación para ${destinationPhone}`)
+            }
+        } catch (error) {
+            console.error(`Error enviando notificación a ${destinationPhone}:`, error)
         }
     }
 
-    console.log("Whatsapp disconnect notification sent to " + notifyPhones.length + " phones")
-    return true
+    console.log(`Whatsapp disconnect notification enviada a ${notificacionesEnviadas} de ${notifyPhones.length} teléfonos`)
+    return notificacionesEnviadas > 0
 }
