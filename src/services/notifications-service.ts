@@ -211,7 +211,7 @@ ${name ? `**Nombre:** ${name}` : ""}
 //WHATSAPP_DISCONNECT_NOTIFICATIONS
 export async function  sendWhatsappDisconnectNotification(clientId: string) {
     const notifyPhonesValue= await getValue("WHATSAPP_DISCONNECT_NOTIFICATIONS")
-    const notifyPhones= notifyPhonesValue?.split(",") || []
+    const notifyPhones= notifyPhonesValue?.split(",").map(phone => phone.trim()) || []
     if (notifyPhones.length === 0) {
         console.log("No notify phones found for whatsapp disconnect notification")
         return
