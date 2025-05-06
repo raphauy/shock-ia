@@ -518,7 +518,18 @@ export async function getLastChatwootConversationIdByPhoneNumber(phone: string, 
   } else {
     // get the last conversation of the contact
     const lastConversation= await getLastConversationByContactId(contact.id, clientId)
-    if (!lastConversation) throw new Error("Error al obtener la última conversación del contacto")
+    //if (!lastConversation) throw new Error("Error al obtener la última conversación del contacto")
+    if (!lastConversation) {
+      // create conversation in chatwoot
+      const whatsappInstance= await getWhatsappInstance(clientId)
+      if (!whatsappInstance) throw new Error("Whatsapp instance not found")
+      if (!whatsappInstance.whatsappInboxId) throw new Error("Whatsapp inbox not found")
+      if (!contact.chatwootId) throw new Error("Chatwoot ID not found")
+      const chatwootConversationId= await createChatwootConversation(Number(whatsappInstance.chatwootAccountId), whatsappInstance.whatsappInboxId, contact.chatwootId)
+      if (!chatwootConversationId) throw new Error("Error al crear la conversación en Chatwoot")
+
+      return chatwootConversationId
+    }
 
     return lastConversation.chatwootConversationId
   }

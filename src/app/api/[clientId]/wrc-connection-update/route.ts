@@ -4,7 +4,7 @@ import { connectionState } from "@/services/wrc-sdk";
 import { NextResponse } from "next/server";
 
 
-export const maxDuration = 299
+export const maxDuration = 800
 
 type Props= {
     params: {
@@ -64,42 +64,32 @@ async function processConnectionUpdate(clientId: string, instanceName: string, s
     console.log("processing connection update")
 
     console.log("clientId: ", clientId)
-    console.log("instanceName: ", instanceName)
     console.log(instanceName + ": " + state)
     
     // Verificar si la instancia está desconectada
     if (state === "close") {
         console.log(`La instancia ${instanceName} se ha desconectado. Verificando reconexión...`)
         
-        const LOOPS_LIMIT = 2;
-        const LOOP_TIME = 5; // segundos
-        let contador = 0;
+        const SLEEP_TIME = 10; // segundos
         
-        const intervalo = setInterval(async () => {
-            contador++;
+        try {
+            // Primera verificación realizada, ahora esperamos
+            console.log(`Esperando ${SLEEP_TIME} segundos antes de verificar nuevamente...`)
+            await new Promise(resolve => setTimeout(resolve, SLEEP_TIME * 1000));
             
-            try {
-                const estadoConexion = await connectionState(instanceName);
-                
-                if (estadoConexion.state === "open") {
-                    clearInterval(intervalo);
-                    console.log(`La instancia ${instanceName} se ha reconectado después de ${contador * LOOP_TIME} segundos.`);
-                    return;
-                } else {
-                    console.log(`La instancia ${instanceName} sigue desconectada después de ${contador * LOOP_TIME} segundos. Status: ${estadoConexion.state}`);
-                }
-                
-                if (contador >= LOOPS_LIMIT) {
-                    clearInterval(intervalo);
-                    console.log(`¡ALERTA! La instancia ${instanceName} sigue desconectada después de ${LOOPS_LIMIT * LOOP_TIME} segundos.`);
-                    await sendWhatsappDisconnectNotification(clientId)
-                }
-                
-            } catch (error) {
-                console.error(`Error verificando estado de conexión para ${instanceName}:`, error);
-                clearInterval(intervalo);
+            // Verificamos nuevamente después de esperar
+            const estadoConexion = await connectionState(instanceName);
+            
+            if (estadoConexion.state === "open") {
+                console.log(`La instancia ${instanceName} se ha reconectado después de ${SLEEP_TIME} segundos.`);
+                return;
+            } else {
+                console.log(`La instancia ${instanceName} sigue desconectada después de ${SLEEP_TIME} segundos. Status: ${estadoConexion.state}`);
+                console.log(`¡ALERTA! La instancia ${instanceName} sigue desconectada. Enviando notificación...`);
+                await sendWhatsappDisconnectNotification(clientId);
             }
-            
-        }, LOOP_TIME * 1000); // Verificar cada 10 segundos
+        } catch (error) {
+            console.error(`Error verificando estado de conexión para ${instanceName}:`, error);
+        }
     }
 }
