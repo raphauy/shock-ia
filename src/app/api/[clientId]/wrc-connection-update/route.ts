@@ -71,8 +71,8 @@ async function processConnectionUpdate(clientId: string, instanceName: string, s
     if (state === "close") {
         console.log(`La instancia ${instanceName} se ha desconectado. Verificando reconexión...`)
         
-        const LOOPS_LIMIT = 3;
-        const LOOP_TIME = 10; // segundos
+        const LOOPS_LIMIT = 2;
+        const LOOP_TIME = 5; // segundos
         let contador = 0;
         
         const intervalo = setInterval(async () => {
