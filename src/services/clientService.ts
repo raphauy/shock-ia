@@ -1398,3 +1398,22 @@ export async function getClientsWithAbandonedOrders() {
   return clients;
 }
 
+export async function getAllWhatsappInstances() {
+  return prisma.whatsappInstance.findMany({
+    include: {
+      client: {
+        select: {
+          id: true,
+          name: true,
+          slug: true
+        }
+      }
+    },
+    orderBy: {
+      client: {
+        name: 'asc'
+      }
+    }
+  })
+}
+

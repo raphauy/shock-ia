@@ -17,14 +17,14 @@ async function main() {
     
     try {
         // Verificar estado actual del webhook
-        // console.log(`Verificando estado actual del webhook para el cliente: ${instanceName}`);
-        // const estadoActual = await getWebhookStatus(instanceName);
-        // console.log(`Estado actual del webhook:`);
-        // console.log(`- Habilitado: ${estadoActual.enabled}`);
-        // console.log(`- URL: ${estadoActual.url}`);
-        // console.log(`- Eventos: ${estadoActual.events.join(', ')}`);
+        console.log(`Verificando estado actual del webhook para el cliente: ${instanceName}`);
+        const estadoActual = await getWebhookStatus(instanceName);
+        console.log(`Estado actual del webhook:`);
+        console.log(`- Habilitado: ${estadoActual.enabled}`);
+        console.log(`- URL: ${estadoActual.url}`);
+        console.log(`- Eventos: ${estadoActual.events.join(', ')}`);
 
-        await sendWhatsappDisconnectNotification(clientId)
+        // await sendWhatsappDisconnectNotification(clientId)
         
         // // Activar el webhook
         // console.log(`\nActivando webhook para el cliente: ${instanceName}`);
