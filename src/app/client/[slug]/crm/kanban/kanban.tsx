@@ -35,7 +35,7 @@ export function KanbanComponent({ clientId, initialStages, allTags, comercials, 
   const [stages, setStages] = useState<KanbanStageDAOWithContacts[]>(initialStages)
   const [filteredTags, setFilteredTags] = useState<string[]>([])
   const [phoneFilter, setPhoneFilter] = useState<string>("")
-  const [selectedComercial, setSelectedComercial] = useState<string>("")
+  const [selectedComercial, setSelectedComercial] = useState<string>("all")
   const [showMyContacts, setShowMyContacts] = useState(false)
   const [selectedContact, setSelectedContact] = useState<ContactDAO | null>(null)
   const { data: session } = useSession()
@@ -48,11 +48,11 @@ export function KanbanComponent({ clientId, initialStages, allTags, comercials, 
     const filteredStages = initialStages.map(stage => ({
       ...stage,
       contacts: stage.contacts.filter(contact => {
-        const matchesTags = filteredTags.length === 0 || contact.tags?.some(tag => filteredTags.includes(tag));
+        const matchesTags = filteredTags.length === 0 || filteredTags.every(tag => contact.tags?.includes(tag));
         const matchesPhone = !phoneFilter || 
           contact.phone?.toLowerCase().includes(phoneFilter.toLowerCase()) ||
           contact.name?.toLowerCase().includes(phoneFilter.toLowerCase());
-        const matchesComercial = !selectedComercial || contact.comercialId === selectedComercial;
+        const matchesComercial = !selectedComercial || selectedComercial === "all" || contact.comercialId === selectedComercial;
         
         return matchesTags && matchesPhone && matchesComercial;
       })
@@ -188,7 +188,7 @@ export function KanbanComponent({ clientId, initialStages, allTags, comercials, 
                   <SelectValue placeholder="Todos los comerciales" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos los comerciales</SelectItem>
+                  <SelectItem value="all">Todos los comerciales</SelectItem>
                   {comercials.map((comercial) => (
                     <SelectItem key={comercial.id} value={comercial.id}>
                       {comercial.user.name}

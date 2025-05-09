@@ -68,7 +68,7 @@ export const columns: ColumnDef<CampaignContactDAO>[] = [
       return (
         <div className="flex items-center gap-2 lg:min-w-[300px]">
           <Avatar>
-            <AvatarImage src={data.imageUrl ?? ""} />
+            <AvatarImage src={data.imageUrl || undefined} />
             <AvatarFallback>{data.name.charAt(0)}</AvatarFallback>
           </Avatar>
           <div>

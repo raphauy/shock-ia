@@ -28,7 +28,7 @@ export const columns: ColumnDef<ContactDAOWithStage>[] = [
       return (
         <div className="flex items-center gap-2">
           <Avatar>
-            <AvatarImage src={data.imageUrl ?? ""} />
+            <AvatarImage src={data.imageUrl || undefined} />
             <AvatarFallback>{data.name.charAt(0)}</AvatarFallback>
           </Avatar>
           {data.name}

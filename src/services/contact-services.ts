@@ -444,7 +444,7 @@ export async function getFilteredContacts(clientId: string, from: Date | null, t
         lte: to || undefined
       },
       tags: tags.length > 0 ? {
-        hasSome: tags
+        hasEvery: tags
       } : undefined,
       stageId: stageId,
       comercialId: comercialId
