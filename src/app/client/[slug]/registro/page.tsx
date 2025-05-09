@@ -6,17 +6,18 @@ import { getFullNarvaezsDAOByClient } from "@/services/narvaez-services"
 import { redirect } from "next/navigation"
 
 type Props= {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
-export default async function NarvaezPage({ params }: Props) {
+export default async function NarvaezPage(props: Props) {
+  const params = await props.params;
 
   const slug = params.slug
 
   const clientsOfNarvaez= await getClientsOfFunctionByName("registrarPedido")
-  
+
   if (!clientsOfNarvaez.map(c => c.slug).includes(slug))
     return redirect(`/client/${slug}`)
 

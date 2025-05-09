@@ -16,12 +16,13 @@ import DashboardActions from "./dashboard-actions"
 export const maxDuration = 800; // 800 segundos (máximo para plan Pro con Fluid Compute)
 
 type Props = {
-    params: {
+    params: Promise<{
       slug: string
-    } 
+    }> 
 }
 
-export default async function ClientProducts({ params }: Props) {
+export default async function ClientProducts(props: Props) {
+    const params = await props.params;
     const { slug } = params
 
     const client = await getClientBySlug(slug)
@@ -59,14 +60,14 @@ export default async function ClientProducts({ params }: Props) {
 
     // Obtener algunos productos para mostrar
     const rawRecentProducts = await getClientProducts(client.id, 5)
-    
+
     // Convertir los campos Decimal a string para evitar problemas de serialización
     const recentProducts = rawRecentProducts.map(product => ({
         ...product,
         price: product.price?.toString() || "0",
         salePrice: product.salePrice?.toString() || null
     }))
-    
+
     return (
         <div className="container mx-auto py-6 space-y-6">
             <div className="flex flex-col md:flex-row justify-between space-y-2 md:space-y-0 md:items-end">

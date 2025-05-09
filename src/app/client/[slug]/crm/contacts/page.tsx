@@ -13,20 +13,22 @@ import ComercialSelector from "./comercial-selector"
 import { getActiveComercialsDAO } from "@/services/comercial-services"
 
 type Props= {
-  params: {
+  params: Promise<{
     slug: string
-  }
-  searchParams: {
+  }>
+  searchParams: Promise<{
     from: string
     to: string
     last: string
     tags: string
     stageId: string
     comercialId: string
-  }
+  }>
 }
 
-export default async function ContactsPage({ params, searchParams }: Props) {
+export default async function ContactsPage(props: Props) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   const client= await getClientBySlug(params.slug)
   if (!client) return notFound()
 

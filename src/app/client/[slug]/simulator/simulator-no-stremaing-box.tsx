@@ -262,18 +262,19 @@ export default function SimulatorNoStreamingBox() {
 
                 </div>
                 {message.role !== "system" &&
-                  <ReactMarkdown
-                    className="w-full mt-1 prose break-words prose-p:leading-relaxed"
-                    remarkPlugins={[remarkGfm]}
-                    components={{
-                      // open links in new tab
-                      a: (props) => (
-                        <a {...props} target="_blank" rel="noopener noreferrer" />
-                      ),
-                    }}
-                  >
-                    {message.content}
-                  </ReactMarkdown>            
+                  <div className="w-full mt-1 prose break-words prose-p:leading-relaxed dark:prose-invert">
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        // open links in new tab
+                        a: (props) => (
+                          <a {...props} target="_blank" rel="noopener noreferrer" />
+                        ),
+                      }}
+                    >
+                      {message.content}
+                    </ReactMarkdown>            
+                  </div>
                 }
               </div>                         
               {

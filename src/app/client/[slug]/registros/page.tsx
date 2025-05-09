@@ -4,12 +4,13 @@ import { columns } from "./repodata-columns"
 import { getClientBySlug } from "@/services/clientService"
 
 type Props= {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
-export default async function RepoDataPage({ params }: Props) {
+export default async function RepoDataPage(props: Props) {
+  const params = await props.params;
 
   const slug = params.slug
   const client= await getClientBySlug(slug)

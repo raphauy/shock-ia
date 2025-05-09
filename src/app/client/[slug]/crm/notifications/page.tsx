@@ -4,18 +4,19 @@ import { columns } from "./notification-columns"
 import { getClientBySlug } from "@/services/clientService"
 
 type Props = {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
-export default async function NotificationPage({ params }: Props) {
+export default async function NotificationPage(props: Props) {
+  const params = await props.params;
 
   const client = await getClientBySlug(params.slug)
   if (!client) {
     return <div>Cliente no encontrado</div>
   }
-  
+
   const data= await getNotificationsDAO(client.id)
 
   return (

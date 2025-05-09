@@ -6,13 +6,14 @@ import { getClientBySlug } from "@/services/clientService"
 import { notFound } from "next/navigation"
 
 type Props= {
-  params: { 
+  params: Promise<{ 
     slug: string 
-  }
+  }>
 }
 
-export default async function CampaignPage({ params }: Props) {
-  
+export default async function CampaignPage(props: Props) {
+  const params = await props.params;
+
   const slug= params.slug
   const client= await getClientBySlug(slug)
   if (!client) return notFound()

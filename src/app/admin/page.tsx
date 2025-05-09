@@ -11,19 +11,20 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 type Props= {
-  searchParams: {
+  searchParams: Promise<{
     slug: string
-  }
+  }>
 }
 
-export default async function AdminPage({searchParams}: Props) {
+export default async function AdminPage(props: Props) {
+  const searchParams = await props.searchParams;
   const slug= searchParams.slug
   const users= await getUsers()
   const clientsCount= await getClientsCount()
   const documentsCount= await getDocumentsCount()
 
   const user= await getCurrentUser()
-  console.log(format(new Date(), "MM-dd HH:mm:ss", {locale: es}), user?.name, "(admin page)")    
+  console.log(format(new Date(), "MM-dd HH:mm:ss", {locale: es}), user?.name, "(admin page)")
 
   let targetClientId= null
   if (slug) {

@@ -6,9 +6,9 @@ import { TailwindIndicator } from '@/components/shadcn/tailwind-indicator'
 import { ThemeProvider } from '@/components/shadcn/theme-provider'
 import getSession from '@/lib/auth'
 import Menu from "@/components/header/menu"
-import SessionProvider from '@/components/SessionProvider'
 import { cn } from "@/lib/utils"
 import Header from '../components/header/header'
+import SessionProvider from '@/components/SessionProvider'
 
 
 export const metadata: Metadata = {
@@ -47,7 +47,6 @@ export default async function RootLayout({ children }: RootLayoutProps) {
       <html lang="en" suppressHydrationWarning>
         <head />
         <body className={cn("min-h-screen bg-background font-sans antialiased w-full")}>
-        {/* <body className={cn("min-h-screen bg-background font-sans antialiased w-full", fontSans.variable)}> */}
             <SessionProvider session={session}>
           
 

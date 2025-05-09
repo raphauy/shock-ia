@@ -25,12 +25,13 @@ import SelectEventStage from "./select-stage";
 import SingleSlotEdits from "./single-slot-edits";
 
 type Props= {
-    params: {
+    params: Promise<{
         slug: string;
         eventId: string;
-    }
+    }>
 }
-export default async function EditEventPage({ params }: Props) {
+export default async function EditEventPage(props: Props) {
+  const params = await props.params;
   const { slug, eventId } = params
   const event= await getFullEventDAO(eventId)
   if (!event) return <div>Event not found</div>

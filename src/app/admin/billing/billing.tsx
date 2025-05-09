@@ -145,7 +145,7 @@ export function Billing({ clientId }: Props) {
                   onSelect={setTo}
                   selected={to}
                   defaultMonth={to}
-                  disabled={(date) =>
+                  disabled={(date: Date) =>
                     date > new Date() || date < new Date("1900-01-01")
                   }           
                 />

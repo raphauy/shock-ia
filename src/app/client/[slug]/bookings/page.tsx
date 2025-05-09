@@ -4,13 +4,14 @@ import { DataTable } from "./booking-table"
 import { columns } from "./booking-columns"
 
 type Props = {  
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
-export default async function BookingPage({ params }: Props) {
-  
+export default async function BookingPage(props: Props) {
+  const params = await props.params;
+
   const data= await getFullBookingsDAO(params.slug)
 
   return (

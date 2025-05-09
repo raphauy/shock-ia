@@ -24,20 +24,22 @@ import { Separator } from "@/components/ui/separator"
 import CancelCampaignButton from "./cancel-campaign-button"
 
 type Props= {
-  params: {
+  params: Promise<{
     campaignId: string
     slug: string
-  }
-  searchParams: {
+  }>
+  searchParams: Promise<{
     from: string
     to: string
     last: string
     tags: string
     stageId: string
-  }
+  }>
 }
 
-export default async function CampaignPage({ params, searchParams }: Props) {
+export default async function CampaignPage(props: Props) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   const campaign: CampaignDAO | null = await getCampaignDAO(params.campaignId)
   if (!campaign) return notFound()
 
@@ -184,5 +186,5 @@ function isValidWhatsappContact(contact: ContactDAOWithStage) {
   return contact.chatwootId && 
          contact.phone && 
          contact.phone.startsWith("+") && 
-         contact.phone.slice(1).match(/^\d+$/)
+         contact.phone.slice(1).match(/^\d+$/);
 }

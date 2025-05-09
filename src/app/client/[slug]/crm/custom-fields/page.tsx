@@ -3,11 +3,12 @@ import CustomFieldsBox from "./custom-fields-box"
 import { CustomFieldDialog } from "./customfield-dialogs"
 
 type Props = {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
-export default async function CustomFieldsPage({ params }: Props) {
+export default async function CustomFieldsPage(props: Props) {
+  const params = await props.params;
   const client= await getClientAndCustomFieldsBySlug(params.slug)
   if (!client) {
     return <div>Cliente no encontrado</div>

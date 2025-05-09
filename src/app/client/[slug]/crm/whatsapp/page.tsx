@@ -4,11 +4,12 @@ import { getClientBySlug } from "@/services/clientService"
 import { fetchInstance } from "@/services/wrc-sdk"
 
 type Props = {
-    params: {
+    params: Promise<{
         slug: string
-    }
+    }>
 }
-export default async function WhatsappPage({ params }: Props) {
+export default async function WhatsappPage(props: Props) {
+    const params = await props.params;
     const slug= params.slug
     const client= await getClientBySlug(slug)
     if (!client) return <div>Cliente no encontrado: {slug}</div>
@@ -30,5 +31,4 @@ export default async function WhatsappPage({ params }: Props) {
             <ConnectionDetails instance={wrcInstance} clientId={client.id} chatwootAccountId={whatsappInstance.chatwootAccountId} whatsappInboxId={whatsappInstance.whatsappInboxId}/>
         </div>
       )
-
 }

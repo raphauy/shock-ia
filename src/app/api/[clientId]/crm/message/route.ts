@@ -10,7 +10,8 @@ import { NextResponse } from "next/server";
 export const maxDuration = 290
 export const dynamic = 'force-dynamic'
 
-export async function POST(request: Request, { params }: { params: { clientId: string } }) {
+export async function POST(request: Request, props: { params: Promise<{ clientId: string }> }) {
+    const params = await props.params;
 
     try {
         const clientId = params.clientId
@@ -101,7 +102,6 @@ export async function POST(request: Request, { params }: { params: { clientId: s
             details: error instanceof Error ? error.message : "Error desconocido"
         }, { status: 500 })        
     }
-   
 }
 
 type ContactAPI= {

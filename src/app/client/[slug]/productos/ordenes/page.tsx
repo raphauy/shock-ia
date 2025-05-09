@@ -13,10 +13,10 @@ import EstadoCarga from "./estado-carga"
 export const dynamic = 'force-dynamic'
 
 type Props = {
-    params: {
+    params: Promise<{
         slug: string
-    }
-    searchParams: { 
+    }>
+    searchParams: Promise<{ 
         pagina?: string
         estado?: string
         estadoEntrega?: string
@@ -24,13 +24,15 @@ type Props = {
         fHasta?: string
         cliente?: string
         incluirAtributosProducto?: string
-    }
+    }>
 }
 
-export default async function OrdersPage({ params, searchParams }: Props) {
+export default async function OrdersPage(props: Props) {
+    const searchParams = await props.searchParams;
+    const params = await props.params;
     const { slug } = params
     const client = await getClientBySlug(slug)
-    
+
     // Parámetros de paginación y filtros
     const pagina = searchParams.pagina ? parseInt(searchParams.pagina) : 1
     const estado = searchParams.estado === "TODAS" ? undefined : searchParams.estado
@@ -39,10 +41,10 @@ export default async function OrdersPage({ params, searchParams }: Props) {
     const fHasta = searchParams.fHasta || undefined
     const cliente = searchParams.cliente || undefined
     const incluirAtributosProducto = searchParams.incluirAtributosProducto || undefined
-    
+
     // Obtener la URL del feed
     const feedURL = await getFeedURL(client?.id || "")
-    
+
     let apiBaseEndpoint = ""
     let ordenesEndpoint = ""
     if (feedURL) {
@@ -128,7 +130,7 @@ export default async function OrdersPage({ params, searchParams }: Props) {
     // Verificar si hay órdenes disponibles
     const hayOrdenes = ordenesData?.ordenes && ordenesData.ordenes.length > 0
     const ordenesVacias = !hayOrdenes && !cargando && !ordenesError
-    
+
     // Verificar si hay más resultados para la paginación
     const hayMasResultados = ordenesData?.ordenes?.length === 50
 

@@ -9,12 +9,13 @@ import { es } from "date-fns/locale";
 import { NextResponse } from "next/server";
 
 type Props= {
-    params: {
+    params: Promise<{
         repoId: string
-    }
+    }>
 }
 
-export async function POST(request: Request, { params }: Props) {
+export async function POST(request: Request, props: Props) {
+    const params = await props.params;
 
     try {
         const authorization = request.headers.get("authorization")
@@ -65,6 +66,5 @@ export async function POST(request: Request, { params }: Props) {
     } catch (error) {
         return NextResponse.json({ error: "error: " + error}, { status: 502 })        
     }
-   
 }
 

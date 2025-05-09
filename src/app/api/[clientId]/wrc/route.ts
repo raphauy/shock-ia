@@ -7,12 +7,13 @@ import { NextResponse } from "next/server";
 export const maxDuration = 299
 
 type Props= {
-    params: {
+    params: Promise<{
         clientId: string
-    }
+    }>
 }
 
-export async function POST(request: Request, { params }: Props) {
+export async function POST(request: Request, props: Props) {
+    const params = await props.params;
 
     try {
         const clientId = params.clientId
@@ -87,10 +88,9 @@ export async function POST(request: Request, { params }: Props) {
         console.log("error: ", error)
         return NextResponse.json({ error: "error: " + error}, { status: 502 })                
     }
-
 }
 
-export async function GET(request: Request, { params }: { params: { clientId: string } }) {
+export async function GET(request: Request) {
 
     const res= "API is working"
 

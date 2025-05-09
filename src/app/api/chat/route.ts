@@ -10,7 +10,7 @@ import { getStageByChatwootId } from "@/services/stage-services"
 import { OpenAIStream, StreamingTextResponse } from "ai"
 import { NextResponse } from "next/server"
 import { OpenAI } from "openai"
-import openaiTokenCounter from 'openai-gpt-token-counter'
+//import openaiTokenCounter from 'openai-gpt-token-counter'
 
 export const maxDuration = 299
 export const dynamic = 'force-dynamic'
@@ -178,16 +178,16 @@ export async function POST(req: Request) {
     onCompletion: async (completion) => {
       console.log("completion: ", completion)
 
-      const partialPromptToken = openaiTokenCounter.chat(apiMessages, "gpt-4") + 1
-      console.log(`\tPartial prompt token count: ${partialPromptToken}`)      
-      promptTokens += partialPromptToken
+      // const partialPromptToken = openaiTokenCounter.chat(apiMessages, "gpt-4") + 1
+      // console.log(`\tPartial prompt token count: ${partialPromptToken}`)      
+      // promptTokens += partialPromptToken
 
       const completionMessages = [
         { role: "assistant", content: completion },
       ]
-      const partialCompletionTokens = openaiTokenCounter.chat(completionMessages, "gpt-4")
-      console.log(`\tPartial completion token count: ${partialCompletionTokens}`)
-      completionTokens += partialCompletionTokens
+      // const partialCompletionTokens = openaiTokenCounter.chat(completionMessages, "gpt-4")
+      // console.log(`\tPartial completion token count: ${partialCompletionTokens}`)
+      // completionTokens += partialCompletionTokens
 
       if (!completion.includes("function_call")) {
         console.log(`Prompt token count: ${promptTokens}`)

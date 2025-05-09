@@ -4,22 +4,34 @@ import { DataClient, getDataClientBySlug } from "@/app/admin/clients/(crud)/acti
 import { toast } from "@/components/ui/use-toast"
 import { Loader } from "lucide-react"
 import { useSession } from "next-auth/react"
-import { useEffect, useState } from "react"
+import { useEffect, useState, use } from "react";
 import { DataConversation, DataConversationShort, getDataConversationAction, getDataConversationsShort, getLastDataConversationAction } from "./actions"
 import { columns } from "./columns"
 import ConversationBox from "./conversation-box"
 import { DataTable } from "./data-table"
 
 interface Props {
-  params: {
+  params: Promise<{
     slug: string
-  }
-  searchParams: {
+  }>
+  searchParams: Promise<{
     id: string
-  }
+  }>
 }
   
-export default function ChatPage({ searchParams: { id }, params: { slug } }: Props) {
+export default function ChatPage(props: Props) {
+  const params = use(props.params);
+
+  const {
+    slug
+  } = params;
+
+  const searchParams = use(props.searchParams);
+
+  const {
+    id
+  } = searchParams;
+
   const session= useSession()
 
   const [loadingConversations, setLoadingConversations] = useState(false)
@@ -54,7 +66,7 @@ export default function ChatPage({ searchParams: { id }, params: { slug } }: Pro
     
 
   }, [id, slug])
-  
+
 
   useEffect(() => {   
     setLoadingConversations(true)
@@ -79,7 +91,7 @@ export default function ChatPage({ searchParams: { id }, params: { slug } }: Pro
     
 
   }, [slug])
-  
+
 
 
   if (!conversation) return <div></div>
@@ -125,5 +137,5 @@ export default function ChatPage({ searchParams: { id }, params: { slug } }: Pro
     </div>
 
     );
-  }
+}
     

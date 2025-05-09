@@ -5,38 +5,40 @@ import BuscadorOrden from "./buscador"
 import ResultadoOrden from "./resultado-orden"
 
 type Props = {
-  params: {
+  params: Promise<{
     slug: string
-  },
-  searchParams: {
+  }>,
+  searchParams: Promise<{
     ordenId?: string
     raw?: string
-  }
+  }>
 }
 
 // Forzar que la página siempre se renderice dinámicamente
 export const dynamic = 'force-dynamic'
 
-export default async function BuscarOrden({ params, searchParams }: Props) {
+export default async function BuscarOrden(props: Props) {
+    const searchParams = await props.searchParams;
+    const params = await props.params;
     const { slug } = params
     const { ordenId, raw } = searchParams
-    
+
     // Convertir el parámetro raw a booleano
     const showRawJson = raw === 'true'
-    
+
     // Obtener datos del cliente
     const client = await getClientBySlug(params.slug)
     if (!client) {
         return <div>Cliente no encontrado</div>
     }
-    
+
     // Variables para el estado de la consulta
     let orden: Orden | undefined = undefined
     let error: string | undefined = undefined
     // En un RSC, el estado de carga no es perceptible para el usuario,
     // ya que la página se renderiza completamente en el servidor antes de enviarse al cliente
     let cargando = false
-    
+
     // Si hay un ordenId en la URL, consultar la orden
     if (ordenId) {
         try {
@@ -52,7 +54,7 @@ export default async function BuscarOrden({ params, searchParams }: Props) {
             console.error(`❌ Error no manejado al consultar orden ${ordenId}:`, err)
         }
     }
-    
+
     return (
         <div className="container mx-auto py-6 space-y-6">
             <h1 className="text-3xl font-bold tracking-tight">Buscar Orden</h1>

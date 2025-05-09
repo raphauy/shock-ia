@@ -48,6 +48,7 @@ export function DatePicker({ label, date, setDate, disabled = false }: Props) {
           selected={date}
           onSelect={handleDateChange}
           initialFocus
+          locale={es}
         />
       </PopoverContent>
     </Popover>

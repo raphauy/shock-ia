@@ -6,15 +6,17 @@ import { getContactEventDAO } from "@/services/contact-event-services"
 import { getContactDAO } from "@/services/contact-services"
 
 type Props= {
-  params: {
+  params: Promise<{
     slug: string
-  }
-  searchParams: {
+  }>
+  searchParams: Promise<{
     contactId?: string
-  }
+  }>
 }
 
-export default async function RepoDataPage({ params, searchParams }: Props) {
+export default async function RepoDataPage(props: Props) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
 
   const contactId= searchParams.contactId
   const slug = params.slug

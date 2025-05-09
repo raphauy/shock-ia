@@ -6,20 +6,22 @@ import SimulatorNoStreamingBox from "../../simulator/simulator-no-stremaing-box"
 import SimulatorBox from "../../simulator/simulator-box";
 
 type Props = {
-    params: {
+    params: Promise<{
         slug: string
-    },
-    searchParams: {
+    }>,
+    searchParams: Promise<{
         model: string
-    }
+    }>
 }
-export default async function CRMSimulatorPage({ params, searchParams }: Props) {
+export default async function CRMSimulatorPage(props: Props) {
+    const searchParams = await props.searchParams;
+    const params = await props.params;
     const slug= params.slug as string
     const modelName= searchParams.model
     console.log("modelName", modelName)
-    
-    const model= modelName && await getFullModelDAOByName(modelName)
-    
+
+    const model= modelName && (await getFullModelDAOByName(modelName))
+
     if (!model) {
         
         const client= await getClientBySlug(slug)
@@ -38,14 +40,14 @@ export default async function CRMSimulatorPage({ params, searchParams }: Props) 
             console.log("redirecting to home")
             redirect(`/client/${slug}`)
         }
-    } 
-    
+    }
+
     const haveStreaming= model.provider.streaming && model.streaming
 
     const models= await getFullModelsDAO()
     const selectorData: SelectorData[]= models.map(model => ({slug: model.name, name: model.name}))
-  
-  
+
+
     return (
         <div className="flex flex-col items-center w-full h-full">
             <div>

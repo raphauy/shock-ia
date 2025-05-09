@@ -7,13 +7,19 @@ import { EventDialog } from "../event-dialogs";
 import { EventCreator } from "@/app/client/[slug]/events/event-creator";
 
 type Props = {
-  params: {
+  params: Promise<{
     slug: string;
-  }
+  }>
   children: React.ReactNode;
 }
 
-export default async function EventLayout({ params, children }: Props) {
+export default async function EventLayout(props: Props) {
+  const params = await props.params;
+
+  const {
+    children
+  } = props;
+
   const slug = params.slug
 
   const data= await getFullEventsDAO(slug)

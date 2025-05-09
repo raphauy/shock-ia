@@ -8,12 +8,18 @@ import SideBar from "./side-bar";
 
 type Props= {
   children: React.ReactNode
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
-export default async function SlugLayout({ children, params }: Props) {
+export default async function SlugLayout(props: Props) {
+  const params = await props.params;
+
+  const {
+    children
+  } = props;
+
   const currentUser = await getCurrentUser()
   const slug = params.slug
 
@@ -32,14 +38,14 @@ export default async function SlugLayout({ children, params }: Props) {
   }
   if (!client) 
     return <div>Cliente no encontrado (l)</div>
-  
+
   if (slug !== client.slug)
     return redirect("/unauthorized?message=" + encodeURIComponent("No tienes permisos para ver este cliente."))
 
   const clientsOfNarvaez= await getClientsOfFunctionByName("registrarPedido")
   const showRegistro= clientsOfNarvaez.map(c => c.slug).includes(slug)
 
-  const clientsOfCarServices= await getClientsOfFunctionByName("reservarServicio") 
+  const clientsOfCarServices= await getClientsOfFunctionByName("reservarServicio")
   const showCarServices= clientsOfCarServices.map(c => c.slug).includes(slug)
 
   const clientsWithRepo= await getClientsWithSomeFunctionWithRepository()

@@ -6,20 +6,22 @@ import { getClientsOfFunctionByName } from "@/services/function-services"
 import { redirect } from "next/navigation"
 
 type Props= {
-  params: {
+  params: Promise<{
     slug: string
-  }
-  searchParams: {
+  }>
+  searchParams: Promise<{
     name?: string
-  }
+  }>
 }
 
-export default async function UsersPage({ params, searchParams }: Props) {
+export default async function UsersPage(props: Props) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
 
   const name = searchParams.name
 
   const slug = params.slug
-  const clientsOfCarServices= await getClientsOfFunctionByName("reservarServicio") 
+  const clientsOfCarServices= await getClientsOfFunctionByName("reservarServicio")
 
   if (!clientsOfCarServices.map(c => c.slug).includes(slug))
     return redirect(`/client/${slug}`)
@@ -30,7 +32,7 @@ export default async function UsersPage({ params, searchParams }: Props) {
 
   const data= await getCarServicesDAOByClientId(client.id)
 
-  
+
   return (
     <div className="w-full">      
 

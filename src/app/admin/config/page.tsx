@@ -30,12 +30,13 @@ import ProductsConfig from "./products-config"
 export const maxDuration = 800; // 800 segundos (máximo para plan Pro con Fluid Compute)
 
 type Props = {
-    searchParams: {
+    searchParams: Promise<{
         clientId: string
         fcId: string
-    }
+    }>
 }
-export default async function ConfigPage({ searchParams }: Props) {
+export default async function ConfigPage(props: Props) {
+    const searchParams = await props.searchParams;
 
     const user= await getCurrentUser()
     if (!user) return <div>No hay usuario logueado</div>

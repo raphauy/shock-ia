@@ -8,12 +8,13 @@ import { ArrowLeft } from "lucide-react"
 import { ReminderDefinitionList } from "@/app/client/[slug]/crm/reminder-definitions/reminder-definition-list"
 
 type Props= {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
-export default async function ReminderDefinitionsPage({ params }: Props) {
+export default async function ReminderDefinitionsPage(props: Props) {
+  const params = await props.params;
   const clientSlug= params.slug
   const client= await getClientBySlug(clientSlug)
   if (!client) {

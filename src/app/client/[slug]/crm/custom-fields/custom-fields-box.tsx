@@ -50,34 +50,36 @@ export default function CustomFieldsBox({ initialFields, clientId }: Props) {
         })
     }
     return (
-        <Reorder.Group values={fields} onReorder={(newOrder) => handleNewOrder(newOrder)} className="">
+        <Reorder.Group values={fields} onReorder={(newOrder) => handleNewOrder(newOrder)}>
         {
             fields.map((field, index) => {
                 return (
-                    <Reorder.Item key={field.id} value={field} className="rounded-lg border mt-2 flex w-full border-b hover:bg-muted py-5 px-2 min-h-[150px]">
-                        <div className="flex cursor-pointer w-full">
-                            <Grip className="w-6 h-6 text-gray-500" />
-                            <div className="flex flex-col justify-between w-full h-full">
-                                <div>
-                                    <p className="whitespace-pre-line ml-2 font-bold">{field.name}</p>
-                                    <p className="whitespace-pre-line ml-2 text-sm text-muted-foreground">{field.description}</p>
-                                </div>
-                                {field.showInContext && <Badge variant="secondaryWithBorder" className="w-fit">Contexto</Badge>}
-                            </div>                            
-                        </div>
-                        <div className="flex flex-col justify-between self-stretch items-center gap-2">
-                            <Badge className="w-16 flex items-center justify-center">{field.type}</Badge>
-                            <div className="flex items-center">                            
-                                <CustomFieldDialog clientId={clientId} id={field.id} />
-                                {
-                                    loading && deletingId === field.id ? <Loader className="h-5 w-5 animate-spin" />
-                                    : 
-                                    <DeleteCustomFieldDialog id={field.id} description={`Seguro que quieres eliminar el campo ${field.name}?\nSe eliminarán todos los valores asociados a este campo para los contactos que los tengan.`} />
-                                }
+                    <div key={field.id} className="bg-white rounded-lg dark:bg-slate-800 border mt-2 flex items-center justify-between w-full text-muted-foreground border-b hover:bg-slate-50 min-h-12 px-2">
+                        <Reorder.Item value={field}>
+                            <div className="flex cursor-pointer w-full">
+                                <Grip className="w-6 h-6 text-gray-500" />
+                                <div className="flex flex-col justify-between w-full h-full">
+                                    <div>
+                                        <p className="whitespace-pre-line ml-2 font-bold">{field.name}</p>
+                                        <p className="whitespace-pre-line ml-2 text-sm text-muted-foreground">{field.description}</p>
+                                    </div>
+                                    {field.showInContext && <Badge variant="secondaryWithBorder" className="w-fit">Contexto</Badge>}
+                                </div>                            
                             </div>
-                        </div>
+                            <div className="flex flex-col justify-between self-stretch items-center gap-2">
+                                <Badge className="w-16 flex items-center justify-center">{field.type}</Badge>
+                                <div className="flex items-center">                            
+                                    <CustomFieldDialog clientId={clientId} id={field.id} />
+                                    {
+                                        loading && deletingId === field.id ? <Loader className="h-5 w-5 animate-spin" />
+                                        : 
+                                        <DeleteCustomFieldDialog id={field.id} description={`Seguro que quieres eliminar el campo ${field.name}?\nSe eliminarán todos los valores asociados a este campo para los contactos que los tengan.`} />
+                                    }
+                                </div>
+                            </div>
                         </Reorder.Item>
-                        )
+                    </div>
+                )
             })
         }
         </Reorder.Group>

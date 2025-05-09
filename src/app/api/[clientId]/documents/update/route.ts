@@ -8,7 +8,8 @@ import { revalidatePath } from "next/cache";
 export const maxDuration = 59
 export const dynamic = 'force-dynamic'
 
-export async function POST(request: Request, { params }: { params: { clientId: string } }) {
+export async function POST(request: Request, props: { params: Promise<{ clientId: string }> }) {
+    const params = await props.params;
 
     try {
         const authorization = request.headers.get("authorization")
@@ -72,7 +73,6 @@ export async function POST(request: Request, { params }: { params: { clientId: s
     } catch (error) {
         return NextResponse.json({ error: "error: " + error}, { status: 502 })        
     }
-   
 }
 
 

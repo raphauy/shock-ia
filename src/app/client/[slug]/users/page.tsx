@@ -7,13 +7,18 @@ import { getClientBySlug } from "@/services/clientService"
 import { getDataUsersOfClientAction } from "@/app/admin/users/(crud)/actions"
 
 interface Props {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
-export default async function WinesPage({ params: { slug } }: Props) {
-  
+export default async function WinesPage(props: Props) {
+  const params = await props.params;
+
+  const {
+    slug
+  } = params;
+
   const client= await getClientBySlug(slug)
   if (!client) return <div>Cliente no encontrado</div>
 

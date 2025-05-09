@@ -8,7 +8,8 @@ export const maxDuration = 299
 
 const baseUrl= process.env.NEXTAUTH_URL === "http://localhost:3000" ? "https://local.rctracker.dev" : process.env.NEXTAUTH_URL
 
-export async function POST(request: Request, { params }: { params: { clientId: string } }) {
+export async function POST(request: Request) {
+
     let reminderId = null
 
     try {

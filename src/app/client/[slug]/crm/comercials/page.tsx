@@ -6,13 +6,14 @@ import { ComercialDialog } from "./comercial-dialogs"
 import ComercialList from "./comercial-list"
 
 type Props = {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
-export default async function ComercialPage({ params }: Props) {
-  
+export default async function ComercialPage(props: Props) {
+  const params = await props.params;
+
   const slug= params.slug
 
   const client= await getClientBySlug(slug)
@@ -25,7 +26,7 @@ export default async function ComercialPage({ params }: Props) {
   const whatsappInstance= await getWhatsappInstance(client.id)
   const allChhatwootUsers= await getChatwootUsers(Number(whatsappInstance?.chatwootAccountId))
   // filter actual comercial users
-  let chatwootUsers 
+  let chatwootUsers
   if (slug === "shock") {
     chatwootUsers= allChhatwootUsers.filter(user => !data.some(comercial => comercial.chatwootUserId === user.id) && user.name !== "Shock IA")
   } else {

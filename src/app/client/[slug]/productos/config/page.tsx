@@ -14,28 +14,29 @@ import { getValue } from "@/services/config-services"
 export const dynamic = 'force-dynamic'
 
 type Props = {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
-export default async function ConfigPage({ params }: Props) {
+export default async function ConfigPage(props: Props) {
+  const params = await props.params;
   const { slug } = params
   const client = await getClientBySlug(slug)
-  
+
   if (!client) {
     return notFound()
   }
-  
+
   // Obtener las plantillas de recordatorio (past=false for future reminders)
   const templates = await getReminderDefinitionsDAO(client.id, false)
-  
+
   // Obtener la plantilla actualmente configurada
   const currentTemplateId = await getAbandonedOrdersTemplateId(client.id)
-  
+
   // Obtener el tiempo de expiración actual específico del cliente
   const currentExpireTime = await getAbandonedOrdersExpireTime(client.id)
-  
+
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex items-center justify-between">

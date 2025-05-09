@@ -12,24 +12,26 @@ import SearchBox from "../components/search-box"
 import Link from "next/link"
 
 type Props = {
-  params: {
+  params: Promise<{
     slug: string
-  },
-  searchParams: {
+  }>,
+  searchParams: Promise<{
     page?: string
     perPage?: string
     query?: string
-  }
+  }>
 }
 
-export default async function TextSearchPage({ params, searchParams }: Props) {
+export default async function TextSearchPage(props: Props) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   const { slug } = params
-  
+
   // Configuración de paginación y búsqueda
   const currentPage = parseInt(searchParams.page || "1")
   const itemsPerPage = parseInt(searchParams.perPage || "20")
   const searchQuery = searchParams.query || ""
-  
+
   // Verificar cliente y acceso a productos
   const client = await getClientBySlug(slug)
   if (!client) {
@@ -51,13 +53,13 @@ export default async function TextSearchPage({ params, searchParams }: Props) {
   }
 
   // Obtener estadísticas de productos utilizando la capa de servicios
-  
+
   // Obtener conteos
   const totalProductCount = await getClientProductsCount(client.id)
   const filteredProductCount = searchQuery 
     ? await countClientProductsBySearch(client.id, searchQuery)
     : totalProductCount
-  
+
   const productsWithEmbeddings = await getClientProductsWithEmbeddingsCount(client.id)
 
   // Obtener productos paginados con búsqueda
@@ -68,7 +70,7 @@ export default async function TextSearchPage({ params, searchParams }: Props) {
     currentPage,
     itemsPerPage
   )
-  
+
   // Convertir Decimal a string para evitar problemas de serialización
   const products = rawProducts.map(product => ({
     id: product.id,

@@ -5,12 +5,13 @@ import { Users } from "lucide-react"
 import { ClientUserDialog } from "./client-user-dialogs"
 
 type Props = {
-    params: {
+    params: Promise<{
       slug: string
-    }
+    }>
 }
   
-export default async function UsersPage({ params }: Props) {
+export default async function UsersPage(props: Props) {
+  const params = await props.params;
   const slug= params.slug
   const client= await getClientBySlug(slug)
   if (!client) {

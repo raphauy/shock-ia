@@ -5,17 +5,18 @@ import { columns } from "./document-columns"
 import { getDocumentsDAOByClient } from "@/services/document-services"
 
 type Props= {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
-export default async function UsersPage({ params }: Props) {
+export default async function UsersPage(props: Props) {
+  const params = await props.params;
   const slug= params.slug
   const client= await getClientBySlug(slug)
   if (!client) {
     return <div>Cliente no encontrado</div>
   }
-  
+
   const data= await getDocumentsDAOByClient(client.id)
 
   return (

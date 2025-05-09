@@ -6,11 +6,12 @@ import { notFound } from "next/navigation";
 import TagInputBox from "./tag-input";
 
 type Props = {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
-export default async function TagsPage({ params }: Props) {
+export default async function TagsPage(props: Props) {
+  const params = await props.params;
   const client= await getClientBySlug(params.slug)
   if (!client) notFound()
 

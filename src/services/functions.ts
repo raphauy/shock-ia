@@ -1,38 +1,35 @@
-import { checkDateTimeFormatForSlot, decodeAndCorrectText } from "@/lib/utils";
 import { ContactEventType, EventType, ReminderType } from "@/lib/generated/prisma";
+import { checkDateTimeFormatForSlot, decodeAndCorrectText } from "@/lib/utils";
+import { JsonValue } from "@prisma/client/runtime/library";
 import { addMinutes, format, parse } from "date-fns";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import moment from 'moment-timezone';
-import { revalidatePath } from "next/cache";
 import { BookingFormValues, cancelBooking, createBooking, getBookingDAO, getFutureBookingsDAOByContact, getFutureBookingsDAOByEventId } from "./booking-services";
 import { CarServiceFormValues, createCarService } from "./carservice-services";
-import { addLabelToConversation, sendTextToConversation, toggleConversationStatus } from "./chatwoot";
+import { sendTextToConversation } from "./chatwoot";
 import { createExternalPayment } from "./cobros-wap";
+import { getNextComercialIdToAssign } from "./comercial-services";
 import { getValue, setValue } from "./config-services";
+import { createContactEvent } from "./contact-event-services";
 import { addTagsToContact, assignContactToComercial, getContactDAO, getTagsOfContact, setNewStage } from "./contact-services";
 import { getConversation, messageArrived } from "./conversationService";
 import { getDocumentDAO } from "./document-services";
 import { EventDAO, getEventDAO } from "./event-services";
+import { getOrderData } from "./fenicio-services";
 import { getDataTags, getEventDataTags, getFieldsDAOByEventId, getFieldsDAOByRepositoryId } from "./field-services";
+import { createOrUpdateFieldValue } from "./fieldvalue-services";
 import { functionHaveRepository, getFunctionClientDAO, getTagsOfClientFunction } from "./function-services";
 import { NarvaezFormValues, createOrUpdateNarvaez } from "./narvaez-services";
-import { sendWapMessage } from "./osomService";
+import { RepoDataWithClientNameAndBooking, sendEventNotifications, sendFCNotifications, sendWebhookNotification } from "./notifications-service";
+import { searchProductsWithEmbeddings } from "./product-services";
+import { getReminderDefinitionsDAOByEventId } from "./reminder-definition-services";
+import { ReminderFormValues, createReminder } from "./reminder-services";
 import { createRepoData, repoDataFormValues } from "./repodata-services";
 import { getRepositoryDAOByFunctionName } from "./repository-services";
 import { getSectionOfDocument } from "./section-services";
 import { checkBookingAvailability, getSlots } from "./slots-service";
 import { getStageByName, getStagesDAO } from "./stage-services";
 import { SummitFormValues, createSummit } from "./summit-services";
-import { RepoDataWithClientNameAndBooking, sendWebhookNotification, sendFCNotifications, sendEventNotifications } from "./notifications-service";
-import { setMoveToStageIdOfClientFunctionAction } from "@/app/admin/repositories/repository-actions";
-import { JsonValue } from "@prisma/client/runtime/library";
-import { createOrUpdateFieldValue } from "./fieldvalue-services";
-import { createContactEvent } from "./contact-event-services";
-import { getReminderDefinitionsDAOByEventId } from "./reminder-definition-services";
-import { createReminder, ReminderFormValues } from "./reminder-services";
-import { getNextComercialIdToAssign } from "./comercial-services";
-import { searchProductsWithEmbeddings } from "./product-services";
-import { getOrderData } from "./fenicio-services";
 
 export type CompletionInitResponse = {
   assistantResponse: string | null
@@ -349,8 +346,6 @@ export async function reservarServicio(clientId: string, conversationId: string,
 
   const created= await createCarService(data)
   if (!created) return "Error al reservar, pregunta al usuario si quiere que tu reintentes"
-
-  revalidatePath("/client/[slug]/car-service", "page")
 
   return "Reserva registrada. Dile exactamente esto al usuario: Gracias por agendar tu service, a la brevedad un asesor te confirmará la fecha del service."
 }
@@ -914,8 +909,6 @@ export async function defaultFunction(clientId: string, name: string, args: any)
     if (!created || !created.repositoryId)
       return "Hubo un error al procesar esta solicitud"
   
-    revalidatePath(`/client/${conversation.client.slug}/registros`)
-
     const functionClient= await getFunctionClientDAO(repo.functionId, conversation.client.id)
     if (functionClient) {
       if (functionClient.webHookUrl) {

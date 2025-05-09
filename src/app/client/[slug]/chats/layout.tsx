@@ -3,16 +3,21 @@ import { redirect } from "next/navigation";
 
 interface Props {
   children: React.ReactNode
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
-export default async function ChatLayout({ children, params }: Props) {
+export default async function ChatLayout(props: Props) {
+  const params = await props.params;
+
+  const {
+    children
+  } = props;
 
   let client= null
   if (!params.slug) return <div>Cliente no encontrado</div>
-  
+
   const currentUser = await getCurrentUser()
 
   if (currentUser?.role !== "admin" && currentUser?.role !== "osom" && currentUser?.role !== "cliente") {

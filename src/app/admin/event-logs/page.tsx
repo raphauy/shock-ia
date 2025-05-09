@@ -13,7 +13,7 @@ import SelectFilter from "@/components/filters/select-filter"
 import SearchFilter from "@/components/filters/search-filter"
 
 type Props = {
-  searchParams: {
+  searchParams: Promise<{
     from: string
     to: string
     last: string
@@ -21,27 +21,28 @@ type Props = {
     clientName: string
     metadataSearch: string
     page: string
-  }
+  }>
 }
 
-export default async function EventLogsPage({ searchParams }: Props) {
+export default async function EventLogsPage(props: Props) {
+  const searchParams = await props.searchParams;
   // Obtener fechas de los parámetros de búsqueda
   const { from, to } = getDatesFromSearchParams(searchParams)
-  
+
   // Obtener filtros adicionales
   const eventType = searchParams.eventType ?? undefined
   const clientName = searchParams.clientName ?? undefined
   const metadataSearch = searchParams.metadataSearch ?? undefined
-  
+
   // Paginación
   const page = searchParams.page ? parseInt(searchParams.page) : 1
   const limit = 20
   const offset = (page - 1) * limit
-  
+
   // Cargar datos para selectores
   const allEventTypes = await getAllEventTypes()
   const allClientNames = await getAllClientNames()
-  
+
   // Cargar logs filtrados
   const { eventLogs, total } = await getFilteredEventLogs({
     eventType,
@@ -52,10 +53,10 @@ export default async function EventLogsPage({ searchParams }: Props) {
     limit,
     offset
   })
-  
+
   const baseUrl = `/admin/event-logs`
   const totalPages = Math.ceil(total / limit)
-  
+
   return (
     <div className="container mx-auto p-4 max-w-screen-2xl">
       <div className="space-y-4">

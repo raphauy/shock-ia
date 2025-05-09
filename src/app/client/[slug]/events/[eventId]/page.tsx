@@ -12,51 +12,52 @@ import FixedDateTabsPage from "./tabs-fixed-date";
 import SingleSlotTabsPage from "./tabs-single-slot";
 
 type Props= {
-    params: {
+    params: Promise<{
       slug: string;
       eventId?: string;
-    },
+    }>,
 }
-export default async function EventPage({ params }: Props) {
-    const eventId = params.eventId
-    const slug = params.slug
-    if (!eventId) return <div>No se encontró el event ID</div>
-    const clientHaveCRM= await getClientHaveCRMBySlug(slug)
+export default async function EventPage(props: Props) {
+  const params = await props.params;
+  const eventId = params.eventId
+  const slug = params.slug
+  if (!eventId) return <div>No se encontró el event ID</div>
+  const clientHaveCRM= await getClientHaveCRMBySlug(slug)
 
-    const event= await getEventDAO(eventId)
-    let calendarEvents: CalendarEvent[] = []
-    if (event) {
-      const bookingsDAO= await getFutureBookingsDAOByEventId(eventId, event.timezone)
-      calendarEvents= getCalendarEvents(event, bookingsDAO)
-      calendarEvents= calendarEvents.map(a => ({
-        ...a,
-        clientId: event.clientId,
-        eventId: event.id,
-        availableSeats: event.seatsPerTimeSlot || 1
-      }))
-    }
+  const event= await getEventDAO(eventId)
+  let calendarEvents: CalendarEvent[] = []
+  if (event) {
+    const bookingsDAO= await getFutureBookingsDAOByEventId(eventId, event.timezone)
+    calendarEvents= getCalendarEvents(event, bookingsDAO)
+    calendarEvents= calendarEvents.map(a => ({
+      ...a,
+      clientId: event.clientId,
+      eventId: event.id,
+      availableSeats: event.seatsPerTimeSlot || 1
+    }))
+  }
 
-    return ( 
-        <div className="w-full space-y-4 flex flex-col items-center">
-          <div className="flex gap-2 w-full">
-            <EventHeader event={event} slug={slug} />
+  return ( 
+      <div className="w-full space-y-4 flex flex-col items-center">
+        <div className="flex gap-2 w-full">
+          <EventHeader event={event} slug={slug} />
 
-            <AvailabilityDisplay event={event} />
-          </div>
-
-          <div className="w-full">
-            {
-              event.type === EventType.SINGLE_SLOT && 
-              <SingleSlotTabsPage eventId={eventId} initialEvents={calendarEvents} timezone={event.timezone} clientHaveCRM={clientHaveCRM} />
-            }
-
-            {
-              event.type === EventType.FIXED_DATE && 
-              <FixedDateTabsPage eventId={eventId} clientHaveCRM={clientHaveCRM} />
-            }
-          </div>
+          <AvailabilityDisplay event={event} />
         </div>
-      );
+
+        <div className="w-full">
+          {
+            event.type === EventType.SINGLE_SLOT && 
+            <SingleSlotTabsPage eventId={eventId} initialEvents={calendarEvents} timezone={event.timezone} clientHaveCRM={clientHaveCRM} />
+          }
+
+          {
+            event.type === EventType.FIXED_DATE && 
+            <FixedDateTabsPage eventId={eventId} clientHaveCRM={clientHaveCRM} />
+          }
+        </div>
+      </div>
+    );
 }    
 
 function getCalendarEvents(event: EventDAO, bookings: BookingDAO[]): CalendarEvent[] {

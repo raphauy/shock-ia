@@ -7,17 +7,19 @@ import DatesFilter from "./kanban/dates-filter";
 import { KanbanComponent } from "./kanban/kanban";
 
 type Props = {
-  params: {
+  params: Promise<{
     slug: string
-  } 
-  searchParams: {
+  }> 
+  searchParams: Promise<{
     from: string
     to: string
     last: string
     phone: string
-  }
+  }>
 }
-export default async function CRMKanban({ params, searchParams }: Props) {
+export default async function CRMKanban(props: Props) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
 
   const { from, to }= getDatesFromSearchParams(searchParams)
   const phone= searchParams.phone

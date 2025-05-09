@@ -6,12 +6,13 @@ import { Globe } from "lucide-react";
 import { setTimezoneAction } from "./actions";
 
 type Props = {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
-export default async function AvailabilityPage({ params }: Props) {
+export default async function AvailabilityPage(props: Props) {
+  const params = await props.params;
   const slug= params.slug
   const client= await getClientBySlug(slug)
   if (!client) return notFound()

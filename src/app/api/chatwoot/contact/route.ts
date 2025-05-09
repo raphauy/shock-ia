@@ -87,7 +87,7 @@ export async function POST(request: Request) {
 
 }
 
-export async function GET(request: Request, { params }: { params: { clientId: string } }) {
+export async function GET(request: Request) {
 
     const res= "API is working"
 

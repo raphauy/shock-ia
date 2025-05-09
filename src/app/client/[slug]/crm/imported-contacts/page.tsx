@@ -6,12 +6,13 @@ import { ImportedContactDialog } from "./imported-contact-dialogs"
 import { DataTable } from "./imported-contact-table"
 
 type Props= {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
-export default async function ImportedContactPage({ params }: Props) {
+export default async function ImportedContactPage(props: Props) {
+  const params = await props.params;
   const slug= params.slug
   const client= await getClientBySlug(slug)
   if (!client) {

@@ -11,14 +11,16 @@ import { EventCreator } from "@/app/client/[slug]/events/event-creator"
 import { EventType } from "@/lib/generated/prisma"
 
 type Props = {
-  params: {
+  params: Promise<{
     slug: string
-  }
-  searchParams: {
+  }>
+  searchParams: Promise<{
     id: string
-  }
+  }>
 }
-export default async function EventPage({ params, searchParams }: Props) {
+export default async function EventPage(props: Props) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   const slug = params.slug
   const id = searchParams.id
   const data= await getFullEventsDAO(slug)

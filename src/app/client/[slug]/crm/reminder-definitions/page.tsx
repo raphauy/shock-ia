@@ -5,12 +5,13 @@ import { ReminderDefinitionList } from "./reminder-definition-list"
 import { ReminderDefinitionDialog } from "./reminderdefinition-dialogs"
 
 type Props= {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
-export default async function ReminderDefinitionPage({ params }: Props) {
+export default async function ReminderDefinitionPage(props: Props) {
+  const params = await props.params;
   const clientSlug= params.slug
   const client= await getClientBySlug(clientSlug)
   if (!client) {

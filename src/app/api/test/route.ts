@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 
-export async function POST(request: Request, { params }: { params: { clientId: string } }) {
+export async function POST(request: Request) {
 
     const json= await request.json()
     console.log("json: ", json)
@@ -13,7 +13,7 @@ export async function POST(request: Request, { params }: { params: { clientId: s
 
 }
 
-export async function GET(request: Request, { params }: { params: { clientId: string } }) {
+export async function GET(request: Request) {
 
     const res= "API is working"
 

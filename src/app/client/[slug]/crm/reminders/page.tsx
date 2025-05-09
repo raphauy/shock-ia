@@ -7,11 +7,12 @@ import { getClientIdBySlug } from "@/services/clientService"
 import { getReminderDefinitionsDAO } from "@/services/reminder-definition-services"
 
 type Props= {
-  params: {
+  params: Promise<{
     slug: string
-  },
+  }>,
 }
-export default async function ReminderPage({ params }: Props) {
+export default async function ReminderPage(props: Props) {
+  const params = await props.params;
   const clientSlug= params.slug
   const clientId= await getClientIdBySlug(clientSlug)
   if (!clientId) {

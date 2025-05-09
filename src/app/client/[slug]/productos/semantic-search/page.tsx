@@ -7,12 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Slider } from "@/components/ui/slider"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { LayoutDashboard, Loader2, Search, ShoppingCart, X } from "lucide-react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
@@ -20,14 +15,9 @@ import { useState } from "react"
 import ProductCard from "../components/product-card"
 import { searchProducts } from "./actions"
 
-type Props = {
-  params: {
-    slug: string
-  }
-}
-
-export default function SemanticSearchPage({ params }: Props) {
-  const { slug } = useParams() as { slug: string }
+export default function SemanticSearchPage() {
+  const params = useParams()
+  const slug = params.slug as string
   
   const [query, setQuery] = useState("")
   const [limit, setLimit] = useState<number>(10)

@@ -3,12 +3,13 @@ import { notFound } from "next/navigation";
 import Script from "next/script";
 
 type Props = {
-    params: {
+    params: Promise<{
         slug: string;
-    };
+    }>;
 };
 
-export default async function WidgetPage({ params }: Props) {
+export default async function WidgetPage(props: Props) {
+    const params = await props.params;
     const { slug } = params
     const client = await getClientBySlug(slug)
 

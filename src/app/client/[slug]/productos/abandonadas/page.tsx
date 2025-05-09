@@ -66,13 +66,13 @@ const formatearFecha = (fecha: Date) => {
 }
 
 type Props = {
-    params: {
+    params: Promise<{
         slug: string
-    },
-    searchParams: {
+    }>,
+    searchParams: Promise<{
         page?: string,
         filter?: string
-    }
+    }>
 }
 
 // Componente para mostrar el badge de estado y su información adicional
@@ -118,10 +118,12 @@ function StatusBadge({ status, fechaRecordatorio, fechaRecuperada, error }: Stat
     );
 }
 
-export default async function AbandonadasPage({ params, searchParams }: Props) {
+export default async function AbandonadasPage(props: Props) {
+    const searchParams = await props.searchParams;
+    const params = await props.params;
     const { slug } = params
     const client = await getClientBySlug(slug)
-    
+
     if (!client) {
         return (
             <div className="container mx-auto py-6">
@@ -131,16 +133,16 @@ export default async function AbandonadasPage({ params, searchParams }: Props) {
             </div>
         )
     }
-    
+
     // Obtener el número de página de los parámetros de búsqueda
     const currentPage = searchParams.page ? parseInt(searchParams.page) : 1
-    
+
     // Obtener el filtro de búsqueda
     const filter = searchParams.filter || ""
-    
+
     // Definir el número de elementos por página
     const itemsPerPage = 20
-    
+
     // Obtener las órdenes abandonadas utilizando la capa de servicios con paginación y filtro
     const { data: abandonedOrders, meta } = await getAbandonedOrdersByClientId(
         client.id, 
@@ -148,11 +150,11 @@ export default async function AbandonadasPage({ params, searchParams }: Props) {
         itemsPerPage,
         filter
     );
-    
+
     // Obtener todas las órdenes (sin paginación) para estadísticas
     const allOrdersResponse = await getAbandonedOrdersByClientId(client.id, 1, 1000); // Usar un límite alto
     const allOrders = allOrdersResponse.data;
-    
+
     return (
         <div className="container mx-auto py-6 space-y-6">
             <div className="flex items-center justify-between">

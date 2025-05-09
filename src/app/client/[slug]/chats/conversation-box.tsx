@@ -148,18 +148,19 @@ export default function ConversationBox({ conversation, promptTokensPrice, compl
                           // De lo contrario, intentar renderizar como Markdown
                           try {
                             return (
-                              <ReactMarkdown                        
-                                className="prose break-words prose-p:leading-relaxed dark:prose-invert"
-                                remarkPlugins={[remarkGfm]}
-                                components={{
-                                  // open links in new tab
-                                  a: (props) => (
-                                    <a {...props} target="_blank" rel="noopener noreferrer" />
-                                  ),
-                                }}
-                              >
-                                {message.content}
-                              </ReactMarkdown>
+                              <div className="w-full mt-1 prose break-words prose-p:leading-relaxed dark:prose-invert">
+                                <ReactMarkdown                                                        
+                                  remarkPlugins={[remarkGfm]}
+                                  components={{
+                                    // open links in new tab
+                                    a: (props) => (
+                                      <a {...props} target="_blank" rel="noopener noreferrer" />
+                                    ),
+                                  }}
+                                >
+                                  {message.content}
+                                </ReactMarkdown>
+                              </div>
                             );
                           } catch (error) {
                             console.error("Error rendering markdown:", error);

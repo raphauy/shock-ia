@@ -15,20 +15,21 @@ import { Bot, CircleDollarSign, Loader, RefreshCcw, SendIcon, Terminal, Ticket, 
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, use } from "react";
 import ReactMarkdown from "react-markdown";
 import Textarea from "react-textarea-autosize";
 import remarkGfm from "remark-gfm";
 
 type Props= {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }  
 
-export default function Chat({ params }: Props) {
+export default function Chat(props0: Props) {
+  const params = use(props0.params);
   const slug= params.slug
-  
+
   const formRef = useRef<HTMLFormElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -92,7 +93,7 @@ export default function Chat({ params }: Props) {
   const totalCompletionTokens= messages.reduce((acc, message) => acc + message.completionTokens, 0)
   const promptTokensValue= totalPromptTokens / 1000 * promptTokensPrice
   const completionTokensValue= totalCompletionTokens / 1000 * completionTokensPrice
-  
+
   const searchParams= useSearchParams()
 
   useEffect(() => {
@@ -225,18 +226,19 @@ export default function Chat({ params }: Props) {
 
                 </div>
                 {message.role !== "system" &&
-                  <ReactMarkdown
-                    className="w-full mt-1 prose break-words prose-p:leading-relaxed"
-                    remarkPlugins={[remarkGfm]}
-                    components={{
-                      // open links in new tab
-                      a: (props) => (
-                        <a {...props} target="_blank" rel="noopener noreferrer" />
-                      ),
-                    }}
-                  >
-                    {message.content}
-                  </ReactMarkdown>            
+                  <div className="w-full mt-1 prose break-words prose-p:leading-relaxed dark:prose-invert">
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        // open links in new tab
+                        a: (props) => (
+                          <a {...props} target="_blank" rel="noopener noreferrer" />
+                        ),
+                      }}
+                    >
+                      {message.content}
+                    </ReactMarkdown>            
+                  </div>
                 }
               </div>                         
               {
