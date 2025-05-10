@@ -44,7 +44,7 @@ export default function SelectFilter({
   // Sincronizar con searchParams al iniciar
   useEffect(() => {
     const currentValue = searchParams.get(paramName);
-    setSelectedValue(currentValue || "");
+    setSelectedValue(currentValue || "all");
   }, [searchParams, paramName]);
   
   // Manejar cambio de selección
@@ -52,7 +52,7 @@ export default function SelectFilter({
     setSelectedValue(value);
     
     // Si se selecciona la opción "todos", eliminar el parámetro
-    if (value === "") {
+    if (value === "all") {
       router.push(createUrlWithParams({
         [paramName]: null
       }));
@@ -73,7 +73,7 @@ export default function SelectFilter({
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="">
+        <SelectItem value="all">
           {allLabel}
         </SelectItem>
         {options.map((option) => (

@@ -1,9 +1,8 @@
-import { useState } from "react"
-import { DataClient } from "../clients/(crud)/actions"
-import { RepoSelector, SelectorData } from "./repo-selector"
-import FCConfig from "../repositories/[repoId]/fc-config"
 import { getReposOfClient } from "@/services/repository-services"
+import { DataClient } from "../clients/(crud)/actions"
+import FCConfig from "../repositories/[repoId]/fc-config"
 import { CreateFCDialog } from "./create-fc-dialog"
+import { RepoSelector } from "./repo-selector"
 
 type Props = {
     client: DataClient
