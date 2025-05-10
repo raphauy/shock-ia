@@ -39,11 +39,6 @@ export default function SideBar() {
       text: "Funciones"
     },
     {
-      href: `/admin/tags`,
-      icon: Tag,
-      text: "Etiquetas"
-    },
-    {
       href: "divider", icon: User
     },
     // {
