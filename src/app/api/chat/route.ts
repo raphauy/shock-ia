@@ -155,6 +155,9 @@ export async function POST(req: Request) {
         onFinish: async ({usage}) => {
             console.log("--------------------------------")
             console.log("[onFinish] usage: " + JSON.stringify(usage))
+        },
+        onError: async (error) => {
+            console.error("onError en /api/chat:", error, typeof error, JSON.stringify(error));
         }
     });
     console.log("POST /api/chat - después de streamText");

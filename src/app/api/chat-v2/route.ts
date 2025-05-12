@@ -163,9 +163,11 @@ export async function POST(req: Request) {
             } catch (_) {
               console.error('Failed to save chat');
             }
-
+        },
+        onError: async (error) => {
+          console.error("onError (v2) en /api/chat:", error, typeof error, JSON.stringify(error));
         }
-    });
+  });
 
   return result.toDataStreamResponse();
 }
