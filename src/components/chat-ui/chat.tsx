@@ -67,8 +67,6 @@ export function Chat({
           selectedModelId={selectedChatModel}
         />
 
-        <p>status: {status}</p>
-        <p>error: {JSON.stringify(error, null, 2)}</p>
         {messages.length === 0 ? (
           <div className="w-full flex flex-col items-center justify-center min-h-[70vh]">
             <div className="w-full flex flex-col items-center justify-center gap-2 max-w-3xl">
