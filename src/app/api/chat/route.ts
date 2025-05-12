@@ -165,3 +165,8 @@ export async function POST(req: Request) {
     );
   }
 }
+
+export async function OPTIONS() {
+  console.log("OPTIONS /api/chat called");
+  return new Response(null, { status: 204 });
+}

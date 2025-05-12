@@ -167,7 +167,13 @@ export default function SimulatorBox() {
 
   const disabled = isLoading || input.length === 0;
 
-  const errorMessage= error?.message && error.message.includes("Bot disabled") ? "El bot está deshabilitado para este contacto." : error?.message
+  const errorMessage =
+  // @ts-ignore
+  error?.data?.error ||
+    (error?.message && error.message.includes("Bot disabled")
+      ? "El bot está deshabilitado para este contacto."
+      : error?.message) ||
+    "Ocurrió un error inesperado. Intenta nuevamente.";
 
 
   return (
