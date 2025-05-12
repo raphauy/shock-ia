@@ -18,6 +18,7 @@ export const maxDuration = 30;
 
 export async function POST(req: Request) {
   try {
+    console.log("POST /api/chat - inicio");
     const currentUser= await getCurrentUser()
     const phone= currentUser?.email || "web-chat"
   
@@ -120,6 +121,7 @@ export async function POST(req: Request) {
     }
     console.log("tools count:", Object.keys(tools).length)
 
+    console.log("POST /api/chat - antes de streamText");
     const result = streamText({
         model: openai('gpt-4.1'),
         temperature: 0,
@@ -155,10 +157,10 @@ export async function POST(req: Request) {
             console.log("[onFinish] usage: " + JSON.stringify(usage))
         }
     });
-
+    console.log("POST /api/chat - después de streamText");
     return result.toDataStreamResponse();
   } catch (error: any) {
-    console.error("Error en /api/chat:", error);
+    console.error("Error en /api/chat:", error, typeof error, JSON.stringify(error));
     return NextResponse.json(
       { error: "Ocurrió un error procesando tu mensaje. Intenta nuevamente. " + (error?.message || "") },
       { status: 500 }
