@@ -17,6 +17,7 @@ import { getDocumentTool } from '@/lib/ai/tools';
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
+  try {
     const currentUser= await getCurrentUser()
     const phone= currentUser?.email || "web-chat"
   
@@ -155,5 +156,12 @@ export async function POST(req: Request) {
         }
     });
 
-  return result.toDataStreamResponse();
+    return result.toDataStreamResponse();
+  } catch (error: any) {
+    console.error("Error en /api/chat:", error);
+    return NextResponse.json(
+      { error: "Ocurrió un error procesando tu mensaje. Intenta nuevamente. " + (error?.message || "") },
+      { status: 500 }
+    );
+  }
 }
