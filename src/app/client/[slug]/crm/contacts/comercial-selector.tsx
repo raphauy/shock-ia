@@ -29,19 +29,23 @@ export default function ComercialSelector({ baseUrl, comercials }: Props) {
   )
 
   const handleChange = (comercialId: string) => {
-    router.push(baseUrl + "?" + createQueryString("comercialId", comercialId))
+    if (comercialId === "all") {
+      router.push(baseUrl + "?" + createQueryString("comercialId", ""))
+    } else {
+      router.push(baseUrl + "?" + createQueryString("comercialId", comercialId))
+    }
   }
 
   return (
     <Select
-      value={searchParams.get("comercialId") || ""}
+      value={searchParams.get("comercialId") || "all"}
       onValueChange={handleChange}
     >
       <SelectTrigger>
         <SelectValue placeholder="Todos los comerciales" />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="">Todos los comerciales</SelectItem>
+        <SelectItem value="all">Todos los comerciales</SelectItem>
         {comercials.map((comercial) => (
           <SelectItem key={comercial.id} value={comercial.id}>
             {comercial.user.name}

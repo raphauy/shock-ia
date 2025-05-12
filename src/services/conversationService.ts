@@ -6,7 +6,7 @@ import { ChatCompletion } from "groq-sdk/resources/chat/completions.mjs";
 import { ChatCompletionMessageParam, ChatCompletionSystemMessageParam, ChatCompletionUserMessageParam } from "openai/resources/index.mjs";
 import { sendAudioToConversation, sendTextToConversation } from "./chatwoot";
 import { getChatwootAccountId } from "./clientService";
-import { ContactFormValues, createContact, getContactByChatwootId } from "./contact-services";
+import { ContactFormValues, createContact, getContactByChatwootId, getLastChatwootConversationIdByPhoneNumber, getOrCreateContact } from "./contact-services";
 import { completionInit, getContext } from "./function-call-services";
 import { getFunctionsDefinitions } from "./function-services";
 import { getDocument } from "./functions";
@@ -17,6 +17,7 @@ import { sendWapMessage } from "./osomService";
 import { setSectionsToMessage } from "./section-services";
 import { getUserByEmail } from "./user-service";
 import { sendText } from "./wrc-sdk";
+import { ToolCall, ToolCallPart } from "ai";
 
 
 export default async function getConversations() {
@@ -820,6 +821,49 @@ export async function saveFunction(phone: string, completion: string, clientId: 
   }
   const messageStored = await messageArrived(phone, text, clientId, "function", gptData ? JSON.stringify(gptData) : "", 0, 0)
   if (messageStored) console.log("function message stored")
+}
+
+export async function saveToolCalls(phone: string, toolCalls: ToolCallPart[], clientId: string, promptTokens: number, completionTokens: number) {
+  console.log("saveToolCalls")
+  console.log(JSON.stringify(toolCalls))
+
+  let saveTokens= true // only save tokens on the first tool call
+  for (const toolCall of toolCalls) {
+    const name= toolCall.toolName
+    const args= toolCall.args as any
+
+    let text= `Llamando a la función ${name}, datos: ${args}`
+
+    let gptData
+    if (name === "getDocument" || name === "getSection") {
+      text= `${name}`
+      const document = await getDocument(args.docId)
+      if (typeof document !== "string") {
+        gptData = {
+          functionName: name,
+          docId: document.docId,
+          docName: document.docName,
+        }
+      }
+    } else if (name !== "getDateOfNow" && name !== "registrarPedido" && name !== "reservarSummit" && name !== "echoRegister" && name !== "completarFrase" && name !== "reservarServicio") {
+      const copyArgs = { ...JSON.parse(args) }
+      delete copyArgs.conversationId
+
+      gptData = {
+        functionName: name,
+        args: copyArgs
+      }
+    }
+    if (saveTokens) {
+      saveTokens= false
+    } else {
+      promptTokens= 0
+      completionTokens= 0
+    }
+    const messageStored = await messageArrived(phone, text, clientId, "function", gptData ? JSON.stringify(gptData) : "", promptTokens, completionTokens)
+    if (messageStored) console.log("function message stored")
+
+  }
 }
 
 

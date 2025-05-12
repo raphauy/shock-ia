@@ -29,10 +29,17 @@ export const repositorySchema = z.object({
 export type RepositoryFormValues = z.infer<typeof repositorySchema>
 
 
-export async function getRepositorysDAO() {
+export async function getRepositorysDAO(clientId: string) {
   const found = await prisma.repository.findMany({
+    where: {
+      function: {
+        clients: {
+          some: { clientId }
+        }
+      }
+    },
     orderBy: {
-      id: 'asc'
+      createdAt: 'desc'
     },
   })
   return found as RepositoryDAO[]

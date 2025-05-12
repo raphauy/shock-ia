@@ -241,15 +241,13 @@ export default function SimulatorBox() {
                     !gptData &&
                     <div
                         className={cn("p-1.5 text-white",
-                          (message.role === "assistant") ? "bg-green-500" : (message.role === "system" || message.role === "function") ? "bg-blue-500" : "bg-black",
+                          (message.role === "assistant") ? "bg-green-500" : (message.role === "system") ? "bg-blue-500" : "bg-black",
                         )}
                       >
                       {message.role === "user" ? (
                       <User width={20} />
                       ) : message.role === "system" ? (
                       <Terminal width={20} />
-                      ) : (message.role === "function" && !gptData) ? (
-                      <Terminal width={20}/>
                       ) : message.role === "assistant" ? (
                       <Bot width={20} />
                       ) : 
@@ -259,6 +257,7 @@ export default function SimulatorBox() {
                       </div>
                     }
                     {
+                      // @ts-ignore
                       message.role !== "system" && message.role !== "function" && !gptData &&
                       <div className="w-full mt-1 prose break-words prose-p:leading-relaxed dark:prose-invert">                       
                         <ReactMarkdown

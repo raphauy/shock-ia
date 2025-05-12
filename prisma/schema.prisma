@@ -204,6 +204,9 @@ model Message {
   updatedAt         DateTime    @updatedAt
   role              String
   content           String      @db.Text
+  parts             Json @default("[]")
+  attachments       Json @default("[]")
+
   gptData           String?     @db.Text
   conversationId    String
   conversation      Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
