@@ -53,7 +53,7 @@ export function Chat({
     onError: () => {
       toast({
         title: 'Error',
-        description: 'An error occurred, please try again!',
+        description: 'Ocurrió un error, por favor intente nuevamente!',
       });
     },
   });

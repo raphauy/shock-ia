@@ -12,7 +12,7 @@ import { getRepositorysDAO } from '@/services/repository-services';
 import { getDocumentTool } from '@/lib/ai/tools';
 import { getMostRecentUserMessage } from '@/lib/ai/chat-utils';
 import { MessageFormValues, saveMessage, saveMessages } from '@/services/messages-service';
-import { getOrCreateContact } from '@/services/contact-services';
+import { ContactFormValues, createContact, getContactByPhone, getOrCreateContact } from '@/services/contact-services';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -66,7 +66,7 @@ export async function POST(req: Request) {
 
     // save the input  as user  role with messageArrived
     //const userMessageStored= await messageArrived(phone, userMessage.content, client.id, "user", "")
-    const conversationId= await getActiveConversationId(email, client.id)
+    const conversationId= await getActiveConversationId(email, currentUser.name || email, client.id)
     const messageFormValues: MessageFormValues= {
       conversationId,
       role: "user",
@@ -172,13 +172,26 @@ export async function POST(req: Request) {
   return result.toDataStreamResponse();
 }
 
-async function getActiveConversationId(email: string, clientId: string) {
+async function getActiveConversationId(email: string, name: string, clientId: string) {
   const activeConversation= await getActiveConversation(email, clientId)
   if (activeConversation) {
     return activeConversation.id
   }
-  // if there is no active conversation, create a new one
-  const contact= await getOrCreateContact(clientId, email, email)
+  // for use with chatwoot:
+  // const contact= await getOrCreateContact(clientId, email, email)
+
+  let contact= await getContactByPhone(email, clientId)
+
+  if (!contact) {
+    const contactFormValues: ContactFormValues= {
+      clientId,
+      phone: email,
+      name: name,
+      chatwootId: undefined,
+      src: "simulator",
+    }
+    contact= await createContact(contactFormValues)
+  }
   const created= await createConversation(email, clientId, contact.id, 0)
   return created.id
 }
