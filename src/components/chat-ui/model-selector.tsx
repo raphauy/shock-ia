@@ -29,14 +29,14 @@ export function ModelSelector({
       <DropdownMenuTrigger
         asChild
         className={cn(
-          'w-fit data-[state=open]:bg-accent data-[state=open]:text-accent-foreground',
+          'w-fit data-[state=open]:bg-accent data-[state=open]:text-accent-foreground min-w-[200px]',
           className,
         )}
       >
         <Button
           data-testid="model-selector"
           variant="outline"
-          className="md:px-2 md:h-[34px]"
+          className="md:px-2 md:h-[34px] justify-between"
         >
           {selectedChatModel?.name}
           <ChevronDownIcon className="w-4 h-4" />
@@ -73,7 +73,7 @@ export function ModelSelector({
                 </div>
 
                 <div className="text-foreground dark:text-foreground opacity-0 group-data-[active=true]/item:opacity-100">
-                  <CheckCircle />
+                  <CheckCircle className="w-5 h-5" />
                 </div>
               </button>
             </DropdownMenuItem>

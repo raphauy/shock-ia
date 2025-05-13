@@ -12,6 +12,7 @@ interface MessagesProps {
   messages: Array<UIMessage>;
   setMessages: UseChatHelpers['setMessages'];
   reload: UseChatHelpers['reload'];
+  slug: string;
 }
 
 function PureMessages({
@@ -19,6 +20,7 @@ function PureMessages({
   messages,
   setMessages,
   reload,
+  slug,
 }: MessagesProps) {
   const [messagesContainerRef, messagesEndRef] =
     useScrollToBottom<HTMLDivElement>();
@@ -27,7 +29,7 @@ function PureMessages({
     <div
       ref={messagesContainerRef}
       //className={cn("flex flex-col min-w-0 gap-6 flex-1 pt-4 w-full", messages.length !== 0 && "overflow-y-scroll")}
-      className={cn("flex flex-col min-w-0 gap-6 flex-1 pt-4 w-full")}
+      className={cn("flex flex-col min-w-0 gap-6 flex-1 pt-4 w-full overflow-y-auto scrollbar-thin")}
     >
       {messages.length === 0 && <Greeting />}
 
@@ -39,6 +41,7 @@ function PureMessages({
           setMessages={setMessages}
           reload={reload}
           status={status}
+          slug={slug}
         />
       ))}
 

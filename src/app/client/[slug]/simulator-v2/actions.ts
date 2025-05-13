@@ -18,7 +18,7 @@ export async function closeConversationAction(conversationId: string) {
   const updated= await closeConversation(conversationId)
 
   const clientSlug= updated.client.slug
-  revalidatePath(`/client/${clientSlug}/simulator-v2`)
+  revalidatePath(`/client/${clientSlug}/crm/simulator-v2`)
 
   return updated
 }

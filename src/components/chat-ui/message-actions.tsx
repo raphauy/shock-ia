@@ -3,7 +3,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { toast } from '@/hooks/use-toast';
 import type { Message } from 'ai';
 import { CopyIcon } from 'lucide-react';
-import { memo } from 'react';
+import { memo, type MouseEvent, type FocusEvent } from 'react';
 import { useCopyToClipboard } from 'usehooks-ts';
 
 export function PureMessageActions({
@@ -18,15 +18,30 @@ export function PureMessageActions({
   if (isLoading) return null;
   if (message.role === 'user') return null;
 
+  // Detiene la propagación de eventos para evitar que se active el scroll automático
+  const handleMouseEnter = (e: MouseEvent) => {
+    e.stopPropagation();
+  };
+
+  const handleFocus = (e: FocusEvent) => {
+    e.stopPropagation();
+  };
+
   return (
     <TooltipProvider delayDuration={0}>
-      <div className="flex flex-row gap-2">
+      <div 
+        className="flex flex-row gap-2 ml-10 message-action-container"
+        onMouseEnter={handleMouseEnter}
+        onFocus={handleFocus}
+      >
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
               className="py-1 px-2 h-fit text-muted-foreground"
               variant="outline"
-              onClick={async () => {
+              onClick={async (e) => {
+                e.stopPropagation(); // Prevenir propagación del evento click
+                
                 const textFromParts = message.parts
                   ?.filter((part) => part.type === 'text')
                   .map((part) => (part as { text: string }).text)

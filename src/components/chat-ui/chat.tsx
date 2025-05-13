@@ -76,6 +76,7 @@ export function Chat({
                   messages={messages}
                   setMessages={setMessages}
                   reload={reload}
+                  slug={slug}
                 />
               </div>
               <form className="flex flex-col items-center w-full max-w-3xl gap-1">
@@ -100,12 +101,13 @@ export function Chat({
           </div>
         ) : (
           <>
-            <div className="flex flex-col min-w-0 gap-6 flex-1 overflow-y-scroll pt-4 w-full">
+            <div className="flex flex-col min-w-0 gap-6 flex-1 overflow-y-auto scrollbar-thin pt-4 w-full">
               <Messages
                 status={status}
                 messages={messages}
                 setMessages={setMessages}
                 reload={reload}
+                slug={slug}
               />
             </div>
             <form className="flex mx-auto px-4 bg-background pb-4 md:pb-6 gap-2 w-full md:max-w-3xl">

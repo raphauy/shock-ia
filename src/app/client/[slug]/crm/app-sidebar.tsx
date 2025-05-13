@@ -20,12 +20,12 @@ const items = [
     icon: Bot,
     group: "kanban",
   },
-  // {
-  //   title: "Simulador V2",
-  //   url: `crm/simulator-v2`,
-  //   icon: Sparkles,
-  //   group: "kanban",
-  // },  
+  {
+    title: "Simulador Pro",
+    url: `crm/simulator-v2`,
+    icon: Sparkles,
+    group: "kanban",
+  },  
   {
     title: "Contactos",
     url: `crm/contacts?last=30D`,

@@ -8,15 +8,19 @@ import { useLocalStorage, useWindowSize } from 'usehooks-ts';
 import { PreviewAttachment } from './preview-attachment';
 import equal from 'fast-deep-equal';
 import type { UseChatHelpers } from '@ai-sdk/react';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ArrowUpIcon, PaperclipIcon, StopCircleIcon, Wrench, PlusCircleIcon } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { SuggestedActions } from './suggested-actions';
 import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { closeConversationAction, getActiveConversationIdAction } from '@/app/client/[slug]/simulator-v2/actions';
 import { useSession } from 'next-auth/react';
+import { 
+  AttachmentsButton, 
+  StopButton, 
+  SendButton, 
+  ToolsButton, 
+  NewConversationButton,
+  TooltipButtonProvider
+} from './chat-buttons';
 
 function PureMultimodalInput({
   conversationId,
@@ -109,7 +113,7 @@ function PureMultimodalInput({
   const [uploadQueue, setUploadQueue] = useState<Array<string>>([]);
 
   const submitForm = useCallback(() => {
-    window.history.replaceState({}, '', `/client/${slug}/simulator-v2`);
+    window.history.replaceState({}, '', `/client/${slug}/crm/simulator-v2`);
 
     handleSubmit(undefined, {
       experimental_attachments: attachments,
@@ -293,7 +297,7 @@ function PureMultimodalInput({
         placeholder="Escribe aquí..."
         value={input}
         className={cx(
-          'min-h-[24px] max-h-[calc(75dvh)] overflow-hidden resize-none rounded-2xl !text-base bg-background pb-10 border border-input shadow-sm focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none focus-visible:border-input',
+          'min-h-[24px] max-h-[calc(75dvh)] overflow-hidden resize-none rounded-2xl !text-base bg-background pb-12 border border-input shadow-xl focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none focus-visible:border-input',
           className,
         )}
         rows={2}
@@ -320,14 +324,14 @@ function PureMultimodalInput({
       />
 
       <div className="absolute bottom-0 p-2 w-fit flex flex-row justify-start items-center">
-        <TooltipProvider>
+        <TooltipButtonProvider>
           <AttachmentsButton fileInputRef={fileInputRef} status={status} />
           <ToolsButton userTools={userTools} />
           <NewConversationButton 
             handleNewConversation={handleNewConversation}
             disabled={messages.length === 0 || status !== 'ready'}
           />
-        </TooltipProvider>
+        </TooltipButtonProvider>
       </div>
 
       <div className="absolute bottom-0 right-0 p-2 w-fit flex flex-row justify-end">
@@ -356,193 +360,3 @@ export const MultimodalInput = memo(
     return true;
   },
 );
-
-function PureAttachmentsButton({
-  fileInputRef,
-  status,
-}: {
-  fileInputRef: React.MutableRefObject<HTMLInputElement | null>;
-  status: UseChatHelpers['status'];
-}) {
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          data-testid="attachments-button"
-          className="rounded-full flex items-center gap-2 px-3 py-2 h-fit text-sm border border-input bg-background hover:bg-muted text-foreground"
-          onClick={(event) => {
-            event.preventDefault();
-            fileInputRef.current?.click();
-          }}
-          disabled={status !== 'ready'}
-          variant="ghost"
-        >
-          <PaperclipIcon size={16} />
-          <span>Imágenes</span>
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>
-        <p>Imágenes</p>
-      </TooltipContent>
-    </Tooltip>
-  );
-}
-
-const AttachmentsButton = memo(PureAttachmentsButton);
-
-function PureStopButton({
-  stop,
-  setMessages,
-}: {
-  stop: () => void;
-  setMessages: UseChatHelpers['setMessages'];
-}) {
-  return (
-    <Button
-      data-testid="stop-button"
-      className="rounded-full p-1.5 h-fit border dark:border-zinc-600"
-      onClick={(event) => {
-        event.preventDefault();
-        stop();
-        setMessages((messages) => messages);
-      }}
-    >
-      <StopCircleIcon size={14} />
-    </Button>
-  );
-}
-
-const StopButton = memo(PureStopButton);
-
-function PureSendButton({
-  submitForm,
-  input,
-  uploadQueue,
-}: {
-  submitForm: () => void;
-  input: string;
-  uploadQueue: Array<string>;
-}) {
-  return (
-    <Button
-      data-testid="send-button"
-      className="rounded-full p-2 h-fit bg-primary text-primary-foreground hover:bg-primary/90 flex items-center justify-center"
-      onClick={(event) => {
-        event.preventDefault();
-        submitForm();
-      }}
-      disabled={input.length === 0 || uploadQueue.length > 0}
-    >
-      <ArrowUpIcon size={16} />
-    </Button>
-  );
-}
-
-const SendButton = memo(PureSendButton, (prevProps, nextProps) => {
-  if (prevProps.uploadQueue.length !== nextProps.uploadQueue.length)
-    return false;
-  if (prevProps.input !== nextProps.input) return false;
-  return true;
-});
-
-const ToolsButton = memo(
-  function ToolsButton({
-    userTools,
-  }: {
-    userTools: {
-      totalTools: number;
-      tools: Array<{ name: string; mcpName: string }>;
-    };
-  }) {
-    const [open, setOpen] = useState(false);
-
-    return (
-      <Tooltip>
-        <Popover open={open} onOpenChange={setOpen}>
-          <TooltipTrigger asChild>
-            <PopoverTrigger asChild>
-              <Button
-                variant="ghost"
-                disabled={userTools.totalTools === 0}
-                className="rounded-full flex items-center gap-2 px-3 py-2 h-fit text-sm border border-input bg-background hover:bg-muted text-foreground ml-1"
-              >
-                <Wrench size={16} />
-                <span>Herramientas MCP</span>
-                {userTools.totalTools > 0 && (
-                  <span className="bg-accent-foreground text-accent rounded-full size-5 min-w-5 flex items-center justify-center text-[10px] font-medium">
-                    {userTools.totalTools}
-                  </span>
-                )}
-              </Button>
-            </PopoverTrigger>
-          </TooltipTrigger>
-          <PopoverContent className="w-72 p-0" align="end" sideOffset={8}>
-            <div className="p-3 bg-accent/50 border-b">
-              <h3 className="font-medium text-sm">Tools disponibles</h3>
-            </div>
-            <div className="max-h-[300px] overflow-y-auto p-2">
-              {userTools.tools.length === 0 ? (
-                <div className="py-3 px-2 text-sm text-muted-foreground text-center">
-                  No hay tools disponibles
-                </div>
-              ) : (
-                <div className="space-y-1">
-                  {userTools.tools.map((tool, index) => (
-                    <div
-                      key={`${tool.mcpName}-${tool.name}-${index}`}
-                      className="py-1.5 px-2 text-sm hover:bg-accent/50 rounded-md cursor-default"
-                    >
-                      <div className="font-medium">{tool.name}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {tool.mcpName}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </PopoverContent>
-        </Popover>
-        <TooltipContent>
-          <p>Herramientas disponibles</p>
-        </TooltipContent>
-      </Tooltip>
-    );
-  },
-  (prevProps, nextProps) => {
-    return equal(prevProps.userTools, nextProps.userTools);
-  },
-);
-
-function PureNewConversationButton({
-  handleNewConversation,
-  disabled,
-}: {
-  handleNewConversation: () => Promise<void>;
-  disabled: boolean;
-}) {
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          data-testid="new-conversation-button"
-          className="rounded-full flex items-center gap-2 px-3 py-2 h-fit text-sm border border-input bg-background hover:bg-muted text-foreground ml-1"
-          onClick={(event) => {
-            event.preventDefault();
-            handleNewConversation();
-          }}
-          disabled={disabled}
-          variant="ghost"
-        >
-          <PlusCircleIcon size={16} />
-          <span>Nueva conversación</span>
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>
-        <p>Nueva conversación</p>
-      </TooltipContent>
-    </Tooltip>
-  );
-}
-
-const NewConversationButton = memo(PureNewConversationButton);

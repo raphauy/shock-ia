@@ -1,19 +1,18 @@
 'use client';
 
+import { cn } from '@/lib/utils';
+import { UseChatHelpers } from '@ai-sdk/react';
 import type { UIMessage } from 'ai';
 import cx from 'classnames';
+import equal from 'fast-deep-equal';
 import { AnimatePresence, motion } from 'framer-motion';
-import { memo, useState } from 'react';
+import Image from 'next/image';
+import { memo } from 'react';
+import { DocumentTool } from './document-tool';
 import { Markdown } from './markdown';
 import { MessageActions } from './message-actions';
-import { PreviewAttachment } from './preview-attachment';
-import equal from 'fast-deep-equal';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { MessageReasoning } from './message-reasoning';
-import { UseChatHelpers } from '@ai-sdk/react';
-import { SparklesIcon } from 'lucide-react';
+import { PreviewAttachment } from './preview-attachment';
 
 const PurePreviewMessage = ({
   message,
@@ -21,12 +20,14 @@ const PurePreviewMessage = ({
   setMessages,
   reload,
   status,
+  slug,
 }: {
   message: UIMessage;
   isLoading: boolean;
   setMessages: UseChatHelpers['setMessages'];
   reload: UseChatHelpers['reload'];
   status: UseChatHelpers['status'];
+  slug: string;
 }) => {
 
   return (
@@ -39,24 +40,14 @@ const PurePreviewMessage = ({
         data-role={message.role}
       >
         <div
-          className={cn('flex gap-4 w-full group-data-[role=user]/message:ml-auto group-data-[role=user]/message:max-w-2xl group-data-[role=user]/message:w-fit',
+          className={cn('flex gap-4 w-full group-data-[role=user]/message:ml-auto group-data-[role=user]/message:max-w-2xl group-data-[role=user]/message:w-fit pt-0',
           )}
         >
-          {message.role === 'assistant' && (
-            <div className="size-8 flex items-center rounded-full justify-center ring-1 shrink-0 ring-border bg-background">
-              <div className="translate-y-px">
-                <div
-                  className={cn({
-                    'animate-spin': status !== 'ready',
-                  })}
-                >
-                  <SparklesIcon size={14} />
-                </div>
-              </div>
-            </div>
-          )}
+          {/* {message.role === 'assistant' && (
+            <AssistantAvatar status={status} />
+          )} */}
 
-          <div className="flex flex-col gap-4 w-full">
+          <div className="flex flex-col gap-4 w-full pt-0 mt-0">
             {message.experimental_attachments && (
               <div
                 data-testid={`message-attachments`}
@@ -87,15 +78,21 @@ const PurePreviewMessage = ({
 
               if (type === 'text') {
                 return (
-                  <div key={key} className="flex flex-row gap-2 items-start">
-                    <div
-                      data-testid="message-content"
-                      className={cn('flex flex-col gap-4', {
-                        'bg-primary text-primary-foreground px-3 py-2 rounded-xl':
-                          message.role === 'user',
-                      })}
-                    >
-                      <Markdown>{part.text}</Markdown>
+                  <div key={key} className="flex gap-2">
+                    {message.role === 'assistant' && (
+                      <AssistantAvatar status={status} />
+                    )}
+                  
+                    <div className="flex flex-row gap-2 items-start mt-1">
+                      <div
+                        data-testid="message-content"
+                        className={cn('flex flex-col gap-4', {
+                          'bg-primary text-primary-foreground px-3 py-2 rounded-xl':
+                            message.role === 'user',
+                        })}
+                      >
+                        <Markdown>{part.text}</Markdown>
+                      </div>
                     </div>
                   </div>
                 );
@@ -112,9 +109,14 @@ const PurePreviewMessage = ({
                     <div
                       key={toolCallId}
                       className={cx({
-                        skeleton: ['getWeather'].includes(toolName),
+                        skeleton: ['getDocument'].includes(toolName),
                       })}
                     >
+                      {
+                        toolName === 'getDocument' && (
+                          <DocumentTool args={args} slug={slug} />
+                        )
+                      }
                       {/* {toolName === 'getWeather' ? (
                         <Weather />
                       ) : toolName === 'createDocument' ? (
@@ -141,7 +143,11 @@ const PurePreviewMessage = ({
 
                   return (
                     <div key={toolCallId}>
-                      {/* {toolName === 'getWeather' ? (
+                      {
+                        toolName === 'getDocument' && (
+                          <DocumentTool args={result} slug={slug} />
+                        )
+                      }                      {/* {toolName === 'getWeather' ? (
                         <Weather weatherAtLocation={result} />
                       ) : toolName === 'createDocument' ? (
                         <DocumentPreview
@@ -214,23 +220,45 @@ return (
           },
         )}
       >
-        <div className="size-8 flex items-center rounded-full justify-center ring-1 shrink-0 ring-border">
-          <div
-            className={cn({
-              'animate-spin': status !== 'ready',
-            })}
-          >
-            <SparklesIcon size={14} />
-          </div>
-        </div>
+        <AssistantAvatar status={status} showBackground={false} />
 
-        <div className="flex flex-col gap-2 w-full">
+        <div className="flex flex-col gap-2 w-full mt-1">
           <div className="flex flex-col gap-4 text-muted-foreground">
-            Hmm...
+            🤔 Hmmm...
           </div>
         </div>
       </div>
     </motion.div>
-
   );
 };
+
+// Componente reutilizable para el avatar del asistente
+interface AssistantAvatarProps {
+  status: UseChatHelpers['status'];
+  showBackground?: boolean;
+}
+
+function AssistantAvatar({ status, showBackground = true }: AssistantAvatarProps) {
+  return (
+    <div className={cn(
+      "size-8 flex items-start justify-center ring-1 shrink-0 ring-blue-600 rounded-full",
+      showBackground && "bg-background"
+    )}>
+      <div className="flex items-center justify-center">
+        <div
+          className={cn({
+            'animate-pulse': status !== 'ready',
+          })}
+        >
+          <Image 
+            src="/asistime_icon.png"
+            alt="Asistime.ai Logo"
+            width={30}
+            height={30}
+            className="w-[30px] h-[30px]"
+          />
+        </div>
+      </div>
+    </div>
+  );
+}

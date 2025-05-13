@@ -7,6 +7,7 @@ import { getClientBySlug } from '@/services/clientService';
 import { getActiveMessages } from '@/services/conversationService';
 import type { Attachment, UIMessage } from 'ai';
 import { Message } from '@/lib/generated/prisma';
+import { getLocalTools } from '@/services/local-tools-services';
 
 type Props = {
   params: Promise<{ 
@@ -31,10 +32,8 @@ export default async function Page(props: Props) {
   }
 
   // Obtener todas las tools del usuario
-  let userTools: {
-    totalTools: number;
-    tools: Array<{ name: string; mcpName: string }>;
-  } = { totalTools: 0, tools: [] };
+  const userTools= await getLocalTools(client.id)
+  console.log("userTools", userTools)
 
   const messagesFromDb = await getActiveMessages(currentUser.email, client.id)
 
@@ -54,20 +53,8 @@ export default async function Page(props: Props) {
 
   const cookieStore = await cookies();
   const chatModelFromCookie = cookieStore.get('chat-model');
-
-  if (!chatModelFromCookie) {
-    return (
-      <>
-        <Chat
-          conversationId={conversationId}
-          clientId={client.id}
-          initialMessages={convertToUIMessages(messagesFromDb ?? [])}
-          selectedChatModel={DEFAULT_CHAT_MODEL}
-          userTools={userTools}
-        />
-      </>
-    );
-  }
+  
+  const selectedChatModel = chatModelFromCookie ? chatModelFromCookie.value : DEFAULT_CHAT_MODEL;
 
   return (
     <>
@@ -75,7 +62,7 @@ export default async function Page(props: Props) {
         conversationId={conversationId}
         clientId={client.id}
         initialMessages={convertToUIMessages(messagesFromDb ?? [])}
-        selectedChatModel={chatModelFromCookie.value}
+        selectedChatModel={selectedChatModel}
         userTools={userTools}
       />
     </>
