@@ -241,21 +241,21 @@ interface AssistantAvatarProps {
 function AssistantAvatar({ status, showBackground = true }: AssistantAvatarProps) {
   return (
     <div className={cn(
-      "size-8 flex items-start justify-center ring-1 shrink-0 ring-blue-600 rounded-full",
+      "size-8 flex items-center justify-center ring-1 shrink-0 ring-blue-600 rounded-full overflow-hidden",
       showBackground && "bg-background"
     )}>
       <div className="flex items-center justify-center">
         <div
-          className={cn({
-            'animate-pulse': status !== 'ready',
+          className={cn("flex items-center justify-center", {
+            'animate-spin': status !== 'ready',
           })}
         >
           <Image 
-            src="/asistime_icon.png"
+            src="/asistime_icon2.png"
             alt="Asistime.ai Logo"
-            width={30}
-            height={30}
-            className="w-[30px] h-[30px]"
+            width={24}
+            height={24}
+            className="w-[24px] h-[24px]"
           />
         </div>
       </div>
