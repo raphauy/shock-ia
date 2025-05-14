@@ -11,7 +11,7 @@ import type { UseChatHelpers } from '@ai-sdk/react';
 import { toast } from '@/components/ui/use-toast';
 import { SuggestedActions } from './suggested-actions';
 import { Textarea } from '@/components/ui/textarea';
-import { closeConversationAction, getActiveConversationIdAction } from '@/app/client/[slug]/simulator-v2/actions';
+import { closeConversationAction, getActiveConversationIdAction } from '@/app/client/[slug]/crm/simulator-pro/actions';
 import { useSession } from 'next-auth/react';
 import { 
   AttachmentsButton, 
@@ -113,7 +113,7 @@ function PureMultimodalInput({
   const [uploadQueue, setUploadQueue] = useState<Array<string>>([]);
 
   const submitForm = useCallback(() => {
-    window.history.replaceState({}, '', `/client/${slug}/crm/simulator-v2`);
+    window.history.replaceState({}, '', `/client/${slug}/crm/simulator-pro`);
 
     // Si hay attachments pero no hay texto, usar append con "Imagen enviada"
     if (input.trim() === '' && attachments.length > 0) {

@@ -1,12 +1,9 @@
 'use server';
 
-import { generateText, Message } from 'ai';
 import { cookies } from 'next/headers';
 
-import { myProvider } from '@/lib/ai/providers';
 import { closeConversation, getActiveConversation } from '@/services/conversationService';
 import { revalidatePath } from 'next/cache';
-import { getConversationIdFromMessageId } from '@/services/messages-service';
 
 export async function saveChatModelAsCookie(model: string) {
   const cookieStore = await cookies();
@@ -18,7 +15,7 @@ export async function closeConversationAction(conversationId: string) {
   const updated= await closeConversation(conversationId)
 
   const clientSlug= updated.client.slug
-  revalidatePath(`/client/${clientSlug}/crm/simulator-v2`)
+  revalidatePath(`/client/${clientSlug}/crm/simulator-pro`)
 
   return updated
 }

@@ -2,17 +2,14 @@
 'use client'
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
-import { Availability, AvailabilitySlot, Schedule } from '@/services/calcom-sdk-v2'
-import { format } from "date-fns"
+import { toast } from "@/components/ui/use-toast"
 import { Loader, Save } from 'lucide-react'
-import { useParams, useRouter } from 'next/navigation'
 import { useMemo, useState } from 'react'
 import { setAvailabilityAction } from "../event-actions"
-import { toast } from "@/components/ui/use-toast"
 
 const daysOfWeek = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'] as const
 const dayIndices = { 'Lunes': 1, 'Martes': 2, 'Miércoles': 3, 'Jueves': 4, 'Viernes': 5, 'Sábado': 6, 'Domingo': 0 }

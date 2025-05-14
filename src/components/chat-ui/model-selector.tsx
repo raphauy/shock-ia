@@ -7,7 +7,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { chatModels } from '@/lib/ai/models';
 import { cn } from '@/lib/utils';
 import { CheckCircle, ChevronDownIcon } from 'lucide-react';
-import { saveChatModelAsCookie } from '@/app/client/[slug]/simulator-v2/actions';
+import { saveChatModelAsCookie } from '@/app/client/[slug]/crm/simulator-pro/actions';
 
 export function ModelSelector({
   selectedModelId,

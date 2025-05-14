@@ -51,7 +51,7 @@ function PureSuggestedActions({ slug, append }: SuggestedActionsProps) {
           <Button
             variant="ghost"
             onClick={async () => {
-              window.history.replaceState({}, '', `/client/${slug}/simulator-v2`);
+              window.history.replaceState({}, '', `/client/${slug}/simulator-pro`);
 
               append({
                 role: 'user',

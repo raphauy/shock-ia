@@ -22,7 +22,7 @@ const items = [
   },
   {
     title: "Simulador Pro",
-    url: `crm/simulator-v2`,
+    url: `crm/simulator-pro`,
     icon: Sparkles,
     group: "kanban",
   },  

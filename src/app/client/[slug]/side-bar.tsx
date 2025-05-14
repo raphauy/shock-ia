@@ -43,11 +43,6 @@ export default function SideBar({ slug, showRegistro, showCarServices, showRepoD
       icon: Bot,
       text: "Simulador"
     },
-    // {
-    //   href: `/client/${slug}/simulator-v2`,
-    //   icon: Bot,
-    //   text: "Simulador v2"
-    // },
     {
       href: "divider", icon: User
     },
