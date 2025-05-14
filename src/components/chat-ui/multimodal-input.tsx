@@ -115,9 +115,18 @@ function PureMultimodalInput({
   const submitForm = useCallback(() => {
     window.history.replaceState({}, '', `/client/${slug}/crm/simulator-v2`);
 
-    handleSubmit(undefined, {
-      experimental_attachments: attachments,
-    });
+    // Si hay attachments pero no hay texto, usar append con "Imagen enviada"
+    if (input.trim() === '' && attachments.length > 0) {
+      append({
+        role: 'user',
+        content: 'Imagen enviada',
+        experimental_attachments: attachments,
+      });
+    } else {
+      handleSubmit(undefined, {
+        experimental_attachments: attachments,
+      });
+    }
 
     setAttachments([]);
     setLocalStorageInput('');
@@ -129,15 +138,18 @@ function PureMultimodalInput({
   }, [
     attachments,
     handleSubmit,
+    append,
+    input,
     setAttachments,
     setLocalStorageInput,
     width,
     slug,
   ]);
 
-  const uploadFile = async (file: File) => {
+  const uploadFile = useCallback(async (file: File) => {
     const formData = new FormData();
     formData.append('file', file);
+    formData.append('clientSlug', slug);
 
     try {
       const response = await fetch('/api/files/upload', {
@@ -166,7 +178,7 @@ function PureMultimodalInput({
         description: 'Failed to upload file, please try again!',
       });
     }
-  };
+  }, [slug]);
 
   const handleFileChange = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
@@ -191,7 +203,7 @@ function PureMultimodalInput({
         setUploadQueue([]);
       }
     },
-    [setAttachments],
+    [setAttachments, uploadFile, setUploadQueue],
   );
 
   const handleNewConversation = async () => {
@@ -234,10 +246,13 @@ function PureMultimodalInput({
       // Limpiar el estado local
       setMessages([]);
       setInput('');
+      setAttachments([]);
+      setUploadQueue([]);
       resetHeight();
       
       toast({
-        description: "Conversación cerrada. Iniciando nueva conversación.",
+        title: "Conversación cerrada.",
+        description: "Iniciando nueva conversación.",
       });
     } catch (error) {
       toast({
@@ -267,7 +282,7 @@ function PureMultimodalInput({
       {(attachments.length > 0 || uploadQueue.length > 0) && (
         <div
           data-testid="attachments-preview"
-          className="flex flex-row gap-2 overflow-x-scroll items-end"
+          className="flex flex-row gap-2 overflow-x-auto scrollbar-thin items-end"
         >
           {attachments.map((attachment, index) => (
             <PreviewAttachment
@@ -342,6 +357,7 @@ function PureMultimodalInput({
             input={input}
             submitForm={submitForm}
             uploadQueue={uploadQueue}
+            hasAttachments={attachments.length > 0}
           />
         )}
       </div>

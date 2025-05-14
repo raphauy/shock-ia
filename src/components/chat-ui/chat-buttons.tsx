@@ -25,8 +25,7 @@ function PureAttachmentsButton({ fileInputRef, status }: AttachmentsButtonProps)
             event.preventDefault();
             fileInputRef.current?.click();
           }}
-          //disabled={status !== 'ready'}
-          disabled={true}
+          disabled={status !== 'ready'}
           variant="ghost"
         >
           <PaperclipIcon size={16} />
@@ -71,9 +70,10 @@ interface SendButtonProps {
   submitForm: () => void;
   input: string;
   uploadQueue: Array<string>;
+  hasAttachments?: boolean;
 }
 
-function PureSendButton({ submitForm, input, uploadQueue }: SendButtonProps) {
+function PureSendButton({ submitForm, input, uploadQueue, hasAttachments = false }: SendButtonProps) {
   return (
     <Button
       data-testid="send-button"
@@ -82,7 +82,7 @@ function PureSendButton({ submitForm, input, uploadQueue }: SendButtonProps) {
         event.preventDefault();
         submitForm();
       }}
-      disabled={input.length === 0 || uploadQueue.length > 0}
+      disabled={(input.length === 0 && !hasAttachments) || uploadQueue.length > 0}
     >
       <ArrowUpIcon size={16} />
     </Button>
@@ -93,6 +93,7 @@ export const SendButton = memo(PureSendButton, (prevProps, nextProps) => {
   if (prevProps.uploadQueue.length !== nextProps.uploadQueue.length)
     return false;
   if (prevProps.input !== nextProps.input) return false;
+  if (prevProps.hasAttachments !== nextProps.hasAttachments) return false;
   return true;
 });
 

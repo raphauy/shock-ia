@@ -63,6 +63,7 @@
     "@types/react-syntax-highlighter": "^15.5.13",
     "@types/xml2js": "^0.4.14",
     "@upstash/qstash": "^2.7.19",
+    "@vercel/blob": "^1.0.1",
     "@vercel/functions": "^1.5.0",
     "ai": "4.3.15",
     "autoprefixer": "10.4.15",
