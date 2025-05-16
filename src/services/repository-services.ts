@@ -118,6 +118,9 @@ Instrucciones:
     const created = await prisma.repository.create({
       data
     })
+
+    await updateRepositoryToolDefinition(created.id)
+
     return created
   } catch (error: any) {
     // Verificar si es un error de Prisma relacionado con la unicidad del nombre
@@ -252,7 +255,7 @@ export async function setFunctionName(id: string, functionName: string) {
   })
 
   await updateFunctionDefinition(id)
-
+  await updateRepositoryToolDefinition(id)
   return updated
 }
 
@@ -270,7 +273,8 @@ export async function setFunctionDescription(id: string, functionDescription: st
   })
 
   await updateFunctionDefinition(id)
-
+  await updateRepositoryToolDefinition(id)
+  
   return updated
 }
 
