@@ -28,6 +28,9 @@ type Props= {
 
 export function FieldForm({ id, repoId, eventId, customFields, closeDialog }: Props) {
   const [initialDataLoading, setInitialDataLoading] = useState(id ? true : false);
+  // Estado local para mantener el tipo real
+  const [fieldType, setFieldType] = useState<FieldType>("string");
+  
   const [initialValues, setInitialValues] = useState<FieldFormValues>({
     name: "",
     type: "string" as FieldType,
@@ -46,17 +49,24 @@ export function FieldForm({ id, repoId, eventId, customFields, closeDialog }: Pr
       getFieldDAOAction(id)
         .then(data => {
           if (data) {
-            setInitialValues({
+            // Establecer el tipo directamente en el estado local
+            if (["string", "number", "boolean", "list"].includes(data.type)) {
+              setFieldType(data.type as FieldType);
+            }
+            
+            const newValues = {
               repositoryId: data.repositoryId ?? undefined,
               eventId: data.eventId ?? undefined,
               linkedCustomFieldId: data.linkedCustomFieldId ?? undefined,
               name: data.name,
-              type: data.type,
+              type: data.type as FieldType,
               description: data.description,
               required: data.required,
               etiquetar: data.etiquetar,
               listOptions: data.listOptions ?? []
-            });
+            };
+            
+            setInitialValues(newValues);
           }
           setInitialDataLoading(false);
         })
@@ -98,7 +108,13 @@ export function FieldForm({ id, repoId, eventId, customFields, closeDialog }: Pr
   const onSubmit = async (data: FieldFormValues) => {
     setLoading(true)
     try {
-      await createOrUpdateFieldAction(id ? id : null, data)
+      // Forzar el tipo correcto desde nuestro estado local
+      const formDataWithCorrectType = {
+        ...data,
+        type: fieldType
+      };
+      
+      await createOrUpdateFieldAction(id ? id : null, formDataWithCorrectType)
       toast({ title: id ? "Campo actualizado" : "Campo creado" })
       closeDialog()
     } catch (error: any) {
@@ -145,26 +161,36 @@ export function FieldForm({ id, repoId, eventId, customFields, closeDialog }: Pr
             <FormField
               control={form.control}
               name="type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tipo</FormLabel>
-                  <FormControl>
-                    <Select onValueChange={(value) => field.onChange(value)} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecciona un Tipo" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {Object.values(FieldType).map((type) => (
-                          <SelectItem key={type} value={type}>{getTypeLabel(type)}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              render={({ field }) => {                
+                return (
+                  <FormItem>
+                    <FormLabel>Tipo</FormLabel>
+                    <FormControl>
+                      <Select 
+                        onValueChange={(value) => {
+                          // Actualizar ambos: el estado del formulario y nuestro estado local
+                          field.onChange(value);
+                          setFieldType(value as FieldType);
+                        }} 
+                        value={fieldType}
+                        defaultValue="string"
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecciona un Tipo" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {Object.values(FieldType).map((type) => (
+                            <SelectItem key={type} value={type}>{getTypeLabel(type)}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
             />
 
             {/* add a field for the list options here */}
@@ -227,13 +253,16 @@ export function FieldForm({ id, repoId, eventId, customFields, closeDialog }: Pr
               control={form.control}
               name="linkedCustomFieldId"
               render={({ field }) => {
+                // Verificar que el valor es válido para el enum
+                const safeValue = field.value ? field.value : undefined;
+                
                 return (
                   <FormItem>
                     <FormLabel>Linkear campo personalizado</FormLabel>
                     <FormControl>
                       <Select 
                         onValueChange={field.onChange}
-                        value={field.value}
+                        value={safeValue}
                       >
                         <FormControl>
                           <SelectTrigger disabled={customFields.length === 0}>
