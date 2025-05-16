@@ -5,8 +5,9 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { UseChatHelpers } from '@ai-sdk/react';
 import equal from 'fast-deep-equal';
-import { ArrowUpIcon, Loader, PaperclipIcon, PlusCircleIcon, StopCircleIcon, Wrench } from 'lucide-react';
+import { ArrowUpIcon, Loader, PaperclipIcon, PlusCircleIcon, StopCircleIcon } from 'lucide-react';
 import React, { memo, useState } from 'react';
+import { ToolsButton } from './tools-button';
 
 // Botón de adjuntos
 interface AttachmentsButtonProps {
@@ -95,75 +96,6 @@ export const SendButton = memo(PureSendButton, (prevProps, nextProps) => {
   if (prevProps.input !== nextProps.input) return false;
   if (prevProps.hasAttachments !== nextProps.hasAttachments) return false;
   return true;
-});
-
-// Botón de herramientas
-interface ToolsButtonProps {
-  userTools: {
-    totalTools: number;
-    tools: Array<{ name: string; mcpName: string }>;
-  };
-}
-
-function PureToolsButton({ userTools }: ToolsButtonProps) {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <Tooltip>
-      <Popover open={open} onOpenChange={setOpen}>
-        <TooltipTrigger asChild>
-          <PopoverTrigger asChild>
-            <Button
-              variant="ghost"
-              disabled={userTools.totalTools === 0}
-              className="rounded-full flex items-center gap-2 px-3 py-2 h-fit text-sm border border-input bg-background hover:bg-muted text-foreground ml-1"
-            >
-              <Wrench size={16} />
-              <span>Herramientas</span>
-              {userTools.totalTools > 0 && (
-                <span className="bg-accent-foreground text-accent rounded-full size-5 min-w-5 flex items-center justify-center text-[10px] font-medium">
-                  {userTools.totalTools}
-                </span>
-              )}
-            </Button>
-          </PopoverTrigger>
-        </TooltipTrigger>
-        <PopoverContent className="w-72 p-0" align="end" sideOffset={8}>
-          <div className="p-3 bg-accent/50 border-b">
-            <h3 className="font-medium text-sm">Herramientas disponibles (en desarrollo)</h3>
-          </div>
-          <div className="max-h-[300px] overflow-y-auto p-2">
-            {userTools.tools.length === 0 ? (
-              <div className="py-3 px-2 text-sm text-muted-foreground text-center">
-                No hay herramientas disponibles
-              </div>
-            ) : (
-              <div className="space-y-1">
-                {userTools.tools.map((tool, index) => (
-                  <div
-                    key={`${tool.mcpName}-${tool.name}-${index}`}
-                    className="py-1.5 px-2 text-sm hover:bg-accent/50 rounded-md cursor-default"
-                  >
-                    <div className="font-medium">{tool.name}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {tool.mcpName}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </PopoverContent>
-      </Popover>
-      <TooltipContent>
-        <p>Herramientas disponibles</p>
-      </TooltipContent>
-    </Tooltip>
-  );
-}
-
-export const ToolsButton = memo(PureToolsButton, (prevProps, nextProps) => {
-  return equal(prevProps.userTools, nextProps.userTools);
 });
 
 // Botón de nueva conversación

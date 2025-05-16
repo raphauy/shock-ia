@@ -9,22 +9,20 @@ import { toast } from '../ui/use-toast';
 import { MultimodalInput } from './multimodal-input';
 import { useParams } from 'next/navigation';
 import { Messages } from './messages';
+import { UiGroupToolData } from '@/lib/ai/tools';
 
 export function Chat({
   conversationId,
   clientId,
   initialMessages,
   selectedChatModel,
-  userTools = { totalTools: 0, tools: [] },
+  uiGroupsTools = [],
 }: {
   conversationId: string | null;
   clientId: string;
   initialMessages: Array<UIMessage>;
   selectedChatModel: string;
-  userTools?: {
-    totalTools: number;
-    tools: Array<{ name: string; mcpName: string }>;
-  };
+  uiGroupsTools: UiGroupToolData[];
 }) {
   const { mutate } = useSWRConfig();
   const params = useParams();
@@ -94,7 +92,7 @@ export function Chat({
                   messages={messages}
                   setMessages={setMessages}
                   append={append}
-                  userTools={userTools}
+                  uiGroupsTools={uiGroupsTools}
                 />
               </form>
             </div>
@@ -125,7 +123,7 @@ export function Chat({
                 messages={messages}
                 setMessages={setMessages}
                 append={append}
-                userTools={userTools}
+                uiGroupsTools={uiGroupsTools}
               />
             </form>
           </>

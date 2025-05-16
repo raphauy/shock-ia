@@ -8,6 +8,7 @@ import { getActiveMessages } from '@/services/conversationService';
 import type { Attachment, UIMessage } from 'ai';
 import { Message } from '@/lib/generated/prisma';
 import { getLocalTools } from '@/services/local-tools-services';
+import { getUiGroupsTools } from '@/lib/ai/tools';
 
 type Props = {
   params: Promise<{ 
@@ -31,10 +32,6 @@ export default async function Page(props: Props) {
     return <div>No se pudo obtener el cliente ({slug})</div>
   }
 
-  // Obtener todas las tools del usuario
-  const userTools= await getLocalTools(client.id)
-  console.log("userTools", userTools)
-
   const messagesFromDb = await getActiveMessages(currentUser.email, client.id)
 
   function convertToUIMessages(messages: Array<Message>): Array<UIMessage> {
@@ -56,6 +53,8 @@ export default async function Page(props: Props) {
   
   const selectedChatModel = chatModelFromCookie ? chatModelFromCookie.value : DEFAULT_CHAT_MODEL;
 
+  const uiGroupsTools= await getUiGroupsTools(client.id)
+
   return (
     <>
       <Chat
@@ -63,7 +62,7 @@ export default async function Page(props: Props) {
         clientId={client.id}
         initialMessages={convertToUIMessages(messagesFromDb ?? [])}
         selectedChatModel={selectedChatModel}
-        userTools={userTools}
+        uiGroupsTools={uiGroupsTools}
       />
     </>
   );

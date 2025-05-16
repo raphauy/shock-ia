@@ -92,11 +92,11 @@ export function FCPanel({ clientId, haveCRM, haveProducts, genericFunctions, fun
                             haveCRM &&
                             <div className="border-b pb-3 last:border-0">
                                 <h3 className="font-medium">CRM</h3>
-                                <p className="text-sm text-muted-foreground">
+                                <div className="text-sm text-muted-foreground">
                                     {crmFunctions.map(func => (
                                         <p key={func}>{func}</p>
                                     ))}
-                                </p>
+                                </div>
                             </div>
                         }
                         {haveProducts &&

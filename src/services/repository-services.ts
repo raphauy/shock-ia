@@ -1,8 +1,12 @@
-import * as z from "zod"
 import { prisma } from "@/lib/db"
-import { FunctionClientDAO, FunctionDAO, createFunction, deleteFunction, nameIsAvailable } from "./function-services"
-import { FieldDAO } from "./field-services"
+import { FieldType } from "@/lib/generated/prisma"
 import { colorPalette } from "@/lib/utils"
+import { Tool, tool } from "ai"
+import * as z from "zod"
+import { FieldDAO, getFieldsDAOByRepositoryId } from "./field-services"
+import { FunctionDAO, createFunction, deleteFunction, nameIsAvailable } from "./function-services"
+import { defaultFunction } from "./functions"
+import { genericExecute } from "@/lib/ai/tools"
 
 export type RepositoryDAO = {
 	id: string
@@ -50,6 +54,9 @@ export async function getRepositoryDAO(id: string) {
     where: {
       id
     },
+    include: {
+      function: true
+    }
   })
   return found as RepositoryDAO
 }
@@ -484,3 +491,258 @@ export async function getReposOfClient(clientId: string) {
 
   return repos as RepositoryDAO[]
 }
+
+
+
+/**
+ *  functions to manage dynamic tools
+ */
+
+// Tipo para la definición serializada de una herramienta
+export type SerializedToolDefinition = {
+  functionName: string;
+  description: string;
+  parametersSchema: string; // Schema de Zod serializado
+  repositoryId: string;
+}
+
+/**
+ * Función interna para generar una herramienta CoreTool a partir de un repositorio y sus campos
+ * @private
+ */
+async function _generateCoreTool(repositoryId: string, clientId: string): Promise<Record<string, Tool>> {
+  const repository = await getRepositoryDAO(repositoryId);
+  if (!repository) throw new Error("Repository not found");
+  const fields = await getFieldsDAOByRepositoryId(repositoryId);
+
+  // Convertir los campos del repositorio a propiedades para la herramienta
+  const parameters = z.object({
+    ...fields.reduce((acc, field) => {
+      // Determinar el tipo de campo para Zod
+      let fieldSchema;
+      
+      switch (field.type) {
+        case FieldType.string:
+          fieldSchema = z.string();
+          break;
+        case FieldType.number:
+          fieldSchema = z.number();
+          break;
+        case FieldType.boolean:
+          fieldSchema = z.boolean();
+          break;
+        case FieldType.list:
+          // Si es una lista con opciones predefinidas
+          if (field.listOptions && field.listOptions.length > 0) {
+            fieldSchema = z.enum(field.listOptions as [string, ...string[]]);
+          } else {
+            fieldSchema = z.array(z.string());
+          }
+          break;
+        default:
+          fieldSchema = z.string();
+      }
+      
+      // Añadir descripción al campo
+      fieldSchema = fieldSchema.describe(field.description);
+      
+      // Si el campo es requerido o no
+      if (!field.required) {
+        fieldSchema = fieldSchema.optional();
+      }
+      
+      return {
+        ...acc,
+        [field.name]: fieldSchema
+      };
+    }, {}),
+    // Añadir conversationId como campo requerido
+    conversationId: z.string().describe("ID de la conversación")
+  });
+
+  // Crear la herramienta dinámica
+  const dynamicTool = {
+    [repository.functionName]: tool({
+      description: repository.functionDescription,
+      parameters,
+      execute: async (args: Record<string, any>) => {
+        // Llamar a la función genérica de ejecución con los argumentos
+        return await genericExecute({
+          ...args,
+          repositoryId: repository.id,
+          functionName: repository.functionName,
+          clientId: clientId
+        });
+      }
+    })
+  };
+
+  return dynamicTool as Record<string, Tool>;
+}
+
+/**
+ * Serializa la definición de una herramienta para guardarla en la base de datos
+ */
+export async function serializeToolDefinition(repositoryId: string): Promise<string> {
+  const repository = await getRepositoryDAO(repositoryId);
+  if (!repository) throw new Error("Repository not found");
+  const fields = await getFieldsDAOByRepositoryId(repositoryId);
+  
+  // Crear un objeto que represente la definición de la herramienta
+  const toolDefinition: SerializedToolDefinition = {
+    functionName: repository.functionName,
+    description: repository.functionDescription,
+    parametersSchema: JSON.stringify(
+      fields.map(field => ({
+        name: field.name,
+        type: field.type,
+        description: field.description,
+        required: field.required,
+        listOptions: field.listOptions
+      }))
+    ),
+    repositoryId: repository.id,
+  };
+  
+  // Serializar la definición completa
+  return JSON.stringify(toolDefinition);
+}
+
+/**
+ * Hidrata (deserializa) una definición de herramienta para convertirla en una CoreTool utilizable
+ */
+export function hydrateToolDefinition(serializedDefinition: string, clientId: string): Record<string, Tool> {
+  // Deserializar la definición
+  const toolDefinition: SerializedToolDefinition = JSON.parse(serializedDefinition);
+  const fields = JSON.parse(toolDefinition.parametersSchema);
+  
+  // Crear el esquema de parámetros con Zod
+  const parameters = z.object({
+    ...fields.reduce((acc: Record<string, any>, field: any) => {
+      // Determinar el tipo de campo para Zod
+      let fieldSchema;
+      
+      switch (field.type) {
+        case FieldType.string:
+          fieldSchema = z.string();
+          break;
+        case FieldType.number:
+          fieldSchema = z.number();
+          break;
+        case FieldType.boolean:
+          fieldSchema = z.boolean();
+          break;
+        case FieldType.list:
+          // Si es una lista con opciones predefinidas
+          if (field.listOptions && field.listOptions.length > 0) {
+            fieldSchema = z.enum(field.listOptions as [string, ...string[]]);
+          } else {
+            fieldSchema = z.array(z.string());
+          }
+          break;
+        default:
+          fieldSchema = z.string();
+      }
+      
+      // Añadir descripción al campo
+      fieldSchema = fieldSchema.describe(field.description);
+      
+      // Si el campo es requerido o no
+      if (!field.required) {
+        fieldSchema = fieldSchema.optional();
+      }
+      
+      return {
+        ...acc,
+        [field.name]: fieldSchema
+      };
+    }, {}),
+    // Añadir conversationId como campo requerido
+    conversationId: z.string().describe("ID de la conversación")
+  });
+  
+  // Crear la herramienta dinámica
+  const dynamicTool = {
+    [toolDefinition.functionName]: tool({
+      description: toolDefinition.description,
+      parameters,
+      execute: async (args: Record<string, any>) => {
+        // Llamar a la función genérica de ejecución con los argumentos
+        return await genericExecute({
+          ...args,
+          repositoryId: toolDefinition.repositoryId,
+          functionName: toolDefinition.functionName,
+          clientId: clientId
+        });
+      }
+    })
+  };
+  
+  return dynamicTool as Record<string, Tool>;
+}
+
+/**
+ * Actualiza el campo functionDefinition del repositorio con la definición serializada de la herramienta
+ */
+export async function updateRepositoryToolDefinition(repositoryId: string): Promise<void> {
+  console.log("updateRepositoryToolDefinition", repositoryId)
+  // Serializar la definición de la herramienta
+  const serializedDefinition = await serializeToolDefinition(repositoryId);
+  
+  // Actualizar el campo functionDefinition del repositorio
+  await prisma.repository.update({
+    where: {
+      id: repositoryId
+    },
+    data: {
+      function: {
+        update: {
+          toolDefinition: serializedDefinition
+        }
+      }
+    }
+  });
+}
+
+
+
+/**
+ * Obtiene la herramienta CoreTool desde la definición almacenada en la base de datos.
+ * Si no existe una definición almacenada, la genera y la guarda automáticamente.
+ * Esta es la función principal que debe utilizarse para obtener herramientas CoreTool.
+ */
+export async function getToolFromDatabase(repositoryId: string, clientId: string): Promise<Record<string, Tool>> {
+  const repository = await getRepositoryDAO(repositoryId);
+  if (!repository) throw new Error("Repository not found");
+  
+  try {
+    // Si no hay definición almacenada o está vacía, generarla y guardarla
+    if (!repository.function.toolDefinition || repository.function.toolDefinition === "") {
+      // Generar la herramienta
+      const tool = await _generateCoreTool(repositoryId, clientId);
+      
+      // Guardar la definición en la base de datos
+      await updateRepositoryToolDefinition(repositoryId);
+      
+      return tool;
+    }
+    
+    // Hidratar la definición almacenada
+    return hydrateToolDefinition(repository.function.toolDefinition, clientId);
+  } catch (error) {
+    console.error("Error al obtener la herramienta:", error);
+    
+    // En caso de error al hidratar, regenerar la herramienta
+    const tool = await _generateCoreTool(repositoryId, clientId);
+    
+    // Intentar actualizar la definición
+    try {
+      await updateRepositoryToolDefinition(repositoryId);
+    } catch (updateError) {
+      console.error("Error al actualizar la definición:", updateError);
+    }
+    
+    return tool;
+  }
+}
+

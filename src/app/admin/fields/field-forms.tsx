@@ -27,46 +27,64 @@ type Props= {
 }
 
 export function FieldForm({ id, repoId, eventId, customFields, closeDialog }: Props) {
+  const [initialDataLoading, setInitialDataLoading] = useState(id ? true : false);
+  const [initialValues, setInitialValues] = useState<FieldFormValues>({
+    name: "",
+    type: "string" as FieldType,
+    description: "",
+    required: true,
+    etiquetar: false,
+    repositoryId: repoId ?? undefined,
+    eventId: eventId ?? undefined,
+    linkedCustomFieldId: undefined,
+    listOptions: []
+  });
+
+  useEffect(() => {
+    if (id) {
+      setInitialDataLoading(true);
+      getFieldDAOAction(id)
+        .then(data => {
+          if (data) {
+            setInitialValues({
+              repositoryId: data.repositoryId ?? undefined,
+              eventId: data.eventId ?? undefined,
+              linkedCustomFieldId: data.linkedCustomFieldId ?? undefined,
+              name: data.name,
+              type: data.type,
+              description: data.description,
+              required: data.required,
+              etiquetar: data.etiquetar,
+              listOptions: data.listOptions ?? []
+            });
+          }
+          setInitialDataLoading(false);
+        })
+        .catch(() => {
+          setInitialDataLoading(false);
+        });
+    }
+  }, [id]);
+  
   const form = useForm<FieldFormValues>({
     resolver: zodResolver(repoFieldSchema),
-    defaultValues: async () => {
-      if (id) {
-        const data = await getFieldDAOAction(id)
-        if (data) {
-          return {
-            repositoryId: data.repositoryId ?? undefined,
-            eventId: data.eventId ?? undefined,
-            linkedCustomFieldId: data.linkedCustomFieldId ?? undefined,
-            name: data.name,
-            type: data.type,
-            description: data.description,
-            required: data.required,
-            etiquetar: data.etiquetar,
-            listOptions: data.listOptions ?? []
-          }
-        }
-      }
-      return {
-        name: "",
-        type: "string",
-        description: "",
-        required: true,
-        etiquetar: false,
-        repositoryId: repoId ?? undefined,
-        eventId: eventId ?? undefined,
-        linkedCustomFieldId: undefined,
-        listOptions: []
-      }
-    },
+    defaultValues: initialValues,
     mode: "onChange",
-  })
+  });
+
+  // Actualizar los valores del formulario cuando cambian los valores iniciales
+  useEffect(() => {
+    if (!initialDataLoading) {
+      form.reset(initialValues);
+    }
+  }, [initialValues, initialDataLoading, form]);
+
   const [loading, setLoading] = useState(false)
 
   const [filteredCustomFields, setFilteredCustomFields] = useState<CustomFieldDAO[]>(customFields)
 
   const watchedType = form.watch("type")
   const watchedListOptions = form.watch("listOptions")
-  console.log(watchedType)
 
   useEffect(() => {
     const selectedType = watchedType
@@ -90,29 +108,16 @@ export function FieldForm({ id, repoId, eventId, customFields, closeDialog }: Pr
     }
   }
 
-  useEffect(() => {
-    if (id) {
-      getFieldDAOAction(id).then((data) => {
-        if (data) {
-          console.log("linkedCustomFieldId: ", data.linkedCustomFieldId);
-          form.reset({
-            repositoryId: data.repositoryId ?? undefined,
-            eventId: data.eventId ?? undefined,
-            linkedCustomFieldId: data.linkedCustomFieldId ?? undefined,
-            name: data.name,
-            type: data.type,
-            description: data.description,
-            required: data.required,
-            etiquetar: data.etiquetar,
-            listOptions: data.listOptions ?? []
-          })
-        }
-      })
-    }
-  }, [form, id])
-
   function handleListOptionsChange(options: string[]) {
     form.setValue("listOptions", options)
+  }
+
+  if (initialDataLoading) {
+    return (
+      <div className="flex justify-center items-center py-8">
+        <Loader className="h-8 w-8 animate-spin" />
+      </div>
+    );
   }
 
   return (

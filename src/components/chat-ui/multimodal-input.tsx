@@ -17,10 +17,11 @@ import {
   AttachmentsButton, 
   StopButton, 
   SendButton, 
-  ToolsButton, 
   NewConversationButton,
   TooltipButtonProvider
 } from './chat-buttons';
+import { ToolsButton } from './tools-button';
+import { UiGroupToolData } from '@/lib/ai/tools';
 
 function PureMultimodalInput({
   conversationId,
@@ -37,7 +38,7 @@ function PureMultimodalInput({
   append,
   handleSubmit,
   className,
-  userTools = { totalTools: 0, tools: [] },
+  uiGroupsTools,
 }: {
   conversationId: string | null;
   clientId: string;
@@ -53,10 +54,7 @@ function PureMultimodalInput({
   append: UseChatHelpers['append'];
   handleSubmit: UseChatHelpers['handleSubmit'];
   className?: string;
-  userTools?: {
-    totalTools: number;
-    tools: Array<{ name: string; mcpName: string }>;
-  };
+  uiGroupsTools: UiGroupToolData[];
 }) {
   const session= useSession()
   const email= session.data?.user?.email
@@ -341,7 +339,7 @@ function PureMultimodalInput({
       <div className="absolute bottom-0 p-2 w-fit flex flex-row justify-start items-center">
         <TooltipButtonProvider>
           <AttachmentsButton fileInputRef={fileInputRef} status={status} />
-          <ToolsButton userTools={userTools} />
+          <ToolsButton uiGroupsTools={uiGroupsTools} />
           <NewConversationButton 
             handleNewConversation={handleNewConversation}
             disabled={messages.length === 0 || status !== 'ready'}

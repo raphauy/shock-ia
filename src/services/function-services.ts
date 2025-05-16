@@ -25,6 +25,7 @@ export type FunctionDAO = {
 	name: string
 	description: string | null
 	definition: string | null
+  toolDefinition: string | null
   tags: string[]
 	createdAt: Date
 	updatedAt: Date
@@ -395,6 +396,28 @@ export async function getClientFunctions(clientId: string) {
   })
 
   return found
+}
+
+export async function getClientRepositoryFunctionsNames(clientId: string) {
+  const found = await prisma.clientFunction.findMany({
+    where: {
+      clientId,
+      function: {
+        repositories: {
+          some: {}
+        }
+      }
+    },
+    select: {
+      function: {
+        select: {
+          name: true
+        }
+      }
+    }
+  })
+
+  return found.map((f) => f.function.name)
 }
 
 export async function getTagsOfClientFunction(clientId: string, functionId: string) {

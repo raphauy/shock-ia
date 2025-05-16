@@ -8,7 +8,7 @@ import equal from 'fast-deep-equal';
 import { AnimatePresence, motion } from 'framer-motion';
 import Image from 'next/image';
 import { memo } from 'react';
-import { DocumentTool } from './document-tool';
+import { DocumentTool, DocumentToolSkeleton, GenericTool } from './component-tools';
 import { Markdown } from './markdown';
 import { MessageActions } from './message-actions';
 import { MessageReasoning } from './message-reasoning';
@@ -113,8 +113,11 @@ const PurePreviewMessage = ({
                       })}
                     >
                       {
-                        toolName === 'getDocument' && (
-                          <DocumentTool args={args} slug={slug} />
+                        toolName === 'getDocument' ? (
+                          <DocumentToolSkeleton />
+                        )
+                      : (
+                          <GenericTool toolName={toolName} args={args} />
                         )
                       }
                       {/* {toolName === 'getWeather' ? (
@@ -139,37 +142,18 @@ const PurePreviewMessage = ({
                 }
 
                 if (state === 'result') {
-                  const { result } = toolInvocation;
+                  const { args, result } = toolInvocation;
 
                   return (
                     <div key={toolCallId}>
                       {
-                        toolName === 'getDocument' && (
-                          <DocumentTool args={result} slug={slug} />
+                        toolName === 'getDocument' ? (
+                          <DocumentTool documentId={args.documentId} documentName={result.documentName} slug={slug} />
                         )
-                      }                      {/* {toolName === 'getWeather' ? (
-                        <Weather weatherAtLocation={result} />
-                      ) : toolName === 'createDocument' ? (
-                        <DocumentPreview
-                          isReadonly={isReadonly}
-                          result={result}
-                        />
-                      ) : toolName === 'updateDocument' ? (
-                        <DocumentToolResult
-                          type="update"
-                          result={result}
-                          isReadonly={isReadonly}
-                        />
-                      ) : toolName === 'requestSuggestions' ? (
-                        <DocumentToolResult
-                          type="request-suggestions"
-                          result={result}
-                          isReadonly={isReadonly}
-                        />
-                      ) : (
-                        // <pre>{JSON.stringify(result, null, 2)}</pre>
-                        <p />
-                      )} */}
+                      : (
+                          <GenericTool toolName={toolName} args={args} result={result} />
+                        )
+                      }
                     </div>
                   );
                 }
