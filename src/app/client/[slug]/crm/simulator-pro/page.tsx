@@ -9,6 +9,7 @@ import type { Attachment, UIMessage } from 'ai';
 import { Message } from '@/lib/generated/prisma';
 import { getLocalTools } from '@/services/local-tools-services';
 import { getUiGroupsTools } from '@/lib/ai/tools';
+import { convertToUIMessages } from '@/services/conversation-v2-services';
 
 type Props = {
   params: Promise<{ 
@@ -34,17 +35,6 @@ export default async function Page(props: Props) {
 
   const messagesFromDb = await getActiveMessages(currentUser.email, client.id)
 
-  function convertToUIMessages(messages: Array<Message>): Array<UIMessage> {
-    return messages.map((message) => ({
-      id: message.id,
-      parts: message.parts as UIMessage['parts'],
-      role: message.role as UIMessage['role'],
-      // Note: content will soon be deprecated in @ai-sdk/react
-      content: '',
-      createdAt: message.createdAt,
-      experimental_attachments: (message.attachments as unknown as Array<Attachment>) ?? [],
-    }));
-  }
 
   const conversationId = messagesFromDb && messagesFromDb.length > 0 ? messagesFromDb[0].conversationId : null;
 

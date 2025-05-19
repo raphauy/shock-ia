@@ -18,6 +18,9 @@ importers:
       '@ai-sdk/react':
         specifier: ^1.2.12
         version: 1.2.12(react@19.1.0)(zod@3.23.8)
+      '@ai-sdk/ui-utils':
+        specifier: ^1.2.11
+        version: 1.2.11(zod@3.23.8)
       '@figuro/chatwoot-sdk':
         specifier: ^1.1.16
         version: 1.1.16

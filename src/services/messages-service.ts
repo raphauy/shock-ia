@@ -20,6 +20,13 @@ export async function saveMessage(message: MessageFormValues) {
   return created
 }
 
+export async function saveMessages(messages: MessageFormValues[]) {
+  const created = await prisma.message.createMany({
+    data: messages,
+  })
+  return created
+}
+
 export async function getConversationIdFromMessageId(messageId: string) {
   const message= await prisma.message.findUnique({
     where: {
