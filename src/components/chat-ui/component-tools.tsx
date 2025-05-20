@@ -19,7 +19,7 @@ export function DocumentTool({ documentId, documentName, slug }: DocumentToolPro
             <Link className="flex px-1" href={`/client/${slug}/documents/${documentId}`} target="_blank">
                 <Button variant="link" className="h-6"><p>{documentName}</p></Button>
             </Link>
-            <BookOpen className="size-6 ml-auto"/>
+            <BookOpen className="size-6 ml-auto"/>            
         </div>
     )
 }

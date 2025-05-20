@@ -27,6 +27,12 @@ const items = [
     group: "kanban",
   },  
   {
+    title: "Conversaciones Pro",
+    url: `crm/conversations-pro`,
+    icon: MessageCircle,
+    group: "kanban",
+  },
+  {
     title: "Contactos",
     url: `crm/contacts?last=30D`,
     icon: User,

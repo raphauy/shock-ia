@@ -13,6 +13,7 @@ import { Markdown } from './markdown';
 import { MessageActions } from './message-actions';
 import { MessageReasoning } from './message-reasoning';
 import { PreviewAttachment } from './preview-attachment';
+import GPTData from '@/app/client/[slug]/chats/gpt-data';
 
 const PurePreviewMessage = ({
   message,
@@ -61,7 +62,31 @@ const PurePreviewMessage = ({
                 ))}
               </div>
             )}
-
+            {(!message.parts || message.parts.length === 0) && (
+              <div className="flex gap-2">
+                {
+                  //@ts-ignore
+                  message.gptData && <GPTData gptData={message.gptData} slug={slug} />
+                }
+                {message.role === 'assistant' && (
+                  <AssistantAvatar status={status} />
+                )}
+                
+                {(message.role === 'assistant' || message.role === 'user') && (
+                  <div className="flex flex-row gap-2 items-start mt-1">
+                    <div
+                      data-testid="message-content"
+                      className={cn('flex flex-col gap-4', {
+                        'bg-primary text-primary-foreground px-3 py-2 rounded-xl':
+                          message.role === 'user',
+                      })}
+                    >
+                      <Markdown>{message.content}</Markdown>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
             {message.parts?.map((part, index) => {
               const { type } = part;
               const key = `message-${message.id}-part-${index}`;
@@ -147,8 +172,10 @@ const PurePreviewMessage = ({
                   return (
                     <div key={toolCallId}>
                       {
-                        toolName === 'getDocument' ? (
-                          <DocumentTool documentId={args.documentId} documentName={result.documentName} slug={slug} />
+                        toolName === 'getDocument' ? (                          
+                          <div>
+                            <DocumentTool documentId={args.docId} documentName={result.documentName} slug={slug} />
+                          </div>
                         )
                       : (
                           <GenericTool toolName={toolName} args={args} result={result} />

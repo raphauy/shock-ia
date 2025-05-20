@@ -414,16 +414,20 @@ export function convertToUIMessages(messages: Array<Message>): Array<UIMessage> 
       parts: message.parts as UIMessage['parts'],
       role: message.role as UIMessage['role'],
       // Note: content will soon be deprecated in @ai-sdk/react
-      content: '',
+      content: message.content,
       createdAt: message.createdAt,
       experimental_attachments: (message.attachments as unknown as Array<Attachment>) ?? [],
+      gptData: message.gptData
     }));
 }
 
 export async function getConversationMessages(conversationId: string, take = 20) {
     const messages= await prisma.message.findMany({
         where: {
-            conversationId: conversationId
+            conversationId: conversationId,
+            role: {
+                not: "system"
+            }
         },
         orderBy: {
             createdAt: 'asc'
@@ -443,4 +447,111 @@ async function getConversationWithContact(conversationId: string) {
         }
     })
     return conversation
+}
+
+/**
+ * Obtiene conversaciones paginadas para un cliente específico
+ * 
+ * @param clientId ID del cliente
+ * @param page Número de página (comienza en 1)
+ * @param pageSize Tamaño de página
+ * @returns Conversaciones paginadas y metadatos
+ */
+export async function getPaginatedConversations(clientId: string, page: number = 1, pageSize: number = 10, searchQuery?: string) {
+    const skip = (page - 1) * pageSize;
+    
+    // Construir el filtro de búsqueda
+    let where: any = { clientId };
+    if (searchQuery && searchQuery.trim() !== "") {
+        where = {
+            ...where,
+            OR: [
+                { phone: { contains: searchQuery, mode: "insensitive" } },
+                { contact: { name: { contains: searchQuery, mode: "insensitive" } } }
+            ]
+        };
+    }
+    
+    try {
+        // Obtener total de conversaciones para el cliente (con filtro de búsqueda)
+        const totalCount = await prisma.conversation.count({
+            where
+        });
+        
+        console.log(`Conversaciones totales para cliente ${clientId}: ${totalCount}`);
+        
+        // Si no hay conversaciones, devolver vacío
+        if (totalCount === 0) {
+            return {
+                data: [],
+                meta: {
+                    currentPage: page,
+                    pageSize,
+                    totalCount: 0,
+                    totalPages: 0,
+                    hasNextPage: false,
+                    hasPreviousPage: false
+                }
+            };
+        }
+        
+        // Obtener conversaciones con información relevante, sin incluir los mensajes
+        const conversations = await prisma.conversation.findMany({
+            where,
+            select: {
+                id: true,
+                phone: true,
+                createdAt: true,
+                updatedAt: true,
+                contact: {
+                    select: {
+                        id: true,
+                        name: true,
+                        phone: true,
+                        imageUrl: true
+                    }
+                }
+            },
+            orderBy: {
+                updatedAt: 'desc'
+            },
+            skip,
+            take: pageSize
+        });
+        
+        console.log(`Conversaciones obtenidas: ${conversations.length}`);
+        
+        // Calcular metadatos de paginación
+        const totalPages = Math.ceil(totalCount / pageSize);
+        const hasNextPage = page < totalPages;
+        const hasPreviousPage = page > 1;
+        
+        console.log(`Metadatos de paginación: total=${totalCount}, páginas=${totalPages}, página actual=${page}`);
+        
+        return {
+            data: conversations,
+            meta: {
+                currentPage: page,
+                pageSize,
+                totalCount,
+                totalPages,
+                hasNextPage,
+                hasPreviousPage
+            }
+        };
+    } catch (error) {
+        console.error("Error obteniendo conversaciones paginadas:", error);
+        // En caso de error, devolver valores por defecto
+        return {
+            data: [],
+            meta: {
+                currentPage: page,
+                pageSize,
+                totalCount: 0,
+                totalPages: 0,
+                hasNextPage: false,
+                hasPreviousPage: false
+            }
+        };
+    }
 }
