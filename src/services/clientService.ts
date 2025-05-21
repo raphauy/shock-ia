@@ -918,6 +918,19 @@ export async function getClientIdBySlug(slug: string) {
   return client?.id || null
 }
 
+export async function getClientIdByConversationId(conversationId: string) {
+  const conversation= await prisma.conversation.findUnique({
+    where: {
+      id: conversationId
+    },
+    select: {
+      clientId: true
+    }
+  })
+  return conversation?.clientId || null
+}
+
+
 export async function getLastClientId() {
   const client= await prisma.client.findFirst({
     orderBy: {

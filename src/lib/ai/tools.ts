@@ -1,8 +1,9 @@
 import { Tool, tool } from 'ai';
 import { z } from 'zod';
-import { getDocumentDAO } from '../../services/document-services';
+import { getDocumentDAO, getDocumentsCount, getDocumentsCountByClient } from '../../services/document-services';
 import { getRepositorysDAO, getToolFromDatabase } from '@/services/repository-services';
-import { defaultFunction } from '@/services/functions';
+import { buscarOrden, buscarProducto, defaultFunction } from '@/services/functions';
+import { clientHasOrderFunction, getClient, getClientIdByConversationId } from '@/services/clientService';
 
 export async function genericExecute(args: any)  {
     const { repositoryId, functionName, conversationId, clientId, ...data } = args;
@@ -23,7 +24,7 @@ export async function genericExecute(args: any)  {
 }
 
 export async function getAllClientTools(clientId: string) {
-    const staticTools= await getStaticTools()
+    const staticTools= await getStaticTools(clientId)
     const dynamicTools= await getDynamicTools(clientId)
     const mcpTools= await getMCPTools(clientId)
     return {
@@ -33,10 +34,33 @@ export async function getAllClientTools(clientId: string) {
     }
 }
 
-async function getStaticTools() {
-    return {
-        ...getDocumentTool
+async function getStaticTools(clientId: string) {
+    let res= {}
+    const client= await getClient(clientId)
+    if (!client) throw new Error("Client not found")
+
+    const documentCount= await getDocumentsCountByClient(clientId)
+    if (documentCount > 0) {
+        res= {
+            ...res,
+            ...getDocumentTool
+        }
     }
+    const haveProducts= client.haveProducts
+    if (haveProducts) {
+        res= {
+            ...res,
+            ...buscarProductoTool
+        }
+    }
+    const haveOrderFunction= await clientHasOrderFunction(clientId)
+    if (haveOrderFunction) {
+        res= {
+            ...res,
+            ...buscarOrdenTool
+        }
+    }
+    return res
 }
 
 async function getDynamicTools(clientId: string) {
@@ -101,8 +125,39 @@ export async function obtenerDocumento(id: string) {
         content: document.textContent ?? null,
     }
     return res
-  }
-  
+}
+
+export const buscarProductoTool= {
+    buscarProducto: tool({
+        description: 'Busca un producto en la base de datos de productos. Esta es una búsqueda semántica, por lo que la query será transformada a un vector y se buscarán productos que tengan una similaridad semántica. Entre los resultados viene el campo similarity que indica la similaridad del producto con la query, cuanto más cercano a 0, más similar es el producto con la query.',
+        parameters: z.object({
+            conversationId: z.string().describe('Id de la conversación que se proporciona en el prompt.'),
+            query: z.string().describe('Nombre, descripción o algún otro aspecto del producto que se quiere buscar.'),
+        }),
+        execute: async ({ conversationId, query }) => {
+            const clientId= await getClientIdByConversationId(conversationId)
+            if (!clientId) return "No se encontró un cliente para el conversationId: " + conversationId
+            const response= await buscarProducto(clientId, conversationId, query)
+            return response
+        },
+    })
+}
+
+export const buscarOrdenTool= {
+    buscarOrden: tool({
+        description: 'Busca una orden en la base de datos de ordenes a partir de su ID.',
+        parameters: z.object({
+            conversationId: z.string().describe('Id de la conversación que se proporciona en el prompt.'),
+            orderId: z.string().describe('Id de la orden que se quiere buscar.'),
+        }),
+        execute: async ({ conversationId, orderId }) => {
+            const clientId= await getClientIdByConversationId(conversationId)
+            if (!clientId) return "No se encontró un cliente para el conversationId: " + conversationId
+            const response= await buscarOrden(clientId, conversationId, orderId)
+            return response
+        },
+    })
+}
 
 /******************************************************************************************************
  * UI Group Tools Data
@@ -119,14 +174,14 @@ export type UiGroupToolData= {
 }
 
 export async function getUiGroupsTools(clientId: string): Promise<UiGroupToolData[]> {
-    const staticTools = await getStaticTools();
+    const staticTools = await getStaticTools(clientId);
     const dynamicTools = await getDynamicTools(clientId);
     const mcpTools = await getMCPTools(clientId);
     
     const uiGroupsTools: UiGroupToolData[] = [
         {
             groupName: "Local Static Tools",
-            tools: toolToToolData(getDocumentTool)
+            tools: toolToToolData(staticTools)
         },
         {
             groupName: "Local Dynamic Tools",
@@ -142,16 +197,6 @@ export async function getUiGroupsTools(clientId: string): Promise<UiGroupToolDat
 
 // Helper function to convert a tool to a ToolData[]
 function toolToToolData(toolList: any): ToolData[] {
-    // toolList example:
-    // {
-    //     getDocument: tool({
-    //         description: 'Devuelve la información completa de un documento a partir de su id. Los documentos pueden utilizarse para responder a las peticiones del usuario.".',
-    //     }),
-    //     otherTool: tool({
-    //         description: 'Descripción de otherTool".',
-    //     }),
-    // }   
-    // return an array of ToolData
     return Object.keys(toolList).map(toolName => ({
         name: toolName,
         description: (toolList as any)[toolName]?.description || ""
