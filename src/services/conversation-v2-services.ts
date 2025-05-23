@@ -141,6 +141,10 @@ export async function processIncomingMessage(messageId: string, clientId: string
         return false
     }
 
+    const chatwootAccountId= await getChatwootAccountId(client.id)
+    if (!chatwootAccountId) throw new Error("chatwootAccountId not found")
+    if (!conversation.chatwootConversationId) throw new Error("chatwootConversationId not found")
+
     console.log("Iniciando procesamiento con IA...");
     try {
 
@@ -209,10 +213,6 @@ export async function processIncomingMessage(messageId: string, clientId: string
             },
         );
 
-        const chatwootAccountId= await getChatwootAccountId(client.id)
-        if (!chatwootAccountId) throw new Error("chatwootAccountId not found")
-        if (!conversation.chatwootConversationId) throw new Error("chatwootConversationId not found")
-            
         const lastMessageWasAudio= conversation.lastMessageWasAudio
         if (lastMessageWasAudio && client.haveAudioResponse) {
           const audioBase64 = await generateAudioFromElevenLabs(created.content, "KXQbcKbroGSUf9Q5Crjd")
@@ -226,8 +226,7 @@ export async function processIncomingMessage(messageId: string, clientId: string
         return true
     } catch (error) {
         console.error("Error al procesar mensaje con IA:", error);
-        // TODO: send error message to conversation
-        //await sendTextToConversation(parseInt(chatwootAccountId), conversation.chatwootConversationId, "Error al procesar mensaje con IA", true)
+        await sendTextToConversation(parseInt(chatwootAccountId), conversation.chatwootConversationId, "Hubo un error al procesar tu mensaje", true)
         return false
     }
 
