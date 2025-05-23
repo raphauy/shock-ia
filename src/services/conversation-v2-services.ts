@@ -361,7 +361,10 @@ function convertChatwootAttachments(attachments?: ChatwootAttachment[]): Attachm
     if (!attachments || attachments.length === 0) {
         return [];
     }
-    
+
+    // filter attachments to discard audio
+    attachments= attachments.filter(attachment => attachment.file_type !== 'audio')
+
     return attachments.map(attachment => {
         // Extraer el nombre del archivo de la URL
         const url = attachment.data_url;
