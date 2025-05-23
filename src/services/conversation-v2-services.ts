@@ -1,21 +1,28 @@
 // Definimos los tipos basados en la estructura real de los mensajes de Chatwoot
-import { prisma } from "@/lib/db";
-import { ChatwootAttachment, IncomingChatwootMessage } from "@/services/chatwoot-types";
-import { getChatwootAccountId, getClient, getClientIdByChatwootAccountId } from "@/services/clientService";
-import { ContactFormValues, createContact, getContactByChatwootId, getContactByPhone, getOrCreateContact } from "@/services/contact-services";
-import { MessageFormValues, saveMessage, saveMessages } from "@/services/messages-service";
-import { Attachment, FileUIPart, TextUIPart, UIMessage } from "@ai-sdk/ui-utils";
+import { getMostRecentUserMessage } from "@/lib/ai/chat-utils";
 import { myProvider } from "@/lib/ai/providers";
 import { getAllClientTools } from "@/lib/ai/tools";
-import { appendResponseMessages, generateText } from "ai";
+import { prisma } from "@/lib/db";
+import { EventType, Message } from '@/lib/generated/prisma';
+import { ChatwootAttachment, IncomingChatwootMessage } from "@/services/chatwoot-types";
+import { getChatwootAccountId, getClient, getClientHaveCRM, getClientIdByChatwootAccountId } from "@/services/clientService";
+import { getContactByChatwootId, getContactByPhone } from "@/services/contact-services";
 import { createConversation, getActiveConversation, getSystemMessage } from "@/services/conversationService";
-import { getContext } from "@/services/function-call-services";
-import { generateAudioFromElevenLabs, getFullModelDAO } from "@/services/model-services";
-import { getValue } from "./config-services";
-import { Message } from '@/lib/generated/prisma';
-import { getMostRecentUserMessage } from "@/lib/ai/chat-utils";
-import { getStageByChatwootId } from "./stage-services";
+import { MessageFormValues, saveMessage } from "@/services/messages-service";
+import { generateAudioFromElevenLabs } from "@/services/model-services";
+import { Attachment, FileUIPart, TextUIPart, UIMessage } from "@ai-sdk/ui-utils";
+import { appendResponseMessages, generateText } from "ai";
+import { format } from "date-fns";
+import { toZonedTime } from "date-fns-tz";
+import { es } from "date-fns/locale";
+import { getFutureBookingsDAOByPhone } from "./booking-services";
 import { sendAudioToConversation, sendTextToConversation } from "./chatwoot";
+import { getValue } from "./config-services";
+import { getClientCustomFields } from "./customfield-services";
+import { getDocumentsDAOByClient } from "./document-services";
+import { getActiveEventsDAOByClientId } from "./event-services";
+import { getFieldValuesByContactId } from "./fieldvalue-services";
+import { getStageByChatwootId } from "./stage-services";
 
 
 /**
@@ -157,20 +164,20 @@ export async function processIncomingMessage(messageId: string, clientId: string
         }
 
         const phone= contact.phone || contact.name // name for widget-web
-        const contextResponse= await getContext(clientId, phone, "TODO: remove this")
-  
-        const systemMessage= getSystemMessage(client.prompt, contextResponse.contextString)
-      
+
+        const clientContext= await getClientContext(clientId, phone)   
+        const system= client.prompt + "\n" + clientContext
+
         console.log("messages.count: " + messagesFromDb.length)
-        console.log("messages: " + JSON.stringify(uiMessages, null, 3))
-    
+        console.log("systemMessage: " + system)
+        
         const tools= await getAllClientTools(client.id)
-    
+        
         const result = await generateText({        
             model: myProvider.languageModel("gpt-4.1"),
             temperature: 0,
             maxSteps: 10,
-            system: systemMessage.content,
+            system,
             messages: uiMessages,
             tools,
         });
@@ -219,6 +226,8 @@ export async function processIncomingMessage(messageId: string, clientId: string
         return true
     } catch (error) {
         console.error("Error al procesar mensaje con IA:", error);
+        // TODO: send error message to conversation
+        //await sendTextToConversation(parseInt(chatwootAccountId), conversation.chatwootConversationId, "Error al procesar mensaje con IA", true)
         return false
     }
 
@@ -554,4 +563,184 @@ export async function getPaginatedConversations(clientId: string, page: number =
             }
         };
     }
+}
+
+export async function getClientContext(clientId: string, phone: string) {
+
+    const timezone = "America/Montevideo";
+    const now = new Date();
+    const zonedDate = toZonedTime(now, timezone);
+    const hoy = format(zonedDate, "EEEE, dd/MM/yyyy HH:mm:ss", {
+      locale: es,
+    });
+  
+    let contextString= "\n"
+    contextString+= "<Contexto técnico>\n"
+    contextString+= "Hablas correctamente el español, incluyendo el uso adecuado de tildes y eñes.\nPor favor, utiliza solo caracteres compatibles con UTF-8\n"
+    contextString+= `Hoy es ${hoy} en Montevideo\n`
+  
+  
+    const conversation= await getActiveConversation(phone, clientId)
+    let contact= conversation?.contact
+    let clientHaveCRM= false
+    if (conversation) {
+      clientHaveCRM= conversation.client.haveCRM
+      contextString+= "conversationId para invocar funciones: " + conversation.id + "\n"
+    } else {
+      console.log("No hay conversación activa");
+      contact= await getContactByPhone(phone, clientId)
+      clientHaveCRM= await getClientHaveCRM(clientId)
+    }
+    contextString+= "</Contexto técnico>\n"
+  
+  
+  
+    if (contact && clientHaveCRM) {
+      contextString+= "\n"
+      contextString+= "En la siguiente sección se encuentra información del Contacto asociado al usuario de esta conversación.\n"
+      contextString+= "<Información del Contacto>\n"
+      contextString+= `contactId: ${contact.id}\n`
+      contextString+= `Nombre: ${contact.name}\n`
+      contextString+= `Teléfono: ${contact.phone}\n`
+      contextString+= `Estado CRM: ${contact.stage?.name}\n`
+      contextString+= `Etiquetas: ${contact.tags}\n`
+  
+      const customFields= await getClientCustomFields(clientId)
+      const customFieldsValues= await getFieldValuesByContactId(contact.id)
+      const customFieldsToShow= customFields.filter(field => field.showInContext)
+      customFieldsToShow.map((field) => {
+        const value= customFieldsValues.find(fieldValue => fieldValue.customFieldId === field.id)?.value
+        if (value) {
+          contextString+= `${field.name}: ${value}\n`
+        }
+      })
+      contextString+= "</Información del Contacto>\n"
+    } else {
+      console.log("no hay contacto o cliente tiene CRM")    
+    }
+  
+  
+    const documents= await getDocumentsDAOByClient(clientId)
+    if (documents.length > 0) {
+        contextString+= "En la siguiente sección se encuentran documentos que pueden ser relevantes para elaborar una respuesta.\n"
+        contextString+= "Los documentos se deben obtener con la función getDocument.\n"
+        contextString+= "Si te preguntan algo que puede estar en alguno de los documentos debes obtener la información para elaborar la respuesta.\n"
+        contextString+= "<Documentos>\n"
+        documents.map((doc) => {
+        contextString += `{
+docId: "${doc.id}",
+docName: "${doc.name}",
+docDescription: "${doc.description}"
+},
+`
+        })
+        contextString+= "</Documentos>\n"
+  
+    }
+  
+    // info de eventos y disponibilidad si tiene la función obtenerDisponibilidad
+  
+    const clientHaveReservas= false
+    if (clientHaveReservas) {
+      const askInSequenceText= `Para este evento, los campos de la metadata se deben preguntar en secuencia. Esperar la respuesta de cada campo antes de preguntar el siguiente campo.\n`
+      const repetitiveEvents= await getActiveEventsDAOByClientId(clientId, EventType.SINGLE_SLOT)
+      const availableRepetitiveEvents= repetitiveEvents.filter(event => event.availability.length > 0)
+      console.log("availableRepetitiveEvents: ", availableRepetitiveEvents.map((event) => event.name))
+  
+      contextString+= "<Eventos>\n"
+  
+      if (availableRepetitiveEvents.length > 0) {
+  
+        contextString+= "En la siguiente sección se encuentran eventos repetitivos disponibles para reservar.\n" 
+        contextString+= "Estos tienen disponibilidad para reservar en diferentes slots de tiempo.\n" 
+        contextString+= "Se debe utilizar la función obtenerDisponibilidad para obtener la disponibilidad de un evento en una determinada fecha.\n"
+        contextString+= "<Eventos Repetitivos>\n"
+        availableRepetitiveEvents.map((event) => {
+        contextString += `{
+        eventId: "${event.id}",
+        eventName: "${event.name}",
+        eventDescription: "${event.description}",
+        eventAddress: "${event.address}",
+        timezone: "${event.timezone}",
+        duration: ${event.minDuration},
+        metadata: ${event.metadata}\n`
+  
+        // eventSeatsPerTimeSlot: ${event.seatsPerTimeSlot}
+  
+        if (event.askInSequence) {
+          contextString+= askInSequenceText
+        }
+  
+        const hoy = format(toZonedTime(new Date(), event.timezone), "EEEE, PPP HH:mm:ss", {
+          locale: es,
+        })
+        contextString+= `Ahora es ${hoy} en el timezone del evento (${event.timezone})\n`
+        contextString+= `}\n`  
+        })
+        contextString+= "</Eventos Repetitivos>\n"
+      } else {
+        contextString+= "No hay eventos repetitivos disponibles para reservar.\n"
+      }
+  
+      const allFixedDateEvents= await getActiveEventsDAOByClientId(clientId, EventType.FIXED_DATE)
+      const fixedDateEvents= allFixedDateEvents.filter(event => event.startDateTime && event.endDateTime)
+  
+      if (fixedDateEvents.length > 0) {
+        contextString+= "En la siguiente sección se encuentran eventos de tipo única vez (fecha fija) que pueden ser relevantes para elaborar una respuesta.\n"
+        contextString+= "Estos eventos tienen la disponibilidad (cupos) entre los datos del evento. No se debe utilizar la función obtenerDisponibilidad ya que la fecha del evento es fija.\n"
+        contextString+= "<Eventos de tipo Única vez>\n"
+        fixedDateEvents.map((event) => {
+        contextString += `{
+  eventId: "${event.id}",
+  eventName: "${event.name}",
+  eventDescription: "${event.description}",
+  eventAddress: "${event.address}",
+  timezone: "${event.timezone}",
+  seatsAvailable: ${event.seatsAvailable},
+  seatsTotal: ${event.seatsPerTimeSlot},
+  startDateTime: "${format(toZonedTime(event.startDateTime!, event.timezone), "dd/MM/yyyy HH:mm")}",
+  endDateTime: "${format(toZonedTime(event.endDateTime!, event.timezone), "dd/MM/yyyy HH:mm")}",
+  metadata: ${event.metadata}\n`
+  
+        if (event.askInSequence) {
+          contextString+= askInSequenceText
+        }
+        const hoy = format(toZonedTime(new Date(), event.timezone), "EEEE, dd/MM/yyyy HH:mm:ss", {
+          locale: es,
+        })
+    
+        contextString+= `Ahora es ${hoy} en el timezone del evento (${event.timezone})\n`
+        contextString+= `}\n`  
+        })        
+        contextString+= "</Eventos de tipo Única vez>\n"
+      } else {
+        contextString+= "No hay eventos de tipo Única vez disponibles para reservar.\n"
+      }
+      
+      contextString+= "</Eventos>\n"
+  
+      // info de las reservas
+      contextString+= "En la siguiente sección se encuentran las reservas activas del contacto.\n"
+      contextString+= "<Reservas>\n"
+      const bookings= await getFutureBookingsDAOByPhone(phone, clientId)
+      if (bookings.length > 0) {
+        bookings.map((booking) => {
+          contextString+= `{
+            event: "${booking.eventName}",
+            bookingId: "${booking.id}",
+            bookingName: "${booking.name}",
+            bookingSeats: ${booking.seats},
+            bookingStatus: "${booking.status}",
+            bookingDate: "${format(booking.start, "dd/MM/yyyy HH:mm")}"
+          }\n`
+        })
+      } else {
+        contextString+= "Este contacto no tiene reservas activas.\n"
+      }
+  
+      contextString+= "</Reservas>\n"
+  
+    }
+  
+    return contextString
 }

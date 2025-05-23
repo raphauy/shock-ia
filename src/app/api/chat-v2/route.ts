@@ -4,6 +4,7 @@ import { getAllClientTools } from '@/lib/ai/tools';
 import { getCurrentUser } from '@/lib/auth';
 import { getClient } from '@/services/clientService';
 import { ContactFormValues, createContact, getContactByPhone } from '@/services/contact-services';
+import { getClientContext } from '@/services/conversation-v2-services';
 import { createConversation, getActiveConversation, getSystemMessage } from '@/services/conversationService';
 import { getContext } from '@/services/function-call-services';
 import { MessageFormValues, saveMessage } from '@/services/messages-service';
@@ -73,11 +74,11 @@ export async function POST(req: Request) {
     }
     await saveMessage(messageFormValues)
 
-    const contextResponse= await getContext(clientId, email, "TODO: remove this")
-  
-    const systemMessage= getSystemMessage(client.prompt, contextResponse.contextString)
-  
+    const clientContext= await getClientContext(clientId, email)   
+    const system= client.prompt + "\n" + clientContext
+
     console.log("messages.count: " + messages.length)
+    console.log("systemMessage: " + system)
 
     const tools= await getAllClientTools(client.id)
 
@@ -88,7 +89,7 @@ export async function POST(req: Request) {
         model: myProvider.languageModel(selectedChatModel),
         temperature: 0,
         maxSteps: 10,
-        system: systemMessage.content,
+        system,
         messages: messages,
         tools,
         onFinish: async ({usage, response}) => {

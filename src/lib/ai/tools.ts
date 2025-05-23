@@ -40,6 +40,7 @@ async function getStaticTools(clientId: string) {
     if (!client) throw new Error("Client not found")
 
     const documentCount= await getDocumentsCountByClient(clientId)
+    console.log("documentCount: ", documentCount)
     if (documentCount > 0) {
         res= {
             ...res,
@@ -82,7 +83,7 @@ async function getDynamicTools(clientId: string) {
 async function getMCPTools(clientId: string) {
     // TODO: Implementar MCPTools
     let mcpTools= {}
-    
+
     return {
         ...mcpTools
     }
@@ -135,10 +136,15 @@ export const buscarProductoTool= {
             query: z.string().describe('Nombre, descripción o algún otro aspecto del producto que se quiere buscar.'),
         }),
         execute: async ({ conversationId, query }) => {
-            const clientId= await getClientIdByConversationId(conversationId)
-            if (!clientId) return "No se encontró un cliente para el conversationId: " + conversationId
-            const response= await buscarProducto(clientId, conversationId, query)
-            return response
+            try {
+                const clientId= await getClientIdByConversationId(conversationId)
+                if (!clientId) return "No se encontró un cliente para el conversationId: " + conversationId
+                const response= await buscarProducto(clientId, conversationId, query)
+                return JSON.stringify(response)
+            } catch (error) {
+                console.error("Error en buscarProducto:", error)
+                return "Error al buscar productos"
+            }
         },
     })
 }
@@ -153,8 +159,13 @@ export const buscarOrdenTool= {
         execute: async ({ conversationId, orderId }) => {
             const clientId= await getClientIdByConversationId(conversationId)
             if (!clientId) return "No se encontró un cliente para el conversationId: " + conversationId
-            const response= await buscarOrden(clientId, conversationId, orderId)
-            return response
+            try {
+                const response= await buscarOrden(clientId, conversationId, orderId)
+                return JSON.stringify(response)
+            } catch (error) {
+                console.error("Error en buscarOrden:", error)
+                return "Error al buscar orden"
+            }
         },
     })
 }
@@ -202,3 +213,25 @@ function toolToToolData(toolList: any): ToolData[] {
         description: (toolList as any)[toolName]?.description || ""
     }))
 }
+
+/**
+ * Prepara las herramientas para ser utilizadas con generateText
+ * Elimina las funciones y otros objetos no serializables
+ */
+// export function prepareToolsForGeneration(tools: Record<string, any>): Record<string, any> {
+//     const preparedTools: Record<string, any> = {};
+    
+//     for (const toolName in tools) {
+//         if (Object.keys(tools[toolName]).length === 0) continue;
+        
+//         const tool = tools[toolName];
+//         if (tool.description && tool.parameters) {
+//             preparedTools[toolName] = {
+//                 description: tool.description,
+//                 parameters: tool.parameters
+//             };
+//         }
+//     }
+    
+//     return preparedTools;
+// }
