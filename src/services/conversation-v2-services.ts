@@ -7,7 +7,7 @@ import { EventType, Message } from '@/lib/generated/prisma';
 import { ChatwootAttachment, IncomingChatwootMessage } from "@/services/chatwoot-types";
 import { getChatwootAccountId, getClient, getClientHaveCRM, getClientIdByChatwootAccountId } from "@/services/clientService";
 import { getContactByChatwootId, getContactByPhone } from "@/services/contact-services";
-import { createConversation, getActiveConversation, getSystemMessage } from "@/services/conversationService";
+import { createConversation, getActiveConversation, getSystemMessage, setLastMessageWasAudio } from "@/services/conversationService";
 import { MessageFormValues, saveMessage } from "@/services/messages-service";
 import { generateAudioFromElevenLabs } from "@/services/model-services";
 import { Attachment, FileUIPart, TextUIPart, UIMessage } from "@ai-sdk/ui-utils";
@@ -23,6 +23,7 @@ import { getDocumentsDAOByClient } from "./document-services";
 import { getActiveEventsDAOByClientId } from "./event-services";
 import { getFieldValuesByContactId } from "./fieldvalue-services";
 import { getStageByChatwootId } from "./stage-services";
+import { transcribeAudio } from "./transcribe-services";
 
 
 /**
@@ -56,7 +57,7 @@ export async function saveChatwootMessage(message: IncomingChatwootMessage): Pro
         const chatwootContactId= message.sender.id
         const conversationId= await getActiveConversationId(senderPhone, chatwootContactId, clientId, chatwootConversationId)
         
-        const parts = convertChatwootMessageToParts(message);
+        const parts = await convertChatwootMessageToParts(message, conversationId);
         
         let textContent = message.content || "";
         
@@ -302,7 +303,7 @@ async function getActiveConversationId(phone: string, chatwootContactId: number,
  * @param message Mensaje recibido de Chatwoot
  * @returns Array de partes de mensaje en formato AI SDK
  */
-function convertChatwootMessageToParts(message: IncomingChatwootMessage): Array<TextUIPart | FileUIPart> {
+async function convertChatwootMessageToParts(message: IncomingChatwootMessage, conversationId: string): Promise<Array<TextUIPart | FileUIPart>> {
     const parts: Array<TextUIPart | FileUIPart> = [];
     
     // Agregar texto si existe
@@ -313,25 +314,39 @@ function convertChatwootMessageToParts(message: IncomingChatwootMessage): Array<
         };
         parts.push(textPart);
     }
-    
+
+    let lastMessageWasAudio= false
+
     // Agregar adjuntos si existen
     if (message.attachments && message.attachments.length > 0) {
         for (const attachment of message.attachments) {
-            if (attachment.file_type === 'image' || attachment.file_type === 'audio') {
-                // Para imágenes y audios, creamos una parte de archivo
-                // Nota: data debería ser el contenido en base64, pero como solo tenemos la URL,
-                // tendremos que convertir los datos del archivo en una etapa posterior
-                // Por ahora, solo almacenamos la URL en el campo data
+            if (attachment.file_type === 'image') {
                 const filePart: FileUIPart = {
                     type: 'file',
-                    mimeType: attachment.file_type === 'image' ? 'image/jpeg' : 'audio/ogg',
+                    mimeType: 'image/jpeg',
                     data: attachment.data_url
                 };
                 parts.push(filePart);
             }
+            if (attachment.file_type === 'audio') {
+                const audioUrl= attachment.data_url
+                if (audioUrl) {
+                    const transcription= await transcribeAudio(audioUrl)
+                    console.log("transcription:", transcription)
+                    lastMessageWasAudio= true
+                    const textPart: TextUIPart= {
+                        type: "text",
+                        text: transcription
+                    }
+                    parts.push(textPart)
+                }
+            }
             // Podríamos manejar otros tipos como video, documentos, etc. si es necesario
         }
     }
+
+    console.log("setting lastMessageWasAudio to ", lastMessageWasAudio)
+    await setLastMessageWasAudio(conversationId, lastMessageWasAudio)
     
     return parts;
 }

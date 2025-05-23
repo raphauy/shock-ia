@@ -3,9 +3,9 @@ import { checkWorkingHoursNow, getClient, getClientIdByChatwootAccountId } from 
 import { getContactByPhone } from "@/services/contact-services";
 import { setLastMessageWasAudio } from "@/services/conversationService";
 import { MessageDelayResponse, onMessageReceived, processDelayedMessage } from "@/services/messageDelayService";
+import { transcribeAudio } from "@/services/transcribe-services";
 import { waitUntil } from "@vercel/functions";
 import { NextResponse } from "next/server";
-import OpenAI from "openai";
 
 export const maxDuration = 299
 
@@ -157,24 +157,5 @@ export async function GET(request: Request) {
 function processConnectionUpdate(json: any) {
     console.log("processing connection update")
     console.log("json: ", json)
-}
-
-async function transcribeAudio(audioUrl: string): Promise<string> {
-    console.log("transcribing audio")
-    console.log("audioUrl: ", audioUrl)
-    const client = new OpenAI({
-        apiKey: process.env.OPENAI_API_KEY_FOR_EMBEDDINGS,
-    })
-    
-    const response = await fetch(audioUrl);
-    const arrayBuffer = await response.arrayBuffer();
-    const file = new File([arrayBuffer], 'audio.oga', { type: 'audio/ogg' });
-
-    const transcription = await client.audio.transcriptions.create({
-        model: "whisper-1",
-        file: file,
-        language: "es"
-    })
-    return transcription.text
 }
 
