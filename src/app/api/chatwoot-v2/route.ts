@@ -85,16 +85,18 @@ export async function POST(request: Request) {
         const result = await saveChatwootMessage(json as IncomingChatwootMessage)
         if (result.success) {
             const savedMessageId= result.messageId!
-            const processResult= await processIncomingMessage(savedMessageId, clientId)
-            console.log("processResult: ", processResult)
+            const processOk= await processIncomingMessage(savedMessageId, clientId)
+            if (!processOk) {
+                console.error("Error al procesar el mensaje:", processOk)
+                return NextResponse.json({ data: "ACK", processed: false, error: processOk }, { status: 200 })
+            }
         } else {
             console.log("Error al guardar el mensaje:", result.error)
             return NextResponse.json({ data: "ACK", processed: false, error: result.error }, { status: 200 })
         }
-        const duration = Date.now() - startTime;       
         
+        const duration = Date.now() - startTime;       
         console.log(`===== MENSAJE PROCESADO EXITOSAMENTE (${duration}ms) =====`)
-        // Retornamos ACK para que Chatwoot sepa que recibimos y procesamos el mensaje
         return NextResponse.json({ data: "ACK", processed: true }, { status: 200 })
     
     } catch (error) {

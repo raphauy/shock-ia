@@ -444,7 +444,9 @@ export function convertToUIMessages(messages: Array<Message>): Array<UIMessage> 
       content: message.content,
       createdAt: message.createdAt,
       experimental_attachments: (message.attachments as unknown as Array<Attachment>) ?? [],
-      gptData: message.gptData
+      gptData: message.gptData,
+      promptTokens: message.promptTokens,
+      completionTokens: message.completionTokens,
     }));
 }
 

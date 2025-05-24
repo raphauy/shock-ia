@@ -38,7 +38,7 @@ export async function ConversationMessages({ conversationId, slug }: Conversatio
     const messages = convertToUIMessages(messagesFromDb);
     
     // Usar ClientMessagesView para renderizar los mensajes
-    return <ClientMessagesView messages={messages} slug={slug} />;
+    return <ClientMessagesView messages={messages} slug={slug} conversationId={conversationId} />;
   } catch (error) {
     console.error("Error cargando mensajes:", error);
     return (

@@ -45,8 +45,8 @@ export function CloseConversationDialog({ id, description, redirectUri }: CloseP
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost">
-          <Minimize2 className="hover:cursor-pointer"/>
+        <Button variant="ghost" className="p-0 hover:bg-foreground/20 px-2 h-9">
+          <Minimize2/>
         </Button>
         
       </DialogTrigger>
