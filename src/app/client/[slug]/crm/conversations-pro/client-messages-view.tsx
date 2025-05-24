@@ -8,9 +8,10 @@ import { Badge } from '@/components/ui/badge';
 import { CloseConversationDialog } from '@/app/client/[slug]/chats/(delete-conversation)/delete-dialogs';
 
 // Extensión local del tipo UIMessage para incluir los campos de tokens
-interface UIMessageWithTokens extends UIMessage {
+export interface UIMessageWithTokens extends UIMessage {
   promptTokens?: number;
   completionTokens?: number;
+  gptData?: any;
 }
 
 interface ClientMessagesViewProps {

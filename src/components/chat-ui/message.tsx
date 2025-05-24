@@ -14,6 +14,7 @@ import { MessageActions } from './message-actions';
 import { MessageReasoning } from './message-reasoning';
 import { PreviewAttachment } from './preview-attachment';
 import GPTData from '@/app/client/[slug]/chats/gpt-data';
+import { UIMessageWithTokens } from '@/app/client/[slug]/crm/conversations-pro/client-messages-view';
 
 const PurePreviewMessage = ({
   message,
@@ -23,7 +24,7 @@ const PurePreviewMessage = ({
   status,
   slug,
 }: {
-  message: UIMessage;
+  message: UIMessageWithTokens;
   isLoading: boolean;
   setMessages: UseChatHelpers['setMessages'];
   reload: UseChatHelpers['reload'];
@@ -65,7 +66,6 @@ const PurePreviewMessage = ({
             {(!message.parts || message.parts.length === 0) && (
               <div className="flex gap-2">
                 {
-                  //@ts-ignore
                   message.gptData && <GPTData gptData={message.gptData} slug={slug} />
                 }
                 {message.role === 'assistant' && (
@@ -191,6 +191,8 @@ const PurePreviewMessage = ({
               key={`action-${message.id}`}
               message={message}
               isLoading={isLoading}
+              promptTokens={message.promptTokens || 0}
+              completionTokens={message.completionTokens || 0}
             />
           </div>
         </div>

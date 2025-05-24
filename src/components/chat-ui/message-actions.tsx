@@ -5,13 +5,18 @@ import type { Message } from 'ai';
 import { CopyIcon } from 'lucide-react';
 import { memo, type MouseEvent, type FocusEvent } from 'react';
 import { useCopyToClipboard } from 'usehooks-ts';
+import { Badge } from '../ui/badge';
 
 export function PureMessageActions({
   message,
   isLoading,
+  promptTokens,
+  completionTokens,
 }: {
   message: Message;
   isLoading: boolean;
+  promptTokens: number;
+  completionTokens: number;
 }) {
   const [_, copyToClipboard] = useCopyToClipboard();
 
@@ -67,6 +72,19 @@ export function PureMessageActions({
             </Button>
           </TooltipTrigger>
           <TooltipContent>Copiar</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Badge variant="outline">{promptTokens + completionTokens}</Badge>
+          </TooltipTrigger>
+          <TooltipContent>
+            <div className='flex gap-2'>
+              <Badge variant="archived">In: {promptTokens}</Badge>
+              <Badge variant="archived">Out: {completionTokens}</Badge>
+              <Badge>Total: {promptTokens + completionTokens}</Badge>
+            </div>
+
+          </TooltipContent>
         </Tooltip>
       </div>
     </TooltipProvider>
