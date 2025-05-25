@@ -32,6 +32,8 @@ export function PureMessageActions({
     e.stopPropagation();
   };
 
+  const totalTokens= promptTokens + completionTokens
+
   return (
     <TooltipProvider delayDuration={0}>
       <div 
@@ -73,20 +75,24 @@ export function PureMessageActions({
           </TooltipTrigger>
           <TooltipContent>Copiar</TooltipContent>
         </Tooltip>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Badge variant="outline">{promptTokens + completionTokens}</Badge>
-          </TooltipTrigger>
-          <TooltipContent>
-            <div className='flex gap-2'>
-              <Badge variant="archived">In: {promptTokens}</Badge>
-              <Badge variant="archived">Out: {completionTokens}</Badge>
-              <Badge>Total: {promptTokens + completionTokens}</Badge>
-            </div>
 
-          </TooltipContent>
-        </Tooltip>
-      </div>
+        {
+          totalTokens > 0 && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge variant="outline">{totalTokens}</Badge>
+              </TooltipTrigger>
+              <TooltipContent>
+                <div className='flex gap-2'>
+                  <Badge variant="archived">In: {promptTokens}</Badge>
+                  <Badge variant="archived">Out: {completionTokens}</Badge>
+                  <Badge>Total: {totalTokens}</Badge>
+                </div>
+
+              </TooltipContent>
+            </Tooltip>
+        )}
+        </div>
     </TooltipProvider>
   );
 }

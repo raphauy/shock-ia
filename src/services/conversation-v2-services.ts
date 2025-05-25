@@ -616,27 +616,27 @@ export async function getClientContext(clientId: string, phone: string) {
   
   
     if (contact && clientHaveCRM) {
-      contextString+= "\n"
-      contextString+= "En la siguiente sección se encuentra información del Contacto asociado al usuario de esta conversación.\n"
-      contextString+= "<Información del Contacto>\n"
-      contextString+= `contactId: ${contact.id}\n`
-      contextString+= `Nombre: ${contact.name}\n`
-      contextString+= `Teléfono: ${contact.phone}\n`
-      contextString+= `Estado CRM: ${contact.stage?.name}\n`
-      contextString+= `Etiquetas: ${contact.tags}\n`
-  
-      const customFields= await getClientCustomFields(clientId)
-      const customFieldsValues= await getFieldValuesByContactId(contact.id)
-      const customFieldsToShow= customFields.filter(field => field.showInContext)
-      customFieldsToShow.map((field) => {
-        const value= customFieldsValues.find(fieldValue => fieldValue.customFieldId === field.id)?.value
-        if (value) {
-          contextString+= `${field.name}: ${value}\n`
-        }
-      })
-      contextString+= "</Información del Contacto>\n"
+        contextString+= "\n"
+        contextString+= "En la siguiente sección se encuentra información del Contacto asociado al usuario de esta conversación.\n"
+        contextString+= "<Información del Contacto>\n"
+        contextString+= `contactId: ${contact.id}\n`
+        contextString+= `Nombre: ${contact.name}\n`
+        contextString+= `Teléfono: ${contact.phone}\n`
+        contextString+= `Estado CRM: ${contact.stage?.name}\n`
+        contextString+= `Etiquetas: ${contact.tags}\n`
+    
+        const customFields= await getClientCustomFields(clientId)
+        const customFieldsValues= await getFieldValuesByContactId(contact.id)
+        const customFieldsToShow= customFields.filter(field => field.showInContext)
+        customFieldsToShow.map((field) => {
+            const value= customFieldsValues.find(fieldValue => fieldValue.customFieldId === field.id)?.value
+            if (value) {
+            contextString+= `${field.name}: ${value}\n`
+            }
+        })
+        contextString+= "</Información del Contacto>\n"
     } else {
-      console.log("no hay contacto o cliente tiene CRM")    
+        console.log("no hay contacto o cliente tiene CRM")    
     }
   
   
@@ -660,7 +660,7 @@ docDescription: "${doc.description}"
   
     // info de eventos y disponibilidad si tiene la función obtenerDisponibilidad
   
-    const clientHaveReservas= false
+    const clientHaveReservas= conversation?.client.haveEvents
     if (clientHaveReservas) {
       const askInSequenceText= `Para este evento, los campos de la metadata se deben preguntar en secuencia. Esperar la respuesta de cada campo antes de preguntar el siguiente campo.\n`
       const repetitiveEvents= await getActiveEventsDAOByClientId(clientId, EventType.SINGLE_SLOT)
@@ -684,8 +684,6 @@ docDescription: "${doc.description}"
         timezone: "${event.timezone}",
         duration: ${event.minDuration},
         metadata: ${event.metadata}\n`
-  
-        // eventSeatsPerTimeSlot: ${event.seatsPerTimeSlot}
   
         if (event.askInSequence) {
           contextString+= askInSequenceText
@@ -711,16 +709,16 @@ docDescription: "${doc.description}"
         contextString+= "<Eventos de tipo Única vez>\n"
         fixedDateEvents.map((event) => {
         contextString += `{
-  eventId: "${event.id}",
-  eventName: "${event.name}",
-  eventDescription: "${event.description}",
-  eventAddress: "${event.address}",
-  timezone: "${event.timezone}",
-  seatsAvailable: ${event.seatsAvailable},
-  seatsTotal: ${event.seatsPerTimeSlot},
-  startDateTime: "${format(toZonedTime(event.startDateTime!, event.timezone), "dd/MM/yyyy HH:mm")}",
-  endDateTime: "${format(toZonedTime(event.endDateTime!, event.timezone), "dd/MM/yyyy HH:mm")}",
-  metadata: ${event.metadata}\n`
+        eventId: "${event.id}",
+        eventName: "${event.name}",
+        eventDescription: "${event.description}",
+        eventAddress: "${event.address}",
+        timezone: "${event.timezone}",
+        seatsAvailable: ${event.seatsAvailable},
+        seatsTotal: ${event.seatsPerTimeSlot},
+        startDateTime: "${format(toZonedTime(event.startDateTime!, event.timezone), "dd/MM/yyyy HH:mm")}",
+        endDateTime: "${format(toZonedTime(event.endDateTime!, event.timezone), "dd/MM/yyyy HH:mm")}",
+        metadata: ${event.metadata}\n`
   
         if (event.askInSequence) {
           contextString+= askInSequenceText

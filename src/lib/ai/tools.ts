@@ -1,9 +1,11 @@
-import { Tool, tool } from 'ai';
+import { tool } from 'ai';
 import { z } from 'zod';
 import { getDocumentDAO, getDocumentsCount, getDocumentsCountByClient } from '../../services/document-services';
 import { getRepositorysDAO, getToolFromDatabase } from '@/services/repository-services';
 import { buscarOrden, buscarProducto, defaultFunction } from '@/services/functions';
 import { clientHasOrderFunction, getClient, getClientIdByConversationId } from '@/services/clientService';
+import { Client } from '../generated/prisma';
+import { obtenerDisponibilidadTool } from './events-tools';
 
 export async function genericExecute(args: any)  {
     const { repositoryId, functionName, conversationId, clientId, ...data } = args;
@@ -24,22 +26,25 @@ export async function genericExecute(args: any)  {
 }
 
 export async function getAllClientTools(clientId: string) {
-    const staticTools= await getStaticTools(clientId)
-    const dynamicTools= await getDynamicTools(clientId)
-    const mcpTools= await getMCPTools(clientId)
+    const client= await getClient(clientId)
+    if (!client) throw new Error("Client not found")
+
+    const staticTools= await getStaticTools(client)
+    const dynamicTools= await getDynamicTools(client.id)
+    const eventsTools= await getEventsTools(client)
+    const mcpTools= await getMCPTools(client.id)
     return {
         ...staticTools,
         ...dynamicTools,
+        ...eventsTools,
         ...mcpTools
     }
 }
 
-async function getStaticTools(clientId: string) {
+async function getStaticTools(client: Client) {
     let res= {}
-    const client= await getClient(clientId)
-    if (!client) throw new Error("Client not found")
 
-    const documentCount= await getDocumentsCountByClient(clientId)
+    const documentCount= await getDocumentsCountByClient(client.id)
     console.log("documentCount: ", documentCount)
     if (documentCount > 0) {
         res= {
@@ -54,11 +59,25 @@ async function getStaticTools(clientId: string) {
             ...buscarProductoTool
         }
     }
-    const haveOrderFunction= await clientHasOrderFunction(clientId)
+    const haveOrderFunction= await clientHasOrderFunction(client.id)
     if (haveOrderFunction) {
         res= {
             ...res,
             ...buscarOrdenTool
+        }
+    }
+
+    return res
+}
+
+async function getEventsTools(client: Client) {
+    let res= {}
+
+    const haveEvents= client.haveEvents
+    if (haveEvents) {
+        res= {
+            ...res,
+            ...obtenerDisponibilidadTool
         }
     }
     return res
@@ -184,10 +203,11 @@ export type UiGroupToolData= {
     tools: ToolData[]
 }
 
-export async function getUiGroupsTools(clientId: string): Promise<UiGroupToolData[]> {
-    const staticTools = await getStaticTools(clientId);
-    const dynamicTools = await getDynamicTools(clientId);
-    const mcpTools = await getMCPTools(clientId);
+export async function getUiGroupsTools(client: Client): Promise<UiGroupToolData[]> {
+    const staticTools = await getStaticTools(client);
+    const eventsTools = await getEventsTools(client);
+    const dynamicTools = await getDynamicTools(client.id);
+    const mcpTools = await getMCPTools(client.id);
     
     const uiGroupsTools: UiGroupToolData[] = [
         {
@@ -197,6 +217,10 @@ export async function getUiGroupsTools(clientId: string): Promise<UiGroupToolDat
         {
             groupName: "Local Dynamic Tools",
             tools: toolToToolData(dynamicTools)
+        },
+        {
+            groupName: "Local Events Tools",
+            tools: toolToToolData(eventsTools)
         },
         {
             groupName: "MCP Tools",

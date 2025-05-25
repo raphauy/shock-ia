@@ -321,48 +321,6 @@ export async function sendMessageToContact(clientId: string, contact: ContactDAO
   return messageCreated.conversationId
 }
 
-// export async function sendMessageToContact(clientId: string, contact: ContactDAO, message: string, tags: string[], moveToStageId: string | null, by: string) {
-//   const phone= contact.phone
-//   if (!phone) throw new Error("Contacto no tiene teléfono")
-
-//   console.log("phone: ", phone)
-//   const chatwootAccountId= await getChatwootAccountId(clientId)
-//   if (!chatwootAccountId) throw new Error("Chatwoot account not found")
-//   console.log("chatwootAccountId: ", chatwootAccountId)
-
-//   let conversation= await getLastConversationByContactId(contact.id, clientId)
-//   if (!conversation) {
-//     const whatsappInstance= await getWhatsappInstance(clientId)
-//     if (!whatsappInstance) throw new Error("Whatsapp instance not found")
-//     if (!whatsappInstance.whatsappInboxId) throw new Error("Whatsapp inbox not found")
-//     if (!contact.chatwootId) throw new Error("Chatwoot contact not found")
-//     const chatwootConversationId= await createChatwootConversation(Number(chatwootAccountId), whatsappInstance.whatsappInboxId, contact.chatwootId)
-//     if (!chatwootConversationId) throw new Error("Chatwoot conversation not found")
-//     conversation= await createConversation(phone, clientId, contact.id, chatwootConversationId)
-//   }
-
-//   if (!conversation) throw new Error("Conversation not found")
-
-//   const assistantMessage= "Información del sistema: Se le ha enviado al usuario el siguiente mensaje:\n\n" + message
-//   await messageArrived(conversation.phone, assistantMessage, conversation.clientId, "assistant", "", undefined, undefined, conversation.chatwootConversationId || undefined, Number(contact.chatwootId))
-    
-//   const chatwootConversationId= conversation.chatwootConversationId
-//   if (!chatwootConversationId) throw new Error("Chatwoot conversation not found")
-
-//   await sendTextToConversation(Number(chatwootAccountId), chatwootConversationId, message)
-
-//   if (tags.length > 0) {
-//     await addTagsToContact(contact.id, tags, by)
-//   }
-
-//   if (moveToStageId) {
-//     console.log("setting new stage to contact, by: " + by)
-//     await setNewStage(contact.id, moveToStageId, by)
-//   }
-
-//   return conversation
-// }
-
 
 async function checkAndUpdateCampaignStatus(campaignId: string) {
   // check if all contacts are sent and update campaign status to COMPLETADA

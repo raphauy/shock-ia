@@ -43,7 +43,7 @@ export default async function Page(props: Props) {
   
   const selectedChatModel = chatModelFromCookie ? chatModelFromCookie.value : DEFAULT_CHAT_MODEL;
 
-  const uiGroupsTools= await getUiGroupsTools(client.id)
+  const uiGroupsTools= await getUiGroupsTools(client)
 
   return (
     <>
