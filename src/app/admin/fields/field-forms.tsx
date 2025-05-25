@@ -43,6 +43,12 @@ export function FieldForm({ id, repoId, eventId, customFields, closeDialog }: Pr
     listOptions: []
   });
 
+  const form = useForm<FieldFormValues>({
+    resolver: zodResolver(repoFieldSchema),
+    defaultValues: initialValues,
+    mode: "onChange",
+  });
+
   useEffect(() => {
     if (id) {
       setInitialDataLoading(true);
@@ -67,6 +73,7 @@ export function FieldForm({ id, repoId, eventId, customFields, closeDialog }: Pr
             };
             
             setInitialValues(newValues);
+            form.reset(newValues)
           }
           setInitialDataLoading(false);
         })
@@ -74,13 +81,8 @@ export function FieldForm({ id, repoId, eventId, customFields, closeDialog }: Pr
           setInitialDataLoading(false);
         });
     }
-  }, [id]);
+  }, [id, form]);
   
-  const form = useForm<FieldFormValues>({
-    resolver: zodResolver(repoFieldSchema),
-    defaultValues: initialValues,
-    mode: "onChange",
-  });
 
   // Actualizar los valores del formulario cuando cambian los valores iniciales
   useEffect(() => {

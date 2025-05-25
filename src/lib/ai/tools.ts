@@ -5,7 +5,7 @@ import { getRepositorysDAO, getToolFromDatabase } from '@/services/repository-se
 import { buscarOrden, buscarProducto, defaultFunction } from '@/services/functions';
 import { clientHasOrderFunction, getClient, getClientIdByConversationId } from '@/services/clientService';
 import { Client } from '../generated/prisma';
-import { obtenerDisponibilidadTool } from './events-tools';
+import { cancelarReservaTool, obtenerDisponibilidadTool, obtenerReservasTool, reservarParaEventoDeUnicaVezTool, reservarParaEventoTool } from './events-tools';
 
 export async function genericExecute(args: any)  {
     const { repositoryId, functionName, conversationId, clientId, ...data } = args;
@@ -77,7 +77,11 @@ async function getEventsTools(client: Client) {
     if (haveEvents) {
         res= {
             ...res,
-            ...obtenerDisponibilidadTool
+            ...obtenerDisponibilidadTool,
+            ...reservarParaEventoTool,
+            ...reservarParaEventoDeUnicaVezTool,
+            ...obtenerReservasTool,
+            ...cancelarReservaTool
         }
     }
     return res
