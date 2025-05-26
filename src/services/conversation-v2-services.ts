@@ -5,7 +5,7 @@ import { getAllClientTools } from "@/lib/ai/tools";
 import { prisma } from "@/lib/db";
 import { EventType, Message } from '@/lib/generated/prisma';
 import { ChatwootAttachment, IncomingChatwootMessage } from "@/services/chatwoot-types";
-import { getChatwootAccountId, getClient, getClientHaveCRM, getClientIdByChatwootAccountId } from "@/services/clientService";
+import { getChatwootAccountId, getClient, getClientHaveCRM, getClientHaveEvents, getClientIdByChatwootAccountId } from "@/services/clientService";
 import { getContactByChatwootId, getContactByPhone } from "@/services/contact-services";
 import { createConversation, getActiveConversation, getSystemMessage, setLastMessageWasAudio } from "@/services/conversationService";
 import { MessageFormValues, saveMessage } from "@/services/messages-service";
@@ -152,10 +152,11 @@ export async function processIncomingMessage(messageId: string, clientId: string
         let maxMessages= 20
         const MAX_MESSAGES_TO_PROCESS= await getValue("MAX_MESSAGES_TO_PROCESS")
         if (MAX_MESSAGES_TO_PROCESS) {
-            maxMessages= parseInt(MAX_MESSAGES_TO_PROCESS)
+            maxMessages= parseInt(MAX_MESSAGES_TO_PROCESS) + 1
         }
 
         const messagesFromDb= await getConversationMessages(conversationId, maxMessages)
+        console.log("messagesFromDb: " + JSON.stringify(messagesFromDb, null, 3))
         const uiMessages= convertToUIMessages(messagesFromDb)
         const userMessage = getMostRecentUserMessage(uiMessages);
         if (!userMessage) {
@@ -170,8 +171,7 @@ export async function processIncomingMessage(messageId: string, clientId: string
 
         const phone= contact.phone || contact.name // name for widget-web
 
-        const clientContext= await getClientContext(clientId, phone)   
-        const system= client.prompt + "\n" + clientContext
+        const system= await getClientContext(clientId, phone, client.prompt)
 
         console.log("messages.count: " + messagesFromDb.length)
         console.log("systemMessage: " + system)
@@ -450,7 +450,7 @@ export function convertToUIMessages(messages: Array<Message>): Array<UIMessage> 
     }));
 }
 
-export async function getConversationMessages(conversationId: string, take = 20) {
+export async function getConversationMessages(conversationId: string, take: number) {
     const messages= await prisma.message.findMany({
         where: {
             conversationId: conversationId,
@@ -459,10 +459,11 @@ export async function getConversationMessages(conversationId: string, take = 20)
             }
         },
         orderBy: {
-            createdAt: 'asc'
+            createdAt: 'desc'
         },
         take: take
     })
+    messages.reverse()
     return messages
 }
 
@@ -585,7 +586,7 @@ export async function getPaginatedConversations(clientId: string, page: number =
     }
 }
 
-export async function getClientContext(clientId: string, phone: string) {
+export async function getClientContext(clientId: string, phone: string, clientPrompt: string) {
 
     const timezone = "America/Montevideo";
     const now = new Date();
@@ -593,8 +594,21 @@ export async function getClientContext(clientId: string, phone: string) {
     const hoy = format(zonedDate, "EEEE, dd/MM/yyyy HH:mm:ss", {
       locale: es,
     });
-  
+
+    const documents= await getDocumentsDAOByClient(clientId)
+
     let contextString= "\n"
+
+    if (documents.length > 0) {
+        contextString+= "<Importante>\n"
+        contextString+= "Tu principal función es responder todas las consultas de los usuarios utilizando exclusivamente la información contenida en los documentos que se te listan en la sección de documentos más abajo.\n"
+        contextString+= "No puedes inventar información bajo ninguna circunstancia.\n"
+        contextString+= "Tu principal objetivo es identificar el documento que puede tener la información que necesita el usuario y utilizar la función getDocument para obtenerlo.\n"    
+        contextString+= "</Importante>\n"
+    }
+
+    contextString+= "\n<Prompt del cliente>\n" + clientPrompt + "\n</Prompt del cliente>\n"
+
     contextString+= "<Contexto técnico>\n"
     contextString+= "Hablas correctamente el español, incluyendo el uso adecuado de tildes y eñes.\nPor favor, utiliza solo caracteres compatibles con UTF-8\n"
     contextString+= `Hoy es ${hoy} en Montevideo\n`
@@ -603,13 +617,16 @@ export async function getClientContext(clientId: string, phone: string) {
     const conversation= await getActiveConversation(phone, clientId)
     let contact= conversation?.contact
     let clientHaveCRM= false
+    let clientHaveEvents= false
     if (conversation) {
       clientHaveCRM= conversation.client.haveCRM
+      clientHaveEvents= conversation.client.haveEvents
       contextString+= "conversationId para invocar funciones: " + conversation.id + "\n"
     } else {
       console.log("No hay conversación activa");
       contact= await getContactByPhone(phone, clientId)
       clientHaveCRM= await getClientHaveCRM(clientId)
+      clientHaveEvents= await getClientHaveEvents(clientId)
     }
     contextString+= "</Contexto técnico>\n"
   
@@ -640,7 +657,6 @@ export async function getClientContext(clientId: string, phone: string) {
     }
   
   
-    const documents= await getDocumentsDAOByClient(clientId)
     if (documents.length > 0) {
         contextString+= "En la siguiente sección se encuentran documentos que pueden ser relevantes para elaborar una respuesta.\n"
         contextString+= "Los documentos se deben obtener con la función getDocument.\n"
@@ -658,10 +674,7 @@ docDescription: "${doc.description}"
   
     }
   
-    // info de eventos y disponibilidad si tiene la función obtenerDisponibilidad
-  
-    const clientHaveReservas= conversation?.client.haveEvents
-    if (clientHaveReservas) {
+    if (clientHaveEvents) {
       const askInSequenceText= `Para este evento, los campos de la metadata se deben preguntar en secuencia. Esperar la respuesta de cada campo antes de preguntar el siguiente campo.\n`
       const repetitiveEvents= await getActiveEventsDAOByClientId(clientId, EventType.SINGLE_SLOT)
       const availableRepetitiveEvents= repetitiveEvents.filter(event => event.availability.length > 0)

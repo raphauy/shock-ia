@@ -17,12 +17,16 @@ export function Chat({
   initialMessages,
   selectedChatModel,
   uiGroupsTools = [],
+  maxInWindow,
+  systemMessage
 }: {
   conversationId: string | null;
   clientId: string;
   initialMessages: Array<UIMessage>;
   selectedChatModel: string;
   uiGroupsTools: UiGroupToolData[];
+  maxInWindow: number;
+  systemMessage: string;
 }) {
   const { mutate } = useSWRConfig();
   const params = useParams();
@@ -75,6 +79,7 @@ export function Chat({
                   setMessages={setMessages}
                   reload={reload}
                   slug={slug}
+                  maxInWindow={maxInWindow}
                 />
               </div>
               <form className="flex flex-col items-center w-full max-w-3xl gap-1">
@@ -93,6 +98,7 @@ export function Chat({
                   setMessages={setMessages}
                   append={append}
                   uiGroupsTools={uiGroupsTools}
+                  systemMessage={systemMessage}
                 />
               </form>
             </div>
@@ -106,6 +112,7 @@ export function Chat({
                 setMessages={setMessages}
                 reload={reload}
                 slug={slug}
+                maxInWindow={maxInWindow}
               />
             </div>
             <form className="flex mx-auto px-4 bg-background pb-4 md:pb-6 gap-2 w-full md:max-w-3xl">
@@ -124,6 +131,7 @@ export function Chat({
                 setMessages={setMessages}
                 append={append}
                 uiGroupsTools={uiGroupsTools}
+                systemMessage={systemMessage}
               />
             </form>
           </>

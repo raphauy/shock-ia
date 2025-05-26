@@ -6,6 +6,7 @@ import type { UIMessage } from 'ai';
 import type { ChatRequestOptions } from 'ai';
 import { Badge } from '@/components/ui/badge';
 import { CloseConversationDialog } from '@/app/client/[slug]/chats/(delete-conversation)/delete-dialogs';
+import { ContextButton } from '@/components/chat-ui/context-button';
 
 // Extensión local del tipo UIMessage para incluir los campos de tokens
 export interface UIMessageWithTokens extends UIMessage {
@@ -18,13 +19,14 @@ interface ClientMessagesViewProps {
   messages: UIMessageWithTokens[];
   slug: string;
   conversationId: string;
+  maxInWindow: number;
 }
 
-export function ClientMessagesView({ messages, slug, conversationId }: ClientMessagesViewProps) {
+export function ClientMessagesView({ messages, slug, conversationId, maxInWindow }: ClientMessagesViewProps) {
   // Mock functions para los props que no usaremos activamente
   const mockSetMessages = () => {};
   const mockReload = (chatRequestOptions?: ChatRequestOptions) => Promise.resolve(null);
-  
+
   // Calcular sumatorias de tokens
   const promptTokens = messages.reduce((acc, msg) => acc + (msg.promptTokens || 0), 0);
   const completionTokens = messages.reduce((acc, msg) => acc + (msg.completionTokens || 0), 0);
@@ -55,6 +57,7 @@ export function ClientMessagesView({ messages, slug, conversationId }: ClientMes
             reload={mockReload}
             status="ready"
             slug={slug}
+            maxInWindow={maxInWindow}
           />
         </CardContent>
       </Card>

@@ -3,6 +3,7 @@ import { myProvider } from '@/lib/ai/providers';
 import { getAllClientTools } from '@/lib/ai/tools';
 import { getCurrentUser } from '@/lib/auth';
 import { getClient } from '@/services/clientService';
+import { getValue } from '@/services/config-services';
 import { ContactFormValues, createContact, getContactByPhone } from '@/services/contact-services';
 import { getClientContext } from '@/services/conversation-v2-services';
 import { createConversation, getActiveConversation, getSystemMessage } from '@/services/conversationService';
@@ -28,6 +29,13 @@ export async function POST(req: Request) {
     const email= currentUser.email
   
     const { messages, clientId, selectedChatModel } = await req.json()
+
+    const MAX_MESSAGES_TO_PROCESS= await getValue("MAX_MESSAGES_TO_PROCESS")
+    const maxInWindow= MAX_MESSAGES_TO_PROCESS ? parseInt(MAX_MESSAGES_TO_PROCESS) + 1 : 1000
+
+    const messagesCount= messages.length
+    const lastMessages= messages.slice(messagesCount - maxInWindow, messagesCount)
+  
   
     // Validar que clientId exista
     if (!clientId) {
@@ -74,11 +82,10 @@ export async function POST(req: Request) {
     }
     await saveMessage(messageFormValues)
 
-    const clientContext= await getClientContext(clientId, email)   
-    const system= client.prompt + "\n" + clientContext
+    const system= await getClientContext(clientId, email, client.prompt)   
 
-    console.log("messages.count: " + messages.length)
-    console.log("systemMessage: " + system)
+    console.log("lastMessages.count: " + lastMessages.length)
+    //console.log("systemMessage: " + system)
 
     const tools= await getAllClientTools(client.id)
 
@@ -90,7 +97,7 @@ export async function POST(req: Request) {
         temperature: 0,
         maxSteps: 10,
         system,
-        messages: messages,
+        messages: lastMessages,
         tools,
         onFinish: async ({usage, response}) => {
             console.log("--------------------------------")

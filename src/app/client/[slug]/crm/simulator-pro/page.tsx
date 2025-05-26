@@ -9,7 +9,8 @@ import type { Attachment, UIMessage } from 'ai';
 import { Message } from '@/lib/generated/prisma';
 import { getLocalTools } from '@/services/local-tools-services';
 import { getUiGroupsTools } from '@/lib/ai/tools';
-import { convertToUIMessages } from '@/services/conversation-v2-services';
+import { convertToUIMessages, getClientContext } from '@/services/conversation-v2-services';
+import { getValue } from '@/services/config-services';
 
 type Props = {
   params: Promise<{ 
@@ -34,7 +35,8 @@ export default async function Page(props: Props) {
   }
 
   const messagesFromDb = await getActiveMessages(currentUser.email, client.id)
-
+  const MAX_MESSAGES_TO_PROCESS= await getValue("MAX_MESSAGES_TO_PROCESS")
+  const maxInWindow= MAX_MESSAGES_TO_PROCESS ? parseInt(MAX_MESSAGES_TO_PROCESS) : 1000
 
   const conversationId = messagesFromDb && messagesFromDb.length > 0 ? messagesFromDb[0].conversationId : null;
 
@@ -45,6 +47,8 @@ export default async function Page(props: Props) {
 
   const uiGroupsTools= await getUiGroupsTools(client)
 
+  const systemMessage= await getClientContext(client.id, currentUser.email, client.prompt ?? "Prompt no configurado")
+
   return (
     <>
       <Chat
@@ -53,6 +57,8 @@ export default async function Page(props: Props) {
         initialMessages={convertToUIMessages(messagesFromDb ?? [])}
         selectedChatModel={selectedChatModel}
         uiGroupsTools={uiGroupsTools}
+        maxInWindow={maxInWindow}
+        systemMessage={systemMessage}
       />
     </>
   );

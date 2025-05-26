@@ -804,6 +804,18 @@ export async function getClientHaveCRM(clientId: string) {
   return client?.haveCRM || false
 }
 
+export async function getClientHaveEvents(clientId: string) {
+  const client= await prisma.client.findUnique({
+    where: {
+      id: clientId
+    },
+    select: {
+      haveEvents: true
+    }
+  })
+  return client?.haveEvents || false
+}
+
 export async function getClientHaveCRMBySlug(slug: string) {
   const client= await prisma.client.findUnique({
     where: {

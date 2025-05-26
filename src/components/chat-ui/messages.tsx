@@ -13,6 +13,7 @@ interface MessagesProps {
   setMessages: UseChatHelpers['setMessages'];
   reload: UseChatHelpers['reload'];
   slug: string;
+  maxInWindow: number;
 }
 
 function PureMessages({
@@ -21,28 +22,30 @@ function PureMessages({
   setMessages,
   reload,
   slug,
+  maxInWindow,
 }: MessagesProps) {
-  const [messagesContainerRef, messagesEndRef] =
-    useScrollToBottom<HTMLDivElement>();
+  const [messagesContainerRef, messagesEndRef] = useScrollToBottom<HTMLDivElement>();
+
+  const messagesInRed= messages.length - maxInWindow
 
   return (
     <div
       ref={messagesContainerRef}
-      //className={cn("flex flex-col min-w-0 gap-6 flex-1 pt-4 w-full", messages.length !== 0 && "overflow-y-scroll")}
       className={cn("flex flex-col min-w-0 gap-6 flex-1 pt-4 w-full overflow-y-auto scrollbar-thin")}
     >
       {messages.length === 0 && <Greeting />}
 
       {messages.map((message, index) => (
-        <PreviewMessage
-          key={message.id}
-          message={message}
-          isLoading={status === 'streaming' && messages.length - 1 === index}
-          setMessages={setMessages}
-          reload={reload}
-          status={status}
-          slug={slug}
-        />
+        <div key={message.id} className={cn(index < messagesInRed && "bg-red-100 dark:bg-red-900")}>
+          <PreviewMessage            
+            message={message}
+            isLoading={status === 'streaming' && messages.length - 1 === index}
+            setMessages={setMessages}
+            reload={reload}
+            status={status}
+            slug={slug}
+          />
+        </div>
       ))}
 
       {status === 'submitted' &&

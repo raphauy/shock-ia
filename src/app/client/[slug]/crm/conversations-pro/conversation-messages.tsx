@@ -3,6 +3,7 @@ import { getConversationMessages, convertToUIMessages } from '@/services/convers
 import { Card, CardContent } from '@/components/ui/card';
 import { AlertCircle } from 'lucide-react';
 import { ClientMessagesView } from './client-messages-view';
+import { getValue } from '@/services/config-services';
 
 interface ConversationMessagesProps {
   conversationId?: string;
@@ -22,7 +23,7 @@ export async function ConversationMessages({ conversationId, slug }: Conversatio
 
   // Obtener los mensajes de la conversación seleccionada
   try {
-    const messagesFromDb = await getConversationMessages(conversationId, 100); // Obtener hasta 100 mensajes
+    const messagesFromDb = await getConversationMessages(conversationId, 1000)
     
     // Si no hay mensajes, mostrar un mensaje informativo
     if (messagesFromDb.length === 0) {
@@ -37,8 +38,11 @@ export async function ConversationMessages({ conversationId, slug }: Conversatio
     // Convertir los mensajes al formato que espera el componente Messages
     const messages = convertToUIMessages(messagesFromDb);
     
+    const MAX_MESSAGES_TO_PROCESS= await getValue("MAX_MESSAGES_TO_PROCESS")
+    const maxInWindow= MAX_MESSAGES_TO_PROCESS ? parseInt(MAX_MESSAGES_TO_PROCESS) : 1000
+
     // Usar ClientMessagesView para renderizar los mensajes
-    return <ClientMessagesView messages={messages} slug={slug} conversationId={conversationId} />;
+    return <ClientMessagesView messages={messages} slug={slug} conversationId={conversationId} maxInWindow={maxInWindow} />;
   } catch (error) {
     console.error("Error cargando mensajes:", error);
     return (

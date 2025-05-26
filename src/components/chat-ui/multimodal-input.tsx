@@ -21,6 +21,7 @@ import {
   TooltipButtonProvider
 } from './chat-buttons';
 import { ToolsButton } from './tools-button';
+import { ContextButton } from './context-button';
 import { UiGroupToolData } from '@/lib/ai/tools';
 
 function PureMultimodalInput({
@@ -39,6 +40,7 @@ function PureMultimodalInput({
   handleSubmit,
   className,
   uiGroupsTools,
+  systemMessage
 }: {
   conversationId: string | null;
   clientId: string;
@@ -55,6 +57,7 @@ function PureMultimodalInput({
   handleSubmit: UseChatHelpers['handleSubmit'];
   className?: string;
   uiGroupsTools: UiGroupToolData[];
+  systemMessage: string;
 }) {
   const session= useSession()
   const email= session.data?.user?.email
@@ -340,6 +343,7 @@ function PureMultimodalInput({
         <TooltipButtonProvider>
           <AttachmentsButton fileInputRef={fileInputRef} status={status} />
           <ToolsButton uiGroupsTools={uiGroupsTools} />
+          <ContextButton systemMessage={systemMessage} />
           <NewConversationButton 
             handleNewConversation={handleNewConversation}
             disabled={messages.length === 0 || status !== 'ready'}
