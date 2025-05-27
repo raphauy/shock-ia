@@ -2,22 +2,22 @@ import { prisma } from "@/lib/db";
 
 import { BillingData, CompleteData } from "@/app/admin/billing/actions";
 import { removeSectionTexts } from "@/lib/utils";
+import { ToolCallPart } from "ai";
 import { ChatCompletion } from "groq-sdk/resources/chat/completions.mjs";
 import { ChatCompletionMessageParam, ChatCompletionSystemMessageParam, ChatCompletionUserMessageParam } from "openai/resources/index.mjs";
 import { sendAudioToConversation, sendTextToConversation } from "./chatwoot";
 import { getChatwootAccountId } from "./clientService";
-import { ContactFormValues, createContact, getContactByChatwootId, getLastChatwootConversationIdByPhoneNumber, getOrCreateContact } from "./contact-services";
+import { ContactFormValues, createContact, getContactByChatwootId } from "./contact-services";
 import { completionInit, getContext } from "./function-call-services";
 import { getFunctionsDefinitions } from "./function-services";
 import { getDocument } from "./functions";
 import { googleCompletionInit } from "./google-function-call-services";
 import { groqCompletionInit } from "./groq-function-call-services";
-import { generateAudioFromElevenLabs, generateAudioFromOpenAI, getFullModelDAO, getFullModelDAOByName } from "./model-services";
+import { generateAudioFromElevenLabs, getFullModelDAO, getFullModelDAOByName } from "./model-services";
 import { sendWapMessage } from "./osomService";
 import { setSectionsToMessage } from "./section-services";
 import { getUserByEmail } from "./user-service";
 import { sendText } from "./wrc-sdk";
-import { ToolCall, ToolCallPart } from "ai";
 
 
 export default async function getConversations() {
@@ -453,7 +453,7 @@ export async function processMessage(id: string, modelName?: string) {
       const lastMessageWasAudio= conversation.lastMessageWasAudio
       if (lastMessageWasAudio && client.haveAudioResponse) {
         //const audioBase64 = await generateAudioFromOpenAI(assistantResponse, "ash")
-        const audioBase64 = await generateAudioFromElevenLabs(assistantResponse, "KXQbcKbroGSUf9Q5Crjd")
+        const audioBase64 = await generateAudioFromElevenLabs(assistantResponse, "PZOJhoabffwAg5QODFZ2")
         await sendAudioToConversation(parseInt(chatwootAccountId), chatwootConversationId, audioBase64)
       } else {
         await sendTextToConversation(parseInt(chatwootAccountId), chatwootConversationId, assistantResponse)

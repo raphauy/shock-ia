@@ -7,7 +7,7 @@ import { EventType, Message } from '@/lib/generated/prisma';
 import { ChatwootAttachment, IncomingChatwootMessage } from "@/services/chatwoot-types";
 import { getChatwootAccountId, getClient, getClientHaveCRM, getClientHaveEvents, getClientIdByChatwootAccountId } from "@/services/clientService";
 import { getContactByChatwootId, getContactByPhone } from "@/services/contact-services";
-import { createConversation, getActiveConversation, getSystemMessage, setLastMessageWasAudio } from "@/services/conversationService";
+import { createConversation, getActiveConversation, setLastMessageWasAudio } from "@/services/conversationService";
 import { MessageFormValues, saveMessage } from "@/services/messages-service";
 import { generateAudioFromElevenLabs, generateAudioFromOpenAI } from "@/services/model-services";
 import { Attachment, FileUIPart, TextUIPart, UIMessage } from "@ai-sdk/ui-utils";
@@ -216,8 +216,8 @@ export async function processIncomingMessage(messageId: string, clientId: string
 
         const lastMessageWasAudio= conversation.lastMessageWasAudio
         if (lastMessageWasAudio && client.haveAudioResponse) {
-          //const audioBase64 = await generateAudioFromElevenLabs(created.content, "KXQbcKbroGSUf9Q5Crjd")
-          const audioBase64 = await generateAudioFromOpenAI(created.content, "alloy")
+          const audioBase64 = await generateAudioFromElevenLabs(created.content, "PZOJhoabffwAg5QODFZ2")
+          //const audioBase64 = await generateAudioFromOpenAI(created.content, "alloy")
           await sendAudioToConversation(parseInt(chatwootAccountId), conversation.chatwootConversationId, audioBase64, true)
         } else {
           console.log("sending text to conversation, chatwootAccountId: " + chatwootAccountId + ", conversation.chatwootConversationId: " + conversation.chatwootConversationId)
