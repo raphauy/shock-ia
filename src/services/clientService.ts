@@ -1442,3 +1442,26 @@ export async function getAllWhatsappInstances() {
   })
 }
 
+export async function setV2Enabled(clientId: string, v2Enabled: boolean) {
+  const client= await prisma.client.update({
+    where: {
+      id: clientId
+    },
+    data: {
+      v2Enabled
+    }
+  })
+  return client
+}
+
+export async function getV2EnabledBySlug(slug: string) {
+  const client= await prisma.client.findUnique({
+    where: {
+      slug
+    },
+    select: {
+      v2Enabled: true
+    }
+  })
+  return client?.v2Enabled || false
+}

@@ -79,7 +79,8 @@ export async function getDataClientWithModel(slug: string, modelName?: string): 
       apiKey: client.apiKey,
       inboxProvider: client.inboxProvider,
       availability: client.availability,
-      timezone: client.timezone
+      timezone: client.timezone,
+      v2Enabled: client.v2Enabled
   }
   return data
 }

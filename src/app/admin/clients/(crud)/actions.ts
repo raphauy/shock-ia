@@ -40,6 +40,7 @@ export type DataClient = {
     inboxProvider: InboxProvider
     availability: string[]
     timezone: string
+    v2Enabled: boolean
   }
     
 
@@ -78,7 +79,8 @@ export async function getDataClient(clientId: string): Promise<DataClient | null
         apiKey: client.apiKey,
         inboxProvider: client.inboxProvider,
         availability: client.availability,
-        timezone: client.timezone
+        timezone: client.timezone,
+        v2Enabled: client.v2Enabled
     }
     return data
 }
@@ -122,7 +124,8 @@ export async function getDataClientOfUser(userId: string): Promise<DataClient | 
         apiKey: client.apiKey,
         inboxProvider: client.inboxProvider,
         availability: client.availability,
-        timezone: client.timezone
+        timezone: client.timezone,
+        v2Enabled: client.v2Enabled
     }
     return data
 }
@@ -164,7 +167,8 @@ export async function getDataClientBySlug(slug: string): Promise<DataClient | nu
         apiKey: client.apiKey,
         inboxProvider: client.inboxProvider,
         availability: client.availability,
-        timezone: client.timezone
+        timezone: client.timezone,
+        v2Enabled: client.v2Enabled
     }
     return data
 }
@@ -204,7 +208,8 @@ export async function getLastClientAction(): Promise<DataClient | null>{
         apiKey: client.apiKey,
         inboxProvider: client.inboxProvider,
         availability: client.availability,
-        timezone: client.timezone
+        timezone: client.timezone,
+        v2Enabled: client.v2Enabled
     }
     return data
 }
@@ -252,7 +257,8 @@ export async function getDataClients() {
                 whatsappInstance: client.whatsappInstances.length === 0 ? undefined : client.whatsappInstances[0],
                 inboxProvider: client.inboxProvider,
                 availability: client.availability,
-                timezone: client.timezone
+                timezone: client.timezone,
+                v2Enabled: client.v2Enabled
             };
         })
     );

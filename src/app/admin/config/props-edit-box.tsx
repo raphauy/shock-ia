@@ -1,7 +1,7 @@
 "use client"
 
 import { Switch } from "@/components/ui/switch"
-import { setHaveAgentsAction, setHaveAudioResponseAction, setHaveCRMAction, setHaveEventsAction } from "./(crud)/actions"
+import { setHaveAgentsAction, setHaveAudioResponseAction, setHaveCRMAction, setHaveEventsAction, setV2EnabledAction } from "./(crud)/actions"
 import { use, useEffect, useState } from "react"
 import { Loader } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
@@ -13,6 +13,7 @@ interface Props {
     haveAgents: boolean
     haveAudioResponse: boolean
     inboxProvider: InboxProvider
+    v2Enabled: boolean
 }
 
 export default function PropsEdit({ 
@@ -20,20 +21,24 @@ export default function PropsEdit({
     haveEvents: initialHaveEvents, 
     haveAgents: initialHaveAgents, 
     haveAudioResponse: initialHaveAudioResponse,
-    inboxProvider 
+    inboxProvider,
+    v2Enabled: initialV2Enabled
 }: Props) {
 
     const [loadingEvents, setLoadingEvents] = useState(false)
     const [loadingAgents, setLoadingAgents] = useState(false)
     const [loadingAudioResponse, setLoadingAudioResponse] = useState(false)
+    const [loadingV2Enabled, setLoadingV2Enabled] = useState(false)
     const [haveEvents, setHaveEvents] = useState(initialHaveEvents)
     const [haveAgents, setHaveAgents] = useState(initialHaveAgents)
     const [haveAudioResponse, setHaveAudioResponse] = useState(initialHaveAudioResponse)
+    const [v2Enabled, setV2Enabled] = useState(initialV2Enabled)
     useEffect(() => {
         setHaveEvents(initialHaveEvents)
         setHaveAgents(initialHaveAgents)
         setHaveAudioResponse(initialHaveAudioResponse)
-    }, [initialHaveEvents, initialHaveAgents, initialHaveAudioResponse])
+        setV2Enabled(initialV2Enabled)
+    }, [initialHaveEvents, initialHaveAgents, initialHaveAudioResponse, initialV2Enabled])
 
     function handleHaveEventsChange(haveEvents: boolean) {
         setLoadingEvents(true)
@@ -99,6 +104,26 @@ export default function PropsEdit({
         })
     }
 
+    function handleV2EnabledChange(v2Enabled: boolean) {
+        setLoadingV2Enabled(true)
+        setV2EnabledAction(clientId, v2Enabled)
+        .then((res) => {
+            if (res) {
+                setV2Enabled(v2Enabled)
+                toast({ title: "Configuración actualizada", description: "La configuración del cliente ha sido actualizada correctamente" })
+            }
+        })
+        .catch(() => {
+            toast({
+                title: "Error",
+                description: "Ha ocurrido un error al actualizar la configuración del cliente"
+            })
+        })
+        .finally(() => {
+            setLoadingV2Enabled(false)
+        })
+    }
+
     return (
         <div className="w-full p-4 border rounded-lg space-y-4">
             <p className="text-lg font-bold mb-4">Configuración general:</p>
@@ -136,6 +161,13 @@ export default function PropsEdit({
                         </p>
                     )
                 }
+            </div>
+            <div className="flex items-center gap-4">                
+                {
+                    loadingV2Enabled ? <Loader className="w-4 h-4 mr-2 animate-spin" /> :
+                    <Switch checked={v2Enabled} onCheckedChange={handleV2EnabledChange} />
+                }
+                <p className="">Simulador Pro (V2)</p>
             </div>
         </div>
     )

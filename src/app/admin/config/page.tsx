@@ -87,7 +87,7 @@ export default async function ConfigPage(props: Props) {
                     { client.haveCRM && isSuperAdmin && <ClientFunctionsBox clientId={client.id} />}
                 </TabsContent>
                 <TabsContent value="props" className="space-y-6">
-                    <PropsEdit clientId={client.id} haveEvents={client.haveEvents} haveAgents={client.haveAgents} haveAudioResponse={client.haveAudioResponse} inboxProvider={client.inboxProvider} />
+                    <PropsEdit clientId={client.id} haveEvents={client.haveEvents} haveAgents={client.haveAgents} haveAudioResponse={client.haveAudioResponse} inboxProvider={client.inboxProvider} v2Enabled={client.v2Enabled} />
                     <CRMPropsEdit clientId={client.id} haveCRM={client.haveCRM} inboxProvider={client.inboxProvider} wapSendFrequency={client.wapSendFrequency} autoUpdateInactiveConversations={client.whatsappInstance?.autoUpdateInactiveConversations || false} chatwootWidgetToken={client.whatsappInstance?.chatwootWidgetToken || ""} widgetUrl={WIDGET_URL} />
                     <ProductsConfig clientId={client.id} haveProducts={client.haveProducts} />
                     <WhatsappNumbersForm id={client.id} update={updateWhatsAppNumbersAction} whatsappNumbers={client.whatsappNumbers} />

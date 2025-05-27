@@ -1,8 +1,8 @@
 "use client"
 
-import { Button } from "@/components/ui/button";
+import { getV2EnabledActionBySlug } from "@/app/admin/config/(crud)/actions";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
-import { Bell, BellRing, BookDashed, BookOpen, Bot, BriefcaseBusiness, Calendar, ChevronRightSquare, Clock, DatabaseZap, Kanban, LayoutDashboard, LogOut, Megaphone, MessageCircle, MessagesSquare, Phone, QrCode, RectangleEllipsis, Sparkles, Tag, User, Users } from "lucide-react";
+import { Bell, BellRing, BookDashed, Bot, BriefcaseBusiness, Clock, DatabaseZap, Kanban, Megaphone, MessageCircle, QrCode, RectangleEllipsis, Sparkles, Tag, User, Users } from "lucide-react";
 import { useParams, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -145,13 +145,21 @@ export function AppSidebar() {
     const slug= params.slug as string
     const path = usePathname()
 
-    const { open, setOpen } = useSidebar()
+    const [dynamicItems, setDynamicItems] = useState(items)
 
-    // useEffect(() => {
-    //     if (open && path.endsWith("/crm")) {
-    //         setOpen(false)
-    //     }
-    // }, [open, path, setOpen])
+    useEffect(() => {
+        const fetchV2Enabled = async () => {
+            const v2Enabled = await getV2EnabledActionBySlug(slug)
+            if (v2Enabled) {
+              // remove Simulador item
+              setDynamicItems(items.filter((item) => item.title !== "Simulador"))
+            } else {
+              // remove Simulador Pro item and Conversaciones Pro item
+              setDynamicItems(items.filter((item) => item.title !== "Simulador Pro" && item.title !== "Conversaciones Pro"))
+            }
+        }
+        fetchV2Enabled()
+    }, [slug])
 
   
     return (
@@ -166,7 +174,7 @@ export function AppSidebar() {
                             </div>
                             <SidebarGroupContent>
                                 <SidebarMenu>
-                                    {items
+                                    {dynamicItems
                                         .filter((item) => item.group === group.id)
                                         .map((item) => (
                                             <SidebarMenuItem key={item.title}>

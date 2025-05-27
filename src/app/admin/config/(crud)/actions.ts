@@ -1,6 +1,6 @@
 "use server"
 
-import { setHaveAgents, setHaveAudioResponse, setHaveCRM, setHaveEvents, setHaveOrderFunction, setHaveProducts, setTokensPrice, setWapSendFrequency, clientHasOrderFunction, setAutoUpdateInactiveConversations, setChatwootWidgetToken } from "@/services/clientService"
+import { setHaveAgents, setHaveAudioResponse, setHaveCRM, setHaveEvents, setHaveOrderFunction, setHaveProducts, setTokensPrice, setWapSendFrequency, clientHasOrderFunction, setAutoUpdateInactiveConversations, setChatwootWidgetToken, setV2Enabled, getV2EnabledBySlug } from "@/services/clientService"
 import { createOrUpdateEcommerceFeed, getProductsGoogleFormat } from "@/services/product-services"
 import { getProductsGoogleSheetFormat } from "@/services/google-sheets-service"
 import { addTagToFunction, removeTagFromFunction } from "@/services/function-services"
@@ -284,4 +284,18 @@ export async function setChatwootWidgetTokenAction(clientId: string, chatwootWid
     console.error('Error setting chatwootWidgetToken:', error);
     return false;
   }
+}
+
+export async function setV2EnabledAction(clientId: string, v2Enabled: boolean) {
+    const client= await setV2Enabled(clientId, v2Enabled)
+
+    revalidatePath(`/admin/config`)
+
+    return client
+}
+
+export async function getV2EnabledActionBySlug(slug: string) {
+    const client= await getV2EnabledBySlug(slug)
+
+    return client
 }
