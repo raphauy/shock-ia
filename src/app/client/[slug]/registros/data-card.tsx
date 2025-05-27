@@ -22,8 +22,10 @@ export default function DataCard({ repoName, jsonData }: Props) {
                             // log value type
                             const normalKey = camelCaseToNormal(key);
                             const type = typeof value
-                            if (type === "object") {
+                            if (type === "object" && value !== null && Array.isArray(value)) {
                                 value = value.join(", ")
+                            } else if (type === "object" && value === null) {
+                                value = ""
                             }
                             const keyWithTildes = putTildes(normalKey);
                             return (
