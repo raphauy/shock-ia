@@ -1,35 +1,18 @@
 "use client"
 
 import { getV2EnabledActionBySlug } from "@/app/admin/config/(crud)/actions";
-import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
+import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail, SidebarTrigger } from "@/components/ui/sidebar";
 import { Bell, BellRing, BookDashed, Bot, BriefcaseBusiness, Clock, DatabaseZap, Kanban, Megaphone, MessageCircle, QrCode, RectangleEllipsis, Sparkles, Tag, User, Users } from "lucide-react";
 import { useParams, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
-// Menu items.
-const items = [
+// Elementos básicos del menú que siempre aparecen, independiente de la configuración V2
+const baseItems = [
   {
     title: "Kanban",
     url: `crm?last=30D`,
     icon: Kanban,
-    group: "kanban",
-  },
-  {
-    title: "Simulador",
-    url: `crm/simulator`,
-    icon: Bot,
-    group: "kanban",
-  },
-  {
-    title: "Simulador Pro",
-    url: `crm/simulator-pro`,
-    icon: Sparkles,
-    group: "kanban",
-  },  
-  {
-    title: "Conversaciones Pro",
-    url: `crm/conversations-pro`,
-    icon: MessageCircle,
     group: "kanban",
   },
   {
@@ -110,7 +93,33 @@ const items = [
     icon: QrCode,
     group: "whatsapp",
   }
-]
+];
+
+// Elementos que solo aparecen con V2 desactivado
+const nonV2Items = [
+  {
+    title: "Simulador",
+    url: `crm/simulator`,
+    icon: Bot,
+    group: "kanban",
+  }
+];
+
+// Elementos que solo aparecen con V2 activado
+const v2Items = [
+  {
+    title: "Simulador Pro",
+    url: `crm/simulator-pro`,
+    icon: Sparkles,
+    group: "kanban",
+  },
+  {
+    title: "Conversaciones Pro",
+    url: `crm/conversations-pro`,
+    icon: MessageCircle,
+    group: "kanban",
+  }
+];
 
 const groups = [
   {
@@ -139,68 +148,101 @@ const groups = [
   }
 ];
 
+// Usamos un objeto global para cachear la configuración V2 entre navegaciones
+// Esto evita que tengamos que volver a llamar a la API cada vez
+const v2StatusCache = {
+  status: null as boolean | null,
+  slug: null as string | null
+};
+
 export function AppSidebar() {
-
-    const params = useParams()
-    const slug= params.slug as string
-    const path = usePathname()
-
-    const [dynamicItems, setDynamicItems] = useState(items)
-
-    useEffect(() => {
-        const fetchV2Enabled = async () => {
-            const v2Enabled = await getV2EnabledActionBySlug(slug)
-            if (v2Enabled) {
-              // remove Simulador item
-              setDynamicItems(items.filter((item) => item.title !== "Simulador"))
-            } else {
-              // remove Simulador Pro item and Conversaciones Pro item
-              setDynamicItems(items.filter((item) => item.title !== "Simulador Pro" && item.title !== "Conversaciones Pro"))
-            }
-        }
-        fetchV2Enabled()
-    }, [slug])
-
+  const params = useParams();
+  const slug = params.slug as string;
+  const path = usePathname();
   
-    return (
-        <div>
-            <Sidebar className="relative z-0 h-full" collapsible="icon">
-                <SidebarContent className="h-full min-h-[calc(100vh-100px)]">
-                    {groups.map((group) => (
-                        <SidebarGroup key={group.id}>
-                            <div className="flex items-center justify-between">
-                                <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
-                                {group.id === "kanban" && <SidebarTrigger />}
-                            </div>
-                            <SidebarGroupContent>
-                                <SidebarMenu>
-                                    {dynamicItems
-                                        .filter((item) => item.group === group.id)
-                                        .map((item) => (
-                                            <SidebarMenuItem key={item.title}>
-                                                <SidebarMenuButton 
-                                                    asChild 
-                                                    isActive={path.endsWith(item.url)}
-                                                    className={group.id === "configuracion" ? "data-[active=true]:border" : ""}
-                                                >
-                                                    <a href={`/client/${slug}/${item.url}`}>
-                                                        <item.icon />
-                                                        <span>{item.title}</span>
-                                                    </a>
-                                                </SidebarMenuButton>
-                                            </SidebarMenuItem>
-                                        ))}
-                                </SidebarMenu>
-                            </SidebarGroupContent>
-                        </SidebarGroup>
+  // Inicializamos el estado con los items correctos si ya tenemos la configuración en caché
+  const initialItems = v2StatusCache.slug === slug && v2StatusCache.status !== null 
+    ? v2StatusCache.status 
+      ? [...baseItems, ...v2Items]
+      : [...baseItems, ...nonV2Items]
+    : baseItems;
+  
+  const [menuItems, setMenuItems] = useState(initialItems);
+  
+  // Usamos un solo useEffect que se ejecuta una vez al montar
+  useEffect(() => {
+    // Si ya tenemos la configuración en caché para este slug, no hacemos nada más
+    if (v2StatusCache.slug === slug && v2StatusCache.status !== null) {
+      return;
+    }
+    
+    // Si no tenemos la configuración, la cargamos
+    const fetchV2Status = async () => {
+      try {
+        const v2Enabled = await getV2EnabledActionBySlug(slug);
+        
+        // Actualizamos la caché
+        v2StatusCache.slug = slug;
+        v2StatusCache.status = v2Enabled;
+        
+        // Actualizamos el estado solo si es necesario
+        if (v2Enabled) {
+          setMenuItems([...baseItems, ...v2Items]);
+        } else {
+          setMenuItems([...baseItems, ...nonV2Items]);
+        }
+      } catch (error) {
+        console.error("Error cargando la configuración V2:", error);
+      }
+    };
+    
+    fetchV2Status();
+  }, [slug]); // Solo depende del slug
+  
+  // Usamos el mismo renderizado independientemente de si estamos montados o no
+  return (
+    <div>
+      <Sidebar className="relative z-0 h-full" collapsible="icon">
+        <SidebarContent className="h-full min-h-[calc(100vh-100px)]">
+          {groups.map((group) => {
+            // Filtramos los items para este grupo
+            const groupItems = menuItems.filter(item => item.group === group.id);
+            
+            if (groupItems.length === 0) return null;
+            
+            return (
+              <SidebarGroup key={group.id}>
+                <div className="flex items-center justify-between">
+                  <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+                  {group.id === "kanban" && <SidebarTrigger />}
+                </div>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {groupItems.map((item) => (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton 
+                          asChild 
+                          isActive={path.endsWith(item.url)}
+                          className={group.id === "configuracion" ? "data-[active=true]:border" : ""}
+                        >
+                          <Link href={`/client/${slug}/${item.url}`}>
+                            <item.icon />
+                            <span>{item.title}</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
                     ))}
-                </SidebarContent>
-                <SidebarFooter>
-                    <div>
-                    </div>
-                </SidebarFooter>
-                { !path.endsWith("/crm") && <SidebarRail className="[[data-side=left]_&]:cursor-pointer [[data-side=left][data-state=collapsed]_&]:cursor-pointer"/> } 
-            </Sidebar>
-        </div>
-    )
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            );
+          })}
+        </SidebarContent>
+        <SidebarFooter>
+          <div></div>
+        </SidebarFooter>
+        {!path.endsWith("/crm") && <SidebarRail className="[[data-side=left]_&]:cursor-pointer [[data-side=left][data-state=collapsed]_&]:cursor-pointer"/>}
+      </Sidebar>
+    </div>
+  );
 }
