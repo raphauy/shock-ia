@@ -103,6 +103,14 @@ export async function getDocumentsCount() {
   return count
 }
 
+export async function getDocumentsCountByClient(clientId: string) {
+  const count = await prisma.document.count({
+    where: {
+      clientId
+    }
+  })
+  return count
+}
 export async function getDocumentDAO(id: string) {
   const found = await prisma.document.findUnique({
     where: {

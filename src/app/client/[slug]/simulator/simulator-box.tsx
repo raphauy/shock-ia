@@ -167,7 +167,13 @@ export default function SimulatorBox() {
 
   const disabled = isLoading || input.length === 0;
 
-  const errorMessage= error?.message && error.message.includes("Bot disabled") ? "El bot está deshabilitado para este contacto." : error?.message
+  const errorMessage =
+  // @ts-ignore
+  error?.data?.error ||
+    (error?.message && error.message.includes("Bot disabled")
+      ? "El bot está deshabilitado para este contacto."
+      : error?.message) ||
+    "Ocurrió un error inesperado. Intenta nuevamente.";
 
 
   return (
@@ -241,15 +247,13 @@ export default function SimulatorBox() {
                     !gptData &&
                     <div
                         className={cn("p-1.5 text-white",
-                          (message.role === "assistant") ? "bg-green-500" : (message.role === "system" || message.role === "function") ? "bg-blue-500" : "bg-black",
+                          (message.role === "assistant") ? "bg-green-500" : (message.role === "system") ? "bg-blue-500" : "bg-black",
                         )}
                       >
                       {message.role === "user" ? (
                       <User width={20} />
                       ) : message.role === "system" ? (
                       <Terminal width={20} />
-                      ) : (message.role === "function" && !gptData) ? (
-                      <Terminal width={20}/>
                       ) : message.role === "assistant" ? (
                       <Bot width={20} />
                       ) : 
@@ -259,6 +263,7 @@ export default function SimulatorBox() {
                       </div>
                     }
                     {
+                      // @ts-ignore
                       message.role !== "system" && message.role !== "function" && !gptData &&
                       <div className="w-full mt-1 prose break-words prose-p:leading-relaxed dark:prose-invert">                       
                         <ReactMarkdown
@@ -311,6 +316,7 @@ export default function SimulatorBox() {
       </div>
 
       {error && <p className="mt-10 text-base text-center text-red-500">{errorMessage}</p>}
+      {error && <p className="mt-10 text-base text-center text-red-500">{JSON.stringify(error, null, 2)}</p>}
 
       <div className="fixed bottom-0 flex flex-col items-center w-full p-5 pb-3 space-y-3 max-w-[350px] sm:max-w-[400px] md:max-w-[550px] lg:max-w-screen-md bg-gradient-to-b from-transparent via-gray-100 to-gray-100 sm:px-0">
         <form

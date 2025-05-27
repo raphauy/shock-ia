@@ -27,46 +27,76 @@ type Props= {
 }
 
 export function FieldForm({ id, repoId, eventId, customFields, closeDialog }: Props) {
+  const [initialDataLoading, setInitialDataLoading] = useState(id ? true : false);
+  // Estado local para mantener el tipo real
+  const [fieldType, setFieldType] = useState<FieldType>("string");
+  
+  const [initialValues, setInitialValues] = useState<FieldFormValues>({
+    name: "",
+    type: "string" as FieldType,
+    description: "",
+    required: true,
+    etiquetar: false,
+    repositoryId: repoId ?? undefined,
+    eventId: eventId ?? undefined,
+    linkedCustomFieldId: undefined,
+    listOptions: []
+  });
+
   const form = useForm<FieldFormValues>({
     resolver: zodResolver(repoFieldSchema),
-    defaultValues: async () => {
-      if (id) {
-        const data = await getFieldDAOAction(id)
-        if (data) {
-          return {
-            repositoryId: data.repositoryId ?? undefined,
-            eventId: data.eventId ?? undefined,
-            linkedCustomFieldId: data.linkedCustomFieldId ?? undefined,
-            name: data.name,
-            type: data.type,
-            description: data.description,
-            required: data.required,
-            etiquetar: data.etiquetar,
-            listOptions: data.listOptions ?? []
-          }
-        }
-      }
-      return {
-        name: "",
-        type: "string",
-        description: "",
-        required: true,
-        etiquetar: false,
-        repositoryId: repoId ?? undefined,
-        eventId: eventId ?? undefined,
-        linkedCustomFieldId: undefined,
-        listOptions: []
-      }
-    },
+    defaultValues: initialValues,
     mode: "onChange",
-  })
+  });
+
+  useEffect(() => {
+    if (id) {
+      setInitialDataLoading(true);
+      getFieldDAOAction(id)
+        .then(data => {
+          if (data) {
+            // Establecer el tipo directamente en el estado local
+            if (["string", "number", "boolean", "list"].includes(data.type)) {
+              setFieldType(data.type as FieldType);
+            }
+            
+            const newValues = {
+              repositoryId: data.repositoryId ?? undefined,
+              eventId: data.eventId ?? undefined,
+              linkedCustomFieldId: data.linkedCustomFieldId ?? undefined,
+              name: data.name,
+              type: data.type as FieldType,
+              description: data.description,
+              required: data.required,
+              etiquetar: data.etiquetar,
+              listOptions: data.listOptions ?? []
+            };
+            
+            setInitialValues(newValues);
+            form.reset(newValues)
+          }
+          setInitialDataLoading(false);
+        })
+        .catch(() => {
+          setInitialDataLoading(false);
+        });
+    }
+  }, [id, form]);
+  
+
+  // Actualizar los valores del formulario cuando cambian los valores iniciales
+  useEffect(() => {
+    if (!initialDataLoading) {
+      form.reset(initialValues);
+    }
+  }, [initialValues, initialDataLoading, form]);
+
   const [loading, setLoading] = useState(false)
 
   const [filteredCustomFields, setFilteredCustomFields] = useState<CustomFieldDAO[]>(customFields)
 
   const watchedType = form.watch("type")
   const watchedListOptions = form.watch("listOptions")
-  console.log(watchedType)
 
   useEffect(() => {
     const selectedType = watchedType
@@ -80,7 +110,13 @@ export function FieldForm({ id, repoId, eventId, customFields, closeDialog }: Pr
   const onSubmit = async (data: FieldFormValues) => {
     setLoading(true)
     try {
-      await createOrUpdateFieldAction(id ? id : null, data)
+      // Forzar el tipo correcto desde nuestro estado local
+      const formDataWithCorrectType = {
+        ...data,
+        type: fieldType
+      };
+      
+      await createOrUpdateFieldAction(id ? id : null, formDataWithCorrectType)
       toast({ title: id ? "Campo actualizado" : "Campo creado" })
       closeDialog()
     } catch (error: any) {
@@ -90,29 +126,16 @@ export function FieldForm({ id, repoId, eventId, customFields, closeDialog }: Pr
     }
   }
 
-  useEffect(() => {
-    if (id) {
-      getFieldDAOAction(id).then((data) => {
-        if (data) {
-          console.log("linkedCustomFieldId: ", data.linkedCustomFieldId);
-          form.reset({
-            repositoryId: data.repositoryId ?? undefined,
-            eventId: data.eventId ?? undefined,
-            linkedCustomFieldId: data.linkedCustomFieldId ?? undefined,
-            name: data.name,
-            type: data.type,
-            description: data.description,
-            required: data.required,
-            etiquetar: data.etiquetar,
-            listOptions: data.listOptions ?? []
-          })
-        }
-      })
-    }
-  }, [form, id])
-
   function handleListOptionsChange(options: string[]) {
     form.setValue("listOptions", options)
+  }
+
+  if (initialDataLoading) {
+    return (
+      <div className="flex justify-center items-center py-8">
+        <Loader className="h-8 w-8 animate-spin" />
+      </div>
+    );
   }
 
   return (
@@ -140,26 +163,36 @@ export function FieldForm({ id, repoId, eventId, customFields, closeDialog }: Pr
             <FormField
               control={form.control}
               name="type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tipo</FormLabel>
-                  <FormControl>
-                    <Select onValueChange={(value) => field.onChange(value)} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecciona un Tipo" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {Object.values(FieldType).map((type) => (
-                          <SelectItem key={type} value={type}>{getTypeLabel(type)}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              render={({ field }) => {                
+                return (
+                  <FormItem>
+                    <FormLabel>Tipo</FormLabel>
+                    <FormControl>
+                      <Select 
+                        onValueChange={(value) => {
+                          // Actualizar ambos: el estado del formulario y nuestro estado local
+                          field.onChange(value);
+                          setFieldType(value as FieldType);
+                        }} 
+                        value={fieldType}
+                        defaultValue="string"
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecciona un Tipo" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {Object.values(FieldType).map((type) => (
+                            <SelectItem key={type} value={type}>{getTypeLabel(type)}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
             />
 
             {/* add a field for the list options here */}
@@ -222,13 +255,16 @@ export function FieldForm({ id, repoId, eventId, customFields, closeDialog }: Pr
               control={form.control}
               name="linkedCustomFieldId"
               render={({ field }) => {
+                // Verificar que el valor es válido para el enum
+                const safeValue = field.value ? field.value : undefined;
+                
                 return (
                   <FormItem>
                     <FormLabel>Linkear campo personalizado</FormLabel>
                     <FormControl>
                       <Select 
                         onValueChange={field.onChange}
-                        value={field.value}
+                        value={safeValue}
                       >
                         <FormControl>
                           <SelectTrigger disabled={customFields.length === 0}>

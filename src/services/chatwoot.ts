@@ -3,9 +3,9 @@ import ChatwootClient, { agent } from "@figuro/chatwoot-sdk"
 import { getChatwootAccountId, getClient } from "./clientService"
 
 
-export async function sendTextToConversation(accountId: number, conversationId: number, message: string) {
+export async function sendTextToConversation(accountId: number, conversationId: number, message: string, V2: boolean = false) {
     const chatwootUrl= process.env.CHATWOOT_URL!
-    const chatwootToken= process.env.CHATWOOT_AGENT_BOT_ACCESS_TOKEN!
+    const chatwootToken= V2 ? process.env.CHATWOOT_AGENT_BOT_ACCESS_TOKEN_V2 : process.env.CHATWOOT_AGENT_BOT_ACCESS_TOKEN!
     console.log("chatwootUrl:", chatwootUrl)
     if (!chatwootUrl || !chatwootToken) {
         console.error("CHATWOOT_URL or CHATWOOT_AGENT_BOT_ACCESS_TOKEN is not set")
@@ -30,9 +30,9 @@ export async function sendTextToConversation(accountId: number, conversationId: 
     })
 }
 
-export async function sendAudioToConversation(accountId: number, conversationId: number, audioBase64: string) {
+export async function sendAudioToConversation(accountId: number, conversationId: number, audioBase64: string, V2: boolean = false) {
     const chatwootUrl= process.env.CHATWOOT_URL!
-    const chatwootToken= process.env.CHATWOOT_AGENT_BOT_ACCESS_TOKEN!
+    const chatwootToken= V2 ? process.env.CHATWOOT_AGENT_BOT_ACCESS_TOKEN_V2 : process.env.CHATWOOT_AGENT_BOT_ACCESS_TOKEN!
     console.log("chatwootUrl:", chatwootUrl)
     if (!chatwootUrl || !chatwootToken) {
         console.error("CHATWOOT_URL or CHATWOOT_AGENT_BOT_ACCESS_TOKEN is not set")

@@ -204,6 +204,9 @@ model Message {
   updatedAt         DateTime    @updatedAt
   role              String
   content           String      @db.Text
+  parts             Json @default("[]")
+  attachments       Json @default("[]")
+
   gptData           String?     @db.Text
   conversationId    String
   conversation      Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
@@ -233,6 +236,8 @@ model Function {
   description    String?                          // gennext: show.column
   definition     String?      @db.Text            // gennext: show.column
   tags           String[]                         // gennext: show.column
+
+  toolDefinition String?      @db.Text            // gennext: show.column
   
   createdAt      DateTime     @default(now())     // gennext: skip.zod
   updatedAt      DateTime     @updatedAt          // gennext: skip.zod

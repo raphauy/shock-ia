@@ -10,6 +10,14 @@ const nextConfig = {
                 protocol: 'https',
                 hostname: 'f.fcdn.app',
             },
+            {
+                protocol: 'https',
+                hostname: '*.public.blob.vercel-storage.com',
+            },
+            {
+                protocol: 'https',
+                hostname: 'agentes.shock.uy',
+            },
         ],
     },
 }

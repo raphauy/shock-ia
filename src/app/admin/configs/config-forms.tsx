@@ -31,7 +31,10 @@ type Props = {
 export function ConfigForm({ id, closeDialog }: Props) {
   const form = useForm<ConfigFormValues>({
     resolver: zodResolver(configFormSchema),
-    defaultValues: {},
+    defaultValues: {
+      name: "",
+      value: "",
+    },
     mode: "onChange",
   });
   const [loading, setLoading] = useState(false)

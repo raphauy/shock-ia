@@ -521,7 +521,22 @@ export async function reservarParaEvento(clientId: string, conversationId: strin
   if (contactId) {
     const fields= await getFieldsDAOByEventId(eventId)
     for (const field of fields) {
-      const value= metadataObj[field.name]
+      let value;
+      if (field.type === "list") {
+        // Verificar si es un array antes de usar join
+        if (Array.isArray(metadataObj[field.name])) {
+          value = metadataObj[field.name].join(", ");
+        } else if (typeof metadataObj[field.name] === 'string') {
+          // Si es string, usar como está
+          value = metadataObj[field.name];
+        } else {
+          // Si no es array ni string, convertir a string si existe
+          value = metadataObj[field.name] ? String(metadataObj[field.name]) : undefined;
+        }
+      } else {
+        value = metadataObj[field.name];
+      }
+      
       const linkedCustomFieldId= field.linkedCustomFieldId
       if (value && linkedCustomFieldId) {
         await createOrUpdateFieldValue({
@@ -687,7 +702,22 @@ export async function reservarParaEventoDeUnicaVez(clientId: string, conversatio
   if (contactId) {
     const fields= await getFieldsDAOByEventId(eventId)
     for (const field of fields) {
-      const value= metadataObj[field.name]
+      let value;
+      if (field.type === "list") {
+        // Verificar si es un array antes de usar join
+        if (Array.isArray(metadataObj[field.name])) {
+          value = metadataObj[field.name].join(", ");
+        } else if (typeof metadataObj[field.name] === 'string') {
+          // Si es string, usar como está
+          value = metadataObj[field.name];
+        } else {
+          // Si no es array ni string, convertir a string si existe
+          value = metadataObj[field.name] ? String(metadataObj[field.name]) : undefined;
+        }
+      } else {
+        value = metadataObj[field.name];
+      }
+      
       const linkedCustomFieldId= field.linkedCustomFieldId
       if (value && linkedCustomFieldId) {
         await createOrUpdateFieldValue({
@@ -957,7 +987,22 @@ export async function defaultFunction(clientId: string, name: string, args: any)
     if (contactId) {
       const fields= await getFieldsDAOByRepositoryId(repo.id)
       for (const field of fields) {
-        const value= field.type === "list" ? data[field.name]?.join(", ") : data[field.name]
+        let value;
+        if (field.type === "list") {
+          // Verificar si es un array antes de usar join
+          if (Array.isArray(data[field.name])) {
+            value = data[field.name].join(", ");
+          } else if (typeof data[field.name] === 'string') {
+            // Si es string, usar como está
+            value = data[field.name];
+          } else {
+            // Si no es array ni string, convertir a string si existe
+            value = data[field.name] ? String(data[field.name]) : undefined;
+          }
+        } else {
+          value = data[field.name];
+        }
+        
         if (value && field.linkedCustomFieldId) {
           await createOrUpdateFieldValue({
             contactId,

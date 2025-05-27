@@ -1,6 +1,6 @@
 import * as z from "zod"
 import { prisma } from "@/lib/db"
-import { Parameters, RepositoryDAO, generateFunctionDefinition, getFullRepositoryDAO, updateFunctionDefinition } from "./repository-services"
+import { Parameters, RepositoryDAO, generateFunctionDefinition, getFullRepositoryDAO, updateFunctionDefinition, updateRepositoryToolDefinition } from "./repository-services"
 import { FieldType } from "@/lib/generated/prisma"
 import { updateEventMetadata } from "./event-services"
 import { JsonValue } from "@prisma/client/runtime/library"
@@ -64,6 +64,7 @@ export async function createField(data: FieldFormValues) {
 
   if (data.repositoryId) {
     await updateFunctionDefinition(data.repositoryId)
+    await updateRepositoryToolDefinition(data.repositoryId)
   }
 
   if (data.eventId) {
@@ -83,6 +84,7 @@ export async function updateField(id: string, data: FieldFormValues) {
 
   if (data.repositoryId) {
     await updateFunctionDefinition(data.repositoryId)
+    await updateRepositoryToolDefinition(data.repositoryId)
   }
 
   if (data.eventId) {
@@ -101,6 +103,7 @@ export async function deleteField(id: string) {
 
   if (deleted.repositoryId) {
     await updateFunctionDefinition(deleted.repositoryId)
+    await updateRepositoryToolDefinition(deleted.repositoryId)
   }
 
   if (deleted.eventId) {
@@ -152,6 +155,7 @@ export async function updateRepoFieldsOrder(fields: FieldDAO[]): Promise<string>
 
   if (fields[0].repositoryId) {
     await updateFunctionDefinition(fields[0].repositoryId)
+    await updateRepositoryToolDefinition(fields[0].repositoryId)
     return fields[0].repositoryId
   } else {
     throw new Error("Repository ID is required")
