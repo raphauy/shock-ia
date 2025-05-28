@@ -29,7 +29,6 @@ export async function POST(req: Request) {
     //const messages= origMessages.filter((message: any) => message.role !== "system")
     let messages= await getActiveMessages(phone, clientId)
     if (!messages) messages= []
-    messages= messages.filter((message: any) => message.role !== "system")
   
     // filter messages with role function and functionName getDocument
     messages= messages.filter((message: any) => message.role !== "system")
@@ -41,9 +40,8 @@ export async function POST(req: Request) {
       const role= message.role
       if (role === "function") 
         return {
-          role: message.role,
-          content: message.content,
-          name: message.gptData ? JSON.parse(message.gptData).functionName : null
+          role: "data",
+          content: message.gptData ? message.gptData : message.content,
         }
     
       return {
@@ -96,8 +94,7 @@ export async function POST(req: Request) {
     await setSectionsToMessage(created.id, contextResponse.sectionsIds)
   
     console.log("apiMessages.count: " + apiMessages.length)
-    console.log("apiMessages: " + JSON.stringify(apiMessages))  
-    console.log("origMessages: " + JSON.stringify(origMessages))
+    //console.log("apiMessages: " + JSON.stringify(apiMessages))  
 
 
     const tools= await getAllClientTools(client.id)
