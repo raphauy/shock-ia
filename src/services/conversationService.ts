@@ -811,7 +811,7 @@ export async function saveFunction(phone: string, completion: string, clientId: 
       }
     }
   } else if (name !== "getDateOfNow" && name !== "registrarPedido" && name !== "reservarSummit" && name !== "echoRegister" && name !== "completarFrase" && name !== "reservarServicio") {
-    const copyArgs = { ...JSON.parse(args) }
+    const copyArgs = { ...args }
     delete copyArgs.conversationId
 
     gptData = {
@@ -846,7 +846,7 @@ export async function saveToolCalls(phone: string, toolCalls: ToolCallPart[], cl
         }
       }
     } else if (name !== "getDateOfNow" && name !== "registrarPedido" && name !== "reservarSummit" && name !== "echoRegister" && name !== "completarFrase" && name !== "reservarServicio") {
-      const copyArgs = { ...JSON.parse(args) }
+      const copyArgs = { ...args }
       delete copyArgs.conversationId
 
       gptData = {

@@ -1,17 +1,14 @@
-import { messageArrived, saveFunction, saveToolCalls } from '@/services/conversationService';
-import { getFullModelDAO } from '@/services/model-services';
+import { getAllClientTools } from '@/lib/ai/tools';
 import { getCurrentUser } from '@/lib/auth';
 import { getClient } from '@/services/clientService';
-import { getActiveMessages, getSystemMessage } from '@/services/conversationService';
-import { getFullModelDAOByName } from '@/services/model-services';
+import { getActiveMessages, getSystemMessage, messageArrived, saveToolCalls } from '@/services/conversationService';
+import { getContext } from '@/services/function-call-services';
+import { getFullModelDAO, getFullModelDAOByName } from '@/services/model-services';
+import { setSectionsToMessage } from '@/services/section-services';
 import { getStageByChatwootId } from '@/services/stage-services';
 import { openai } from '@ai-sdk/openai';
 import { streamText } from 'ai';
 import { NextResponse } from 'next/server';
-import { getContext } from '@/services/function-call-services';
-import { setSectionsToMessage } from '@/services/section-services';
-import { getRepositorysDAO } from '@/services/repository-services';
-import { getDocumentTool } from '@/lib/ai/tools';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -102,24 +99,9 @@ export async function POST(req: Request) {
     console.log("apiMessages: " + JSON.stringify(apiMessages))  
     console.log("origMessages: " + JSON.stringify(origMessages))
 
-    const repositories= await getRepositorysDAO(client.id)
-    let dynamicTools= {}
-    for (const repository of repositories) {
-        console.log("repository: " + repository.name)
-    //   const tool= await getToolFromDatabase(repository.id)
-    //   console.log("Tool of:", repository.name)
-    //   dynamicTools= {
-    //     ...dynamicTools,
-    //     ...tool
-    //   }
-    }
-    console.log("dynamicTools tools count:", Object.keys(dynamicTools).length)
 
-    const tools= {
-        ...getDocumentTool,
-        ...dynamicTools
-    }
-    console.log("tools count:", Object.keys(tools).length)
+    const tools= await getAllClientTools(client.id)
+    console.log("tool keys: " + JSON.stringify(Object.keys(tools)))
 
     console.log("POST /api/chat - antes de streamText");
     const result = streamText({
