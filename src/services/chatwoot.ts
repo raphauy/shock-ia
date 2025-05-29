@@ -1,9 +1,13 @@
 import axios from 'axios'
 import ChatwootClient, { agent } from "@figuro/chatwoot-sdk"
-import { getChatwootAccountId, getClient } from "./clientService"
+import { getChatwootAccountId, getClient, getClientIdByChatwootAccountId } from "./clientService"
+import { getV2EnabledByChatwootAccountId } from './conversation-v2-services'
 
 
 export async function sendTextToConversation(accountId: number, conversationId: number, message: string, V2: boolean = false) {
+    if (!V2) {
+        V2= await getV2EnabledByChatwootAccountId(accountId) || false
+    }
     const chatwootUrl= process.env.CHATWOOT_URL!
     const chatwootToken= V2 ? process.env.CHATWOOT_AGENT_BOT_ACCESS_TOKEN_V2 : process.env.CHATWOOT_AGENT_BOT_ACCESS_TOKEN!
     console.log("chatwootUrl:", chatwootUrl)
@@ -99,8 +103,8 @@ export async function addLabelToConversation(accountId: number, conversationId: 
 
 export async function addLabelToConversationByPhone(accountId: number, phone: string, labels: string[]) {
     const chatwootUrl= process.env.CHATWOOT_URL!
-//    const chatwootToken= process.env.CHATWOOT_ACCESS_TOKEN!
-    const chatwootToken = process.env.CHATWOOT_AGENT_BOT_ACCESS_TOKEN!
+    const V2= await getV2EnabledByChatwootAccountId(accountId) || false
+    const chatwootToken = V2 ? process.env.CHATWOOT_AGENT_BOT_ACCESS_TOKEN_V2 : process.env.CHATWOOT_AGENT_BOT_ACCESS_TOKEN!
     console.log("chatwootUrl:", chatwootUrl)
     console.log("chatwootToken:", chatwootToken)
     if (!chatwootUrl || !chatwootToken) {
@@ -280,7 +284,8 @@ export async function getChatwootClient(token: string | undefined) {
 
 export async function toggleConversationStatus(accountId: number, conversationId: number, status: "open" | "resolved" | "pending") {
     const chatwootUrl = process.env.CHATWOOT_URL!
-    const chatwootToken= process.env.CHATWOOT_AGENT_BOT_ACCESS_TOKEN!
+    const V2= await getV2EnabledByChatwootAccountId(accountId) || false
+    const chatwootToken = V2 ? process.env.CHATWOOT_AGENT_BOT_ACCESS_TOKEN_V2 : process.env.CHATWOOT_AGENT_BOT_ACCESS_TOKEN!
     console.log("chatwootUrl:", chatwootUrl)
     console.log("chatwootToken:", chatwootToken)
     if (!chatwootUrl || !chatwootToken) {
@@ -341,8 +346,9 @@ export async function createContactInChatwoot(accountId: number, inboxId: number
 }
 
 export async function createChatwootConversation(accountId: number, inboxId: string, chatwootContactId: string) {
+    const V2= await getV2EnabledByChatwootAccountId(accountId)
     const chatwootUrl = process.env.CHATWOOT_URL!
-    const chatwootToken = process.env.CHATWOOT_AGENT_BOT_ACCESS_TOKEN!
+    const chatwootToken = V2 ? process.env.CHATWOOT_AGENT_BOT_ACCESS_TOKEN_V2 : process.env.CHATWOOT_AGENT_BOT_ACCESS_TOKEN!
     console.log("chatwootUrl:", chatwootUrl)
     console.log("chatwootToken:", chatwootToken)
     

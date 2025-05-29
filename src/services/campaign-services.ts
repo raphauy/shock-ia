@@ -216,65 +216,6 @@ export async function processCampaignContact(campaignContactId: string) {
   await checkAndUpdateCampaignStatus(campaign.id)
 
   return updated
-
-//   const phone= contact.phone
-// //  const phoneRegex= /^\+?[0-9]+$/
-// //  if (!phone || !phoneRegex.test(phone)) throw new Error("Contacto no tiene teléfono válido")
-
-//   console.log("phone: ", phone)
-//   const chatwootAccountId= await getChatwootAccountId(campaign.clientId)
-//   if (!chatwootAccountId) throw new Error("Chatwoot account not found")
-//   console.log("chatwootAccountId: ", chatwootAccountId)
-
-//   let conversation= await getLastConversationByContactId(contact.id, campaign.clientId)
-//   if (!conversation) {
-//     const whatsappInstance= await getWhatsappInstance(campaign.clientId)
-//     if (!whatsappInstance) throw new Error("Whatsapp instance not found")
-//     if (!whatsappInstance.whatsappInboxId) throw new Error("Whatsapp inbox not found")
-//     if (!contact.chatwootId) throw new Error("Chatwoot contact not found")
-//     const chatwootConversationId= await createChatwootConversation(Number(chatwootAccountId), whatsappInstance.whatsappInboxId, contact.chatwootId)
-//     if (!chatwootConversationId) throw new Error("Chatwoot conversation not found")
-//     conversation= await createConversation(phone, campaign.clientId, contact.id, chatwootConversationId)
-//   }
-
-//   if (!conversation) throw new Error("Conversation not found")
-
-//   const assistantMessage= "Información del sistema: A través de una campaña el usuario recibió el siguiente mensaje:\n\n" + message
-//   await messageArrived(conversation.phone, assistantMessage, conversation.clientId, "assistant", "", undefined, undefined, conversation.chatwootConversationId || undefined, Number(contact.chatwootId))
-    
-//   const chatwootConversationId= conversation.chatwootConversationId
-//   if (!chatwootConversationId) throw new Error("Chatwoot conversation not found")
-
-//   await sendTextToConversation(Number(chatwootAccountId), chatwootConversationId, message)
-
-//   const updated = await prisma.campaignContact.update({
-//     where: {
-//       id: campaignContactId
-//     },
-//     data: {
-//       conversationId: conversation.id,
-//       status: CampaignContactStatus.ENVIADO,
-//       sentAt: new Date(),
-//     }
-//   })
-
-//   if (!updated) throw new Error("Error al procesar el contacto")
-
-//   const tags= campaign.tags
-//   if (tags.length > 0) {
-//     const by= "camp-" + campaign.name
-//     await addTagsToContact(contact.id, tags, by)
-//   }
-
-//   const moveToStageId= campaign.moveToStageId
-//   if (moveToStageId) {
-//     console.log("setting new stage to contact, by: CAMP-" + campaign.name)
-//     await setNewStage(contact.id, moveToStageId, "CAMP-" + campaign.name)
-//   }
-
-//   await checkAndUpdateCampaignStatus(campaign.id)
-
-//   return updated
 }
 
 export async function sendMessageToContact(clientId: string, contact: ContactDAO, message: string, tags: string[], moveToStageId: string | null, by: string) {
@@ -403,18 +344,23 @@ export async function processCampaign(campaignId: string) {
     const notBefore= Math.floor(notBeforeDate.getTime() / 1000)    
     console.log("notBefore: ", notBefore)
 
-    const scheduleId= await scheduleCampaignContact(campaignContact.id, notBefore, client.name)
-    await prisma.campaignContact.update({
-      where: {
-        id: campaignContact.id
-      },
-      data: {
-        scheduleId,
-        scheduledAt: new Date(),
-        scheduledTo: notBeforeDate,
-        status: CampaignContactStatus.PROGRAMADO
-      }
-    })
+    try {
+      const scheduleId= await scheduleCampaignContact(campaignContact.id, notBefore, client.name)
+      await prisma.campaignContact.update({
+        where: {
+          id: campaignContact.id
+        },
+        data: {
+          scheduleId,
+          scheduledAt: new Date(),
+          scheduledTo: notBeforeDate,
+          status: CampaignContactStatus.PROGRAMADO
+        }
+      })
+    } catch (error) {
+      console.error("Error processing campaign contact: ", error)
+    }
+    
     actualDelay += delayIncrement
   }
 
@@ -531,4 +477,21 @@ export async function getRemainingCount(campaignId: string) {
     }
   })
   return remainingCount
+}
+
+export async function processPendingCampaigns() {
+  const campaigns= await prisma.campaign.findMany({
+    where: {
+      status: CampaignStatus.EN_PROCESO
+    }
+  })
+  for (const campaign of campaigns) {
+    try {
+      await processCampaign(campaign.id)
+    } catch (error) {
+      console.error("Error processing campaign: ", error)
+    }
+  }
+  console.log("Pending campaigns processed")
+  return campaigns.length
 }

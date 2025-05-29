@@ -775,3 +775,20 @@ docDescription: "${doc.description}"
   
     return contextString
 }
+
+
+export async function getV2EnabledByChatwootAccountId(chatwootAccountId: number) {
+    const v2Enabled= await prisma.client.findFirst({
+        where: {
+            whatsappInstances: {
+                some: {
+                    chatwootAccountId: String(chatwootAccountId)
+                }
+            }
+        },
+        select: {
+            v2Enabled: true
+        }
+    })
+    return v2Enabled?.v2Enabled
+}

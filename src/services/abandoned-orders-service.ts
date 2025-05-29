@@ -1,17 +1,11 @@
 import { Orden } from "@/app/client/[slug]/productos/ordenes/types";
 import { prisma } from "@/lib/db";
 import { AbandonedOrderStatus, ReminderType } from "@/lib/generated/prisma";
-import { createReminder, ReminderSchema, ReminderFormValues } from "./reminder-services";
-import { Client } from "@upstash/qstash";
-import { format } from "date-fns";
-import { getValue } from "./config-services";
-import { getOrCreateContact } from "./contact-services";
 import { checkValidPhone } from "@/lib/utils";
+import { format } from "date-fns";
+import { getOrCreateContact } from "./contact-services";
 import { getTodayAbandonedOrders } from "./fenicio-services";
-
-// QStash setup
-const baseUrl = process.env.NEXTAUTH_URL === "http://localhost:3000" ? "https://local.rctracker.dev" : process.env.NEXTAUTH_URL;
-const qstashClient = new Client({ token: process.env.QSTASH_TOKEN! });
+import { createReminder, ReminderFormValues } from "./reminder-services";
 
 export async function createAbandonedOrder(clientId: string, order: Orden) {
 
