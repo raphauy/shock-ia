@@ -580,8 +580,27 @@ export async function processPendingAbandonedOrders() {
     });
     console.log(`✅ Se encontraron ${pendingOrders.length} órdenes pendientes`);
 
+    let procesadas = 0;
+    let fallidas = 0;
+
     for (const order of pendingOrders) {
-        await processAbandonedOrder(order.id);
-    }    
+        try {
+            await processAbandonedOrder(order.id);
+            procesadas++;
+            console.log(`✅ Orden ${order.id} procesada correctamente (${procesadas}/${pendingOrders.length})`);
+        } catch (error: any) {
+            fallidas++;
+            console.error(`❌ Error al procesar orden ${order.id}: ${error.message}`);
+            // Intentar marcar la orden como error para que no se vuelva a procesar
+            try {
+                await markAbandonedOrderAsError(order.id, `Error al procesar: ${error.message}`);
+            } catch (markError: any) {
+                console.error(`❌ No se pudo marcar la orden ${order.id} como error: ${markError.message}`);
+            }
+            // Continuar con la siguiente orden
+        }
+    }
     
+    console.log(`📊 Resumen: ${procesadas} órdenes procesadas, ${fallidas} fallidas, ${pendingOrders.length} total`);
+    return { procesadas, fallidas, total: pendingOrders.length };
 }

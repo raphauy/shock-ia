@@ -55,8 +55,9 @@ async function main() {
 
     try {
         console.log('Procesando órdenes pendientes...');
-        await processPendingAbandonedOrders();
+        const res = await processPendingAbandonedOrders();
         console.log('Proceso de órdenes pendientes completado exitosamente');
+        console.log(res);
     } catch (error) {
         console.error('Error en la ejecución principal:', error);
     }
