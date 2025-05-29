@@ -1,17 +1,15 @@
 import { processPendingCampaigns } from "@/services/campaign-services";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export const maxDuration = 800
 export const dynamic = 'force-dynamic'
 
-export async function GET(request: Request) {
+export async function GET(req: NextRequest) {
 
     try {
-        const authorization = request.headers.get("authorization")
-        if (!authorization) return NextResponse.json({ error: "authorization is required" }, { status: 400 })
-        const apiToken= authorization.replace("Bearer ", "")
-        if (!apiToken) return NextResponse.json({ error: "apiToken is required" }, { status: 400 })
-        if (apiToken !== process.env.API_TOKEN) return NextResponse.json({ error: "Bad apiToken" }, { status: 400 })
+        if (req.headers.get('Authorization') !== `Bearer ${process.env.CRON_SECRET}`) {
+            return NextResponse.json({ error: "unauthorized" }, { status: 401 })
+        }
 
         const processedCampaigns= await processPendingCampaigns()
         console.log(`processedCampaigns: ${processedCampaigns}`)
