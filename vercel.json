@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/process-pending-campaigns",
+      "schedule": "*/30 * * * *"
+    }
+  ]
+}
