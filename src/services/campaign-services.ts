@@ -360,7 +360,7 @@ export async function processCampaign(campaignId: string) {
     } catch (error) {
       console.error("Error processing campaign contact: ", error)
     }
-    
+
     actualDelay += delayIncrement
   }
 
@@ -492,6 +492,10 @@ export async function processPendingCampaigns() {
       console.error("Error processing campaign: ", error)
     }
   }
-  console.log("Pending campaigns processed")
+  if (campaigns.length > 0) {
+    console.log("Pending campaigns processed")
+  } else {
+    console.log("No pending campaigns found")
+  }
   return campaigns.length
 }
