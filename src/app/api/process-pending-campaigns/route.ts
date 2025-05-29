@@ -1,4 +1,4 @@
-import { processPendingImportedContacts } from "@/services/imported-contacts-services";
+import { processPendingCampaigns } from "@/services/campaign-services";
 import { NextResponse } from "next/server";
 
 export const maxDuration = 290
@@ -13,10 +13,10 @@ export async function POST(request: Request) {
         if (!apiToken) return NextResponse.json({ error: "apiToken is required" }, { status: 400 })
         if (apiToken !== process.env.API_TOKEN) return NextResponse.json({ error: "Bad apiToken" }, { status: 400 })
 
-        const toProcessLeft= await processPendingImportedContacts()
-        console.log(`toProcessLeft: ${toProcessLeft}`)
+        const processedCampaigns= await processPendingCampaigns()
+        console.log(`processedCampaigns: ${processedCampaigns}`)
 
-        return NextResponse.json( { "toProcessLeft": toProcessLeft }, { status: 200 })
+        return NextResponse.json( { "processedCampaigns": processedCampaigns }, { status: 200 })
 
     } catch (error) {
         return NextResponse.json({ error: "error: " + error}, { status: 502 })        
