@@ -1,10 +1,10 @@
 import { processPendingCampaigns } from "@/services/campaign-services";
 import { NextResponse } from "next/server";
 
-export const maxDuration = 290
+export const maxDuration = 800
 export const dynamic = 'force-dynamic'
 
-export async function POST(request: Request) {
+export async function GET(request: Request) {
 
     try {
         const authorization = request.headers.get("authorization")
